@@ -51,9 +51,10 @@ source windows
 **Standard output**:
 
 ```text
-GLOBAL_EXPORTED_FOR_PROMPT=true;
+GLOBAL_SOURCED_FOR_PROMPT=true;
 source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main"
 function core::fail() { log::error "$@"; }
+function core::exit() { local exitCode=${1:-0} silent=false IFS=$' '; shift 1; eval "local a= ${*@Q}"; if [[ ${silent} != "true" ]]; then log::error "Caught exit with code ${exitCode}:"; fi; }
 set +o errexit
 trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM; trap ERR; trap EXIT
 
@@ -66,6 +67,7 @@ trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM; trap ERR; trap EXIT
 ```text
 source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main"
 function core::fail() { log::error "$@"; }
+function core::exit() { local exitCode=${1:-0} silent=false IFS=$' '; shift 1; eval "local a= ${*@Q}"; if [[ ${silent} != "true" ]]; then log::error "Caught exit with code ${exitCode}:"; fi; }
 set +o errexit
 
 ```

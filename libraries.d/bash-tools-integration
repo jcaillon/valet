@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: contains function to init a bash session and make use of awesome tools
+
+# shellcheck source=../libraries.d/lib-bash
+source bash
+# shellcheck source=../libraries.d/lib-string
+source string
+
+function starship::init() {
+  local IFS=$' \t\n'
+  if [[ ${precmd_functions[*]} == *"starship::preCmd"* ]]; then
+    return 0
+  fi
+
+  # Set the continuation prompt (shown when continuing a command on the next line with \)
+  # PS2="░ "
+
+  # Will be run before the prompt is drawn
+  precmd_functions+=(starship::preCmd)
+}
+
+function starship::preCmd() {
+  local IFS=$' \t\n'
+
+  # needs to be 16 characters long
+  local STARSHIP_SESSION_KEY="${GLOBAL_PROGRAM_STARTED_AT_SECOND}${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND}0000000000000000"
+  STARSHIP_SESSION_KEY="${STARSHIP_SESSION_KEY:0:16}"
+
+  local milliseconds=$((GLOBAL_LAST_ELAPSED_MICROSECONDS > 1000 ? GLOBAL_LAST_ELAPSED_MICROSECONDS / 1000 : 0))
+
+  local -a starshipArgs=(--terminal-width="${GLOBAL_COLUMNS}" --status="${GLOBAL_LAST_COMMAND_STATUS}" --pipestatus="${GLOBAL_LAST_PIPE_STATUS[*]}" --jobs="${GLOBAL_JOB_COUNT}" --cmd-duration="${milliseconds}")
+
+  STARSHIP_SHELL=bash STARSHIP_SESSION_KEY="${STARSHIP_SESSION_KEY}" bash::getBuiltinOutput starship prompt "${starshipArgs[@]}"
+
+  PS1="${REPLY}"
+}
+
+function atuin::init() {
+  local nbCommandsToLoad=100
+
+  # save multi line commands in a single entry
+  shopt -s cmdhist
+  # and separate lines with semicolons instead of newlines
+  shopt -u lithist
+  # erase duplicated lines in the history to keep only the last one
+  # prompts starting with a space will not be saved in the history
+  HISTCONTROL=erasedups,ignorespace
+  histchars='!^#'
+  # unset HISTFILE to avoid saving the history via bash itself
+  HISTFILE=""
+  # do not limit the number of history entries
+  HISTSIZE=-1
+  # no limit on the size of the history file
+  HISTFILESIZE=-1
+  # remove timestamp to history
+  HISTTIMEFORMAT=""
+
+  # clear the current history
+  history -c
+
+  # load the last commands from atuin
+  ATUIN_SESSION=0 bash::getBuiltinOutput atuin search --limit "${nbCommandsToLoad}" --format "{command}"
+  string::split REPLY $'\n'
+  local cmd
+  for cmd in "${REPLY_ARRAY[@]}"; do
+    history -s "${cmd}"
+  done
+
+  # Will be run before the prompt is drawn
+  precmd_functions+=(atuin::precmd)
+}
+
+function atuin::history() {
+  REPLY="$(ATUIN_SESSION=0 ATUIN_SHELL_BASH=t ATUIN_LOG=error ATUIN_QUERY="${READLINE_LINE:-}" atuin search --interactive "$@" 3>&1 1>&2 2>&3)"
+
+  # We do nothing when the search is canceled.
+  if [[ -z ${REPLY} ]]; then
+    return 0
+  fi
+
+  if [[ ${REPLY} == "__atuin_accept__:"* ]]; then
+    # case we accept the command (and it should be executed immediately)
+    # we could do something different here, like running the command
+    REPLY=${REPLY#"__atuin_accept__:"}
+  fi
+  READLINE_LINE="${REPLY}"
+  READLINE_POINT=0x7fffffff
+}
+
+function atuin::precmd() {
+  if ((GLOBAL_LAST_ELAPSED_MICROSECONDS == 0)); then
+    # no command has been run since the last prompt
+    return 0
+  fi
+  if [[ ! -v ATUIN_SESSION ]]; then
+    # avoid recording the previous command on the first prompt
+    ATUIN_SESSION="${GLOBAL_PROGRAM_STARTED_AT_SECOND}${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND}00000000000000000000000000000000"
+    ATUIN_SESSION="${ATUIN_SESSION:0:32}"
+    return 0
+  fi
+
+  bashHooks::getCurrentCommand
+
+  log::info "Recording command in atuin history: ⌜${GLOBAL_CURRENT_COMMAND}⌝ --exit ${GLOBAL_LAST_COMMAND_STATUS} --duration ${GLOBAL_LAST_ELAPSED_MICROSECONDS}000 ATUIN_SESSION=${ATUIN_SESSION}"
+
+  # record the command
+  ATUIN_SESSION="${ATUIN_SESSION}" ATUIN_LOG=error bash::getBuiltinOutput atuin history start -- "${GLOBAL_CURRENT_COMMAND}"
+  local id="${REPLY%$'\n'}"
+  ATUIN_SESSION="${ATUIN_SESSION}" ATUIN_LOG=error atuin history end --exit "${GLOBAL_LAST_COMMAND_STATUS}" --duration "${GLOBAL_LAST_ELAPSED_MICROSECONDS}000" -- "${id}"
+}
+
+function keybindings::init() {
+
+  # CTRL+R for searching the global history
+  bind -x '"\C-r": atuin::history --keymap-mode=emacs'
+
+  # CTRL+UP for filtering commands run in the current dir
+  bind -x '"\C-x\C-p": atuin::history --shell-up-key-binding --keymap-mode=emacs'
+  bind '"\e[1;5A": "\C-x\C-p"'
+  bind '"\eO1;5A": "\C-x\C-p"'
+}

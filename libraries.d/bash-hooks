@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: contains function to setup bash hooks for preexec and precmd
+
+# shellcheck source=../libraries.d/lib-bash
+source bash
+
+function bashHooks::initialize() {
+  GLOBAL_LAST_COMMAND_STARTED_AT_SECOND="${GLOBAL_PROGRAM_STARTED_AT_SECOND}"
+  GLOBAL_LAST_COMMAND_STARTED_AT_MICROSECOND="${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND}"
+
+  declare -g -a preexec_functions=() precmd_functions=()
+
+  # PS0: the value of this parameter is expanded like PS1 and displayed by interactive shells after reading a command and before the command is executed.
+  # In order to set GLOBAL_LAST_COMMAND_STARTED_AT_SECOND/GLOBAL_LAST_COMMAND_STARTED_AT_MICROSECOND use an arithmetic expansion that evaluates to 0
+  # To avoid printing anything, use the return value in an ${var:offset:length} substring expansion
+  # with offset and length evaluating to 0.
+  # shellcheck disable=SC2016
+  PS0='${GLOBAL_LAST_COMMAND_STARTED_AT_SECOND:$((GLOBAL_LAST_COMMAND_STARTED_AT_SECOND=10#${EPOCHREALTIME%%[.,]*},GLOBAL_LAST_COMMAND_STARTED_AT_MICROSECOND=10#${EPOCHREALTIME##*[.,]},0)):0}$(bashHooks::preCommandExecution)'
+  # with bash 5.3, we will be able to call bashHooks::preCommandExecution in the same context and thus use the variable
+  # READLINE_LINE to get the command line to be executed.
+
+  # PROMPT_COMMAND: If this variable is set, and is an array, the value of each set element is interpreted as a command to execute before printing the primary prompt ($PS1). If this is set but not an array variable, its value is used as a command to execute instead.
+  PROMPT_COMMAND=(bashHooks::prePromptDrawn)
+}
+
+# A way to set '$?', since bash does not allow assigning to '$?' directly
+function bashHooks::setReturn() { return "${1:-0}"; }
+
+# Will be run before the prompt is drawn
+function bashHooks::prePromptDrawn() {
+  # Save the command status
+  local -i GLOBAL_LAST_COMMAND_STATUS=$?
+  local IFS=$' \t\n'
+  # shellcheck disable=SC2206
+  # shellcheck disable=SC2034
+  local -a -i GLOBAL_LAST_PIPE_STATUS=(${PIPESTATUS[@]})
+
+  # Due to a bug in certain Bash versions, any external process launched
+  # inside $PROMPT_COMMAND will be reported by `jobs` as a background job:
+  #
+  #   [1]  42135 Done                    /bin/echo
+  #
+  # This is a workaround - we run `jobs` once to clear out any completed jobs
+  # first, and then we run it again and count the number of jobs.
+  #
+  # More context: https://github.com/starship/starship/issues/5159
+  # Original bug: https://lists.gnu.org/archive/html/bug-bash/2022-07/msg00117.html
+  jobs &>/dev/null
+  local -i GLOBAL_JOB_COUNT=0
+  bash::getBuiltinOutput jobs -r
+  local IFS=$'\n' line
+  for line in ${REPLY}; do
+    if [[ ${line} == "["* ]]; then
+      GLOBAL_JOB_COUNT+=1
+    fi
+  done
+
+  # We split the computation in seconds and milliseconds to avoid overflow on 32-bit systems.
+  # The 10# forces the base 10 conversion to avoid issues with leading zeros.
+  local -i GLOBAL_LAST_ELAPSED_MICROSECONDS
+  if ((GLOBAL_LAST_COMMAND_STARTED_AT_SECOND == -1)); then
+    # If no command was not executed, PS0 was never called so we set the elapsed time to 0.
+    GLOBAL_LAST_ELAPSED_MICROSECONDS=0
+  else
+    # shellcheck disable=SC2034
+    GLOBAL_LAST_ELAPSED_MICROSECONDS=$(((${EPOCHREALTIME%%[.,]*} - GLOBAL_LAST_COMMAND_STARTED_AT_SECOND) * 1000000 + (10#${EPOCHREALTIME##*[.,]} - 10#${GLOBAL_LAST_COMMAND_STARTED_AT_MICROSECOND})))
+  fi
+  GLOBAL_LAST_COMMAND_STARTED_AT_SECOND=-1
+
+  # Run the precmd functions
+  local func
+  for func in "${precmd_functions[@]}"; do
+    if declare -F "${func}" &>/dev/null; then
+      "${func}"
+    fi
+  done
+
+  # Restore $? in case other prompt commands rely on it.
+  bashHooks::setReturn "${GLOBAL_LAST_COMMAND_STATUS}"
+}
+
+# Run the preexec functions before the command is executed
+function bashHooks::preCommandExecution() {
+  bashHooks::getCurrentCommand
+
+  # Run the preexec functions
+  local func
+  for func in "${preexec_functions[@]}"; do
+    if declare -F "${func}" &>/dev/null; then
+      "${func}" "${GLOBAL_CURRENT_COMMAND}"
+    fi
+  done
+}
+
+# Get the current command to be executed
+function bashHooks::getCurrentCommand() {
+  HISTTIMEFORMAT="" bash::getBuiltinOutput fc -lnr -1
+  GLOBAL_CURRENT_COMMAND="${REPLY#$'\t'}"
+  GLOBAL_CURRENT_COMMAND="${GLOBAL_CURRENT_COMMAND#" "*}"
+  GLOBAL_CURRENT_COMMAND="${GLOBAL_CURRENT_COMMAND%$'\n'}"
+}

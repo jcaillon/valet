@@ -39,7 +39,8 @@ examples:
     You can then can then use valet function as if you were in a command script.
 COMMAND_YAML
 function selfSource() {
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   local output=""
@@ -48,7 +49,7 @@ function selfSource() {
     noExit=true
     # can be used to check if the script is running in a prompt or not
     # must be set before calling the core lib
-    output+="GLOBAL_EXPORTED_FOR_PROMPT=true;"$'\n'
+    output+="GLOBAL_SOURCED_FOR_PROMPT=true;"$'\n'
   fi
 
   # source valet core library
@@ -67,6 +68,7 @@ function selfSource() {
 
   if [[ ${noExit:-} == "true" ]]; then
     output+="function core::fail() { log::error \"\$@\"; }"$'\n'
+    output+="function core::exit() { local exitCode=\${1:-0} silent=false IFS=\$' '; shift 1; eval \"local a= \${*@Q}\"; if [[ \${silent} != \"true\" ]]; then log::error \"Caught exit with code \${exitCode}:\"; fi; }"$'\n'
     output+="set +o errexit"$'\n'
   fi
 

@@ -94,7 +94,8 @@ examples:
 COMMAND_YAML
 function selfExtend() {
   local extensionUri version skipSetup name
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   local action="created"
@@ -145,7 +146,7 @@ function selfExtend() {
 
     # get the sha1 of the reference, fail if not found
     selfExtend_getSha1 "${extensionUri}" "${version}"
-    selfExtend_downloadTarball "${extensionUri}"  "${version}" "${extensionDirectory}" "${REPLY}"
+    selfExtend_downloadTarball "${extensionUri}" "${version}" "${extensionDirectory}" "${REPLY}"
   fi
 
   # execute the setup script of the extension, if any
@@ -179,7 +180,12 @@ function selfExtend_createExtension() {
     log::info "Setting up the current directory ⌜${extensionName}⌝ as an extension."
 
     if [[ ${PWD} != "${extensionsDirectory}"* ]]; then
-      core::fail "Extension directories must be created in the user directory ⌜${extensionsDirectory}⌝, the current directory is ⌜${PWD}⌝."
+      log::warning "Extension directories must be created in the user directory ⌜${extensionsDirectory}⌝, the current directory is ⌜${PWD}⌝."
+      if ! interactive::confirm "You are not in the user directory. Do you really want to continue?" default=false; then
+        log::info "Aborting, change the directory to a sub directory of ⌜${extensionsDirectory}⌝."
+        return 0
+      fi
+
     fi
     extensionDirectory="${PWD}"
   else
@@ -225,7 +231,6 @@ function selfExtend_createExtension() {
     # shellcheck disable=SC2317
     function createLink() { fs::createLink "${@}"; }
   fi
-
 
   # vscode stuff
   if command -v code &>/dev/null; then
@@ -305,7 +310,7 @@ function selfExtend_downloadTarball() {
   rm -Rf "${targetDirectory}" 1>/dev/null || core::fail "Could not remove the existing files in ⌜${targetDirectory}⌝."
   fs::createDirectoryIfNeeded "${targetDirectory}"
   fs::listDirectories "${tempDirectory}"
-  if (( ${#REPLY_ARRAY[@]} != 1 )); then
+  if ((${#REPLY_ARRAY[@]} != 1)); then
     core::fail "The tarball ⌜${tempDirectory}/${sha1}.tar.gz⌝ did not contain a single directory."
   fi
   mv "${REPLY_ARRAY[0]}"/* "${targetDirectory}" || core::fail "Could not move the files from ⌜${REPLY_ARRAY[0]}⌝ to ⌜${targetDirectory}⌝."
@@ -418,7 +423,7 @@ function selfExtend_executeSetupScript() {
   log::info "Executing the setup script for the extension ⌜${extensionName}⌝: ⌜${extensionDirectory}/extension.setup.sh⌝."
   # shellcheck disable=SC1091
   bash::runInSubshell source "${extensionDirectory}/extension.setup.sh"
-  if (( REPLY_CODE != 0 )) ; then
+  if ((REPLY_CODE != 0)); then
     log::error "The extension setup script for the extension ⌜${extensionName}⌝ failed. You can manually retry the setup by running the script ⌜${extensionDirectory}/extension.setup.sh⌝."
     interactive::confirm "The setup script for the extension ⌜${extensionName}⌝ failed (see above), do you want to continue anyway?" || core::fail "The setup script for the extension ⌜${extensionName}⌝ failed."
   fi
@@ -534,7 +539,7 @@ function selfExtend_updateTarBall() {
 
   if [[ ${newSha1} != "${currentSha1}" ]]; then
     # download the new tarball
-    selfExtend_downloadTarball "${repo}"  "${reference}" "${extensionDirectory}" "${newSha1}"
+    selfExtend_downloadTarball "${repo}" "${reference}" "${extensionDirectory}" "${newSha1}"
     log::success "The extension ⌜${extensionName}⌝ (tarball) has been updated ⌜${currentSha1:1:5}...${newSha1:1:5}⌝."
     hasBeenUpdated=true
   else
