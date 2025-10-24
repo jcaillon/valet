@@ -18,7 +18,6 @@ function main() {
   test::exec styles::init
   test_log
 
-
   test::title "✅ Testing with full formatting"
   VALET_CONFIG_ENABLE_COLORS=true
   VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
@@ -57,6 +56,11 @@ function test_log::printCallStack() {
 function test_log::init() {
   test::title "✅ Testing log::init"
 
+  # shellcheck disable=SC2317
+  function test::scrubOutput() {
+    GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//" 1>&"[0-9][0-9]/" 1>&11"}"
+  }
+
   # test bad descriptors
   test::exit VALET_CONFIG_LOG_FD=5 log::init
   test::exit VALET_CONFIG_LOG_FD=/unknown/file/path log::init
@@ -81,6 +85,8 @@ function test_log::init() {
 
   test::exec VALET_CONFIG_LOG_FD="${GLOBAL_TEST_TEMP_FILE}" VALET_CONFIG_LOG_TO_DIRECTORY=true VALET_CONFIG_LOG_FILENAME_PATTERN="logFile=a" log::init
   test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
+
+  unset -f test::scrubOutput
 }
 
 function test_log::parseLogPattern() {

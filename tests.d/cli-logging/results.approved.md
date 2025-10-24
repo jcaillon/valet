@@ -225,7 +225,9 @@ With a second line.
 
 ### ✅ Testing that we can output the logs to a specific numbered fd
 
-❯ `VALET_CONFIG_LOG_FD=16 valet self mock1 logging-level`
+❯ `export VALET_CONFIG_LOG_FD=11`
+
+❯ `valet self mock1 logging-level`
 
 ❯ `fs::cat /tmp/valet.d/d1-2/test3.log`
 
