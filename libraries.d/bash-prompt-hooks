@@ -5,7 +5,7 @@
 # shellcheck source=../libraries.d/lib-bash
 source bash
 
-function bashHooks::initialize() {
+function bashHooks::init() {
   GLOBAL_LAST_COMMAND_STARTED_AT_SECOND="${GLOBAL_PROGRAM_STARTED_AT_SECOND}"
   GLOBAL_LAST_COMMAND_STARTED_AT_MICROSECOND="${GLOBAL_PROGRAM_STARTED_AT_MICROSECOND}"
 

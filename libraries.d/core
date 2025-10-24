@@ -607,6 +607,7 @@ function core_dump() {
 # core::setShellOptions
 # ```
 function core::setShellOptions() {
+  # https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1
   # -pipefail: the $? of a pipeline is the status of the last command to exit with a non-zero status
   # -braceexpand: {1..3} will be expanded to 1 2 3
   # -errexit: exit immediately if a command exits with a non-zero status
@@ -620,6 +621,8 @@ function core::setShellOptions() {
   # +noglob: enable filename expansion (globbing)
   # +notify: disable immediate report status of background jobs
   set -o pipefail -o braceexpand -o errexit -o errtrace -o functrace -o nounset -o hashall +o histexpand +o monitor +o noclobber +o noglob +o notify +o allexport +o keyword +o physical +o posix +o privileged
+
+  # https://www.gnu.org/software/bash/manual/bash.html#The-Shopt-Builtin-1
   # -globasciiranges: use C locale for [] character ranges in match patterns
   # +checkwinsize: do not check the window size after each external command
   # +dotglob: disable inclusion of hidden files in filename expansion

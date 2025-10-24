@@ -14,6 +14,8 @@ INFO     Extracting commands from ⌜valet⌝.
 INFO                              ├── ⌜⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/bash-bootstrap.sh⌝.
 INFO                              ├── ⌜bash bootstrap⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/bash-links.sh⌝.
+INFO                              ├── ⌜bash links⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/help.sh⌝.
 INFO                              ├── ⌜help⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-add-command.sh⌝.
@@ -46,15 +48,16 @@ INFO                              ├── ⌜self mock2⌝.
 INFO                              ├── ⌜self mock3⌝.
 INFO     == Summary of the commands ==
 
-- Number of variables declared: ⌜304⌝.
-- Number of functions: ⌜18⌝.
-- Number of commands: ⌜17⌝.
+- Number of variables declared: ⌜320⌝.
+- Number of functions: ⌜19⌝.
+- Number of commands: ⌜18⌝.
 - Number of user library directories found: ⌜0⌝.
 - Maximum sub command level: ⌜1⌝.
 
 == List of all the hidden commands ==
 
 bash bootstrap      Returns a string that can be evaluated to bootstrap your bash session.
+bash links          Create symbolic links as defined in the links definition directory.
 self mock1          A command that only for testing valet core functions.
 self mock2          A command that only for testing valet core functions.
 self mock3          A command that only for testing valet core functions.

@@ -412,9 +412,14 @@ function fs::listPaths() {
   shift 1
   eval "local a= ${*@Q}"
 
+  # make sure globbing is enabled (disable noglob)
+  set +o noglob
+
   if [[ ${includeHidden} == "true" ]]; then
     log::trace "Activating the dotglob shell option to include hidden files."
     shopt -s dotglob
+  else
+    shopt -u dotglob
   fi
 
   REPLY_ARRAY=()
@@ -442,9 +447,7 @@ function fs::listPaths() {
     done
   done
 
-  if [[ ${includeHidden} == "true" ]]; then
-    shopt -u dotglob
-  fi
+  shopt -u dotglob
 }
 
 # ## fs::listFiles

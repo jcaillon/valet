@@ -68,7 +68,7 @@ INFO     The prototype script has been generated in ⌜$GLOBAL_INSTALLATION_DIRE
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets content
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets originalContent append=true
 INFO     The vscode snippets have been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets⌝.
-INFO     Found 15 commands with documentation.
+INFO     Found 16 commands with documentation.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md content
 INFO     The commands documentation has been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md⌝.
 INFO     Writing the xxx functions documentation to the core libraries docs.

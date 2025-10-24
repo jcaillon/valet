@@ -61,13 +61,12 @@ description: |-
         this can be fixed in bash 5.3 with the ${ exec} variable expansion (see implementation of the hooks).
 
 options:
-- name: --bash-scripts-directory <path>
+- name: --bash-scripts-directory <directory>
   description: |-
     Path to the directory containing bash scripts to source during bootstrap.
-- name: --path-definition-directory <path>
+- name: --path-definition-directory <directory>
   description: |-
     Path to the directory containing path definition files to compute the PATH variable.
-
 
 examples:
 - name: !eval "$(valet bash bootstrap)"
@@ -80,40 +79,52 @@ function bashBootstrap() {
   eval "${REPLY}"
   command::checkParsedResults
 
-  local output=""
+  pathDefinitionDirectory="${pathDefinitionDirectory:-"${XDG_CONFIG_HOME:-"${HOME}/.config"}/.paths.d"}"
+  bashScriptsDirectory="${bashScriptsDirectory:-"${XDG_CONFIG_HOME:-"${HOME}/.config"}/.bash.d"}"
+
+  system::getOs
+  local _BASH_OS="${REPLY}"
 
   # source valet itself
   command::sourceFunction selfSource
   selfSource --prompt-mode
 
+  local output=""
+
   # setup bash hooks
-  output+="source \"${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/bash-hooks\""$'\n'
-  output+="bashHooks::initialize"$'\n'
+  output+="source \"${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/bash-prompt-hooks\""$'\n'
+  output+="bashHooks::init"$'\n\n'
 
-  system::getOs
-  local _BASH_OS="${REPLY}"
-
-  # source scripts in the specified directory
-  bashScriptsDirectory="${bashScriptsDirectory:-"${XDG_CONFIG_HOME:-"${HOME}/.config"}/.bash.d2"}"
-  bashBootstrap_sourceScriptsFromDirectory "${bashScriptsDirectory}"
-  output+="${REPLY}"
+  # source scripts in the specified directory which contain -bash-init
+  bashBootstrap_sourceScriptsFromDirectory "${bashScriptsDirectory}" include="-bash-init"
+  output+="${REPLY}"$'\n'
 
   # compute the PATH variable
-  pathDefinitionDirectory="${pathDefinitionDirectory:-"${XDG_CONFIG_HOME:-"${HOME}/.config"}/.paths.d"}"
   bashBootstrap_exportPathFromFiles "${pathDefinitionDirectory}"
-  output+="${REPLY}"
+  output+="${REPLY}"$'\n'
+
+  # source scripts in the specified directory
+  bashBootstrap_sourceScriptsFromDirectory "${bashScriptsDirectory}" exclude="-bash-init"
+  output+="${REPLY}"$'\n'
 
   # setup bash tools integration
-  output+="source \"${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/bash-tools-integration\""$'\n'
+  output+="source \"${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/bash-prompt-tools\""$'\n'
   output+="starship::init"$'\n'
   output+="atuin::init"$'\n'
   output+="keybindings::init"$'\n'
+  output+=$'\n'
 
   echo "${output}"
 }
 
 function bashBootstrap_exportPathFromFiles() {
   local directory="${1}"
+
+  if [[ ! -d ${directory} ]]; then
+    log::debug "The path definition directory ⌜${directory}⌝ does not exist, skipping PATH computation."
+    REPLY=""
+    return 0
+  fi
 
   log::debug "Listing path files in directory: ${directory}"
   fs::listFiles "${directory}" filter=bashBootstrap_filterFileByOs
@@ -139,12 +150,24 @@ function bashBootstrap_exportPathFromFiles() {
       string::trimEdges line
 
       if [[ ${line} == *"="* ]]; then
+        if [[ ! -f ${line##*=} ]]; then
+          log::debug "The file ⌜${line##*=}⌝ does not exist, skipping (defined in ${pathFile})."
+          continue
+        fi
         log::debug "Adding hash defined path: ${line}."
         hashListString+="hash -p \"${line##*=}\" ${line%%=*}"$'\n'
       elif [[ ${line} == "^"* ]]; then
+        if [[ ! -d ${line:1} ]]; then
+          log::debug "The directory ⌜${line:1}⌝ does not exist, skipping (defined in ${pathFile})."
+          continue
+        fi
         pathsToAddBefore+=("${line:1}")
         log::debug "Adding path before: ${line:1}."
       else
+        if [[ ! -d ${line} ]]; then
+          log::debug "The directory ⌜${line}⌝ does not exist, skipping (defined in ${pathFile})."
+          continue
+        fi
         pathsToAddAfter+=("${line}")
         log::debug "Adding path after: ${line}."
       fi
@@ -157,7 +180,7 @@ function bashBootstrap_exportPathFromFiles() {
   # compute the final path
   local finalPathString=":"
   for path in "${pathsToAddBefore[@]}" "${REPLY_ARRAY[@]}" "${pathsToAddAfter[@]}"; do
-    if [[ ! -d ${path} ]]; then continue; fi
+    if [[ -z ${path} ]]; then continue; fi
     if [[ ${finalPathString} == *":${path}:"* ]]; then continue; fi
     finalPathString+="${path}:"
   done
@@ -167,17 +190,29 @@ function bashBootstrap_exportPathFromFiles() {
   finalPathString="${finalPathString%:}"
   log::debug "Final path: ${finalPathString}."
 
-  REPLY="export ORIGINAL_PATH=\"\${PATH}\""$'\n'"export PATH=\"${finalPathString}\""$'\n'
+  REPLY="ORIGINAL_PATH=\"\${ORIGINAL_PATH:-\"\${PATH}\"}\""$'\n'"export PATH=\"${finalPathString}\""$'\n'
 
   if [[ -n ${hashListString} ]]; then
-    REPLY+="${hashListString}"$'\n'"export BASH_CMDS"$'\n'
+    REPLY+="${hashListString}export BASH_CMDS"$'\n'
   fi
 }
 
 # Returns a string to be evaluated in order to source all bash scripts from a given
 # directory.
 function bashBootstrap_sourceScriptsFromDirectory() {
-  local directory="${1}"
+  local \
+    directory="${1}" \
+    include="" \
+    exclude="" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+
+  if [[ ! -d ${directory} ]]; then
+    log::debug "The bash scripts directory ⌜${directory}⌝ does not exist, skipping sourcing bash scripts."
+    REPLY=""
+    return 0
+  fi
 
   log::debug "Listing bash scripts to source in directory: ${directory}"
 
@@ -187,12 +222,16 @@ function bashBootstrap_sourceScriptsFromDirectory() {
     if ! bashBootstrap_filterFileByOs "${1}"; then
       return 1
     fi
-
     # filter by extension
-    if [[ ${1} != *@(sh|bash) ]]; then
+    if [[ ! ${1} =~ \.(sh|bash)$ ]]; then
       return 1
     fi
-
+    if [[ -n ${include} && ! ${1} =~ ${include} ]]; then
+      return 1
+    fi
+    if [[ -n ${exclude} && ${1} =~ ${exclude} ]]; then
+      return 1
+    fi
     return 0
   }
 

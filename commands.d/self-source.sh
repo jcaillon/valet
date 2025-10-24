@@ -75,6 +75,8 @@ function selfSource() {
   if [[ ${promptMode} == "true" ]]; then
     # disable all traps
     output+="trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM; trap ERR; trap EXIT"$'\n'
+    output+="shopt -s expand_aliases"$'\n'
+    output+="set -o histexpand -o monitor -o notify"$'\n'
     # TODO: as we disable the exit trap, we do not clean up the files.
     # We can clean them here during the export. We list all vt-* and we list the running PIDs
     # we can clean everything that is not in the list of running PIDs

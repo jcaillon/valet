@@ -181,7 +181,7 @@ function trap::onTerminateInternal() {
 # busy running an external command (e.g. sleep). Note that the builtin read command
 # also blocks this trigger only it is finished.
 function trap::onResizeInternal() {
-  local currentSize="${GLOBAL_COLUMNS}x${GLOBAL_LINES}"
+  local currentSize="${GLOBAL_COLUMNS:-${COLUMNS:-0}}x${GLOBAL_LINES:-${LINES:-0}}"
   terminal::getTerminalSize
   local newSize="${GLOBAL_COLUMNS}x${GLOBAL_LINES}"
 

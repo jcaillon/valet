@@ -57,6 +57,8 @@ function core::fail() { log::error "$@"; }
 function core::exit() { local exitCode=${1:-0} silent=false IFS=$' '; shift 1; eval "local a= ${*@Q}"; if [[ ${silent} != "true" ]]; then log::error "Caught exit with code ${exitCode}:"; fi; }
 set +o errexit
 trap SIGINT; trap SIGQUIT; trap SIGHUP; trap SIGTERM; trap ERR; trap EXIT
+shopt -s expand_aliases
+set -o histexpand -o monitor -o notify
 
 ```
 
