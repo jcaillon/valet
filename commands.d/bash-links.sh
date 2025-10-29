@@ -71,7 +71,7 @@ function bashLinks() {
   local -a linkFiles=("${REPLY_ARRAY[@]}")
 
   # go through each line of each file
-  local -a links sources modes
+  local -a links=() sources modes
   local linkFile line link source
   for linkFile in "${linkFiles[@]}"; do
     log::debug "Checking link file ${linkFile}."

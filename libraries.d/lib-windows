@@ -445,7 +445,7 @@ function windows::getUnixPathFromWindowsPath() {
 # > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
 function windows::createTempFile() {
-  local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
+  local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME:-${HOME##*/}}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
 
   if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
     windows::getUnixPathFromWindowsPath "${windowsTemporaryDirectory}"
@@ -487,7 +487,7 @@ function windows::createTempFile() {
 # > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 # > function when valet ends.
 function windows::createTempDirectory() {
-  local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
+  local windowsTemporaryDirectory="${LOCALAPPDATA:-"C:\\Users\\${USERNAME:-${HOME##*/}}\\AppData\\Local"}\\Temp\\${GLOBAL_TEMPORARY_DIRECTORY##*/}-windows"
 
   if [[ -z ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} ]]; then
     windows::getUnixPathFromWindowsPath "${windowsTemporaryDirectory}"
@@ -510,8 +510,6 @@ function windows::createTempDirectory() {
     fi
   done
 }
-
-
 
 # ## windows::setEnvVar
 #
