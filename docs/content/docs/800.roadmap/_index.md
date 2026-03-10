@@ -8,9 +8,9 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- make a real test for the self install / extend commands.
 - Check the bash-links command, error when creating a link if the destination path already exists as a folder.
 - Add tooltip in interactive functions (Enter shows help, Tab autocompletes, etc...)
-- allow to break a test without approval testing it (cancel it basically). This will allow use to run docker if it is present and make a real test for the self install / extend commands.
 - Check error handling inside ifs and evals.
 - Check how we can make the list component work in the main screen while user is scrolling. Seems like gum is doing it by positioning the cursor at the end of the screen always, and then using move cursor left to trigger an automatic scroll that takes the user back at the right spot.
 - test with bash 5.1, 5.2 and 5.3 in the pipeline (with different distros each time).

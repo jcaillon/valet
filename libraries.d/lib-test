@@ -479,9 +479,10 @@ function test::flushStderr() {
 
 # ## test::fail
 #
-# Call this function to log a message and exit with the status 142, which
-# indicates to the self test command that the test failed and that we know the
-# reason (it is a bad implementation of the test itself).
+# Call this function to log a message and exit with the status 142.
+# This should be used to purposefully throw a test failure.
+# For example, it can be used to indicate that a tested function did not produce the
+# expected output, or that a tested command did not return the expected exit code.
 #
 # - $@: **message** _as string_:
 #       The message to log.
@@ -499,6 +500,30 @@ function test::fail() {
 
   # shellcheck disable=SC2034
   core::exit "${GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS}" silent=true
+}
+
+# ## test::skipTestSuite
+#
+# Call this function to log a message and exit with the status 143.
+# This can be used to skip the current test suite without failing the whole test execution,
+# for example because a required dependency is not fulfilled.
+#
+# - $@: **message** _as string_:
+#       The message to log.
+#
+# ```bash
+# test::skipTestSuite "This test is not applicable."
+# ```
+function test::skipTestSuite() {
+  GLOBAL_MOCK_STACK_FUNCTION_NAMES=("${FUNCNAME[@]}")
+  GLOBAL_MOCK_STACK_SOURCE_FILES=("${BASH_SOURCE[@]}")
+  GLOBAL_MOCK_STACK_LINE_NUMBERS=("${BASH_LINENO[@]}")
+  declare -p GLOBAL_MOCK_STACK_FUNCTION_NAMES GLOBAL_MOCK_STACK_SOURCE_FILES GLOBAL_MOCK_STACK_LINE_NUMBERS >>"${GLOBAL_TEST_STACK_FILE}"
+
+  test::log "$@"
+
+  # shellcheck disable=SC2034
+  core::exit "${GLOBAL_TEST_SKIPPED_STATUS}" silent=true
 }
 
 # ## test::setTerminalInputs

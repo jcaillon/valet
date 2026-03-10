@@ -74,7 +74,8 @@ examples:
     Run only the test suites that match the regex pattern ⌜(my-thing|my-stuff)⌝.
 COMMAND_YAML
 function selfTest() {
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   time::getProgramElapsedMicroseconds
@@ -105,8 +106,10 @@ function selfTest() {
 
   GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS=241
   GLOBAL_TEST_APPROVAL_FAILURE_STATUS=242
+  GLOBAL_TEST_SKIPPED_STATUS=243
   declare -g -i _TEST_FAILURE_STATUS=0
   declare -g -a _TEST_FAILED_TEST_SUITES=()
+  declare -g -a _TEST_SKIPPED_TEST_SUITES=()
 
   # prepare a list of all the test suites to run (with extra info for each test suite)
   log::info "Listing all test suites to run."
@@ -182,6 +185,22 @@ function selfTest() {
   time::getHumanTimeFromMicroseconds $((REPLY - runStartTimeInMicroSeconds)) format="%S seconds and %l ms"
   log::info "Total time running tests: ⌜${REPLY}⌝."
 
+  if ((${#_TEST_SKIPPED_TEST_SUITES[@]} > 0)); then
+    local skippedMessage
+    skippedMessage="A total of ⌜${#_TEST_SKIPPED_TEST_SUITES[@]}⌝ out of ${#_TEST_TEST_SUITE_NAME[@]} test(s) were skipped because they were not applicable:"$'\n'
+    local treeString="  ├─" treePadding="  │  " skippedTestSuite
+    local -i nb=0
+    for skippedTestSuite in "${_TEST_SKIPPED_TEST_SUITES[@]}"; do
+      if ((nb == ${#_TEST_SKIPPED_TEST_SUITES[@]} - 1)); then
+        treeString="  ╰─"
+        treePadding="     "
+      fi
+      skippedMessage+=$'\n'"- ⌜${skippedTestSuite}⌝."
+      nb+=1
+    done
+    log::warning "${skippedMessage}"$'\n'
+  fi
+
   if ((${#_TEST_FAILED_TEST_SUITES[@]} > 0)); then
     local failMessage
     failMessage="A total of ⌜${#_TEST_FAILED_TEST_SUITES[@]}⌝ out of ${#_TEST_TEST_SUITE_NAME[@]} test(s) failed:"$'\n'
@@ -207,7 +226,7 @@ function selfTest() {
       fi
       core::fail "${failMessage}"
     fi
-  elif (( ${#_TEST_TEST_SUITE_NAME[@]} > 0)); then
+  elif ((${#_TEST_TEST_SUITE_NAME[@]} > 0)); then
     log::success "A total of ⌜${#_TEST_TEST_SUITE_NAME[@]}⌝ tests passed!"
   else
     log::warning "No eligible test suites found."
@@ -276,9 +295,12 @@ function selfTest_parallelCallback() {
 
   progress::update percent="${percent}" message="Done running test suite ⌜${_TEST_TEST_SUITE_NAME[index]}⌝."
 
-  if (( exitCode != 0 )); then
+  if ((exitCode == GLOBAL_TEST_SKIPPED_STATUS)); then
+    # the test was purposefully cancelled because it is not applicable, we don't consider it as a failure
+    _TEST_SKIPPED_TEST_SUITES+=("${_TEST_TEST_SUITE_NAME[index]}")
+  elif ((exitCode != 0)); then
     _TEST_FAILED_TEST_SUITES+=("${_TEST_TEST_SUITE_NAME[index]}")
-    if (( exitCode > _TEST_FAILURE_STATUS )); then
+    if ((exitCode > _TEST_FAILURE_STATUS)); then
       _TEST_FAILURE_STATUS="${exitCode}"
     fi
   fi
@@ -350,7 +372,7 @@ function selfTest_runSingleTestSuite() {
     bash::runInSubshell selfTest_runSingleTest "${testScript}" "${testUserDataDirectory}"
     local exitCode="${REPLY_CODE}"
 
-    if (( exitCode != 0 )); then
+    if ((exitCode != 0)); then
       # Handle an error that occurred in the test script.
       # If the error happened in the test script, we will have capture the stack trace in a file so we can read it.
 
@@ -376,6 +398,15 @@ function selfTest_runSingleTestSuite() {
           break
         fi
       done
+
+      if ((exitCode == GLOBAL_TEST_SKIPPED_STATUS)); then
+        # the function test::skipTestSuite was called
+        # Can be reproduced by inserting a `test::skipTestSuite` call in the test script.
+        fs::readFile "${GLOBAL_TEST_LOG_FILE}"
+        log::warning "The test script ⌜${testScript##*/}⌝ at line ⌜${lineNumber}⌝ required to skip the test suite because it is not applicable:"$'\n\n'"${REPLY}"$'\n\n'"test::skipTestSuite called in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}:${lineNumber}⌝."
+        log::printCallStack stackToSkip=0 stackToSkipAtEnd=11
+        core::exit "${GLOBAL_TEST_SKIPPED_STATUS}" silent=true
+      fi
 
       selfTestUtils_displayTestLogs
       selfTestUtils_displayTestSuiteOutputs

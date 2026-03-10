@@ -277,6 +277,18 @@ Scrubbers are required when we need to convert non-deterministic text to somethi
 - define a function called `test::scrubOutput` in your test script to modify the content of stdout and stderr before it gets flushed into the report. The text to transform is in the global variable `GLOBAL_TEST_OUTPUT_CONTENT` and you can use `_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
 - define a function called `test::scrubReplyVars` in your test script to modify the REPLY variables before they get printed in the report.
 
+### ❌ Throw an error to fail a test
+
+If a tested function or command does not produce the expected output, you can explicitly throw an error to stop the test suite execution by calling `test::fail`.
+
+This will mark the test suite as failed and it will log your message as well as the line number and file of the test failure for easier debugging.
+
+### ✋ Conditionally skipping a test suite
+
+Sometimes, your tests will require a certain dependency which might not always be fulfilled.
+
+In such cases, you can programmatically skip a test (within the test script) by calling `test::skipTestSuite` to signify that the test suite should not be run. This will mark the test suite as skipped. It will display a warning but it will not mark the test suite as failed.
+
 ### ❤️ Recommendations for tests
 
 It is also recommended to implement tests in bash functions and make use of local variables.

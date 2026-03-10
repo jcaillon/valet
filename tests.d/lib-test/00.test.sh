@@ -31,17 +31,16 @@ function main() {
   echo "Then flushed with test::flushStderr" 1>&2
   test::flushStderr blockTitle="**Optional title for the code block:**"
 
-
   test::title "🧪 Generic testing method"
   test::markdown 'The generic way to test your commands is to simply call them. They will write their output to the standard or error (logs) file descriptors as they normally do.' \
-  'You can then use `test::flush` to print their output to the report.'
+    'You can then use `test::flush` to print their output to the report.'
 
   test::markdown '❯ `functionToTest "I am testing functionToTest." "This is supposed to be in the error output" 0`'
   functionToTest "I am testing functionToTest." "This is supposed to be in the error output" 0
   test::flush
 
   test::markdown 'An important thing to keep in mind is that shell options are set to exit on error, and exiting during a test is considered a failure.' \
-  'You can use the `commandThatFails || echo "Failed as expected."` pattern to handle expected failures (unexpected failure are supposed to crash your tests anyway).'
+    'You can use the `commandThatFails || echo "Failed as expected."` pattern to handle expected failures (unexpected failure are supposed to crash your tests anyway).'
   test::markdown '❯ `functionToTest "Second test." "Second test." 2 || echo "Failed as expected because functionToTest returned $?."`'
   functionToTest "Second test." "Second test." 2 || echo "Failed as expected because functionToTest returned $?."
   test::flush
@@ -51,40 +50,35 @@ function main() {
   (functionThatExit "Third test." "Third test." 3) || echo "Failed as expected because functionToTest returned ${PIPESTATUS[0]}."
   test::flush
 
-
   test::title "🧪 Testing any command with test::exec"
   test::markdown 'Another approach is to use `test::exec` to run any command.' \
-  'The command will be executed and its output will be captured then automatically flushed to the test report.' \
-  'This convenient function also logs the command that was executed, handles errors and output the exit code if it is not zero.' \
-  '> However, it is not adapted to handle commands that `exit`, see the next test on `test::exit` for that.'
+    'The command will be executed and its output will be captured then automatically flushed to the test report.' \
+    'This convenient function also logs the command that was executed, handles errors and output the exit code if it is not zero.' \
+    '> However, it is not adapted to handle commands that `exit`, see the next test on `test::exit` for that.'
   test::exec functionToTest "OK" "Success" 0
   test::markdown 'In this second test, we expect the command to fail and return the exit code 2.'
   test::exec functionToTest "KO" "Failure" 2
 
-
   test::title "👋 Testing an exiting command with test::exit"
   test::markdown 'The `test::exit` function is a variant of `test::exec` that is adapted to handle commands that `exit`.' \
-  'It will run the command in a subshell and output the same format as `test::exec`.'
+    'It will run the command in a subshell and output the same format as `test::exec`.'
   test::exit functionThatExit "KO" "Exiting" 3
-
 
   test::title "🔬 Testing a function with test::func"
   test::markdown 'The `test::func` function is a variant of `test::exec` that is adapted to handle functions developed using the coding style of Valet.' \
-  'Meaning functions that usually return values in a variables named `REPLY...` (or `REPLY_ARRAY...`) and that can optionally print results to the standard output and push logs to the error output.' \
-  'It function will be executed and its output will be added the report, including any declare `REPLY*` variable.'
+    'Meaning functions that usually return values in a variables named `REPLY...` (or `REPLY_ARRAY...`) and that can optionally print results to the standard output and push logs to the error output.' \
+    'It function will be executed and its output will be added the report, including any declare `REPLY*` variable.'
   REPLY="This will be overridden"
   REPLY_ARRAY=("This" "will" "be" "overridden")
   test::func functionWithReturnedVariables "VALUE" "Running functionWithReturnedVariables"
 
-
   test::title "🙈 Display reporting REPLY variables"
   test::markdown 'You can manually report the content of the `REPLY*` variables using the `test::printReplyVars` function.' \
-  'The function `test::resetReplyVars` can also be used to reset the content of the `REPLY*` variables.'
+    'The function `test::resetReplyVars` can also be used to reset the content of the `REPLY*` variables.'
   test::resetReplyVars
   REPLY2="This is the value of a returned string for REPLY2"
   REPLY_ARRAY2=("This" "is" "the" "value" "of" "a" "returned" "array" "for" "REPLY_ARRAY2")
   test::printReplyVars
-
 
   test::title "👁️ Display the value of any variable"
   test::markdown 'You can manually report the definition of any variable using the `test::printVars` function.'
@@ -98,6 +92,14 @@ function main() {
   test::markdown "You can use scrubbers to remove dynamic content from the test report." \
     "Scrubbers are required when we need to convert non-deterministic text to something stable so that tests are reproducible." \
     "- define a function called \`test::scrubOutput\` in your test script to modify the content of stdout and stderr before it gets flushed into the report. The text to transform is in the global variable \`GLOBAL_TEST_OUTPUT_CONTENT\` and you can use \`_TEST_FD_NUMBER\` to know which file descriptor is being flushed (1 for stdout, 2 for stderr)."$'\n'"- define a function called \`test::scrubReplyVars\` in your test script to modify the REPLY variables before they get printed in the report."
+
+  test::title "❌ Throw an error to fail a test"
+  test::markdown "If a tested function or command does not produce the expected output, you can explicitly throw an error to stop the test suite execution by calling \`test::fail\`." \
+    "This will mark the test suite as failed and it will log your message as well as the line number and file of the test failure for easier debugging."
+
+  test::title "✋ Conditionally skipping a test suite"
+  test::markdown "Sometimes, your tests will require a certain dependency which might not always be fulfilled." \
+    "In such cases, you can programmatically skip a test (within the test script) by calling \`test::skipTestSuite\` to signify that the test suite should not be run. This will mark the test suite as skipped. It will display a warning but it will not mark the test suite as failed."
 
   test::title "❤️ Recommendations for tests"
   test::markdown "It is also recommended to implement tests in bash functions and make use of local variables." \
