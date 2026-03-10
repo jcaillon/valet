@@ -185,14 +185,14 @@ function exe::invoke() {
 
   local debugMessage="The command ${executable} ended with exit code ${exitCode} in ${REPLY}s."
 
-  if [[ -n ${failMessage} ]]; then
-    debugMessage+=$'\n'"${failMessage}"
-  fi
-
   # if the error code is acceptable, then we set it to 0
   if [[ ${exitCode} -ne 0 && ,${acceptableCodes}, == *",${exitCode},"* ]]; then
     exitCode=0
     log::trace "The error code ${exitCode} is acceptable and has been reset to 0."
+  else
+    if [[ -n ${failMessage} ]]; then
+      debugMessage+=$'\n'"${failMessage}"
+    fi
   fi
 
   local \

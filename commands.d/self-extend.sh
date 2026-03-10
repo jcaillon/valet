@@ -428,6 +428,7 @@ function selfExtend_executeSetupScript() {
     interactive::confirm "The setup script for the extension ⌜${extensionName}⌝ failed (see above), do you want to continue anyway?" || core::fail "The setup script for the extension ⌜${extensionName}⌝ failed."
   fi
   fs::createDirectoryIfNeeded "${extensionDirectory}/.git"
+  # shellcheck disable=SC2034
   local content="ok"
   fs::writeToFile "${extensionDirectory}/.git/.valet-setup-executed" content
   log::success "The setup script for the extension ⌜${extensionName}⌝ has been executed."
