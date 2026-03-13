@@ -26,16 +26,6 @@ function test_fs::Link() {
   test::exec fs::createLink file2 target/link3 hardlink=true
   test::exec fs::createLink folder1 target/folder-link1
 
-  if [[ ! -L target/link1 ]]; then
-    test::fail "target/link1 should be a symbolic link"
-  fi
-  if [[ ! target/link2 -ef file1 ]]; then
-    test::fail "target/link2 should be a hard link to file1 (same inode)"
-  fi
-  if [[ ! -L target/folder-link1 ]]; then
-    test::fail "target/folder-link1 should be a symbolic link"
-  fi
-
   # case of target that already exists (existing folder)
   test::exit fs::createLink folder1 target/existing-folder-link2
   test::exit fs::createLink file1 target/existing-folder-link2
@@ -45,6 +35,20 @@ function test_fs::Link() {
   test::exit fs::createLink folder1 target/existing-file3
   test::exit fs::createLink file1 target/existing-file3
   test::exec fs::createLink file1 target/existing-file3 force=true
+
+  if declare -f windows::endPs1Batch &>/dev/null; then
+    windows::endPs1Batch
+  fi
+
+  if [[ ! -L target/link1 ]]; then
+    test::fail "target/link1 should be a symbolic link"
+  fi
+  if [[ ! target/link2 -ef file1 ]]; then
+    test::fail "target/link2 should be a hard link to file1 (same inode)"
+  fi
+  if [[ ! -L target/folder-link1 ]]; then
+    test::fail "target/folder-link1 should be a symbolic link"
+  fi
 
   test::title "✅ Testing fs::isValidLink"
 

@@ -1,4 +1,4 @@
-# Test suite test-windows-only
+# Test suite lib-fs-winonly
 
 ## Test script 00.tests
 
@@ -19,7 +19,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-FAIL     Failed to create a link to ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/test-windows-only/resources/gitignored/folder1⌝ ← ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/test-windows-only/resources/gitignored/target/existing-folder-link2⌝, the link pathname already exists.
+FAIL     Failed to create a link to ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs-winonly/resources/gitignored/folder1⌝ ← ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs-winonly/resources/gitignored/target/existing-folder-link2⌝, the link pathname already exists.
 ```
 
 ❯ `fs::createLink file1 target/existing-folder-link2`
@@ -29,7 +29,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-FAIL     Failed to create a link to ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/test-windows-only/resources/gitignored/file1⌝ ← ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/test-windows-only/resources/gitignored/target/existing-folder-link2⌝, the link pathname already exists.
+FAIL     Failed to create a link to ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs-winonly/resources/gitignored/file1⌝ ← ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs-winonly/resources/gitignored/target/existing-folder-link2⌝, the link pathname already exists.
 ```
 
 ❯ `fs::createLink folder1 target/existing-folder-link2 force=true`
@@ -41,7 +41,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-FAIL     Failed to create a link to ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/test-windows-only/resources/gitignored/folder1⌝ ← ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/test-windows-only/resources/gitignored/target/existing-file3⌝, the link pathname already exists.
+FAIL     Failed to create a link to ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs-winonly/resources/gitignored/folder1⌝ ← ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs-winonly/resources/gitignored/target/existing-file3⌝, the link pathname already exists.
 ```
 
 ❯ `fs::createLink file1 target/existing-file3`
@@ -51,7 +51,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-FAIL     Failed to create a link to ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/test-windows-only/resources/gitignored/file1⌝ ← ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/test-windows-only/resources/gitignored/target/existing-file3⌝, the link pathname already exists.
+FAIL     Failed to create a link to ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs-winonly/resources/gitignored/file1⌝ ← ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs-winonly/resources/gitignored/target/existing-file3⌝, the link pathname already exists.
 ```
 
 ❯ `fs::createLink file1 target/existing-file3 force=true`

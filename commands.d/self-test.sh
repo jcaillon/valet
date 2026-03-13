@@ -36,14 +36,11 @@ options:
 - name: -a, --auto-approve
   description: |-
     The received test result files will automatically be approved.
-- name: -c, --with-core
-  description: |-
-    Also test the valet core functions.
-
-    This is only if you modified valet core functions themselves.
 - name: -C, --core-only
   description: |-
     Only test the valet core functions. Skips the tests for user commands.
+
+    This option is intended to be used by people modifying valet itself.
 - name: -i, --include <pattern>
   description: |-
     A regex pattern to include only the test suites (path) that match the pattern.
@@ -144,7 +141,7 @@ function selfTest() {
   fi
 
   # core test suites
-  if [[ -n ${withCore:-} || ${coreOnly:-false} == "true" ]]; then
+  if [[ ${coreOnly:-false} == "true" ]]; then
     if [[ ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/tests.d ]]; then
       core::fail "The valet core tests directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/tests.d⌝ does not exist, cannot run core tests."
     fi

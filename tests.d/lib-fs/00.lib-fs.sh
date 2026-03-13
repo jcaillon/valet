@@ -2,6 +2,8 @@
 
 # shellcheck source=../../libraries.d/lib-fs
 source fs
+# shellcheck source=../lib-fs/test-fs-link
+source ./test-fs-link
 
 function main() {
   test_fs::getCommandPath
@@ -15,7 +17,7 @@ function main() {
   test_fs::createFileIfNeeded
   test_fs::cat
   test_fs::isDirectoryWritable
-  test_fs::createLink
+  test_fs::Link
   test_fs::head
   test_fs::tail
 }
@@ -155,30 +157,6 @@ function test_fs::isDirectoryWritable() {
 
   test::exec fs::isDirectoryWritable /tmp
   test::exec fs::isDirectoryWritable /tmp testFileName="test-file"
-}
-
-function test_fs::createLink() {
-  test::title "✅ Testing fs::createLink"
-
-  MSYS="winsymlinks:nativestrict"
-
-  function ln() { echo "🙈 mocking ln: $*"; }
-  function rm() { echo "🙈 mocking rm: $*"; }
-
-  mkdir -p resources/gitignored
-  : >resources/gitignored/file
-
-  test::exec fs::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' hardlink=true
-  test::flush
-
-  test::exec fs::createLink 'resources/gitignored/try' 'resources/gitignored/new'
-  test::flush
-
-  : >"resources/gitignored/try/file2"
-  test::exec fs::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' force=true hardlink=true
-  test::flush
-
-  unset -f ln rm
 }
 
 function test_fs::head() {
