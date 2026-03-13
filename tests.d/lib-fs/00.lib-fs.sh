@@ -116,7 +116,10 @@ function test_fs::createDirectoryIfNeeded() {
   test::func fs::createDirectoryIfNeeded resources/dir/subdir
 
   # on certain versions of bash, you get a different quote character
-  function test::scrubOutput() { GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//'‘'/"'"}"; GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//'’'/"'"}"; }
+  function test::scrubOutput() {
+    GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//'‘'/"'"}"
+    GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//'’'/"'"}"
+  }
 
   test::markdown "This next command will fail because the directory already exists (it is a file)."
   test::exit fs::createDirectoryIfNeeded resources/dir/subdir/file1
@@ -157,11 +160,13 @@ function test_fs::isDirectoryWritable() {
 function test_fs::createLink() {
   test::title "✅ Testing fs::createLink"
 
+  MSYS="winsymlinks:nativestrict"
+
   function ln() { echo "🙈 mocking ln: $*"; }
   function rm() { echo "🙈 mocking rm: $*"; }
 
   mkdir -p resources/gitignored
-  :> resources/gitignored/file
+  : >resources/gitignored/file
 
   test::exec fs::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' hardlink=true
   test::flush

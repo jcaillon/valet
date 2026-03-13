@@ -38,6 +38,16 @@ function fs::getAbsolutePath() {
 
   path="${path%/}"
 
+  if [[ -L ${path} && ${realpath:-} == "true" ]] && command -v readlink &>/dev/null; then
+    # for links, we have to use an external program
+    local REPLY_CODE REPLY2
+    # shellcheck source=./lib-exe
+    source exe
+    exe::invoke readlink -f "${path}"
+    REPLY="${REPLY%[[:space:]]}"
+    return 0
+  fi
+
   # if path starts with ~, we replace it with the home directory
   if [[ ${path} == "~"* ]]; then
     path="${HOME}${path:1}"
@@ -618,8 +628,6 @@ function fs::isDirectoryWritable() {
 # - A hard link is a directory entry that associates a new pathname with an existing
 #   file (inode + data block) on a file system.
 #
-# See `windows::createLink` for Windows.
-#
 # - $1: **linked path** _as string_:
 #       the path to link to (the original file)
 # - $2: **link path** _as string_:
@@ -658,12 +666,14 @@ function fs::createLink() {
     core::fail "Failed to create a link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the linked path does not exist."
   fi
 
-  # check the link path
-  if [[ -f ${linkPath} || -L ${linkPath} ]]; then
-    # if force, delete the link (or file) if it exists
+  # check if the link path already exists and is not a valid link to the target
+  if [[ -e ${linkPath} ]] && ! fs::isValidLink "${linkedPath}" "${linkPath}" hardlink="${hardlink}"; then
+    # if force, delete target if it exists
     if [[ ${force} == true ]]; then
-      if ! rm -f "${linkPath}"; then
-        core::fail "Failed to delete the existing link ⌜${linkPath}⌝ to replace it."
+      if [[ -d "${linkPath}" ]] && ! rm -Rf "${linkPath}"; then
+        core::fail "Failed to delete the existing target directory ⌜${linkPath}⌝ to replace it."
+      elif ! rm -f "${linkPath}"; then
+        core::fail "Failed to delete the existing target file ⌜${linkPath}⌝ to replace it."
       fi
     else
       core::fail "Failed to create a link to ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the link pathname already exists."
@@ -674,22 +684,85 @@ function fs::createLink() {
   local linkParentPath="${linkPath%/*}"
   fs::createDirectoryIfNeeded "${linkParentPath}"
 
+  # the system can't use the ln command, need to use the windows specific implementation
+  #shellcheck source=./lib-system
+  source system
+  if system::isWindowsWithoutNativeSymlinks; then
+    windows::createLink "$@"
+    return 0
+  fi
+
   # create link
+  local linkType
   if [[ ${hardlink} == "true" ]]; then
+    linkType="hard"
     if ! ln "${linkedPath}" "${linkPath}"; then
       core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
     fi
   else
+    linkType="symbolic"
     if ! ln -s "${linkedPath}" "${linkPath}"; then
       core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
     fi
   fi
 
-  local linkType="symbolic"
-  if [[ ${hardlink} == "true" ]]; then
-    linkType="hard"
-  fi
   log::debug "Created ${linkType} link: ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
+}
+
+# ## fs::isValidLink
+#
+# Check if the linked path is a valid link to the target.
+#
+# - $1: **linked path** _as string_:
+#       the path to link to (the original file)
+# - $2: **link path** _as string_:
+#       the path where to create the link
+# - ${hardlink} _as boolean_:
+#       (optional) True to create a hard link, false to create a symbolic link
+#       (defaults to false)
+#
+# Returns:
+#
+# - $?:
+#   - 0 if the linked path is a valid link to the target
+#   - 1 otherwise
+#
+# ```bash
+# if fs::isValidLink "/path/to/link" "/path/to/linked"; then
+#   echo "The link is valid."
+# fi
+# ```
+function fs::isValidLink() {
+  local \
+    linkedPath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    linkPath="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    hardlink="false" \
+    IFS=$' '
+  shift 2
+  eval "local a= ${*@Q}"
+
+  # check the link path
+  if [[ -e ${linkPath} ]]; then
+
+    # check if it is a link or both files (potential hardlink)
+    if [[ -L ${linkPath} || (-f ${linkedPath} && -f ${linkPath}) ]]; then
+
+      # check if the link already exists and points to the correct target
+      if [[ ${hardlink} == "true" && ! -L ${linkPath} && ${linkPath} -ef ${linkedPath} ]]; then
+        return 0
+      elif [[ ${hardlink} == "false" && -L ${linkPath} ]]; then
+        local REPLY
+        # check if the link points to the correct file
+        fs::getAbsolutePath "${linkPath}" realpath=true
+        local linkRealPath="${REPLY}"
+        fs::getAbsolutePath "${linkedPath}" realpath=true
+        if [[ "${linkRealPath}" == "${REPLY}" ]]; then
+          return 0
+        fi
+      fi
+    fi
+  fi
+  return 1
 }
 
 # ## fs::getFileLineCount

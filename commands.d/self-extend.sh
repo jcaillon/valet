@@ -224,12 +224,6 @@ function selfExtend_createExtension() {
     # on windows, creating links will prompt the user for admin permissions
     # we can group all the ps1 commands and run it once at the end
     windows::startPs1Batch
-
-    # shellcheck disable=SC2317
-    function createLink() { windows::createLink "${@}"; }
-  else
-    # shellcheck disable=SC2317
-    function createLink() { fs::createLink "${@}"; }
   fi
 
   # vscode stuff
@@ -239,7 +233,7 @@ function selfExtend_createExtension() {
     cp -n "${GLOBAL_INSTALLATION_DIRECTORY}/extras/.vscode/extensions.json" "${extensionDirectory}/.vscode/extensions.json" || log::error "Could not copy the vscode extensions file."
 
     # link the snippets
-    createLink "${extensionsDirectory}/valet.code-snippets" "${extensionDirectory}/.vscode/valet.code-snippets" || log::error "Could not create a symbolic link to the vscode snippets."
+    fs::createLink "${extensionsDirectory}/valet.code-snippets" "${extensionDirectory}/.vscode/valet.code-snippets" || log::error "Could not create a symbolic link to the vscode snippets."
   fi
 
   # git stuff
@@ -253,8 +247,8 @@ function selfExtend_createExtension() {
   fi
 
   # link lib-valet
-  createLink "${extensionsDirectory}/lib-valet" "${extensionDirectory}/lib-valet" || log::error "Could not create a symbolic link to the lib-valet."
-  createLink "${extensionsDirectory}/lib-valet.md" "${extensionDirectory}/lib-valet.md" || log::error "Could not create a symbolic link to the lib-valet.md."
+  fs::createLink "${extensionsDirectory}/lib-valet" "${extensionDirectory}/lib-valet" || log::error "Could not create a symbolic link to the lib-valet."
+  fs::createLink "${extensionsDirectory}/lib-valet.md" "${extensionDirectory}/lib-valet.md" || log::error "Could not create a symbolic link to the lib-valet.md."
 
   if system::isWindows; then
     windows::endPs1Batch

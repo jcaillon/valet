@@ -229,3 +229,19 @@ INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜fish⌝ shell
 INFO     The directory ⌜/coucou⌝ is already in the PATH for ⌜nu⌝ shell.
 ```
 
+### ✅ Testing system::isWindowsWithoutNativeSymlinks
+
+❯ `MSYS= OSTYPE=msys system::isWindowsWithoutNativeSymlinks`
+
+❯ `MSYS= OSTYPE=linux system::isWindowsWithoutNativeSymlinks`
+
+Returned code: `1`
+
+❯ `MSYS=winsymlinks:nativestrict OSTYPE=cygwin system::isWindowsWithoutNativeSymlinks`
+
+Returned code: `1`
+
+❯ `MSYS=winsymlinks:nativestrict OSTYPE=linux system::isWindowsWithoutNativeSymlinks`
+
+Returned code: `1`
+

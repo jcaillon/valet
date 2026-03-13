@@ -4,23 +4,24 @@
 source windows
 # shellcheck source=../../libraries.d/lib-system
 source system
+# shellcheck source=../../libraries.d/lib-fs
+source fs
+# shellcheck source=../lib-fs/test-fs-link
+source ../lib-fs/test-fs-link
 
 # cancel the test suite if not running on windows
-system::getOs
-if [[ ${REPLY} != "windows" ]]; then
-  test::skipTestSuite "This test suite is only applicable on Windows, skipping it."
+if ! system::isWindows || [[ ${MSYS:-} != "winsymlinks:nativestrict" ]]; then
+  test::skipTestSuite "This test suite is only applicable on Windows with developer mode enabled, skipping it."
 fi
 
 function main() {
-  USERNAME="user"
-  LOCALAPPDATA="tmp"
-
   # test_windows::setEnvVar
   # test_windows::getEnvVar
   # test_windows::addToPath
-  # test_windows::createLink
 
-  rm -Rf tmp
+  # first test, use "normal" ln command
+  MSYS="winsymlinks:nativestrict"
+  test_fs::Link
 }
 
 function test_windows::getWindowsPathFromUnixPath() {
@@ -62,24 +63,6 @@ function test_windows::addToPath() {
   test::exec windows::addToPath /coucou
 
   test::exec windows::addToPath /coucou prepend=true
-}
-
-function test_windows::createLink() {
-  test::title "✅ Testing windows::createLink"
-
-  mkdir -p resources/gitignored
-  : >resources/gitignored/file
-
-  MSYS="winsymlinks:nativestrict"
-  test::exec windows::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' hardlink=true
-  test::flush
-
-  MSYS=""
-  test::exec windows::createLink 'resources/gitignored/file' 'resources/gitignored/try/file2' hardlink=true
-  test::flush
-
-  test::exec windows::createLink 'resources/gitignored/try' 'resources/gitignored/new'
-  test::flush
 }
 
 main

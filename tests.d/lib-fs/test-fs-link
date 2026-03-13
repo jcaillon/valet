@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+# shellcheck source=../../libraries.d/lib-fs
+source fs
+
+function test_fs::Link() {
+  test::title "✅ Testing fs::createLink"
+
+  rm -Rf resources/gitignored
+  mkdir -p resources/gitignored
+
+  pushd resources/gitignored >/dev/null || test::fail "Failed to change directory to ⌜resources/gitignored⌝."
+
+  mkdir -p folder1
+  : >file1
+  : >file2
+  : >folder1/file2
+  mkdir -p target/existing-folder-link2
+  : >target/existing-folder-link2/file
+  : >target/existing-file3
+  : >target/existing-file4
+
+  # normal behavior tests
+  test::exec fs::createLink file1 target/link1
+  test::exec fs::createLink file1 target/link2 hardlink=true
+  test::exec fs::createLink file2 target/link3 hardlink=true
+  test::exec fs::createLink folder1 target/folder-link1
+
+  if [[ ! -L target/link1 ]]; then
+    test::fail "target/link1 should be a symbolic link"
+  fi
+  if [[ ! target/link2 -ef file1 ]]; then
+    test::fail "target/link2 should be a hard link to file1 (same inode)"
+  fi
+  if [[ ! -L target/folder-link1 ]]; then
+    test::fail "target/folder-link1 should be a symbolic link"
+  fi
+
+  # case of target that already exists (existing folder)
+  test::exit fs::createLink folder1 target/existing-folder-link2
+  test::exit fs::createLink file1 target/existing-folder-link2
+  test::exec fs::createLink folder1 target/existing-folder-link2 force=true
+
+  # case of target that already exists (existing file)
+  test::exit fs::createLink folder1 target/existing-file3
+  test::exit fs::createLink file1 target/existing-file3
+  test::exec fs::createLink file1 target/existing-file3 force=true
+
+  test::title "✅ Testing fs::isValidLink"
+
+  # should return 0
+  test::func fs::isValidLink file1 target/link1
+  test::func fs::isValidLink file1 target/link2 hardlink=true
+  test::func fs::isValidLink folder1 target/folder-link1
+
+  # should return 1
+  # not a hardlink/symbolic
+  test::func fs::isValidLink file1 target/link1 hardlink=true
+  test::func fs::isValidLink file1 target/link2
+  # dir/file
+  test::func fs::isValidLink file1 folder1
+  test::func fs::isValidLink folder1 file1
+  # non existing link
+  test::func fs::isValidLink file1 non-existing
+  # incorrect sym/hardlink link
+  test::func fs::isValidLink file2 target/existing-file3
+  test::func fs::isValidLink file1 target/link3 hardlink=true
+
+  popd >/dev/null || test::fail "Failed to popd."
+}

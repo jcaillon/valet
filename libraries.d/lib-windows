@@ -245,9 +245,13 @@ function windows::endPs1Batch() {
   return 0
 }
 
-# ## windows::createLink
+# ## windows::createLink (private)
 #
 # Create a soft or hard link (original ← link).
+# Will fail if the target link already exists or if the linked path does not exist.
+#
+# The function `fs::createLink` should be used instead of this function,
+# it will automatically use the appropriate implementation depending on the system capabilities.
 #
 # Reminder:
 #
@@ -263,10 +267,6 @@ function windows::endPs1Batch() {
 # - ${hardlink} _as boolean_:
 #       (optional) True to create a hard link, false to create a symbolic link
 #       (defaults to false)
-# - ${force} _as boolean_:
-#       (optional) True to overwrite the link or file if it already exists.
-#       Otherwise, the function will fail on an existing link.
-#       (defaults to false)
 #
 # ```bash
 # windows::createLink "/path/to/link" "/path/to/linked"
@@ -278,9 +278,11 @@ function windows::endPs1Batch() {
 # > then it uses the ln command.
 function windows::createLink() {
   if [[ ${MSYS:-} == "winsymlinks:nativestrict" ]]; then
+    # case where we can simply used the normal createLink function as if we are on unix system
     fs::createLink "$@"
     return 0
   fi
+
   local \
     linkedPath="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     linkPath="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
@@ -304,24 +306,8 @@ function windows::createLink() {
   fi
 
   # check the link path
-  if [[ -f ${linkPath} || -L ${linkPath} ]]; then
-    # on windows, creating a link is costly so don't do it if it's already good
-    if command -v ls &>/dev/null; then
-      exe::invoke ls -l "${linkPath}"
-      if [[ ${REPLY%%$'\n'*} == *"${linkedPath}" ]]; then
-        log::debug "The link ⌜${linkPath}⌝ already exists and points to ⌜${linkedPath}⌝."
-        return 0
-      fi
-    fi
-
-    # if force, delete the link (or file) if it exists
-    if [[ ${force} == true ]]; then
-      if ! rm -f "${linkPath}"; then
-        core::fail "Failed to delete the existing link ⌜${linkPath}⌝ to replace it."
-      fi
-    else
-      core::fail "Failed to create a link to ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the link pathname already exists."
-    fi
+  if [[ -e ${linkPath} ]]; then
+    core::fail "Failed to create a link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the link path already exists."
   fi
 
   # create link parent directory if needed
@@ -338,20 +324,19 @@ function windows::createLink() {
   linkedPath="${REPLY}"
 
   log::debug "Creating a new link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝ using powershell."
+  local linkType
   if [[ ${hardlink} == "true" ]]; then
+    linkType="hard"
     if ! windows::runPs1 "New-Item -ItemType HardLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" runAsAdmin=true; then
       core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
     fi
   else
+    linkType="symbolic"
     if ! windows::runPs1 "New-Item -ItemType SymbolicLink -Path \"${linkParentPath}\" -Name \"${linkFileName}\" -Value \"${linkedPath}\" | Out-Null" runAsAdmin=true; then
       core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
     fi
   fi
 
-  local linkType="symbolic"
-  if [[ ${hardlink} == "true" ]]; then
-    linkType="hard"
-  fi
   log::debug "Created ${linkType} link: ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
 }
 

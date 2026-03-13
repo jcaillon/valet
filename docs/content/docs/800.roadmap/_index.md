@@ -8,6 +8,8 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- document debugging with strace
+- implement a simple http server
 - make a real test for the self install / extend commands.
 - Check the bash-links command, error when creating a link if the destination path already exists as a folder.
 - Add tooltip in interactive functions (Enter shows help, Tab autocompletes, etc...)
