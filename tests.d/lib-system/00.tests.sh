@@ -13,6 +13,17 @@ function main() {
   test_system::getOs
   test_system::getEnvVars
   test_system::addToPath
+  test_system::isWindowsWithoutNativeSymlinks
+}
+
+function test_system::isWindowsWithoutNativeSymlinks() {
+  test::title "✅ Testing system::isWindowsWithoutNativeSymlinks"
+
+  test::func MSYS= OSTYPE=msys system::isWindowsWithoutNativeSymlinks
+  test::func MSYS= OSTYPE=linux system::isWindowsWithoutNativeSymlinks
+
+  test::func MSYS=winsymlinks:nativestrict OSTYPE=cygwin system::isWindowsWithoutNativeSymlinks
+  test::func MSYS=winsymlinks:nativestrict OSTYPE=linux system::isWindowsWithoutNativeSymlinks
 }
 
 function test_system::isDarwin() {
