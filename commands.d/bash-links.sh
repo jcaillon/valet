@@ -27,7 +27,7 @@ description: |-
 options:
 - name: --force
   description: |-
-    Replace existing targets without confirmation when creating the links.
+    Replace existing targets without confirmation when creating the links (dangerous).
 - name: --links-definition-directory <directory>
   description: |-
     Path to the directory containing link definition files to create symbolic links.
@@ -71,8 +71,8 @@ function bashLinks() {
   local -a linkFiles=("${REPLY_ARRAY[@]}")
 
   # go through each line of each file
-  local -a links=() sources modes
-  local linkFile line link source
+  local -a links=() sources=() hardlinks=()
+  local linkFile line link source hardlink
   for linkFile in "${linkFiles[@]}"; do
     log::debug "Checking link file ${linkFile}."
 
@@ -88,7 +88,11 @@ function bashLinks() {
 
       if [[ ${line} =~ ^([^:]+)":"([h]?)"->"(.+)$ ]]; then
         link="${BASH_REMATCH[1]}"
-        mode="${BASH_REMATCH[2]}"
+        if [[ ${BASH_REMATCH[2]} == *"h"* ]]; then
+          hardlink=true
+        else
+          hardlink=false
+        fi
         source="${BASH_REMATCH[3]}"
       else
         log::warning "The line ⌜${line}⌝ is not a valid link definition, skipping (defined in ${linkFile})."
@@ -117,61 +121,77 @@ function bashLinks() {
       if [[ ${wildcardMode} == "true" ]]; then
         log::debug "Creating link for each file/directory in the directory ${source}."
 
-        fs::listFiles "${source}" includeHidden=true
+        fs::getAbsolutePath "${source}"
+        fs::listFiles "${REPLY}" includeHidden=true
         local sourcePath fileName
         for sourcePath in "${REPLY_ARRAY[@]}"; do
           fileName="${sourcePath##*/}"
           links+=("${link}/${fileName}")
           sources+=("${sourcePath}")
-          modes+=("${mode}")
+          hardlinks+=("${hardlink}")
         done
-
-        continue
+      else
+        links+=("${link}")
+        sources+=("${source}")
+        hardlinks+=("${hardlink}")
       fi
-
-      links+=("${link}")
-      sources+=("${source}")
-      modes+=("${mode}")
     done
   done
 
-  local -a existingLinks=() existingFiles=()
-  for link in "${links[@]}"; do
-    if [[ -L ${link} ]]; then
-      existingLinks+=("${link}")
-    elif [[ -e ${link} ]]; then
-      existingFiles+=("${link}")
+  local -a existingDirectories=() existingFiles=() indexesToUpdate=()
+  local -i index
+  local hardlink
+  for index in "${!links[@]}"; do
+    if fs::isValidLink "${sources[index]}" "${links[index]}" hardlink="${hardlinks[index]}"; then
+      log::debug "The link ⌜${links[index]}⌝ already exists and is correctly linked to the source ⌜${sources[index]}⌝, skipping."
+      continue
     fi
+    if [[ -d ${links[index]} && ! -L ${links[index]} ]]; then
+      existingDirectories+=("${links[index]}")
+    elif [[ -e ${links[index]} ]]; then
+      existingFiles+=("${links[index]}")
+    fi
+    indexesToUpdate+=("${index}")
   done
 
   if ((${#existingFiles[@]} > 0)); then
     log::warning "The following ${#existingFiles[@]} existing files must be removed to be replaced by links:"
-    local link
-    for link in "${existingFiles[@]}"; do
-      log::printString " - ${link}"
+    local file
+    for file in "${existingFiles[@]}"; do
+      log::printString " - ${file}"
     done
-
-    if [[ ${force:-false} != "true" ]] && ! interactive::confirm "Do you want to proceed and remove the files listed above?" default=false; then
+  fi
+  if ((${#existingDirectories[@]} > 0)); then
+    log::warning "The following ${#existingDirectories[@]} existing directories must be removed to be replaced by links:"
+    local dir
+    for dir in "${existingDirectories[@]}"; do
+      log::printString " - ${dir}"
+    done
+  fi
+  if ((${#existingFiles[@]} > 0 || ${#existingDirectories[@]} > 0)); then
+    if [[ ${force:-false} != "true" ]] && ! interactive::confirm "Do you want to proceed and remove the paths listed above?" default=false; then
       core::fail "Aborting link creation due to existing files."
     fi
   fi
 
-  log::info "${#existingLinks[@]} existing links will be replaced."
+  if ((${#indexesToUpdate[@]} > 0)); then
 
-  log::info "Links created:"
-  local -i index
-  local hardlinkText
-  for index in "${!links[@]}"; do
-    if [[ ${modes[index]} == *"h"* ]]; then
-      fs::createLink "${sources[index]}" "${links[index]}" hardlink=true force=true
-      hardlinkText=" (hardlink)"
-    else
-      fs::createLink "${sources[index]}" "${links[index]}" force=true
-      hardlinkText=""
-    fi
-    log::printString "╭─ ${links[index]}${hardlinkText}" newLinePadString="│  "
-    log::printString "╰──▶ ${sources[index]}" newLinePadString="     "
-  done
+    log::info "Creating links:"
+    local hardlinkText
+    for index in "${indexesToUpdate[@]}"; do
+      fs::createLink "${sources[index]}" "${links[index]}" hardlink="${hardlinks[index]}" force=true
+      if [[ ${hardlinks[index]} == "true" ]]; then
+        hardlinkText=" (hardlink)"
+      else
+        hardlinkText=""
+      fi
+      log::printString "╭─ ${links[index]}${hardlinkText}" newLinePadString="│  "
+      log::printString "╰──▶ ${sources[index]}" newLinePadString="     "
+    done
 
-  log::success "${#links[@]} links created successfully."
+    log::success "${#indexesToUpdate[@]} links created successfully."
+  else
+    log::success "All links are already correctly set up, nothing to do."
+  fi
+
 }

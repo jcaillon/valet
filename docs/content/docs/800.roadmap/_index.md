@@ -9,7 +9,10 @@ url: /docs/roadmap
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
 - document debugging with strace
-- implement a simple http server
+- implement a simple http server with accept
+- implement fs::normalizePath
+- revamp install script and update
+- add a yaml library for basic parsing. Same for json. The parse method can optionally output .keys and .length variable allowing to easily loop over keys or arrays (e.g. REPLY_ASSOCIATIVE_ARRAY["thing.stuff.length"])
 - make a real test for the self install / extend commands.
 - Check the bash-links command, error when creating a link if the destination path already exists as a folder.
 - Add tooltip in interactive functions (Enter shows help, Tab autocompletes, etc...)
@@ -65,7 +68,6 @@ This page lists the features that I would like to implement in Valet. They come 
   - add a stack for kill/yank
   - add a stack for undo/redo
 - add a new command self diagnostic that will run a series of tests to check the environment and help figure out what's wrong.
-- add a yaml library for basic parsing. Same for json
 - Implement tests that are only run with -e flag and where we test system specific stuff, like the windows library and fs::createLink, absolute path with real path etc...
 - Add an option to enter interactive debug mode when an error occurs and on each log::print call.
 - Add a function to display a table, use it for benchmark.
