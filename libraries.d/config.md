@@ -145,7 +145,18 @@ The name of a script which will be sourced by Valet on startup.
 This allows you to define custom functions or variables that
 will be available in Valet.
 
-Defaults to the `.env` file in the current directory.
+Defaults to the `startup` file in the same directory as the config file.
+
+#### VALET_CONFIG_DOT_ENVRC_SCRIPT
+
+The name of a script which will be sourced by Valet on startup if it is present in
+the current directory.
+
+This allows you to define custom functions or variables that will be available in Valet.
+
+It is loaded after the `VALET_CONFIG_STARTUP_SCRIPT` startup script.
+
+Defaults to the `.envrc` file in the current directory.
 
 <!-- ___________________ FEATURES _____________________ -->
 

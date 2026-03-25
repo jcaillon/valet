@@ -76,6 +76,29 @@ ERROR    Error sourcing the env file ⌜.env⌝.
 Check the file for error and try again, or delete the file to discard your config.
 ```
 
+### ✅ Testing the bad .envrc
+
+❯ `valet self mock1`
+
+Returned code: `1`
+
+**Error output**:
+
+```text
+CMDMISS  Command not found: ⌜unknowzaazea⌝.
+Please check your ⌜PATH⌝ variable.
+├─ in source() at .envrc:xxx
+├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
+╰─ in main() at valet:xxx
+CMDERR   Error code ⌜1⌝ for the command:
+╭ unknowzaazea
+├─ in source() at .envrc:xxx
+├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
+╰─ in main() at valet:xxx
+ERROR    Error sourcing the envrc file ⌜.envrc⌝.
+Check the file for error and try again, or delete the file to discard your config.
+```
+
 ### ✅ Testing the bad commands
 
 ❯ `valet self mock1`

@@ -843,3 +843,26 @@ function string::join() {
     done
   fi
 }
+
+# ## string::expandVariables
+#
+# Expand variables in a string.
+# If a variable is not defined, it will be replaced by an empty string.
+#
+# - $1: **string variable name** _as string_:
+#       The variable name that contains the string in which to expand variables.
+#
+# Returns:
+# - ${REPLY}: the string with expanded variables
+#
+# ```bash
+# MY_STRING="Hello $USER, today is $DAY"
+# string::expandVariables MY_STRING
+# echo "${REPLY}"
+# ```
+function string::expandVariables() {
+  local inputString="${!1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  # TODO: implement this
+
+}
