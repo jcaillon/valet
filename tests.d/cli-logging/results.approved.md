@@ -49,9 +49,7 @@ local commandArgumentsErrors help action
 
 help=""
 
-commandArgumentsErrors=""
-
-action="logging-level"
+action=logging-level
 
 TRACE    This is an error trace message which is always displayed.
 
@@ -97,9 +95,7 @@ local commandArgumentsErrors help action
 
 help=""
 
-commandArgumentsErrors=""
-
-action="logging-level"
+action=logging-level
 
 TRACE    This is an error trace message which is always displayed.
 

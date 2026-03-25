@@ -48,14 +48,13 @@ D  I  S  timer  delta                          source:line function             
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:172  selfMock2()                              → eval 'local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
                                                                                                        local -a more
                                                                                                        option1=""
-                                                                                                       thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
-                                                                                                       flag3="${VALET_FLAG3:-}"
+                                                                                                       thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"
+                                                                                                       flag3="${VALET_FLAG3:-""}"
                                                                                                        withDefault="${VALET_WITH_DEFAULT:-"cool"}"
                                                                                                        help=""
-                                                                                                       commandArgumentsErrors=""
-                                                                                                       firstArg="arg1"
+                                                                                                       firstArg=arg1
                                                                                                        more=(
-                                                                                                       "arg2"
+                                                                                                       arg2
                                                                                                        )'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:172  selfMock2()                              → local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → local -a more
@@ -64,9 +63,8 @@ D  I  S  timer  delta                          source:line function             
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:176  selfMock2()                              → flag3=
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:177  selfMock2()                              → withDefault=cool
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:178  selfMock2()                              → help=
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:179  selfMock2()                              → commandArgumentsErrors=
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:180  selfMock2()                              → firstArg=arg1
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:183  selfMock2()                              → more=("arg2")
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:179  selfMock2()                              → firstArg=arg1
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:182  selfMock2()                              → more=(arg2)
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → command::checkParsedResults
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:175  selfMock2()                              → log::info 'Option 1 (option1): .'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:176  selfMock2()                              → log::info 'Option 2 (thisIsOption2): .'
@@ -114,14 +112,13 @@ D  I  S  timer  delta                          source:line function             
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:172  selfMock2()                              → eval 'local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
                                                                                                            local -a more								
                                                                                                            option1=""								
-                                                                                                           thisIsOption2="${VALET_THIS_IS_OPTION2:-}"								
-                                                                                                           flag3="${VALET_FLAG3:-}"								
+                                                                                                           thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"								
+                                                                                                           flag3="${VALET_FLAG3:-""}"								
                                                                                                            withDefault="${VALET_WITH_DEFAULT:-"cool"}"								
                                                                                                            help=""								
-                                                                                                           commandArgumentsErrors=""								
-                                                                                                           firstArg="arg1"								
+                                                                                                           firstArg=arg1								
                                                                                                            more=(								
-                                                                                                           "arg2"								
+                                                                                                           arg2								
                                                                                                            )'								
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:172  selfMock2()                              → local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → local -a more
@@ -130,9 +127,8 @@ D  I  S  timer  delta                          source:line function             
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:176  selfMock2()                              → flag3=
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:177  selfMock2()                              → withDefault=cool
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:178  selfMock2()                              → help=
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:179  selfMock2()                              → commandArgumentsErrors=
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:180  selfMock2()                              → firstArg=arg1
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:183  selfMock2()                              → more=("arg2")
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:179  selfMock2()                              → firstArg=arg1
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:182  selfMock2()                              → more=(arg2)
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:173  selfMock2()                              → command::checkParsedResults
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:175  selfMock2()                              → log::info 'Option 1 (option1): .'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:176  selfMock2()                              → log::info 'Option 2 (thisIsOption2): .'

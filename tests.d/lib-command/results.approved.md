@@ -14,8 +14,8 @@ Returned variables:
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
-thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
-flag3="${VALET_FLAG3:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"
+flag3="${VALET_FLAG3:-""}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 commandArgumentsErrors="Expecting ⌜2⌝ argument(s) but got ⌜0⌝.
@@ -36,16 +36,15 @@ Returned variables:
 ```text
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
-flag3="${VALET_FLAG3:-}"
+flag3="${VALET_FLAG3:-""}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-commandArgumentsErrors=""
-option1="true"
-thisIsOption2="optionValue2"
-firstArg="arg1"
+option1=true
+thisIsOption2=optionValue2
+firstArg=arg1
 more=(
-"more1"
-"more2"
+more1
+more2
 )'
 ```
 
@@ -58,7 +57,7 @@ Returned variables:
 ```text
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
-flag3="${VALET_FLAG3:-}"
+flag3="${VALET_FLAG3:-""}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 commandArgumentsErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
@@ -66,9 +65,9 @@ Use ⌜valet self mock2 --help⌝ to get help.
 
 Usage:
 valet [global options] self mock2 [options] [--] <first-arg> <more...>"
-option1="true"
-thisIsOption2="optionValue2"
-firstArg="arg1"
+option1=true
+thisIsOption2=optionValue2
+firstArg=arg1
 more=(
 )'
 ```
@@ -89,8 +88,8 @@ Returned variables:
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
-thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
-flag3="${VALET_FLAG3:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"
+flag3="${VALET_FLAG3:-""}"
 help=""
 commandArgumentsErrors="Unknown option ⌜--unknown⌝, valid options are:
 -o --option1
@@ -103,8 +102,8 @@ Use ⌜valet self mock2 --help⌝ to get help.
 
 Usage:
 valet [global options] self mock2 [options] [--] <first-arg> <more...>"
-withDefault="optionValue2"
-firstArg="arg"
+withDefault=optionValue2
+firstArg=arg
 more=(
 )'
 ```
@@ -118,16 +117,15 @@ Returned variables:
 ```text
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
-thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
-flag3="${VALET_FLAG3:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"
+flag3="${VALET_FLAG3:-""}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-commandArgumentsErrors=""
-firstArg="arg"
-option1="true"
+firstArg=arg
+option1=true
 more=(
-"more1"
-"more2"
+more1
+more2
 )'
 ```
 
@@ -147,7 +145,7 @@ Returned variables:
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
-flag3="${VALET_FLAG3:-}"
+flag3="${VALET_FLAG3:-""}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 commandArgumentsErrors="Expecting ⌜2⌝ argument(s) but got ⌜1⌝.
@@ -155,8 +153,8 @@ Use ⌜valet self mock2 --help⌝ to get help.
 
 Usage:
 valet [global options] self mock2 [options] [--] <first-arg> <more...>"
-thisIsOption2="arg"
-firstArg="more1"
+thisIsOption2=arg
+firstArg=more1
 more=(
 )'
 ```
@@ -171,14 +169,13 @@ Returned variables:
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
-flag3="${VALET_FLAG3:-}"
+flag3="${VALET_FLAG3:-""}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-commandArgumentsErrors=""
-thisIsOption2="--option1"
-firstArg="arg"
+thisIsOption2=--option1
+firstArg=arg
 more=(
-"more1"
+more1
 )'
 ```
 
@@ -202,14 +199,13 @@ Returned variables:
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
-thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
-flag3="${VALET_FLAG3:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"
+flag3="${VALET_FLAG3:-""}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-commandArgumentsErrors=""
-firstArg="--arg1--"
+firstArg=--arg1--
 more=(
-"--arg2--"
+--arg2--
 )'
 ```
 
@@ -223,14 +219,14 @@ Returned variables:
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
-flag3="${VALET_FLAG3:-}"
+flag3="${VALET_FLAG3:-""}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 commandArgumentsErrors="Missing value for option ⌜thisIsOption2⌝.
 Use ⌜valet self mock2 --help⌝ to get help."
-firstArg="arg1"
+firstArg=arg1
 more=(
-"arg2"
+arg2
 )'
 ```
 
@@ -244,8 +240,8 @@ Returned variables:
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
-thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
-flag3="${VALET_FLAG3:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"
+flag3="${VALET_FLAG3:-""}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 commandArgumentsErrors="Found multiple matches for the option ⌜--th⌝, please be more specific:
@@ -253,9 +249,9 @@ commandArgumentsErrors="Found multiple matches for the option ⌜--th⌝, please
 [95m-[0m[95m-[0mwi[95mt[0m[95mh[0m-default
 
 Use ⌜valet self mock2 --help⌝ to get help."
-firstArg="arg1"
+firstArg=arg1
 more=(
-"arg2"
+arg2
 )'
 ```
 
@@ -268,17 +264,16 @@ Returned variables:
 ```text
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
-thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
-commandArgumentsErrors=""
-option1="true"
-flag3="true"
-firstArg="allo1"
+option1=true
+flag3=true
+firstArg=allo1
 more=(
-"allo2"
-"allo3"
-"allo4"
+allo2
+allo3
+allo4
 )'
 ```
 
@@ -292,14 +287,13 @@ Returned variables:
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 help=""
-commandArgumentsErrors=""
-option1="true"
-thisIsOption2="allo1"
-withDefault="allo2"
-flag3="true"
-firstArg="allo3"
+option1=true
+thisIsOption2=allo1
+withDefault=allo2
+flag3=true
+firstArg=allo3
 more=(
-"allo4"
+allo4
 )'
 ```
 
@@ -312,16 +306,16 @@ Returned variables:
 ```text
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
-thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"
 withDefault="${VALET_WITH_DEFAULT:-"cool"}"
 help=""
 commandArgumentsErrors="Unknown option letter ⌜a⌝ in group ⌜-3ao⌝. Valid single letter options are: ⌜o⌝, ⌜2⌝, ⌜3⌝, ⌜4⌝, ⌜h⌝.
 Use ⌜valet self mock2 --help⌝ to get help."
-flag3="true"
-option1="true"
-firstArg="allo1"
+flag3=true
+option1=true
+firstArg=allo1
 more=(
-"allo2"
+allo2
 )'
 ```
 
@@ -335,14 +329,14 @@ Returned variables:
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
-thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
-flag3="${VALET_FLAG3:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"
+flag3="${VALET_FLAG3:-""}"
 help=""
 commandArgumentsErrors="Missing value for option ⌜withDefault⌝.
 Use ⌜valet self mock2 --help⌝ to get help."
-firstArg="arg1"
+firstArg=arg1
 more=(
-"arg2"
+arg2
 )'
 ```
 
@@ -356,17 +350,17 @@ Returned variables:
 REPLY='local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 local -a more
 option1=""
-thisIsOption2="${VALET_THIS_IS_OPTION2:-}"
-flag3="${VALET_FLAG3:-}"
+thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"
+flag3="${VALET_FLAG3:-""}"
 help=""
 commandArgumentsErrors="Missing value for option ⌜withDefault⌝.
 Missing value for option ⌜withDefault⌝.
 Missing value for option ⌜withDefault⌝.
 Missing value for option ⌜withDefault⌝.
 Use ⌜valet self mock2 --help⌝ to get help."
-firstArg="arg1"
+firstArg=arg1
 more=(
-"arg2"
+arg2
 )'
 ```
 

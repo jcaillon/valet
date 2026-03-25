@@ -26,6 +26,12 @@ function main() {
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
   rm -f ".env"
 
+  test::title "✅ Testing the bad .envrc"
+  echo "unknowzaazea" >".envrc"
+  export VALET_CONFIG_DOT_ENVRC_SCRIPT=".envrc"
+  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1
+  rm -f ".envrc"
+
   test::title "✅ Testing the bad commands"
   fs::createTempDirectory
   export VALET_CONFIG_USER_DATA_DIRECTORY="${REPLY}"

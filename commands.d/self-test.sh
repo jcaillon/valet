@@ -36,7 +36,7 @@ options:
 - name: -a, --auto-approve
   description: |-
     The received test result files will automatically be approved.
-- name: -C, --core-only
+- name: -c, --core-only
   description: |-
     Only test the valet core functions. Skips the tests for user commands.
 

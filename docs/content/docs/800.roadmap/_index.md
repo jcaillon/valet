@@ -8,22 +8,24 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
-- document debugging with strace
-- implement a simple http server with accept
 - implement fs::normalizePath
-- revamp install script and update
-- add a yaml library for basic parsing. Same for json. The parse method can optionally output .keys and .length variable allowing to easily loop over keys or arrays (e.g. REPLY_ASSOCIATIVE_ARRAY["thing.stuff.length"])
-- make a real test for the self install / extend commands.
-- Check the bash-links command, error when creating a link if the destination path already exists as a folder.
-- Add tooltip in interactive functions (Enter shows help, Tab autocompletes, etc...)
-- Check error handling inside ifs and evals.
-- Check how we can make the list component work in the main screen while user is scrolling. Seems like gum is doing it by positioning the cursor at the end of the screen always, and then using move cursor left to trigger an automatic scroll that takes the user back at the right spot.
-- test with bash 5.1, 5.2 and 5.3 in the pipeline (with different distros each time).
-- handle the drawing of TUI panels in a coproc so each has its own set of variables for its state.
+- Modify self install: at the moment we count on the fact that some functions will still exist in valet after an update. The simplest is to redownload the self install script and run it again.
+- Implement tests that are only run with -e flag and where we test system specific stuff, like the windows library and fs::createLink, absolute path with real path etc...
+- validate execution of .env or .envrc
 - Arguments parser:
   - Make the program parser catch all global options and verify in the build command that we do not reuse the same global option in different commands.
   - Allow options to be inherited from parent commands. We can check the existence of the base options in the command::parse function (for verbose, log level, progress bars). For source and version, mark them as `inherited: false` as we only want to handle them in the main parsing loop, at valet level.
   - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
+- test the "sudo" feature: it runs the command by forking. We could add an option to instead rerun valet with sudo.
+- make a real test for the self install / extend commands.
+- add a yaml library for basic parsing. Same for json. The parse method can optionally output .keys and .length variable allowing to easily loop over keys or arrays (e.g. REPLY_ASSOCIATIVE_ARRAY["thing.stuff.length"])
+- Check the bash-links command, error when creating a link if the destination path already exists as a folder.
+- Add tooltip in interactive functions (Enter shows help, Tab autocompletes, etc...)
+- document debugging with strace
+- Check error handling inside ifs and evals.
+- Check how we can make the list component work in the main screen while user is scrolling. Seems like gum is doing it by positioning the cursor at the end of the screen always, and then using move cursor left to trigger an automatic scroll that takes the user back at the right spot.
+- test with bash 5.1, 5.2 and 5.3 in the pipeline (with different distros each time).
+- handle the drawing of TUI panels in a coproc so each has its own set of variables for its state.
 - add a global --edit option to edit the command function file
 - for the showcase, actually build a small app like a git conventional commit tool.
 - prompt:
@@ -36,7 +38,6 @@ This page lists the features that I would like to implement in Valet. They come 
   - add info of the extension from which a command comes from
   - in the menu we can filter by extension (and we see the extension of a command)
 - When calling `valet extension-name`, it should show the commands of the extension.
-- test the "sudo" feature: it runs the command by forking. We could add an option to instead rerun valet with sudo.
 - Add full support for interactive mode:
   - prompt the user in the scrolling terminal. Then we add an option to instead open a full screen editor.
 - In benchmark, with debug mode on, we can compute the time spent on each line of a function. See extdebug shopt.
@@ -68,12 +69,11 @@ This page lists the features that I would like to implement in Valet. They come 
   - add a stack for kill/yank
   - add a stack for undo/redo
 - add a new command self diagnostic that will run a series of tests to check the environment and help figure out what's wrong.
-- Implement tests that are only run with -e flag and where we test system specific stuff, like the windows library and fs::createLink, absolute path with real path etc...
 - Add an option to enter interactive debug mode when an error occurs and on each log::print call.
 - Add a function to display a table, use it for benchmark.
 - Add a function to display a text using figlet fonts.
-- Modify self install: at the moment we count on the fact that some functions will still exist in valet after an update. The simplest is to redownload the self install script and run it again.
 - Links to file and line number of each function implementation.
+- implement a simple http server with accept
 
 [valet-issues]: https://github.com/jcaillon/valet/issues
 

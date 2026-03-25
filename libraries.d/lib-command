@@ -652,10 +652,7 @@ function command_parseFunctionArguments() {
     return 0
   fi
 
-  local -a lastArgumentValues=()
-  local -a outputErrors=()
-  local -a outputSetLine
-  local -a matchedOptionsIndex
+  local -a lastArgumentValues=() outputErrors=() outputSetVar=() outputSetVal=() matchedOptionsIndex=()
 
   local badArguments=false
 
@@ -690,10 +687,12 @@ function command_parseFunctionArguments() {
       outputErrors+=("Missing value for option ⌜${optionName}⌝.")
     else
       shift
-      outputSetLine+=("${optionName}=\"${1//\"/\\\"}\"")
+      outputSetVar+=("${optionName}")
+      outputSetVal+=("${1}")
     fi
   else
-    outputSetLine+=("${optionName}=\"true\"")
+    outputSetVar+=("${optionName}")
+    outputSetVal+=("true")
   fi
   '
 
@@ -764,7 +763,8 @@ function command_parseFunctionArguments() {
           lastArgumentValues+=("${1}")
         else
           argumentPosition+=1
-          outputSetLine+=("${argumentName}=\"${1//\"/\\\"}\"")
+          outputSetVar+=("${argumentName}")
+          outputSetVal+=("${1}")
         fi
 
       fi
@@ -797,7 +797,7 @@ function command_parseFunctionArguments() {
   fi
 
 
-  local outputString
+  local outputString quotedValue
 
   # define all the possible local variables for options and arguments
   local option argumentIndex nbScalarArguments
@@ -831,10 +831,7 @@ function command_parseFunctionArguments() {
       optionNameSc="${optionsNameSc[${optionIndex}]:-}"
       optionDefault="${optionsDefault[${optionIndex}]:-}"
       if [[ -n ${optionNameSc} ]]; then
-        if [[ -n ${optionDefault} ]]; then
-          optionDefault="\"${optionDefault}\""
-        fi
-        outputString+="${optionsName[${optionIndex}]}=\"\${${optionNameSc}:-${optionDefault}}\""$'\n'
+        outputString+="${optionsName[${optionIndex}]}=\"\${${optionNameSc}:-\"${optionDefault}\"}\""$'\n'
       else
         outputString+="${optionsName[${optionIndex}]}=\"${optionDefault}\""$'\n'
       fi
@@ -842,20 +839,23 @@ function command_parseFunctionArguments() {
   done
 
   # output the parsing errors
-  local -i outputErrorIndex
-  outputString+="commandArgumentsErrors=\""
-  for outputErrorIndex in "${!outputErrors[@]}"; do
-    if [[ outputErrorIndex -gt 0 ]]; then
-      outputString+=$'\n'
-    fi
-    outputString+="${outputErrors[${outputErrorIndex}]}"
-  done
-  outputString+="\""$'\n'
+  if (( ${#outputErrors[@]} > 0 )); then
+    local -i outputErrorIndex
+    local outputError=""
+    for outputErrorIndex in "${!outputErrors[@]}"; do
+      if [[ outputErrorIndex -gt 0 ]]; then
+        outputError+=$'\n'
+      fi
+      outputError+="${outputErrors[${outputErrorIndex}]}"
+    done
+    outputString+="commandArgumentsErrors=\"${outputError//\"/\\\"}\""$'\n'
+  fi
 
   # output the matched arguments/options values
-  local outputSet
-  for outputSet in "${outputSetLine[@]}"; do
-    outputString+="${outputSet}"$'\n'
+  local outputSetIndex
+  for outputSetIndex in "${!outputSetVar[@]}"; do
+    printf -v quotedValue '%q' "${outputSetVal[${outputSetIndex}]}"
+    outputString+="${outputSetVar[${outputSetIndex}]}=${quotedValue}"$'\n'
   done
 
   # output the last argument values
@@ -863,7 +863,8 @@ function command_parseFunctionArguments() {
     local lastArgumentValue
     outputString+="${argumentsName[${nbScalarArguments}]}=("$'\n'
     for lastArgumentValue in "${lastArgumentValues[@]}"; do
-      outputString+="\"${lastArgumentValue//\"/\\\"}\""$'\n'
+      printf -v quotedValue '%q' "${lastArgumentValue}"
+      outputString+="${quotedValue}"$'\n'
     done
     outputString+=")"
   fi

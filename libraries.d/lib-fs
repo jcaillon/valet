@@ -43,7 +43,7 @@ function fs::getAbsolutePath() {
     local REPLY_CODE REPLY2
     # shellcheck source=./lib-exe
     source exe
-    exe::invoke readlink -f "${path}"
+    exe::invoke readlink "${path}"
     REPLY="${REPLY%[[:space:]]}"
     return 0
   fi
@@ -667,7 +667,7 @@ function fs::createLink() {
   fi
 
   # check if the link path already exists and is not a valid link to the target
-  if [[ -e ${linkPath} ]] && ! fs::isValidLink "${linkedPath}" "${linkPath}" hardlink="${hardlink}"; then
+  if [[ -e ${linkPath} || -L ${linkPath} ]] && ! fs::isValidLink "${linkedPath}" "${linkPath}" hardlink="${hardlink}"; then
     # if force, delete target if it exists
     if [[ ${force} == true ]]; then
       if [[ -d "${linkPath}" ]] && ! rm -Rf "${linkPath}"; then
@@ -688,6 +688,8 @@ function fs::createLink() {
   #shellcheck source=./lib-system
   source system
   if system::isWindowsWithoutNativeSymlinks; then
+    # shellcheck source=lib-windows
+    source windows
     windows::createLink "${linkedPath}" "${linkPath}" hardlink="${hardlink}"
     return 0
   fi
@@ -742,7 +744,7 @@ function fs::isValidLink() {
   eval "local a= ${*@Q}"
 
   # check the link path
-  if [[ -e ${linkPath} ]]; then
+  if [[ -e ${linkPath} || -L ${linkPath} ]]; then
 
     # check if it is a link or both files (potential hardlink)
     if [[ -L ${linkPath} || (-f ${linkedPath} && -f ${linkPath}) ]]; then
@@ -755,7 +757,7 @@ function fs::isValidLink() {
         # check if the link points to the correct file
         fs::getAbsolutePath "${linkPath}" realpath=true
         local linkRealPath="${REPLY}"
-        fs::getAbsolutePath "${linkedPath}" realpath=true
+        fs::getAbsolutePath "${linkedPath}"
         if [[ "${linkRealPath}" == "${REPLY}" ]]; then
           return 0
         fi

@@ -1,12 +1,8 @@
 {
-  // https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html
-  "bashIde.globPattern": "**/@(core*|main|lib-!(valet)|*-utils)",
+  // https://code.visualstudio.com/docs/editor/glob-patterns
+  "bashIde.globPattern": "{libraries.d/*,commands.d/*}",
   "bashIde.includeAllWorkspaceSymbols": true,
   "terminal.integrated.wordSeparators": " ()[]{}',\"`─‘’“”|⌜⌝",
-  "cSpell.words": [
-    "nocasematch",
-    "Pids",
-    "sfzf"
-  ],
+  "cSpell.words": ["nocasematch", "Pids", "sfzf"],
   "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
 }
