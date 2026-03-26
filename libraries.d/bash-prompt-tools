@@ -225,6 +225,3 @@ function bootstrap::exportPathFromFiles() {
 
   REPLY="ORIGINAL_PATH=\"\${ORIGINAL_PATH:-\"\${PATH}\"}\""$'\n'"export PATH=\"${finalPathString}\""$'\n'"${hashListString}"$'\n'
 }
-
-# TODO: add builtin "z" to jump to frequently used directories
-# TODO:

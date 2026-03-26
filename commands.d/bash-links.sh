@@ -22,7 +22,39 @@ hideInMenu: true
 author: github.com/jcaillon
 shortDescription: Create symbolic links as defined in the links definition directory.
 description: |-
-  Create symbolic links as defined in the links definition directory.
+  This command allows you to create symbolic links declaratively, based on simple definitions written in text files.
+
+  By default, it will look for link definition files in the directory `~/.config/.links.d`.
+
+  Each file under `~/.config/.links.d` can contain multiple link definitions, one per line.
+
+  A valid line should have one of the following formats:
+
+  ```
+  <soft_link_path> :-> <source_path>
+  ```
+
+  Or to create a hard link:
+
+  ```
+  <hard_link_path> :h-> <source_path>
+  ```
+
+  The following rules are applied when parsing the files:
+
+  - A line starting with # is a comment.
+  - A path may use ~ which will be replaced by the user home directory.
+  - A path may contain variables in bash format `${VAR}` or `${VAR:-default}`, which will be replaced by their value.
+
+  The following rules are applied when listing the files to consider in the ~/.config/.links.d directory:
+
+  - If the path file is hidden (starts with a dot), it is skipped.
+  - If the path file contains -linux and the current os is not linux, it is skipped.
+  - If the path file contains -windows and the current os is not windows, it is skipped.
+  - If the path file contains -darwin and the current os is not macos, it is skipped.
+
+  Examples of link definition files are available here:
+  <https://github.com/jcaillon/valet/tree/dotfiles-example>
 
 options:
 - name: --force
@@ -86,6 +118,12 @@ function bashLinks() {
 
       line="${line//'~'/"${HOME}"}"
 
+      if [[ ${line} == *"$"* ]]; then
+        log::warning "The line ⌜${line}⌝ contains a variable, replacing it by its value."
+        string::expandVariables line
+        line="${REPLY}"
+      fi
+
       if [[ ${line} =~ ^([^:]+)":"([h]?)"->"(.+)$ ]]; then
         link="${BASH_REMATCH[1]}"
         if [[ ${BASH_REMATCH[2]} == *"h"* ]]; then
@@ -101,14 +139,6 @@ function bashLinks() {
       string::trimEdges link
       string::trimEdges source
 
-      if [[ ${link} == *"$"* || ${source} == *"$"* ]]; then
-        log::warning "The line ⌜${line}⌝ contains a variable, replacing it by its value."
-        string::expandVariables link
-        link="${REPLY}"
-        string::expandVariables source
-        source="${REPLY}"
-      fi
-
       local wildcardMode=false
       if [[ ${source} == *"/*" || ${link} == *"/*" ]]; then
         wildcardMode=true
@@ -121,6 +151,9 @@ function bashLinks() {
       source="${source%/}"
       link="${link%/}"
 
+      fs::getAbsolutePath "${source}"
+      source="${REPLY}"
+
       if [[ ! -e ${source%/} ]]; then
         log::warning "The source ⌜${source}⌝ does not exist, skipping (defined in ${linkFile})."
         continue
@@ -129,7 +162,6 @@ function bashLinks() {
       if [[ ${wildcardMode} == "true" ]]; then
         log::debug "Creating link for each file/directory in the directory ${source}."
 
-        fs::getAbsolutePath "${source}"
         fs::listFiles "${REPLY}" includeHidden=true
         local sourcePath fileName
         for sourcePath in "${REPLY_ARRAY[@]}"; do

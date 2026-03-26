@@ -15,8 +15,14 @@ function fs::setupTempFileGlobalVariable() {
   # get unique file names for the stdout, stderr and temporary directory
   # to be fast, we do not create anything until we really need it
   # this could lead to issues, although it is very unlikely
-  GLOBAL_TEMPORARY_DIRECTORY_PREFIX="${VALET_CONFIG_TEMP_DIRECTORY:-${TMPDIR:-/tmp}}/vt-${BASHPID}"
-  GLOBAL_TEMPORARY_FILE_PREFIX="${VALET_CONFIG_RUNTIME_DIRECTORY:-${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}}/vt-${BASHPID}"
+  GLOBAL_TEMPORARY_DIRECTORY_PREFIX="${VALET_CONFIG_TEMP_DIRECTORY:-${TMPDIR:-/tmp}}"
+  GLOBAL_TEMPORARY_DIRECTORY_PREFIX="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX%/}/vt-${BASHPID}"
+
+  GLOBAL_TEMPORARY_FILE_PREFIX="${VALET_CONFIG_RUNTIME_DIRECTORY:-${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}}"
+  if [[ ! -d ${GLOBAL_TEMPORARY_DIRECTORY_PREFIX} ]]; then
+    mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}" 1>/dev/null
+  fi
+  GLOBAL_TEMPORARY_FILE_PREFIX="${GLOBAL_TEMPORARY_FILE_PREFIX%/}/vt-${BASHPID}"
 
   while [[ -e "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.d" ]]; do
     # just in case we have a collision

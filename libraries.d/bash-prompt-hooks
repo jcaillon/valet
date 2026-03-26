@@ -17,7 +17,7 @@ function bashHooks::init() {
   # with offset and length evaluating to 0.
   # shellcheck disable=SC2016
   PS0='${GLOBAL_LAST_COMMAND_STARTED_AT_SECOND:$((GLOBAL_LAST_COMMAND_STARTED_AT_SECOND=10#${EPOCHREALTIME%%[.,]*},GLOBAL_LAST_COMMAND_STARTED_AT_MICROSECOND=10#${EPOCHREALTIME##*[.,]},0)):0}$(bashHooks::preCommandExecution)'
-  # with bash 5.3, we will be able to call bashHooks::preCommandExecution in the same context and thus use the variable
+  # TODO: with bash 5.3, we will be able to call bashHooks::preCommandExecution in the same context and thus use the variable
   # READLINE_LINE to get the command line to be executed.
 
   # PROMPT_COMMAND: If this variable is set, and is an array, the value of each set element is interpreted as a command to execute before printing the primary prompt ($PS1). If this is set but not an array variable, its value is used as a command to execute instead.
@@ -39,16 +39,7 @@ function bashHooks::prePromptDrawn() {
   # shellcheck disable=SC2034
   local -a -i GLOBAL_LAST_PIPE_STATUS=(${PIPESTATUS[@]})
 
-  # Due to a bug in certain Bash versions, any external process launched
-  # inside $PROMPT_COMMAND will be reported by `jobs` as a background job:
-  #
-  #   [1]  42135 Done                    /bin/echo
-  #
-  # This is a workaround - we run `jobs` once to clear out any completed jobs
-  # first, and then we run it again and count the number of jobs.
-  #
-  # More context: https://github.com/starship/starship/issues/5159
-  # Original bug: https://lists.gnu.org/archive/html/bug-bash/2022-07/msg00117.html
+  # we run jobs once to clear out any completed jobs
   jobs &>/dev/null
   local -i GLOBAL_JOB_COUNT=0
   bash::getBuiltinOutput jobs -r
