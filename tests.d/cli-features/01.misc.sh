@@ -49,6 +49,8 @@ function main() {
 
 # shellcheck disable=SC2317
 function test::scrubOutput() {
+  local -
+  set -o noglob
   local line text=""
   local IFS=$'\n'
   for line in ${GLOBAL_TEST_OUTPUT_CONTENT}; do

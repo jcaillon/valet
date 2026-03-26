@@ -29,6 +29,7 @@
 # > is still triggered and you can use trace level debugging to see the caught issues.
 # > Additionally, it will report all the errors that occurred during the execution of the command.
 function bash::catchErrors() {
+  local -
   # temporarily disable errexit in the main shell
   set +o errexit
   GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED=true
@@ -39,7 +40,6 @@ function bash::catchErrors() {
   "${@}"
   # shellcheck disable=SC2034
   GLOBAL_ERROR_TRAP_TRY_MODE_ENABLED=false
-  set -o errexit
 
   GLOBAL_ERROR_TRAP_LAST_ERROR_CODE=0
   if ((${#GLOBAL_ERROR_TRAP_ERROR_CODES[@]} > 0)) && ((${GLOBAL_ERROR_TRAP_ERROR_CODES[-1]} > 0)); then
@@ -81,6 +81,7 @@ function bash::catchErrors() {
 # > see <https://www.gnu.org/software/bash/manual/bash.html#index-trap> and
 # > <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.
 function bash::runInSubshell() {
+  local -
   local exitOnFail="${_OPTION_EXIT_ON_FAIL:-false}"
 
   # ensure terminal settings are saved if needed because if that happens in the subshell
@@ -395,6 +396,8 @@ function bash::isFunction() {
 # myFunctionWithGlobalVars
 # ```
 function bash::getFunctionDefinitionWithGlobalVars() {
+  local -
+  set -o noglob
   local \
     functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     newFunctionName="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
@@ -415,7 +418,6 @@ function bash::getFunctionDefinitionWithGlobalVars() {
   local -A globalVars=()
   local -a positionalParameters=("$@")
   local IFS=$'\n' line varName varPosition modifiedFunctionDefinition=""
-  set -o noglob
   for line in ${functionDefinition}; do
     if ((${#positionalParameters[@]} != ${#globalVars[@]})); then
       if [[ "${line}" =~ ^\ *local\ +(-[[:alpha:]]+\ )?([[:alpha:]]+)=[^$]*\$\{?([[:digit:]]+) ]]; then
@@ -430,7 +432,6 @@ function bash::getFunctionDefinitionWithGlobalVars() {
     fi
     modifiedFunctionDefinition+="${line}"$'\n'
   done
-  set +o noglob
 
   # modify the function to use the global variables instead of the positional parameters
   for varName in "${!globalVars[@]}"; do

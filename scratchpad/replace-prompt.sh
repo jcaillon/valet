@@ -9,11 +9,13 @@ include tui
 # tui::rebindKeymap for_each_key
 
 function main() {
+  local -
+  set -o noglob
+
   # save the original bindings
   _OPTION_PATH_ONLY=true fs::createTempFile
   _INTERACTIVE_SAVED_BINDINGS_FILE="${REPLY}"
   bind -p >"${_INTERACTIVE_SAVED_BINDINGS_FILE}" 2>/dev/null
-
 
   # remove all existing bindings except the self-insert ones
   # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
@@ -31,8 +33,8 @@ function main() {
     val="${key:1}"
     val="${val:0:${#val}-1}"
     case "${val}" in
-      \\[0-9]*)
-        eval "val=$'${val}'"
+    \\[0-9]*)
+      eval "val=$'${val}'"
       ;;
     esac
     printf -v val "%q" "${val}"
@@ -48,7 +50,6 @@ function main() {
 main
 
 # bind -X
-
 
 function for_each_key() {
   # echo "READLINE_LINE: ${READLINE_LINE}, READLINE_POINT: ${READLINE_POINT}, READLINE_MARK: ${READLINE_MARK}"

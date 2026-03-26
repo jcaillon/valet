@@ -543,6 +543,16 @@ this is a 	command  '
 MY_STRING='this is a command'
 ```
 
+```text
+MY_STRING='count {1,2,3} test ${stuff} /* ? '
+```
+
+❯ `string::trimAll MY_STRING`
+
+```text
+MY_STRING='count {1,2,3} test ${stuff} /* ?'
+```
+
 ### ✅ Testing string::trimEdges
 
 ```text

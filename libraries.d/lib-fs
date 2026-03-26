@@ -412,6 +412,7 @@ function fs::tail() {
 # > - #TODO: see if we are faster with ** and then looping over dirs to check for symbolic links
 # > - #TODO: introduce an optional (with default 10k) parameter to limit the number of results to avoid looping for too long
 function fs::listPaths() {
+  local -
   local \
     directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     recursive="false" \

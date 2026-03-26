@@ -188,6 +188,7 @@ function test_string::trimAll() {
   test::execWithString string::trimAll '  a  super test  '
   test::execWithString string::trimAll 'this is a command  '
   test::execWithString string::trimAll $'\t\n''this is a '$'\t''command  '
+  test::execWithString string::trimAll 'count {1,2,3} test ${stuff} /* ? '
 
 }
 

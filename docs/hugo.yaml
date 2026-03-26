@@ -15,6 +15,10 @@ module:
 #   page: [HTML]
 #   section: [HTML, RSS]
 
+outputs:
+  page: [html, markdown]
+  section: [html, rss, markdown]
+
 markup:
   # allow raw html
   goldmark:
@@ -85,6 +89,12 @@ params:
   page:
     # full (100%), wide (90rem), normal (1280px)
     width: wide
+    contextMenu:
+      enable: true
+      # links:
+      #   - name: "Ask AI"
+      #     url: "https://example.com?content={markdown_url}"
+      #     icon: "sparkles"
 
   theme:
     # light | dark | system
@@ -137,6 +147,12 @@ params:
       # emitMetadata: 0
       # inputPosition: top
       # lang: en
+
+  imageZoom:
+    enable: true
+
+
+  # displayUpdatedAuthor: true
 
 defaultContentLanguage: en
 languages:

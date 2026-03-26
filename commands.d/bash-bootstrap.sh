@@ -93,6 +93,7 @@ function bashBootstrap() {
 
   # setup bash hooks
   output+="source \"${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/bash-prompt-hooks\""$'\n'
+  output+="source \"${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/bash-prompt-tools\""$'\n'
   output+="bashHooks::init"$'\n\n'
 
   # source scripts in the specified directory which contain -bash-init
@@ -100,101 +101,20 @@ function bashBootstrap() {
   output+="${REPLY}"$'\n'
 
   # compute the PATH variable
-  bashBootstrap_exportPathFromFiles "${pathDefinitionDirectory}"
-  output+="${REPLY}"$'\n'
+  output+="bootstrap::exportPathFromFiles '${pathDefinitionDirectory}' '${_BASH_OS}'"$'\n'
+  output+="eval \"\${REPLY}\""$'\n'
 
   # source scripts in the specified directory
   bashBootstrap_sourceScriptsFromDirectory "${bashScriptsDirectory}" exclude="-bash-init"
   output+="${REPLY}"$'\n'
 
   # setup bash tools integration
-  output+="source \"${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/bash-prompt-tools\""$'\n'
   output+="starship::init"$'\n'
   output+="atuin::init"$'\n'
   output+="keybindings::init"$'\n'
   output+=$'\n'
 
   echo "${output}"
-}
-
-function bashBootstrap_exportPathFromFiles() {
-  local directory="${1}"
-
-  if [[ ! -d ${directory} ]]; then
-    log::debug "The path definition directory ⌜${directory}⌝ does not exist, skipping PATH computation."
-    REPLY=""
-    return 0
-  fi
-
-  log::debug "Listing path files in directory: ${directory}"
-  fs::listFiles "${directory}" filter=bashBootstrap_filterFileByOs
-  unset -f filterFiles
-
-  local hashListString=""
-
-  # go through each path file to get the exhaustive list of paths to add
-  local -a pathsToAddBefore pathsToAddAfter lines
-  local pathFile line
-  for pathFile in "${REPLY_ARRAY[@]}"; do
-    log::debug "Checking path file ${pathFile}."
-
-    readarray -t -d $'\n' lines <"${pathFile}"
-
-    for line in "${lines[@]}"; do
-      # skip comments and empty lines
-      if [[ -z ${line} || ${line} == "#"* ]]; then
-        continue
-      fi
-
-      line="${line//'~'/"${HOME}"}"
-      string::trimEdges line
-
-      if [[ ${line} == *"="* ]]; then
-        if [[ ! -f ${line##*=} ]]; then
-          log::debug "The file ⌜${line##*=}⌝ does not exist, skipping (defined in ${pathFile})."
-          continue
-        fi
-        log::debug "Adding hash defined path: ${line}."
-        hashListString+="hash -p \"${line##*=}\" ${line%%=*}"$'\n'
-      elif [[ ${line} == "^"* ]]; then
-        if [[ ! -d ${line:1} ]]; then
-          log::debug "The directory ⌜${line:1}⌝ does not exist, skipping (defined in ${pathFile})."
-          continue
-        fi
-        pathsToAddBefore+=("${line:1}")
-        log::debug "Adding path before: ${line:1}."
-      else
-        if [[ ! -d ${line} ]]; then
-          log::debug "The directory ⌜${line}⌝ does not exist, skipping (defined in ${pathFile})."
-          continue
-        fi
-        pathsToAddAfter+=("${line}")
-        log::debug "Adding path after: ${line}."
-      fi
-    done
-  done
-
-  # read all the original paths
-  string::split PATH ":"
-
-  # compute the final path
-  local finalPathString=":"
-  for path in "${pathsToAddBefore[@]}" "${REPLY_ARRAY[@]}" "${pathsToAddAfter[@]}"; do
-    if [[ -z ${path} ]]; then continue; fi
-    if [[ ${finalPathString} == *":${path}:"* ]]; then continue; fi
-    finalPathString+="${path}:"
-  done
-
-  # remove trailing and leading :
-  finalPathString="${finalPathString#:}"
-  finalPathString="${finalPathString%:}"
-  log::debug "Final path: ${finalPathString}."
-
-  REPLY="ORIGINAL_PATH=\"\${ORIGINAL_PATH:-\"\${PATH}\"}\""$'\n'"export PATH=\"${finalPathString}\""$'\n'
-
-  if [[ -n ${hashListString} ]]; then
-    REPLY+="${hashListString}export BASH_CMDS"$'\n'
-  fi
 }
 
 # Returns a string to be evaluated in order to source all bash scripts from a given

@@ -16,8 +16,9 @@
 # echo "${MY_STRING}"
 # ```
 function string::trimAll() {
+  local -
+  set -o noglob
   local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  set -o noglob +o braceexpand
   # shellcheck disable=SC2086
   # shellcheck disable=SC2048
   local IFS=$' \t\n'
@@ -25,7 +26,6 @@ function string::trimAll() {
   # shellcheck disable=SC2048
   set -- ${inputString_NameRef}
   inputString_NameRef="$*"
-  set +o noglob -o braceexpand
 }
 
 # ## string::trimEdges
@@ -202,6 +202,8 @@ function string::getCamelCase() {
 # > - using read into an array from a here string
 # > - using bash parameter expansion to remove before/after the separator
 function string::getField() {
+  local -
+  set -o noglob
   local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     fieldNumber="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
@@ -212,18 +214,14 @@ function string::getField() {
 
   local field IFS="${separator}"
   local -i index=0
-  # make sure to turn off globbing to avoid expanding special characters like * or ?
-  set -o noglob
   for field in ${inputString_NameRef}; do
     if [[ index -eq fieldNumber ]]; then
       REPLY="${field}"
-      set +o noglob
       return 0
     fi
     index=$((index + 1))
   done
   REPLY=""
-  set +o noglob
 }
 
 # ## string::getIndexOf
@@ -399,14 +397,13 @@ function string::count() {
 #
 # > This is faster than using read into an array from a here string.
 function string::split() {
+  local -
+  set -o noglob
   local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local IFS="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  # make sure to turn off globbing to avoid expanding special characters like * or ?
-  set -o noglob
   # shellcheck disable=SC2206
   # shellcheck disable=SC2034
   REPLY_ARRAY=(${inputString_NameRef})
-  set +o noglob
 }
 
 # ## string::head

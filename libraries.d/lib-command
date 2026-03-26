@@ -579,14 +579,14 @@ function command::fuzzyMatchCommandToFunctionNameOrFail() {
 # command_getMaxPossibleCommandLevel "cmd1" "subcmd2" "subsubcmd3"
 # level="${REPLY}"
 function command_getMaxPossibleCommandLevel() {
+  local -
+  set -o noglob
   local IFS=' ' level=0
   # make sure to turn off globbing to avoid expanding special characters like * or ?
-  set -o noglob
   # shellcheck disable=SC2048
   for _ in ${*}; do
     level=$((level + 1))
   done
-  set +o noglob
 
   if (( level > CMD_MAX_SUB_COMMAND_LEVEL + 1 )); then
     level=$((CMD_MAX_SUB_COMMAND_LEVEL + 1))
@@ -613,6 +613,9 @@ function command_getMaxPossibleCommandLevel() {
 # - Variable name for an option is taken from the first --long version of the option.
 # - It will set the variable as an array if the (last) argument name ends with '...'
 function command_parseFunctionArguments() {
+  local -
+  set -o noglob
+
   local functionName
   functionName="${1}"
   shift
@@ -1061,6 +1064,8 @@ function command_goInteractive() {
 # command::listCommands true
 # ```
 function command::listCommands() {
+  local -
+  set -o noglob
   local coreOnly="${1}"
 
   command::sourceUserCommands

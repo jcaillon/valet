@@ -165,6 +165,8 @@ function system::getArchitecture() {
 # done
 # ```
 function system::getEnvVars() {
+  local -
+  set -o noglob
   REPLY_ARRAY=()
   bash::getBuiltinOutput compgen -v
   local IFS=$'\n'

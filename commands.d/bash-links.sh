@@ -101,6 +101,14 @@ function bashLinks() {
       string::trimEdges link
       string::trimEdges source
 
+      if [[ ${link} == *"$"* || ${source} == *"$"* ]]; then
+        log::warning "The line ⌜${line}⌝ contains a variable, replacing it by its value."
+        string::expandVariables link
+        link="${REPLY}"
+        string::expandVariables source
+        source="${REPLY}"
+      fi
+
       local wildcardMode=false
       if [[ ${source} == *"/*" || ${link} == *"/*" ]]; then
         wildcardMode=true
@@ -148,7 +156,7 @@ function bashLinks() {
     fi
     if [[ -d ${links[index]} && ! -L ${links[index]} ]]; then
       existingDirectories+=("${links[index]}")
-    elif [[ -e ${links[index]} ]]; then
+    elif [[ -e ${links[index]} || -L ${links[index]} ]]; then
       existingFiles+=("${links[index]}")
     fi
     indexesToUpdate+=("${index}")

@@ -29,6 +29,9 @@ function bashHooks::setReturn() { return "${1:-0}"; }
 
 # Will be run before the prompt is drawn
 function bashHooks::prePromptDrawn() {
+  local -
+  set -o noglob
+
   # Save the command status
   local -i GLOBAL_LAST_COMMAND_STATUS=$?
   local IFS=$' \t\n'

@@ -764,7 +764,6 @@ function prompt_onKeyBindingPress() {
     fi
     _PROMPT_LAST_KEY_PRESSED_TIME=${REPLY}
 
-
     case "${action}" in
     # autocompletion box selected item
     scroll-up)
@@ -792,6 +791,7 @@ function prompt_onKeyBindingPress() {
       list::draw
       ;;
     esac
+    ;;
   esac
 }
 
@@ -1030,6 +1030,8 @@ function prompt_showItemsBox() {
 
 # A function to show an error message
 function prompt_showError() {
+  local -
+  set -o noglob
   local _message="${1:-}"
 
   # clear the autocompletion box / existing error box if any
@@ -1040,11 +1042,9 @@ function prompt_showError() {
   local IFS=$'\n'
   local text="${REPLY}"
   local -i errorLinesNeeded=0
-  set -o noglob
   for _ in ${text}; do
     errorLinesNeeded+=1
   done
-  set +o noglob
 
   # compute the height of the box where we can display error messages
   # This box should fit within the autocomplete width
@@ -1061,7 +1061,6 @@ function prompt_showError() {
   local toPrint="${ESC__CURSOR_HIDE}"
   local line
   local -i lineNumber=0
-  set -o noglob
   for line in ${text}; do
     toPrint+="${ESC__CURSOR_MOVE__}$((_PROMPT_ERROR_BOX_TOP + lineNumber));${_PROMPT_ERROR_BOX_LEFT}${__ESC__TO}${STYLE_PROMPT_VALIDATION_ERROR}${_PROMPT_ERROR_BOX_SYMBOL}${line}${STYLE_RESET}"
     lineNumber+=1
@@ -1069,7 +1068,6 @@ function prompt_showError() {
       break
     fi
   done
-  set +o noglob
   printf '%s%s' "${toPrint}" "${ESC__CURSOR_MOVE__}${GLOBAL_CURSOR_LINE};${GLOBAL_CURSOR_COLUMN}${__ESC__TO}${ESC__CURSOR_SHOW_FORCE}" 1>&3
 
   _PROMPT_ERROR_BOX_SHOWN=true
@@ -1322,7 +1320,6 @@ function prompt_getDisplayedPromptString() {
   REPLY2=${screenIndex}
 }
 
-
 # Clear the multi-line prompt
 function prompt_clearMultiLinePrompt() {
   terminal::clearBox top="${_PROMPT_START_LINE}" left="${_PROMPT_START_COLUMN}" width="${_PROMPT_WIDTH}" height="${_PROMPT_NB_PROMPT_LINES}"
@@ -1339,9 +1336,9 @@ function prompt_drawMultiLinePrompt() {
 }
 
 function prompt_drawMultiLinePromptRefreshLines() {
+  local -
+  set -o noglob
   local -n textToWrapAtWords="${1}"
-
-  local -i linesIndex=0
 
   # short cut in case the text is already shorter than the width
   if [[ ${#textToWrapAtWords} -le ${_PROMPT_STRING_SCREEN_WIDTH} && ${textToWrapAtWords} != *$'\n'* ]]; then
@@ -1368,7 +1365,6 @@ function prompt_drawMultiLinePromptRefreshLines() {
 
     firstWord=1
 
-    set -o noglob
     for word in ${line}; do
       if [[ ${word} == *$'\e'* ]]; then
         realWord="${word}"
@@ -1403,14 +1399,11 @@ function prompt_drawMultiLinePromptRefreshLines() {
       fi
 
     done
-    set +o noglob
 
     lineLength=0
   done
 
   REPLY="${output#$'\n'""}"
-
-
 
   string::wrapWords _PROMPT_STRING width="${_PROMPT_STRING_SCREEN_WIDTH}" newLinePadString="  " firstLineWidth="$((_PROMPT_STRING_SCREEN_WIDTH - _PROMPT_SYMBOL_LENGTH))"
 

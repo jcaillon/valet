@@ -99,7 +99,8 @@ function selfBuild() {
       shift
     done
   else
-    command::parseArguments "$@"; eval "${REPLY}"
+    command::parseArguments "$@"
+    eval "${REPLY}"
     command::checkParsedResults
   fi
 
@@ -204,6 +205,8 @@ function selfBuild() {
 
 # This function summarizes the command definitions that have been extracted for the user.
 function summarize() {
+  local -
+  set -o noglob
   local -i numberOfVars=0
   local _var
   for _var in ${!CMD_*}; do
@@ -289,7 +292,6 @@ function extractCommandDefinitionsToVariables() {
         log::info "                         ├── ⌜${command}⌝."
       fi
 
-
       fs::getAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${REPLY}"
       TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${GLOBAL_INSTALLATION_DIRECTORY}"/}"
 
@@ -342,6 +344,9 @@ function extractCommandDefinitionsToVariables() {
 # CMD_FILETOSOURCE_xxx = the file to source for the function
 # CMD_HIDEINMENU_xxx = true to hide the command in the menu
 function declareFinalCommandDefinitionCommonVariables() {
+  local -
+  set -o noglob
+
   local function command
   function="${1}"
   command="${2}"
@@ -595,7 +600,6 @@ function declareOtherCommandVariables() {
 
   return 0
 }
-
 
 #===============================================================
 # >>> Main

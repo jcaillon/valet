@@ -19,6 +19,8 @@ testsChar=(
 )
 
 function string_split1() {
+  local -
+  set -o noglob
   local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local IFS="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # shellcheck disable=SC2206

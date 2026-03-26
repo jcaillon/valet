@@ -679,6 +679,8 @@ function terminal::waitForKeyPress() {
 # > of characters that you can bind in bash.
 # > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
 function terminal::rebindKeymap() {
+  local -
+  set -o noglob
   local callBackFunction="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   if ! declare -F "${callBackFunction}" &>/dev/null; then
@@ -692,9 +694,6 @@ function terminal::rebindKeymap() {
     bind -p >"${_TERMINAL_SAVED_BINDINGS_FILE}" 2>/dev/null
   fi
 
-  # use emacs style line editing
-  set -o emacs
-
   # remove all existing bindings except the self-insert ones
   # (self-insert is the default binding for "normal" characters, e.g. a, b, c, 1, 2, 3, ...)
   fs::readFile "${_TERMINAL_SAVED_BINDINGS_FILE}"
@@ -703,7 +702,6 @@ function terminal::rebindKeymap() {
     IFS=$'\n' \
     line \
     key
-  set -o noglob
   for line in ${bindings}; do
     if [[ ${line} == "#"* || ${line} == *"self-insert" ]]; then
       continue
@@ -712,7 +710,6 @@ function terminal::rebindKeymap() {
     key="${key//\"/}"
     bind -r "${key%:}"
   done
-  set +o noglob
 
   # some other default values to ensure we get the right behavior
   bind 'set bind-tty-special-chars on'
@@ -891,6 +888,8 @@ function terminal::rebindKeymap() {
 # terminal::restoreBindings
 # ```
 function terminal::restoreBindings() {
+  local -
+  set -o noglob
   if [[ -z ${_TERMINAL_SAVED_BINDINGS_FILE:-} ]]; then
     return 0
   fi
@@ -906,7 +905,6 @@ function terminal::restoreBindings() {
     IFS=$'\n' \
     line \
     key
-  set -o noglob
   for line in ${bindings}; do
     if [[ ${line} == "#"* ]]; then
       continue
@@ -915,7 +913,6 @@ function terminal::restoreBindings() {
     key="${key//\"/}"
     bind -r "${key%:}"
   done
-  set +o noglob
 
   # restore the default bindings
   bind -f "${_TERMINAL_SAVED_BINDINGS_FILE}"

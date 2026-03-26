@@ -1322,6 +1322,9 @@ function string::removeTextFormatting() {
 # > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 # > - It considers escape sequence for text formatting and does not count them as visible characters.
 function string::wrapWords() {
+  # make sure to turn off globbing to avoid expanding special characters like * or ? (local - makes set options local to the function)
+  local -
+  set -o noglob
   local -n stringToWrapAtWords_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     width="${GLOBAL_COLUMNS}" \
@@ -1360,8 +1363,6 @@ function string::wrapWords() {
 
     firstWord=1
 
-    # make sure to turn off globbing to avoid expanding special characters like * or ?
-    set -o noglob
     for word in ${line}; do
       if [[ ${word} == *$'\e'* ]]; then
         realWord="${word}"
@@ -1396,7 +1397,6 @@ function string::wrapWords() {
       fi
 
     done
-    set +o noglob
 
     lineLength=0
   done

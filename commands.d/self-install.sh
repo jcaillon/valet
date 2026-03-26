@@ -183,7 +183,8 @@ function selfUpdate() {
     skipExtensionsSetup="${skipExtensionsSetup:-"${VALET_SKIP_EXTENSIONS_SETUP:-"false"}"}"
   else
     log::debug "Parsing the arguments using the core functions."
-    command::parseArguments "$@"; eval "${REPLY}"
+    command::parseArguments "$@"
+    eval "${REPLY}"
     command::checkParsedResults
   fi
 
@@ -507,6 +508,9 @@ function selfUpdate_isDirectoryWritable() {
 
 # Check if a given directory is in the PATH.
 function selfUpdate_isDirectoryInPath() {
+  local -
+  set -o noglob
+
   local directory="${1}"
   local IFS=':'
   for p in ${PATH}; do

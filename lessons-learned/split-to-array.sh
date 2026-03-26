@@ -13,10 +13,10 @@ cherry
 date"
 
 function split1() {
-  local IFS=$'\n'
+  local -
   set -o noglob
+  local IFS=$'\n'
   REPLY_ARRAY=(${TEST_STRING})
-  set +o noglob
 }
 
 function split2() {
