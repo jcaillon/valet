@@ -1,50 +1,52 @@
 {
-	"hex collapsable": {
-		"prefix": "hex collapsable",
-		"description": "",
+	"hex terminology": {
+		"prefix": "hex terminology",
+		"description": "https://imfing.github.io/hextra/docs/advanced/additional-pages/#glossary",
 		"scope": "",
 		"body": [
-			"{{% details title=\"Click me to reveal\" closed=\"true\" %}}",
-			"",
-			"This will be hidden by default.",
-			"",
-			"{{% /details %}}"
+			"{{< term \"${0:term}\" >}}"
 		]
 	},
-	"hex alert caution": {
-		"prefix": "hex alert caution",
+	"hex pdf": {
+		"prefix": "hex pdf",
 		"description": "",
 		"scope": "",
 		"body": [
-			"> [!CAUTION]",
-			"> Advises about risks or negative outcomes of certain actions."
+			"{{< pdf \"${0:url}\" >}}"
 		]
 	},
-	"hex alert warning": {
-		"prefix": "hex alert warning",
+	"hex youtube": {
+		"prefix": "hex youtube",
 		"description": "",
 		"scope": "",
 		"body": [
-			"> [!WARNING]",
-			"> Urgent info that needs immediate user attention to avoid problems."
+			"{{< youtube ${0:VIDEOID} >}}"
 		]
 	},
-	"hex alert important": {
-		"prefix": "hex alert important",
+	"hex badge": {
+		"prefix": "hex badge",
 		"description": "",
 		"scope": "",
 		"body": [
-			"> [!IMPORTANT]",
-			"> Key information users need to know to achieve their goal."
+			"{{< badge content=\"Releases\" link=\"${0:link}\" icon=\"${1:icon}\" color=\"${2:color}\" border=${3:false} >}}"
 		]
 	},
-	"hex alert tip": {
-		"prefix": "hex alert tip",
+	"hex badge examples": {
+		"prefix": "hex badge examples",
 		"description": "",
 		"scope": "",
 		"body": [
-			"> [!TIP]",
-			"> Helpful advice for doing things better or more easily."
+			"{{< badge content=\"Badge\" border=false >}}",
+			"{{< badge content=\"Badge\" color=\"purple\" border=false >}}",
+			"{{< badge content=\"Badge\" color=\"indigo\" >}}",
+			"{{< badge content=\"Badge\" color=\"blue\" border=false >}}",
+			"{{< badge content=\"Badge\" color=\"green\" border=false >}}",
+			"{{< badge content=\"Badge\" color=\"yellow\" border=false >}}",
+			"{{< badge content=\"Badge\" color=\"amber\" border=false >}}",
+			"{{< badge content=\"Badge\" color=\"orange\" border=false >}}",
+			"{{< badge content=\"Badge\" color=\"red\" border=false >}}",
+			"{{< badge content=\"Badge\" icon=\"sparkles\" >}}",
+			"{{< badge content=\"Releases\" link=\"https://github.com/imfing/hextra/releases\" icon=\"github\" >}}"
 		]
 	},
 	"hex alert note": {
@@ -53,33 +55,74 @@
 		"scope": "",
 		"body": [
 			"> [!NOTE]",
-			"> Useful information that users should know, even when skimming content."
+			"> $0"
 		]
 	},
-	"hex collapse": {
-		"prefix": "hex collapse",
+	"hex alert tip": {
+		"prefix": "hex alert tip",
 		"description": "",
 		"scope": "",
 		"body": [
-			"{{< collapse \"Title\" >}}",
-			"content",
-			"{{< /collapse >}}"
+			"> [!TIP]",
+			"> $0"
 		]
 	},
-	"hugo link ref": {
-		"prefix": "hugo link ref",
+	"hex alert important": {
+		"prefix": "hex alert important",
 		"description": "",
 		"scope": "",
 		"body": [
-			"[About]({{< ref \"/showcase\" >}} \"About\")"
+			"> [!IMPORTANT]",
+			"> $0"
 		]
 	},
+	"hex alert warning": {
+		"prefix": "hex alert warning",
+		"description": "",
+		"scope": "",
+		"body": [
+			"> [!WARNING]",
+			"> $0"
+		]
+	},
+	"hex alert caution": {
+		"prefix": "hex alert caution",
+		"description": "",
+		"scope": "",
+		"body": [
+			"> [!CAUTION]",
+			"> $0"
+		]
+	},
+	"hex mermaid": {
+		"prefix": "hex mermaid",
+		"description": "",
+		"scope": "",
+		"body": [
+			"```mermaid",
+			"$0",
+			"```"
+		]
+	},
+	// Place your snippets for hextra here. Each snippet is defined under a snippet name and has a prefix, body and
+	// description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. Placeholders with the
+	// same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
 	"hex code": {
 		"prefix": "hex code",
 		"description": "",
 		"scope": "",
 		"body": [
-			"```python {linenos=table,hl_lines=[2,4],linenostart=1,filename=\"hello.py\"}",
+			"```python {linenos=table,hl_lines=[2,4],linenostart=1,filename=\"hello.py\",base_url=\"https://github.com/imfing/hextra/blob/main/\",filename=\"docs/hugo.work\"}",
 			"def say_hello():",
 			"    print(\"Hello!\")",
 			"",
@@ -88,16 +131,26 @@
 			"```"
 		]
 	},
+	"hex codelink": {
+		"prefix": "hex codelink",
+		"description": "",
+		"scope": "",
+		"body": [
+			"```go {base_url=\"https://github.com/imfing/hextra/blob/main/\",filename=\"docs/hugo.work\"}",
+			"go 1.20",
+			"```"
+		]
+	},
 	"hex tabs": {
 		"prefix": "hex tabs",
 		"description": "",
 		"scope": "",
 		"body": [
-			"{{< tabs items=\"JSON,YAML,TOML\" defaultIndex=\"1\" >}}",
+			"{{< tabs >}}",
 			"",
-			"  {{< tab >}}**JSON**: JavaScript Object Notation (JSON) is a standard text-based format for representing structured data based on JavaScript object syntax.{{< /tab >}}",
-			"  {{< tab >}}**YAML**: YAML is a human-readable data serialization language.{{< /tab >}}",
-			"  {{< tab >}}**TOML**: TOML aims to be a minimal configuration file format that's easy to read due to obvious semantics.{{< /tab >}}",
+			"  {{< tab name=\"JSON\" selected=true >}}**JSON**: JavaScript Object Notation (JSON) is a standard text-based format for representing structured data based on JavaScript object syntax.{{< /tab >}}",
+			"  {{< tab name=\"YAML\" icon=\"photograph\" >}}**YAML**: YAML is a human-readable data serialization language.{{< /tab >}}",
+			"  {{< tab name=\"TOML\" >}}**TOML**: TOML aims to be a minimal configuration file format that's easy to read due to obvious semantics.{{< /tab >}}",
 			"",
 			"{{< /tabs >}}"
 		]
@@ -122,10 +175,11 @@
 	},
 	"hex icon": {
 		"prefix": "hex icon",
-		"description": "Heroicons v1 outline icons are available out of the box.",
+		"description": "Heroicons v1 outline icons are available out of the box. ",
 		"scope": "",
 		"body": [
-			"{{< icon \"github\" >}}"
+			"{{< icon \"github\" >}}",
+			"<!-- https://github.com/imfing/hextra/blob/main/data/icons.yaml -->"
 		]
 	},
 	"hex filetree ": {
@@ -147,37 +201,33 @@
 		]
 	},
 	"hex details": {
-		"prefix": "hex details",
+		"prefix": [
+			"hex details",
+			"hex collapse"
+		],
 		"description": "A built-in component to display a collapsible content.",
 		"scope": "",
 		"body": [
-			"{{% details title=\"Click me to reveal\" closed=\"true\" %}}",
+			"{{% details title=\"${0:Click me to reveal}\" closed=\"true\" %}}",
 			"",
-			"This will be hidden by default.",
+			"$1",
 			"",
 			"{{% /details %}}"
 		]
 	},
 	"hex cards": {
 		"prefix": "hex cards",
-		"description": "https://imfing.github.io/hextra/docs/guide/shortcodes/cards/",
+		"description": "",
 		"scope": "",
 		"body": [
 			"{{< cards >}}",
 			"  {{< card link=\"../callout\" title=\"Callout\" icon=\"warning\" >}}",
-			"  {{< card link=\"../callout\" title=\"Card with tag\" icon=\"tag\" tag= \"A custom tag\" >}}",
 			"  {{< card link=\"/\" title=\"No Icon\" >}}",
 			"{{< /cards >}}",
 			"{{< cards >}}",
 			"  {{< card link=\"/\" title=\"Image Card\" image=\"https://source.unsplash.com/featured/800x600?landscape\" subtitle=\"Unsplash Landscape\" >}}",
 			"  {{< card link=\"/\" title=\"Local Image\" image=\"/images/card-image-unprocessed.jpg\" subtitle=\"Raw image under static directory.\" >}}",
 			"  {{< card link=\"/\" title=\"Local Image\" image=\"images/space.jpg\" subtitle=\"Image under assets directory, processed by Hugo.\" method=\"Resize\" options=\"600x q80 webp\" >}}",
-			"{{< /cards >}}",
-			"{{< cards >}}",
-			"  {{< card link=\"../callout\" title=\"Card with default tag color\" tag=\"tag text\" >}}",
-			"  {{< card link=\"../callout\" title=\"Card with default red tag\" tag=\"tag text\" tagType=\"error\" >}}",
-			"  {{< card link=\"../callout\" title=\"Card with blue tag\" tag=\"tag text\" tagType=\"info\" >}}",
-			"  {{< card link=\"../callout\" title=\"Card with yellow tag\" tag=\"tag text\" tagType=\"warning\" >}}",
 			"{{< /cards >}}"
 		]
 	},
@@ -186,8 +236,18 @@
 		"description": "",
 		"scope": "",
 		"body": [
-			"{{< callout emoji=\"🌐\" >}}",
-			"  Hugo can be used to create a wide variety of websites, including blogs, portfolios, documentation sites, and more.",
+			"{{< callout emoji=\"$0\" >}}",
+			"  $1",
+			"{{< /callout >}}"
+		]
+	},
+	"hex callout": {
+		"prefix": "hex callout",
+		"description": "",
+		"scope": "",
+		"body": [
+			"{{< callout type=\"${0:info}\" icon=\"${1:sparkles}\" emoji=\"${2:👍}\" >}}",
+			"  $3",
 			"{{< /callout >}}"
 		]
 	},
@@ -197,7 +257,7 @@
 		"scope": "",
 		"body": [
 			"{{< callout type=\"error\" >}}",
-			"  Something went wrong and it's going to explode.",
+			"  $0",
 			"{{< /callout >}}"
 		]
 	},
@@ -207,7 +267,7 @@
 		"scope": "",
 		"body": [
 			"{{< callout type=\"warning\" >}}",
-			"  A **callout** is a short piece of text intended to attract attention.",
+			"  $0",
 			"{{< /callout >}}"
 		]
 	},
@@ -217,21 +277,28 @@
 		"scope": "",
 		"body": [
 			"{{< callout type=\"info\" >}}",
-			"  Please visit GitHub to see the latest releases.",
+			"  $0",
+			"{{< /callout >}}"
+		]
+	},
+	"hex callout important": {
+		"prefix": "hex callout important",
+		"description": "",
+		"scope": "",
+		"body": [
+			"{{< callout type=\"important\" icon=\"sparkles\" >}}",
+			"  $0",
+			"{{< /callout >}}"
+		]
+	},
+	"hex callout note": {
+		"prefix": "hex callout note",
+		"description": "",
+		"scope": "",
+		"body": [
+			"{{< callout >}}",
+			"  $0",
 			"{{< /callout >}}"
 		]
 	}
-	// Place your snippets for markdown here. Each snippet is defined under a snippet name and has a prefix, body and 
-	// description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
-	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. Placeholders with the 
-	// same ids are connected.
-	// Example:
-	// "Print to console": {
-	// 	"prefix": "log",
-	// 	"body": [
-	// 		"console.log('$1');",
-	// 		"$2"
-	// 	],
-	// 	"description": "Log output to console"
-	// }
 }

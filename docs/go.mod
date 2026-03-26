@@ -1,5 +1,5 @@
 module github.com/jcaillon/valet
 
-go 1.23
+go 1.26
 
-require github.com/imfing/hextra v0.9.7 // indirect
+require github.com/imfing/hextra v0.12.1 // indirect

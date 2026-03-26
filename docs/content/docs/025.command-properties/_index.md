@@ -124,14 +124,14 @@ A list of options for your command.
 {{< properties-table >}}
 
 {{< properties-row name="name" mandatory="✔️" >}}
-The option name(s). An option can have one or more long name and up to one short name. Each name is separated with `, `.
+The option name(s). An option can have one or more long name and up to one short name. Each name is separated with `,`.
 
 - A short name is composed of a single hyphen and a single letter. E.g. `-o` or `-b`.
 - A long name is composed of two hyphens then a valid string (alpha numerical that can contain hyphens). E.g. `--option` or `--my-great-option`.
 
 An option can be a simple true/false flag or it can hold a user value:
 
-- If the option ends with ` <something>`, then the option will hold a value passed by the user.
+- If the option ends with `<something>`, then the option will hold a value passed by the user.
 - Otherwise, the option will be a simple flag and will be equal to `true` if the user passed the option, `false` otherwise.
 
 When calling `command::parseArguments` options will be parsed to local variable which name correspond to the camelCase equivalent of the first long option name.

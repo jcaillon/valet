@@ -12,22 +12,6 @@
   --primary-lightness: 83%;
 }
 
-.hx-max-w-6xl {
-  max-width: 92rem;
-}
-
-.hx-max-w-\[90rem\] {
-  max-width: 120rem;
-}
-
-.hero-container {
-  max-width: 100rem;
-  padding-top: 1rem;
-  padding-bottom: 2rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
 strong {
   background: linear-gradient(to left, #017c1b, #03a810);
   background-clip: border-box;
@@ -71,32 +55,66 @@ hr {
   margin: 1rem 0;
 }
 
-kbd {
-  display: inline-block;
-  padding: 0.2em 0.6em;
-  font-size: 0.95em;
-  font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', 'Consolas', monospace;
-  color: #222;
-  background: linear-gradient(180deg, #f3f4f6 60%, #e5e7eb 100%);
-  border: 1.5px solid #bdbdbd;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08), 0 1px 0 #fff inset;
-  margin: 0 0.15em;
-  vertical-align: middle;
-  transition: background 0.2s, box-shadow 0.2s;
-}
-
-kbd:is(html[class~="dark"] *) {
-  color: #eee;
-  background: linear-gradient(180deg, #23272e 60%, #18181b 100%);
-  border: 1.5px solid #444;
-  box-shadow: 0 2px 8px 0 rgba(16,185,129,0.10), 0 1px 0 #23272e inset;
-}
-
-a.section-nav-links {
-  text-decoration: none;
-}
-
 div.section-nav {
+  display: flex;
+  align-items: center;
   margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(187, 187, 187, 0.082);
+}
+
+@media print {
+  div.section-nav {
+    display: none;
+  }
+}
+
+a.section-nav-link {
+  display: flex;
+  align-items: center;
+  max-width: 50%;
+  gap: 0.25rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--tw-prose-body, #4b5563);
+  text-decoration: none;
+  transition: color 0.2s;
+  word-break: break-word;
+}
+
+a.section-nav-link:hover {
+  color: hsl(var(--primary-hue) var(--primary-saturation) var(--primary-lightness));
+}
+
+html.dark a.section-nav-link {
+  color: #d1d5db;
+}
+
+@media (min-width: 768px) {
+  a.section-nav-link {
+    font-size: 1.125rem;
+  }
+}
+
+a.section-nav-prev {
+  padding-right: 1rem;
+}
+
+a.section-nav-next {
+  margin-left: auto;
+  padding-left: 1rem;
+  text-align: right;
+}
+
+.section-nav-icon {
+  display: inline-block;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.section-nav-icon-prev {
+  transform: rotate(180deg);
 }

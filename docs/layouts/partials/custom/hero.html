@@ -1,41 +1,61 @@
 <div class="valet-hero-bg"></div>
 
-<div class="valet-hero" style="position: relative; z-index: 1;">
+<script>
+  // set data-theme in button theme-toggle to the current theme (light, dark or system) (when the page loads)
+  document.addEventListener("DOMContentLoaded", function () {
+    const themeToggleBtn = document.querySelector('.theme-toggle');
+    const storedTheme = localStorage.getItem('color-theme')||'system';
+    themeToggleBtn.setAttribute('data-theme', storedTheme);
+  });
+</script>
+
+<div class="valet-hero">
   <img class="valet-logo-img" src="logo.png" alt="Valet logo" />
   <div class="valet-hero-content">
-    <h1
-      class="not-prose hx-text-4xl hx-font-bold hx-leading-none hx-tracking-tighter md:hx-text-5xl hx-py-2 hx-bg-clip-text hx-text-transparent hx-bg-gradient-to-r hx-from-gray-900 hx-to-gray-600 dark:hx-from-gray-100 dark:hx-to-gray-400">
+    <h1 class="not-prose valet-hero-title">
       Valet
     </h1>
-    <h2 class="not-prose hx-text-xl hx-text-gray-600 dark:hx-text-gray-400 sm:hx-text-xl">
+    <h2 class="not-prose valet-hero-subtitle">
       Valet is a zero dependency tool that helps you build fast, robust, testable and interactive CLI applications in
       bash.
     </h2>
     <div>
       <a href="docs"
-        class="not-prose hx-font-medium hx-cursor-pointer hx-px-6 hx-py-3 hx-rounded-full hx-text-center hx-text-white hx-inline-block hx-bg-primary-600 hover:hx-bg-primary-700 focus:hx-outline-none focus:hx-ring-4 focus:hx-ring-primary-300 dark:hx-bg-primary-600 dark:hover:hx-bg-primary-700 dark:focus:hx-ring-primary-800 hx-transition-all hx-ease-in hx-duration-200 valet-hero-button">Read
+        class="not-prose valet-hero-button">Read
         the docs</a>
-      <button title="Change theme" data-theme="dark"
-        class="theme-toggle hx-group not-prose hx-font-medium hx-cursor-pointer hx-px-6 hx-py-3 hx-rounded-full hx-text-center hx-text-white hx-inline-block hx-bg-primary-600 hover:hx-bg-primary-700 focus:hx-outline-none focus:hx-ring-4 focus:hx-ring-primary-300 dark:hx-bg-primary-600 dark:hover:hx-bg-primary-700 dark:focus:hx-ring-primary-800 hx-transition-all hx-ease-in hx-duration-200 valet-hero-button"
-        type="button" aria-label="Change theme">
-        <div class="hx-flex hx-items-center hx-gap-2 hx-capitalize"><svg height="12"
-            class="group-data-[theme=light]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
+      <button title="Change theme" class="theme-toggle not-prose valet-hero-button hx:group" data-theme="system"
+        onclick="(function(btn){var stored=localStorage.getItem('color-theme');var current=btn.getAttribute('data-theme')||stored||'system';var next=current==='dark'?'light':'dark';setTheme(next);btn.setAttribute('data-theme',next);localStorage.setItem('color-theme',next);})(this)">
+        <div class="theme-toggle-content">
+          <svg height="12"
+            class="hx:group-data-[theme=dark]:hidden hx:group-data-[theme=light]:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path
+              d="M 11.996094,2 C 6.4986225,2.0192368 2.03125,6.5024993 2.03125,12 c 0,5.497501 4.4673725,9.980763 9.964844,10 H 12 12.0039 c 5.497471,-0.01924 9.964844,-4.502499 9.964844,-10 0,-5.4975007 -4.467373,-9.9807632 -9.964844,-10 H 12 Z M 12,4 c 4.417218,0.017598 7.96875,3.5822356 7.96875,8 0,4.417764 -3.551532,7.982402 -7.96875,8 z"></path>
+          </svg><span class="hx:group-data-[theme=dark]:hidden hx:group-data-[theme=light]:hidden">System</span>
+          <svg height="12"
+            class="hx:group-data-[theme=dark]:hidden hx:group-data-[theme=system]:hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
             </path>
-          </svg><span class="group-data-[theme=light]:hx-hidden">Light</span><svg height="12"
-            class="group-data-[theme=dark]:hx-hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          </svg><span class="hx:group-data-[theme=dark]:hidden hx:group-data-[theme=system]:hidden">Light</span>
+          <svg height="12"
+            class="hx:group-data-[theme=light]:hidden hx:group-data-[theme=system]:hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
             stroke-width="2" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-          </svg><span class="group-data-[theme=dark]:hx-hidden">Dark</span></div>
+          </svg><span class="hx:group-data-[theme=light]:hidden hx:group-data-[theme=system]:hidden">Dark</span>
+        </div>
       </button>
     </div>
   </div>
 </div>
 
 <hr>
+
+<p class="hero-valet-can-do">
+  Do these problems look familiar to you?
+</p>
 
 <div class="valet-pain-points-section">
   <div class="valet-pain-points">
@@ -77,6 +97,6 @@
   </div>
 </div>
 
-<p class="hx-text-center hx-mb-6 hero-valet-can-do">
-  Sound familiar? Let's see what Valet can do for you!
+<p class="hero-valet-can-do">
+  Let's see what Valet can do for you!
 </p>

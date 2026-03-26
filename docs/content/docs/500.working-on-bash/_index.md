@@ -11,7 +11,7 @@ url: /docs/work-on-bash-scripts
 
 ## 🧑‍💻 VS Code
 
-I work with [VS code]((https://code.visualstudio.com/download)) and [git bash](https://gitforwindows.org/) on Windows.
+I work with [VS code](https://code.visualstudio.com/download) and [git bash](https://gitforwindows.org/) on Windows.
 
 WSL and the GitHub actions allow me to test Valet on different Linux distributions.
 

@@ -6,6 +6,8 @@
 source bash
 # shellcheck source=../libraries.d/lib-string
 source string
+# shellcheck source=../libraries.d/lib-fs
+source fs
 
 function starship::init() {
   if ! command -v starship &>/dev/null; then
@@ -131,5 +133,98 @@ function keybindings::init() {
   bind '"\eO1;5A": "\C-x\C-p"'
 }
 
+function bootstrap::exportPathFromFiles() {
+  local directory="${1}"
+  local os="${2}"
+
+  if [[ ! -d ${directory} ]]; then
+    log::debug "The path definition directory ⌜${directory}⌝ does not exist, skipping PATH computation."
+    REPLY=""
+    return 0
+  fi
+
+  # shellcheck disable=SC2317
+  function _filterFileByOs() {
+    if [[ ${1} =~ "-"(linux|windows|darwin) ]]; then
+      if [[ ${os} != "${BASH_REMATCH[1]}" ]]; then
+        return 1
+      fi
+    fi
+  }
+
+  log::debug "Listing path files in directory: ${directory}"
+  fs::listFiles "${directory}" filter=_filterFileByOs
+  unset -f _filterFileByOs
+
+  local hashListString=""
+
+  # go through each path file to get the exhaustive list of paths to add
+  local -a pathsToAddBefore pathsToAddAfter lines
+  local pathFile line
+  for pathFile in "${REPLY_ARRAY[@]}"; do
+    log::debug "Checking path file ${pathFile}."
+
+    readarray -t -d $'\n' lines <"${pathFile}"
+
+    for line in "${lines[@]}"; do
+      # skip comments and empty lines
+      if [[ -z ${line} || ${line} == "#"* ]]; then
+        continue
+      fi
+
+      line="${line//'~'/"${HOME}"}"
+      string::trimEdges line
+
+      if [[ ${line} == *"="* ]]; then
+        if [[ ! -f ${line##*=} ]]; then
+          log::debug "The file ⌜${line##*=}⌝ does not exist, skipping (defined in ${pathFile})."
+          continue
+        fi
+        log::debug "Adding hash defined path: ${line}."
+        hashListString+="hash -p \"${line##*=}\" ${line%%=*}"$'\n'
+      elif [[ ${line} == "^"* ]]; then
+        if [[ ! -d ${line:1} ]]; then
+          log::debug "The directory ⌜${line:1}⌝ does not exist, skipping (defined in ${pathFile})."
+          continue
+        fi
+        pathsToAddBefore+=("${line:1}")
+        log::debug "Adding path before: ${line:1}."
+      else
+        if [[ ! -d ${line} ]]; then
+          log::debug "The directory ⌜${line}⌝ does not exist, skipping (defined in ${pathFile})."
+          continue
+        fi
+        pathsToAddAfter+=("${line}")
+        log::debug "Adding path after: ${line}."
+      fi
+    done
+  done
+
+  # read all the original paths
+  string::split PATH ":"
+  local -a newPaths
+  if [[ ${os} == "windows" ]]; then
+    # on windows, we need to convert the paths to lowercase to avoid duplicates
+    newPaths=("${pathsToAddBefore[@],,}" "${REPLY_ARRAY[@],,}" "${pathsToAddAfter[@],,}")
+  else
+    newPaths=("${pathsToAddBefore[@]}" "${REPLY_ARRAY[@]}" "${pathsToAddAfter[@]}")
+  fi
+
+  # compute the final path
+  local finalPathString=":"
+  for path in "${newPaths[@]}"; do
+    if [[ -z ${path} ]]; then continue; fi
+    if [[ ${finalPathString} == *":${path}:"* ]]; then continue; fi
+    finalPathString+="${path}:"
+  done
+
+  # remove trailing and leading :
+  finalPathString="${finalPathString#:}"
+  finalPathString="${finalPathString%:}"
+  log::debug "Final path: ${finalPathString}."
+
+  REPLY="ORIGINAL_PATH=\"\${ORIGINAL_PATH:-\"\${PATH}\"}\""$'\n'"export PATH=\"${finalPathString}\""$'\n'"${hashListString}"$'\n'
+}
+
 # TODO: add builtin "z" to jump to frequently used directories
-# TODO: 
+# TODO:

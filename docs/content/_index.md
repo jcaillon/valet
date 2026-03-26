@@ -44,6 +44,8 @@ keywords:
 description: With Valet, you can setup and execute tests, code interactive experiences for your users, navigate and execute your scripts (called commands) from a searchable menu interface, and more! It provides libraries of functions that can be sourced to solve standard programming needs such as string, array or file manipulation, prompting the user, and so on...
 params:
   asciinema: true
+sidebar:
+  hide: true
 ---
 
 {{< hextra/feature-grid cols="3" >}}

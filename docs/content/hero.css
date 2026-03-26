@@ -23,6 +23,8 @@ hr:is(html[class~="dark"] *) {
 }
 
 .hero-valet-can-do {
+  text-align: center;
+  margin-bottom: 1.5rem;
   background: linear-gradient(90deg, #017c1b 0%, #03a810 100%);
   background-clip: border-box;
   -webkit-background-clip: text;
@@ -56,6 +58,8 @@ hr:is(html[class~="dark"] *) {
 
 
 .valet-hero {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 2rem;
@@ -98,11 +102,102 @@ hr:is(html[class~="dark"] *) {
   gap: 1rem;
 }
 
+.valet-hero-title {
+  font-size: 2.25rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-weight: 700;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  background: linear-gradient(to right, #111827, #4b5563);
+  background-clip: border-box;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .valet-hero-title {
+    font-size: 3rem;
+  }
+}
+
+.valet-hero-title:is(html[class~="dark"] *) {
+  background: linear-gradient(to right, #f3f4f6, #9ca3af);
+  background-clip: border-box;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.valet-hero-subtitle {
+  font-size: 1.25rem;
+  color: #4b5563;
+  margin: 0;
+}
+
+.valet-hero-subtitle:is(html[class~="dark"] *) {
+  color: #9ca3af;
+}
+
 .valet-hero-button {
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  text-align: center;
+  color: #fff;
+  display: inline-block;
+  text-decoration: none;
+  border: 0;
+  background: hsl(var(--primary-hue) var(--primary-saturation) var(--primary-lightness));
+  transition: background-color 200ms ease-in, box-shadow 200ms ease-in;
   margin-right: 0.5rem;
 }
+
+.valet-hero-button:hover {
+  filter: brightness(0.9);
+}
+
+.valet-hero-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px color-mix(in srgb, hsl(var(--primary-hue) var(--primary-saturation) var(--primary-lightness)) 40%, transparent);
+}
+
 .valet-hero-button:is(html[class~="dark"] *) {
   color: #020101ff;
+}
+
+.theme-toggle-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: capitalize;
+}
+
+.theme-show-dark {
+  display: none;
+}
+
+.theme-show-system {
+  display: none;
+}
+
+.theme-toggle[data-theme="system"] .theme-show-system {
+  display: inline;
+}
+
+.theme-toggle[data-theme="system"] .theme-show-light,
+.theme-toggle[data-theme="system"] .theme-show-dark {
+  display: none;
+}
+
+.theme-toggle[data-theme="dark"] .theme-show-dark {
+  display: inline;
+}
+
+.theme-toggle[data-theme="dark"] .theme-show-light {
+  display: none;
 }
 
 .valet-pain-points-section {
@@ -160,3 +255,11 @@ hr:is(html[class~="dark"] *) {
 .valet-pain-point-desc:is(html[class~="dark"] *) { color: #fee2e2; }
 .valet-pain-point-icon:is(html[class~="dark"] *) { color: #f87171; }
 
+
+.hero-container {
+  max-width: 90rem;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
