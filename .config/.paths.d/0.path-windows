@@ -1,0 +1,17 @@
+# Windows configuration
+
+# USER BIN
+^~/.local/bin
+^~/go/bin
+
+# WINDOWS
+/c/windows/system32
+
+# BASIC MSYS PATH
+^/usr/local/bin
+^/usr/bin
+^/bin
+^/opt/bin
+
+# direct hash
+starship=/c/scoop/apps/starship/current/starship

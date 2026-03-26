@@ -1,0 +1,13 @@
+# Windows links
+
+# ----- Other ------
+
+# Points to OneDrive
+~/data/documents/  :-> ~/OneDrive/documents/
+~/data/work/       :-> ~/OneDrive/work/
+
+# C shortcuts
+/c/scoop/ :-> ~/scoop/
+
+# tmp for msys2
+~/scoop/apps/msys2/current/tmp :-> ~/AppData/Local/tmp

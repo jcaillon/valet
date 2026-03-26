@@ -1,0 +1,7 @@
+# Linux configuration
+
+# User binaries
+^~/.local/bin
+
+# HOMEBREW
+^/home/linuxbrew/.linuxbrew/bin

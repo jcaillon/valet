@@ -1,0 +1,7 @@
+# Linux links
+
+# ------ Points to dotfiles -------
+~/.config/            :-> ./.config/
+~/.bashrc             :-> ./.config/.bashrc
+~/.gitconfig          :-> ./.config/.gitconfig
+~/.wslconfig          :-> ./.config/wsl/.wslconfig
