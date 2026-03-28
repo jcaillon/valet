@@ -716,6 +716,8 @@ Returned variables:
 ```text
 REPLY='## ▶️ valet showcase command1
 
+### Synopsis
+
 An example of description.
 
 You can put any text here, it will be wrapped to fit the terminal width.

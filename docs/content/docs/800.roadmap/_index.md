@@ -43,6 +43,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - In benchmark, with debug mode on, we can compute the time spent on each line of a function. See extdebug shopt.
 - add snippets for the esc codes. Add snippets on the global variables.
 - Revamp self build:
+  - an error in the user extensions should not prevent from building valet core commands so we don't fail an install
   - add more checks on command definition
   - Filter build command for `commands.d` directory
   - we split the commands file into several one, per extension, so we don't have to load everything immediately
@@ -60,7 +61,8 @@ This page lists the features that I would like to implement in Valet. They come 
 - For dropdown with a set list of options, we can verify that the input value is one of the expected value.
 - For argument and option autocompletion, accept any multiline string that will be eval and that should set REPLY_ARRAY with the list of possible completion.
 - Generate an autocompletion script for bash and zsh.
-- Add a command `self package` that build the user commands into a single script file. We want to add options to the build command so we can exclude some commands. It will include all source required and try to minify the bash script. In addition, we can rebrand *valet* into another name.
+- Add a command `self package` that build the user commands into a single script file. We want to add options to the build command so we can exclude some commands. It will include all source required and try to minify the bash script.
+- Allow an extension maintainer to create a tool where valet is not mentioned. Idea: a simple shim that allows to override the valet COMMAND_YAML + translates XXX_ variables into VALET_variables + in the help, hint to use XXX_ vars instead of VALET_ vars.
 - add valet in brew
 - add man page for valet
 - Allow self release to release extensions.

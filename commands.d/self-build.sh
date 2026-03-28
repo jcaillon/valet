@@ -13,9 +13,9 @@
 command: self build
 function: selfBuild
 author: github.com/jcaillon
-shortDescription: Index all the commands and libraries present in the valet user directory and installation directory.
+shortDescription: Index all the commands and libraries present in the valet extensions directory and installation directory.
 description: |-
-  Index all the command and libraries present in the valet user directory and installation directory.
+  Index all the command and libraries present in the valet extensions directory and installation directory.
 
   This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
 
@@ -25,7 +25,7 @@ description: |-
 
   - Makes a list of all the eligible files in which we could find command definitions.
   - For each file in this list, extract the command definitions.
-  - Build your commands file (in your valet user directory) from these definitions.
+  - Build your commands file (in your valet extensions directory) from these definitions.
   - Makes a list of all `libraries.d` directories found in the user directory.
 
   You can call this script directly in case calling ⌜valet self build⌝ is broken:
@@ -326,7 +326,7 @@ function extractCommandDefinitionsToVariables() {
   declareOtherCommandVariables
 
   if ((duplicatedCommands > 0)); then
-    core::fail "There are ${duplicatedCommands} duplicated commands, please remove them. Do you have a duplicated folder in your valet user directory?"
+    core::fail "There are ${duplicatedCommands} duplicated commands, please remove them. Do you have a duplicated folder in your valet extensions directory?"
   fi
 }
 

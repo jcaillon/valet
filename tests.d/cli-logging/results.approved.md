@@ -127,28 +127,27 @@ DEBUG    Deleting temporary files.
 **Error output**:
 
 ```text
-TRACE   _This is an error trace message 
-         which is always displayed.
-INFO    _This is an info message with a 
-         super long sentence. The value 
-         of life is not in its duration,
-         but in its donation. You are 
-         not important because of how 
-         long you live, you are 
-         important because of how 
-         effective you live. Give a man 
-         a fish and you feed him for a 
-         day; teach a man to fish and 
-         you feed him for a lifetime. 
-         Surround yourself with the best
-         people you can find, delegate 
-         authority, and don't interfere 
-         as long as the policy you've 
-         decided upon is being carried 
-         out.
-SUCCESS _This is a success message.
-WARNING _This is a warning message.
-         With a second line.
+TRACE  _This is an error trace message 
+        which is always displayed.
+INFO   _This is an info message with a 
+        super long sentence. The value 
+        of life is not in its duration, 
+        but in its donation. You are not
+        important because of how long 
+        you live, you are important 
+        because of how effective you 
+        live. Give a man a fish and you 
+        feed him for a day; teach a man 
+        to fish and you feed him for a 
+        lifetime. Surround yourself with
+        the best people you can find, 
+        delegate authority, and don't 
+        interfere as long as the policy 
+        you've decided upon is being 
+        carried out.
+SUCCESS_This is a success message.
+WARNING_This is a warning message.
+        With a second line.
 ```
 
 ### ✅ Testing that we can output the logs to a directory additionally to console
@@ -158,10 +157,10 @@ WARNING _This is a warning message.
 **Error output**:
 
 ```text
-TRACE    This is an error trace message which is always displayed.
-INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-SUCCESS  This is a success message.
-WARNING  This is a warning message.
+TRACE   This is an error trace message which is always displayed.
+INFO    This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS This is a success message.
+WARNING This is a warning message.
 With a second line.
 ```
 
@@ -182,10 +181,10 @@ REPLY_ARRAY=(
 **Error output**:
 
 ```text
-TRACE    This is an error trace message which is always displayed.
-INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-SUCCESS  This is a success message.
-WARNING  This is a warning message.
+TRACE   This is an error trace message which is always displayed.
+INFO    This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS This is a success message.
+WARNING This is a warning message.
 With a second line.
 ```
 
@@ -194,10 +193,10 @@ With a second line.
 **Standard output**:
 
 ```text
-TRACE    This is an error trace message which is always displayed.
-INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-SUCCESS  This is a success message.
-WARNING  This is a warning message.
+TRACE   This is an error trace message which is always displayed.
+INFO    This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS This is a success message.
+WARNING This is a warning message.
 With a second line.
 
 ```
@@ -211,10 +210,10 @@ With a second line.
 **Standard output**:
 
 ```text
-TRACE    This is an error trace message which is always displayed.
-INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-SUCCESS  This is a success message.
-WARNING  This is a warning message.
+TRACE   This is an error trace message which is always displayed.
+INFO    This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS This is a success message.
+WARNING This is a warning message.
 With a second line.
 
 ```
@@ -230,10 +229,10 @@ With a second line.
 **Standard output**:
 
 ```text
-TRACE    This is an error trace message which is always displayed.
-INFO     This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
-SUCCESS  This is a success message.
-WARNING  This is a warning message.
+TRACE   This is an error trace message which is always displayed.
+INFO    This is an info message with a super long sentence. The value of life is not in its duration, but in its donation. You are not important because of how long you live, you are important because of how effective you live. Give a man a fish and you feed him for a day; teach a man to fish and you feed him for a lifetime. Surround yourself with the best people you can find, delegate authority, and don't interfere as long as the policy you've decided upon is being carried out.
+SUCCESS This is a success message.
+WARNING This is a warning message.
 With a second line.
 
 ```

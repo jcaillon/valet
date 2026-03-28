@@ -36,9 +36,9 @@ description: |-
 
   This command will either:
 
-  - Create and setup a new extension directory under the valet user directory,
+  - Create and setup a new extension directory under the valet extensions directory,
   - setup an existing directory as a valet extension,
-  - or download the given extension (repository) and install it in the Valet user directory.
+  - or download the given extension (repository) and install it in the valet extensions directory.
 
   For downloaded extensions, all GIT repositories are supported.
   For the specific cases of GitHub and GitLab repositories, this command will:
@@ -156,8 +156,8 @@ function selfExtend() {
 
   # rebuild the command cache
   log::info "Rebuilding the command cache."
-  command::deleteUserCommands
-  command::reloadUserCommands
+  command::deleteCommandsIndex
+  command::reloadCommandsIndex
 
   # rebuild the documentation
   log::info "Rebuilding the documentation."

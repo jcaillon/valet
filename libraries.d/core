@@ -416,7 +416,7 @@ function core::getUserStateDirectory() {
 #
 # Returns:
 #
-# - ${REPLY}: the path to the valet user directory
+# - ${REPLY}: the path to the valet extensions directory
 #
 # ```bash
 # core::getExtensionsDirectory
@@ -425,7 +425,7 @@ function core::getUserStateDirectory() {
 #
 # > The default extensions directory is `~/.valet.d`.
 function core::getExtensionsDirectory() {
-  REPLY="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"
+  REPLY="${VALET_CONFIG_EXTENSIONS_DIRECTORY:-${HOME}/.valet.d}"
   if [[ ! -d "${REPLY}" ]]; then
     mkdir -p "${REPLY}"
   fi

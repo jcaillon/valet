@@ -64,17 +64,17 @@ valet self add-library [options] [--] <library-name>
 
 ## ▶️ valet self build
 
-Index all the command and libraries present in the valet user directory and installation directory.
+Index all the command and libraries present in the valet extensions directory and installation directory.
 
 This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
 
-Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in **showcase.d** directory to learn how to create and modified your commands.
+Please check <https://jcaillon.github.io/valet/docs/new-commands/> or check the examples in **showcase.d** directory to learn how to create and modified your commands.
 
 This scripts:
 
 - Makes a list of all the eligible files in which we could find command definitions.
 - For each file in this list, extract the command definitions.
-- Build your commands file (in your valet user directory) from these definitions.
+- Build your commands file (in your valet extensions directory) from these definitions.
 - Makes a list of all `libraries.d` directories found in the user directory.
 
 You can call this script directly in case calling **valet self build** is broken:
@@ -201,13 +201,13 @@ valet self document [options]
 - `-o, --output <directory path>`
 
   The directory in which the documentation will be generated.
-  Defaults to the valet user directory.
+  Defaults to the valet extensions directory.
   This option can be set by exporting the variable VALET_OUTPUT='<directory path>'.
 
 - `-C, --core-only`
 
   Generate the documentation for the core functions only.
-  Will not generate for libraries present in the valet user directory.
+  Will not generate for libraries present in the valet extensions directory.
   This option can be set by exporting the variable VALET_CORE_ONLY='true'.
 
 - `-h, --help`
@@ -227,9 +227,9 @@ Extensions can add new commands or functions to Valet.
 
 This command will either:
 
-- Create and setup a new extension directory under the valet user directory,
+- Create and setup a new extension directory under the valet extensions directory,
 - setup an existing directory as a valet extension,
-- or download the given extension (repository) and install it in the Valet user directory.
+- or download the given extension (repository) and install it in the valet extensions directory.
 
 For downloaded extensions, all GIT repositories are supported.
 For the specific cases of GitHub and GitLab repositories, this command will:
@@ -311,6 +311,7 @@ valet self extend [options] [--] <extension-uri>
 Release a new version of valet.
 
 It will:
+
 - write the current version in the self-install script,
 - commit the file,
 - update the documentation,
@@ -355,7 +356,6 @@ The command run after the installation of Valet to setup the tool.
 
 Adjust the Valet configuration according to the user environment.
 Let the user know what to do next.
-
 
 ### Usage
 
@@ -482,11 +482,11 @@ valet self test [options]
 
 - `valet self test`
 
-  Run all the tests found in the valet user directory.
+  Run all the tests found in the valet extensions directory.
 
 - `valet self test -a`
 
-  Run all the tests found in the valet user directory and automatically approve the results.
+  Run all the tests found in the valet extensions directory and automatically approve the results.
 
 - `valet self test -i '(my-thing|my-stuff)'`
 
@@ -527,11 +527,11 @@ Update valet using the latest release on GitHub. Also update all installed exten
 
 This script can also be used as a standalone script to install Valet:
 
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)"
+bash -c "$(curl -fsSL <https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh>)"
 
 If you need to pass options (e.g. --single-user-installation) to the script, you can do it like this:
 
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)" -s --single-user-installation
+bash -c "$(curl -fsSL <https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh>)" -s --single-user-installation
 
 The default behavior is to install Valet for all users, in /opt/valet, which might require
 you to type your password on sudo commands (you don't have to run this script with sudo, it will
@@ -541,21 +541,20 @@ This script will:
 
 - 1. Download the given release from GitHub (latest by default).
 
-- 2. Copy it in the Valet home directory, which defaults to:
+- 1. Copy it in the Valet home directory, which defaults to:
   - /opt/valet in case of a multi user installation
   - ~/.local/valet otherwise
 
-- 3. Make the valet script readable and executable, either by adding a shim
+- 1. Make the valet script readable and executable, either by adding a shim
     in a bin directory already present in your PATH, or by adding the Valet
     directory to your PATH on shell startup.
 
-- 4. Copy the showcase (command examples) in the valet user directory ~/.valet.d.
+- 1. Copy the showcase (command examples) in the valet extensions directory ~/.valet.d.
 
-- 6. Run self setup command (in case of a new installation) or re-export the config.
+- 1. Run self setup command (in case of a new installation) or re-export the config.
 
-- 7. Try to update (fetch merge --ff-only) the git repositories and all
-    installed extensions in your valet user directory.
-
+- 1. Try to update (fetch merge --ff-only) the git repositories and all
+    installed extensions in your valet extensions directory.
 
 ### Usage
 
@@ -581,7 +580,7 @@ valet self update [options]
 
   The version number to install (do not including the starting 'v').
   
-  Released versions can be found here: https://github.com/jcaillon/valet/releases
+  Released versions can be found here: <https://github.com/jcaillon/valet/releases>
   
   This option can be set by exporting the variable VALET_VERSION='<version>'.
 
@@ -604,7 +603,7 @@ valet self update [options]
 
 - `--no-showcase`
 
-  Set to true to to not copy the showcase (command examples) to the valet user directory (~/.valet.d).
+  Set to true to to not copy the showcase (command examples) to the valet extensions directory (~/.valet.d).
   
   If you do not set this option, newer versions of the showcase will override the existing ones.
   
@@ -613,12 +612,12 @@ valet self update [options]
 
 - `-U, --skip-extensions`
 
-  Set to true to not attempt to update the installed extensions under the valet user directory (~/.valet.d).
+  Set to true to not attempt to update the installed extensions under the valet extensions directory (~/.valet.d).
   This option can be set by exporting the variable VALET_SKIP_EXTENSIONS='true'.
 
 - `-e, --only-extensions`
 
-  Set to true to only update the installed extensions under the valet user directory (~/.valet.d).
+  Set to true to only update the installed extensions under the valet extensions directory (~/.valet.d).
   This option can be set by exporting the variable VALET_ONLY_EXTENSIONS='true'.
 
 - `--skip-extensions-setup`
@@ -699,7 +698,7 @@ valet help [options] [--] [commands...]
 
 Valet helps you browse, understand and execute your custom bash commands.
 
-Online documentation is available at https://jcaillon.github.io/valet/.
+Online documentation is available at <https://jcaillon.github.io/valet/>.
 
 You can call valet without any commands to start an interactive session.
 
@@ -862,7 +861,7 @@ valet [options] [--] [commands...]
 
 - `self build`
 
-  Index all the commands and libraries present in the valet user directory and installation directory.
+  Index all the commands and libraries present in the valet extensions directory and installation directory.
 
 - `self config`
 

@@ -62,10 +62,10 @@ options:
 examples:
 - name: self test
   description: |-
-    Run all the tests found in the valet user directory.
+    Run all the tests found in the valet extensions directory.
 - name: self test -a
   description: |-
-    Run all the tests found in the valet user directory and automatically approve the results.
+    Run all the tests found in the valet extensions directory and automatically approve the results.
 - name: self test -i '(my-thing|my-stuff)'
   description: |-
     Run only the test suites that match the regex pattern ⌜(my-thing|my-stuff)⌝.
@@ -486,7 +486,7 @@ function selfTest_runSingleTest() {
   # set a new user directories so that commands are correctly recreated if calling
   # valet from a test
   cp -R "${testUserDataDirectory}" "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
-  export VALET_CONFIG_USER_VALET_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
+  export VALET_CONFIG_EXTENSIONS_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
   export VALET_CONFIG_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
   export VALET_CONFIG_USER_DATA_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
   export VALET_CONFIG_USER_CACHE_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"

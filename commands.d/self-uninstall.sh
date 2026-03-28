@@ -28,7 +28,8 @@ options:
 COMMAND_YAML
 function selfUninstall() {
   local script
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   if [[ ${script:-} == "true" ]]; then
@@ -54,7 +55,7 @@ rm -Rf "'"${configurationDirectory}"'"
 rm -Rf "'"${userDataDirectory}"'"
 # remove the user cache
 rm -Rf "'"${userCacheDirectory}"'"
-# remove the user directory
+# remove the user extensions directory
 rm -Rf "'"${extensionsDirectory}"'"
 # remove a possible symlink
 rm -f "'"$(which valet)"'" 2>/dev/null || :

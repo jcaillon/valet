@@ -1005,7 +1005,7 @@ function log::parseLogPattern() {
       fi
       ;;
     level)
-      printfFormat="%${formatSpecifier:-"-8s"}"
+      printfFormat="%${formatSpecifier:-"-7s"}"
       log_setPrintfArgumentFromFormat "level"
       ;;
     icon)
@@ -1144,7 +1144,7 @@ function log::init() {
 
   GLOBAL_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
   GLOBAL_LOG_DISABLE_WRAP="${VALET_CONFIG_LOG_DISABLE_WRAP:-false}"
-  GLOBAL_LOG_PATTERN="${logPattern:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level>  <icon><colorDefault> <message>"}}"
+  GLOBAL_LOG_PATTERN="${logPattern:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level> <icon><colorDefault> <message>"}}"
 
   if [[ -v GLOBAL_FD_LOG ]]; then
     # close if already opened

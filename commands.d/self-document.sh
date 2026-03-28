@@ -34,11 +34,11 @@ options:
 - name: -o, --output <directory path>
   description: |-
     The directory in which the documentation will be generated.
-    Defaults to the valet user directory.
+    Defaults to the valet extensions directory.
 - name: -C, --core-only
   description: |-
     Generate the documentation for the core functions only.
-    Will not generate for libraries present in the valet user directory.
+    Will not generate for libraries present in the valet extensions directory.
 examples:
 - name: self document
   description: |-
@@ -46,7 +46,8 @@ examples:
 COMMAND_YAML
 function selfDocument() {
   local output coreOnly
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   # default output to the user directory
@@ -153,7 +154,7 @@ function selfDocument::getAllFunctionsDocumentation() {
     local line
     while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
       if [[ ${reading} == "false" ]]; then
-        if [[ ${line} == "# ##"* && ${line} != *"(private)"*  && ${line} != *"(deprecated)"* ]]; then
+        if [[ ${line} == "# ##"* && ${line} != *"(private)"* && ${line} != *"(deprecated)"* ]]; then
           reading=true
         else
           continue
@@ -216,7 +217,7 @@ function selfDocument::convertFunctionDocumentationToMarkdown() {
     documentation="${documentation:${#line}+1}"
 
     if [[ "${line}" =~ ^("- \$"([^ :]+))[^_]+_[^_]+_:$ ]]; then
-      if (( parameterCount > 0 )); then
+      if ((parameterCount > 0)); then
         REPLY+=$'\n'
       else
         REPLY+="Inputs:"$'\n'$'\n'

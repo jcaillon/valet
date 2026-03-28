@@ -33,7 +33,8 @@ examples:
 COMMAND_YAML
 function selfAddLibrary() {
   local libraryName
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   local templateFlavor="default"
@@ -47,7 +48,7 @@ function selfAddLibrary() {
   # check if we are working for an extension
   core::getExtensionsDirectory
   if [[ ${PWD} != "${REPLY}"* && ! -d "libraries.d" ]]; then
-    log::warning "The current directory is not under the valet user directory ⌜${REPLY}⌝."
+    log::warning "The current directory is not under the valet extensions directory ⌜${REPLY}⌝."
     if ! interactive::confirm "It does not look like the current directory ⌜${PWD}⌝ is a valet extension, do you want to proceed anyway?"; then
       log::info "Aborting the creation of the library."
       log::info "You should first create an extension with ⌜valet self extend⌝ and then cd into the created directory."

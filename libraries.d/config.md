@@ -88,7 +88,7 @@ Default to the `config` file in your config directory.
 
 ### ⚙️ General configuration
 
-#### VALET_CONFIG_USER_VALET_DIRECTORY
+#### VALET_CONFIG_EXTENSIONS_DIRECTORY
 
 The directory in which to find the user commands.
 

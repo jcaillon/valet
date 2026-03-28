@@ -39,7 +39,7 @@ function selfTestUtils_setupValetForConsistency() {
   eval "${vars// /"=''; "}=''"
 
   # setup consistent logs
-  export VALET_CONFIG_LOG_PATTERN="<level> <message>"
+  export VALET_CONFIG_LOG_PATTERN="<level>{-8s} <message>"
   export VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=""
   export VALET_CONFIG_LOG_COLUMNS=9999
   export VALET_CONFIG_LOG_DISABLE_WRAP=true

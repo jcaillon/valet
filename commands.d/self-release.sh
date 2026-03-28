@@ -55,7 +55,8 @@ options:
     Do not perform the release, just show what would be done.
 COMMAND_YAML
 function selfRelease() {
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   if [[ ${dryRun:-} == "true" ]]; then
@@ -245,7 +246,6 @@ function selfRelease::createRelease() {
       -d "${releasePayload}" \
       --- failOnError=true acceptableCodes='201,422'
 
-
     createdReleaseJson="${REPLY}"
 
     log::success "The new version has been released on GitHub."
@@ -348,9 +348,6 @@ function selfRelease::updateDocumentation() {
   exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/config.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
   exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/extras/lib-valet.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/lib-valet.md"
   exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/extras/valet-commands.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/valet-commands.md"
-
-  # copy the vscode recommended extensions
-  exe::invoke cp "${GLOBAL_INSTALLATION_DIRECTORY}/.vscode/extensions.json" "${GLOBAL_INSTALLATION_DIRECTORY}/extras/extensions.json"
 
   # export stats
   # shellcheck disable=SC2034

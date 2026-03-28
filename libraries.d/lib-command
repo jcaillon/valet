@@ -8,7 +8,7 @@
 
 # parse the user arguments for the main program.
 function command::parseProgramArguments() {
-  command::sourceUserCommands
+  command::sourceCommandsIndex
 
   _PARSED_COMMANDS=()
   _PARSED_COMMAND_ARGS=()
@@ -1008,7 +1008,7 @@ function command::parseCmdFunctionArgumentsOrGoInteractive() {
   functionName="${1}"
   shift
 
-  command::sourceUserCommands
+  command::sourceCommandsIndex
 
   command_parseFunctionArguments "${functionName}" "$@"
   local parsedArguments="${REPLY}"
@@ -1068,7 +1068,7 @@ function command::listCommands() {
   set -o noglob
   local coreOnly="${1}"
 
-  command::sourceUserCommands
+  command::sourceCommandsIndex
 
   REPLY_ARRAY=()
   REPLY_ARRAY2=()
@@ -1104,7 +1104,7 @@ function command::listCommands() {
 function command::getHelpAsMarkdown() {
   local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  command::sourceUserCommands
+  command::sourceCommandsIndex
 
   local -n command="CMD_COMMAND_${functionName}"
   local -n description="CMD_DESCRIPTION_${functionName}"
@@ -1162,7 +1162,9 @@ function command::getHelpAsMarkdown() {
 
   REPLY="## ▶️ ${fullCommand}
 
-${description}
+### Synopsis
+
+${description//$'\n'"## "/$'\n'"#### "}
 
 ### Usage
 
@@ -1212,7 +1214,7 @@ function command::getHelpText() {
   local name="${2:-this}"
   local maxColumns="${3:-${GLOBAL_COLUMNS}}"
 
-  command::sourceUserCommands
+  command::sourceCommandsIndex
 
   local -i helpWidth
   helpWidth="${maxColumns}"
@@ -1245,6 +1247,9 @@ function command::getHelpText() {
   local -n functionExamples="CMD_EXAMPLES_NAME_${functionName}"
 
   # description
+  # shellcheck source=./lib-regex
+  source regex
+  regex::replace description $'\n## ([^\n]+)' $'\n'"${STYLE_HELP_SUBTITLE}## \1${STYLE_RESET}"
   string::wrapWords description width="${helpWidth}" newLinePadString="  " firstLineWidth="$((helpWidth - 2))"
   local wrappedDescription="  ${REPLY}"
 
@@ -1382,7 +1387,7 @@ function command_writeAsTable() {
 function command::sourceCommandFunction() {
   local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  command::sourceUserCommands
+  command::sourceCommandsIndex
 
   local fileToSource
   if ! declare -F "${functionName}" &>/dev/null; then
@@ -1403,15 +1408,15 @@ function command::sourceCommandFunction() {
   fi
 }
 
-# ## command::sourceUserCommands (private)
+# ## command::sourceCommandsIndex (private)
 #
-# Source the user 'commands' file from the valet user directory.
+# Source the user 'commands' file from the valet extensions directory.
 # If the file does not exist, we build it on the fly.
 #
 # ```bash
-# command::sourceUserCommands
+# command::sourceCommandsIndex
 # ```
-function command::sourceUserCommands() {
+function command::sourceCommandsIndex() {
   if [[ ${GLOBAL_CMD_INCLUDED:-} == "true" ]]; then
     return 0
   fi
@@ -1447,30 +1452,30 @@ function command::sourceUserCommands() {
   unset -v GLOBAL_ON_EXIT_MESSAGE
 }
 
-# ## command::reloadUserCommands (private)
+# ## command::reloadCommandsIndex (private)
 #
-# Forcibly source again the user 'commands' file from the valet user directory.
+# Forcibly source again the user 'commands' file from the valet extensions directory.
 #
 # ```bash
-# command::reloadUserCommands
+# command::reloadCommandsIndex
 # ```
-function command::reloadUserCommands() {
+function command::reloadCommandsIndex() {
   # delete previous variables
   # shellcheck disable=SC2086
   unset -v ${!CMD_*} GLOBAL_CMD_INCLUDED
-  command::sourceUserCommands
+  command::sourceCommandsIndex
 }
 
-# ## command::deleteUserCommands (private)
+# ## command::deleteCommandsIndex (private)
 #
-# Delete the user 'commands' file from the valet user directory.
+# Delete the user 'commands' file from the valet extensions directory.
 #
-# You probably want to reload the user commands afterward using `command::reloadUserCommands`.
+# You probably want to reload the user commands afterward using `command::reloadCommandsIndex`.
 #
 # ```bash
-# command::deleteUserCommands
+# command::deleteCommandsIndex
 # ```
-function command::deleteUserCommands() {
+function command::deleteCommandsIndex() {
   core::getUserDataDirectory
   rm -f "${REPLY}/commands" 1>/dev/null || :
 }

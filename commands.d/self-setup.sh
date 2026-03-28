@@ -20,11 +20,17 @@ shortDescription: The command run after the installation of Valet to setup the t
 description: |-
   The command run after the installation of Valet to setup the tool.
 
+  Create a shim/proxy script in `~/.local/bin` that points to `~/.local/lib/valet/valet` (the valet entry point).
+  Make the valet script readable and executable, either by adding a shim
+  in a bin directory already present in your PATH, or by adding the Valet
+  directory to your PATH on shell startup.
+
   Adjust the Valet configuration according to the user environment.
   Let the user know what to do next.
 COMMAND_YAML
 function selfSetup() {
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   log::info "Now setting up Valet."

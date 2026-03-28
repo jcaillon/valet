@@ -56,11 +56,11 @@ ABOUT
 
   Valet helps you browse, understand and execute your custom bash commands.
   
-  Online documentation is available at https://jcaillon.github.io/valet/.
+  Online documentation is available at <https://jcaillon.github.io/valet/>.
   
   You can call valet without any commands to start an interactive session.
   
-  ⌜Configuration through environment variables:⌝
+  ## Configuration through environment variables
   
 ```
 

@@ -8,73 +8,74 @@ if [ ${BASH_VERSINFO:-0} -lt 5 ]; then
   exit 1
 fi
 
-# : <<"COMMAND_YAML"
-# command: valet
-# function: this
-# author: github.com/jcaillon
-# shortDescription: Your personal assistant in the terminal!
-# description: |-
-#   Valet helps you browse, understand and execute your custom bash commands.
+: <<"COMMAND_YAML"
+command: valet
+function: this
+author: github.com/jcaillon
+shortDescription: Your personal assistant in the terminal!
+description: |-
+  Valet helps you browse, understand and execute your custom bash commands.
 
-#   Online documentation is available at https://jcaillon.github.io/valet/.
+  Online documentation is available at <https://jcaillon.github.io/valet/>.
 
-#   You can call valet without any commands to start an interactive session.
+  You can call valet without any commands to start an interactive session.
 
-#   ⌜Configuration through environment variables:⌝
+  ## Configuration through environment variables
 
-#   Core features variables can be defined in the valet user config file. Run ⌜valet self config⌝ to open the configuration file with your default editor (the file will get created if it does not yet exist).
+  Core features variables can be defined in the valet user config file. Run ⌜valet self config⌝ to open the configuration file with your default editor (the file will get created if it does not yet exist).
 
-#   Command options can also be set through environment variables. Check the command help for more information.
+  Command options can also be set through environment variables. Check the command help for more information.
 
-#   ⌜Create your own commands:⌝
+  ## Create your own commands
 
-#   You can create your own commands and have them available in valet.
-#   A command is part of an extension, which is a collection of commands.
+  You can create your own commands and have them available in valet.
 
-#   To get started, run the command ⌜valet self create-extension⌝.
-# arguments:
-# - name: commands?...
-#   description: |-
-#     The command or sub commands to execute.
-#     See the commands section for more information.
-# options:
-# - name: --profiler
-#   description: |-
-#     Turn on profiling (with debug mode) before running the required command.
-#     It will output to `~/.local/state/valet/logs` by default.
-#     This is useful to debug your command and understand what takes a long time to execute.
-#     The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
-# - name: --log-level, --log <level>
-#   description: |-
-#     Set the log level of valet (defaults to info).
-#     Possible values are: trace, debug, success, info, success, warning, error.
-# - name: -v, --verbose
-#   description: |-
-#     Output verbose information.
-#     This is the equivalent of setting the log level to debug.
-# - name: --disable-progress-bars
-#   description: |-
-#     Disable all progress bars for commands that use them.
-# - name: --interactive
-#   description: |-
-#     Enter interactive mode for commands even if arguments are not required or provided.
-# - name: --source
-#   description: |-
-#     Returns in the path to the valet file to source in order to use valet in your scripts.
-#     Usage: `source "$(valet --source)"`.
-#   noEnvironmentVariable: true
-# - name: --version
-#   description: |-
-#     Display the current version of valet.
-#   noEnvironmentVariable: true
-# examples:
-# - name: --help
-#   description: |-
-#     Displays this help text.
-# - name: -v a-command and-sub-command
-#   description: |-
-#     Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
-# COMMAND_YAML
+  A command is part of an extension, which is a collection of commands.
+
+  To get started, run the command ⌜valet self create-extension⌝.
+arguments:
+- name: commands?...
+  description: |-
+    The command or sub commands to execute.
+    See the commands section for more information.
+options:
+- name: --profiler
+  description: |-
+    Turn on profiling (with debug mode) before running the required command.
+    It will output to `~/.local/state/valet/logs` by default.
+    This is useful to debug your command and understand what takes a long time to execute.
+    The profiler log will be cleanup to only keep lines relevant for your command script. You can disable this behavior by setting the environment variable VALET_CONFIG_KEEP_ALL_PROFILER_LINES to true.
+- name: --log-level, --log <level>
+  description: |-
+    Set the log level (defaults to info).
+    Possible values are: trace, debug, success, info, success, warning, error.
+- name: -v, --verbose
+  description: |-
+    Output verbose information.
+    This is the equivalent of setting the log level to debug.
+- name: --disable-progress-bars
+  description: |-
+    Disable all progress bars for commands that use them.
+- name: --interactive
+  description: |-
+    Enter interactive mode for commands even if arguments are not required or provided.
+- name: --source
+  description: |-
+    Returns in the path of a script file to source in order to use valet library functions in your scripts.
+    Usage: `source "$(valet --source)"`.
+  noEnvironmentVariable: true
+- name: --version
+  description: |-
+    Display the current version of valet.
+  noEnvironmentVariable: true
+examples:
+- name: --help
+  description: |-
+    Displays this help text.
+- name: -v a-command and-sub-command
+  description: |-
+    Active ⌜verbose⌝ mode and run the command ⌜a-command⌝ with the sub command ⌜and-sub-command⌝.
+COMMAND_YAML
 
 GLOBAL_INSTALLATION_DIRECTORY="${BASH_SOURCE[0]}"
 if [[ "${GLOBAL_INSTALLATION_DIRECTORY}" != /* ]]; then

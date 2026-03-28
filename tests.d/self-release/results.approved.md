@@ -100,11 +100,10 @@ INFO     Writing the xxx functions documentation to the core libraries docs.
 🙈 mocked exe::invoke cp -f $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/config.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/config.md
 🙈 mocked exe::invoke cp -f $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/lib-valet.md
 🙈 mocked exe::invoke cp -f $GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/valet-commands.md
-🙈 mocked exe::invoke cp $GLOBAL_INSTALLATION_DIRECTORY/.vscode/extensions.json $GLOBAL_INSTALLATION_DIRECTORY/extras/extensions.json
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/static/stats.yaml statsContent
 🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/docs/static/config.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/lib-valet.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/valet-commands.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/stats.yaml
 🙈 mocked exe::invoke git add ...
-🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/extras/base.code-snippets $GLOBAL_INSTALLATION_DIRECTORY/extras/extensions.json $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md $GLOBAL_INSTALLATION_DIRECTORY/extras/template-command-default.sh $GLOBAL_INSTALLATION_DIRECTORY/extras/template-library-default.sh $GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets
+🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/extras/base.code-snippets $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md $GLOBAL_INSTALLATION_DIRECTORY/extras/template-command-default.sh $GLOBAL_INSTALLATION_DIRECTORY/extras/template-library-default.sh $GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets
 🙈 mocked exe::invoke git commit -m :memo: updating the documentation
 SUCCESS  The documentation update has been committed.
 🙈 mocked exe::invoke sed -E -i s/VALET_RELEASED_VERSION="[0-9]+\.[^"]+"/VALET_RELEASED_VERSION="1.2.3"/ $GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-install.sh

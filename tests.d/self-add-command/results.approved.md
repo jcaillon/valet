@@ -15,7 +15,7 @@
 **Error output**:
 
 ```text
-WARNING  The current directory is not under the valet user directory ⌜/tmp/valet.valet.d⌝.
+WARNING  The current directory is not under the valet extensions directory ⌜/tmp/valet.valet.d⌝.
 SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-command/resources/gitignored/commands.d/new-cool-command.sh⌝.
 ```
 

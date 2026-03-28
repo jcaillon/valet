@@ -22,7 +22,7 @@ Move to the created directory (`cd` into it) and start creating your new [comman
 
 ## 📂 Extensions location and anatomy
 
-Extensions are created as a directory under the Valet user directory (which defaults to `~/.valet.d` and can be [overridden][valetConfigUserDirectory]).
+Extensions are created as a directory under the Valet extensions directory (which defaults to `~/.valet.d` and can be [overridden][valetExtensionsDirectory]).
 
 This command will initialize your new extension with the following files:
 
@@ -101,6 +101,6 @@ This script will be sourced from Valet when installing or updating the extension
 [new-commands]: ../new-commands
 [new-libraries]: ../new-libraries
 [github]: https://github.com/
-[valetConfigUserDirectory]: ../configuration/#valet_config_user_valet_directory
+[valetExtensionsDirectory]: ../configuration/#valet_config_extensions_directory
 
 {{< main-section-end >}}

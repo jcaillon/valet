@@ -671,7 +671,6 @@ This should be called from a command function for which you want to parse the ar
 
 See the documentation for more details on the parser: <https://jcaillon.github.io/valet/docs/new-commands/#-implement-your-command>.
 
-
 Inputs:
 
 - `$@`: **arguments** _as any_:
@@ -986,6 +985,7 @@ Example usage:
 declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
 coproc::runInParallel jobCommands maxParallelCoprocs=2
 ```
+
 TODO: implement unit tests for this function
 
 ## ⚡ coproc::sendMessage
@@ -1029,6 +1029,7 @@ Inputs:
   The variable name to use for the coproc.
 
 Returns:
+
 - `${REPLY_CODE}`: The exit status of the coproc (or -1 if the coproc is not running).
 
 Example usage:
@@ -1161,7 +1162,7 @@ Creates it if missing.
 
 Returns:
 
-- `${REPLY}`: the path to the valet user directory
+- `${REPLY}`: the path to the valet extensions directory
 
 Example usage:
 
@@ -1397,24 +1398,24 @@ They are defined as variables and not as functions. Please check the content of 
 
 References:
 
-- https://jvns.ca/blog/2025/03/07/escape-code-standards/
-- https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
-- https://en.wikipedia.org/wiki/ANSI_escape_code
-- https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
-- https://paulbourke.net/dataformats/ascii/
-- https://www.aivosto.com/articles/control-characters.html
-- https://github.com/tmux/tmux/blob/master/tools/ansicode.txt
-- https://vt100.net/docs/vt102-ug/chapter5.html
-- https://vt100.net/docs/vt100-ug/chapter3.html#S3.3
-- https://github.com/tmux/tmux/blob/882fb4d295deb3e4b803eb444915763305114e4f/tools/ansicode.txt
+- <https://jvns.ca/blog/2025/03/07/escape-code-standards/>
+- <https://invisible-island.net/xterm/ctlseqs/ctlseqs.html>
+- <https://en.wikipedia.org/wiki/ANSI_escape_code>
+- <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797>
+- <https://paulbourke.net/dataformats/ascii/>
+- <https://www.aivosto.com/articles/control-characters.html>
+- <https://github.com/tmux/tmux/blob/master/tools/ansicode.txt>
+- <https://vt100.net/docs/vt102-ug/chapter5.html>
+- <https://vt100.net/docs/vt100-ug/chapter3.html#S3.3>
+- <https://github.com/tmux/tmux/blob/882fb4d295deb3e4b803eb444915763305114e4f/tools/ansicode.txt>
 
 Ascii graphics:
 
-- https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9
-- https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing
-- https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements
+- <https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9>
+- <https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing>
+- <https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements>
 
-An interesting read: https://sw.kovidgoyal.net/kitty/keyboard-protocol/
+An interesting read: <https://sw.kovidgoyal.net/kitty/keyboard-protocol/>
 
 > While it could be very handy to define a function for each of these instructions,
 > it would also be slower to execute (function overhead + multiple printf calls).
@@ -2308,7 +2309,6 @@ interactive::displayPrompt "Do you want to continue?"
 
 This function must be called regularly (on refresh tick) and is responsible for redrawing the list if necessary.
 
-
 ## ⚡ list::setItems
 
 Set up the list of items to display.
@@ -2970,7 +2970,7 @@ regex::getFirstGroup MY_STRING "name:(.*)"
 echo "${REPLY}"
 ```
 
-> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
 
 ## ⚡ regex::getFuzzySearchRegexFromSearchString
 
@@ -3041,7 +3041,7 @@ for match in "${REPLY_ARRAY[@]}"; do
 done
 ```
 
-> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
 
 ## ⚡ regex::replace
 
@@ -3077,7 +3077,6 @@ Inputs:
 
   (defaults to false)
 
-
 Example usage:
 
 ```bash
@@ -3087,7 +3086,7 @@ regex::replace MY_STRING "name: (.*)" "\1" maxCount=1 onlyMatches=true
 echo "${MY_STRING}"
 ```
 
-> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
 
 ## ⚡ sfzf::show
 
@@ -3118,7 +3117,6 @@ Inputs:
   - $2: the item number;
   - $3: the current panel width;
   - it should return the details of the item in the `REPLY` variable.
-
 
   (defaults to empty, no callback)
 
@@ -3613,6 +3611,7 @@ Inputs:
   (defaults to $'\n')
 
 Returns:
+
 - `${REPLY}`: the joined string
 
 Example usage:
@@ -3759,6 +3758,7 @@ Inputs:
   (defaults to false)
 
 Returns:
+
 - `${REPLY}`: the space left after truncation
 
 Example usage:
@@ -4258,7 +4258,6 @@ See @terminal::testWaitForKeyPress for an implementation example.
 
 This allows to use the `-e` option with the read command and receive events for special key press.
 
-
 This function should be called before using terminal::waitForKeyPress.
 
 You can call `terminal::restoreBindings` to restore the default bindings. However, this is not
@@ -4424,7 +4423,6 @@ Use `terminal::waitForKeyPress` if you need to listen to special keys.
 
 This simple implementation does not rely on GNU readline and does not require terminal options
 to be set using `terminal::setRawMode`.
-
 
 Inputs:
 
@@ -4832,7 +4830,6 @@ Inputs:
   - %S: total seconds
   - %L: total milliseconds
   - %U: total microseconds
-
 
   (defaults to "%HH:%MM:%SS")
 
@@ -5338,7 +5335,5 @@ windows::runPs1 "Write-Host \"Hello\""
 windows::runPs1 "Write-Host \"World\""
 windows::endPs1Batch
 ```
-
-
 
 > Documentation generated for the version 0.36.26 (2025-10-10).

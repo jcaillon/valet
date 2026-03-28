@@ -51,7 +51,7 @@ Next up is a big line with a lot of numbers not separated by spaces. Which means
 **Error output**:
 
 ```text
-INFO     Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.
+INFO    Next up is a big line with a lot of numbers not separated by spaces. Which means they will be truncated by characters and not by word boundaries like this sentence.
 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567
 01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567
 ```
@@ -601,10 +601,13 @@ REPLY4=''
 Returned variables:
 
 ```text
-REPLY='%s%(%H:%M:%S)T%s%s%s%-8s%s%-4s%s%s%-5d%s%-2d%s%8s%s%-10s%s%-4s%s%s\n'
-REPLY2='"[90m" "${EPOCHSECONDS}" "[39m" " " "${levelColor:-}" "${level:0:8}" " " "${icon:-}" "[39m" " PID=" "${BASHPID:0:5}" " SUBSHELL=" "${BASH_SUBSHELL:0:2}" " " "${FUNCNAME[1]:${#FUNCNAME[1]} - 8 > 0 ? ${#FUNCNAME[1]} - 8 : 0}" "@" "${BASH_SOURCE[1]:0:10}" ":" "${BASH_LINENO[1]:0:4}" " " "${messageToPrintInLog:-}" '
-REPLY3='68'
-REPLY4=''
+REPLY='%s%(%H:%M:%S)T%s%s%s%-7s%s%-4s%s%s%-5d%s%-2d%s%8s%s%-10s%s%-4s%s%s\n'
+REPLY2='"[90m" "${EPOCHSECONDS}" "[39m" " " "${levelColor:-}" "${level:0:7}" " " "${icon:-}" "[39m" " PID=" "${BASHPID:0:5}" " SUBSHELL=" "${BASH_SUBSHELL:0:2}" " " "${functionName:${#functionName} - 8 > 0 ? ${#functionName} - 8 : 0}" "@" "${sourcePath:0:10}" ":" "${lineNumber:0:4}" " " "${messageToPrintInLog:-}" '
+REPLY3='67'
+REPLY4='
+local functionName="${FUNCNAME[1]:-}"
+local sourcePath="${BASH_SOURCE[1]:-shell}"
+local lineNumber="${BASH_LINENO[1]:-0}"'
 ```
 
 ❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=true log::parseLogPattern \<icon\>\ \<message\>`
@@ -635,11 +638,14 @@ Returned variables:
 
 ```text
 REPLY='%s%s%(%FT%H:%M:%S%z)T%s%s%s%9s%s%9s%s%9s%s%-5s%s%9s%s%9s%s%9s%s%9s%s%9s\n'
-REPLY2='"[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${variableToPrintInLog:${#variableToPrintInLog} - 9 > 0 ? ${#variableToPrintInLog} - 9 : 0}" " " "${processName:0:5}" " " "${BASHPID:${#BASHPID} - 9 > 0 ? ${#BASHPID} - 9 : 0}" " " "${BASH_SUBSHELL:${#BASH_SUBSHELL} - 9 > 0 ? ${#BASH_SUBSHELL} - 9 : 0}" " " "${FUNCNAME[1]:${#FUNCNAME[1]} - 9 > 0 ? ${#FUNCNAME[1]} - 9 : 0}" " " "${BASH_SOURCE[1]:${#BASH_SOURCE[1]} - 9 > 0 ? ${#BASH_SOURCE[1]} - 9 : 0}" " " "${BASH_LINENO[1]:${#BASH_LINENO[1]} - 9 > 0 ? ${#BASH_LINENO[1]} - 9 : 0}" '
+REPLY2='"[90m" " " "${EPOCHSECONDS}" " " "${levelColor:-}" " " "${level:${#level} - 9 > 0 ? ${#level} - 9 : 0}" " " "${icon:-}" " " "${variableToPrintInLog:${#variableToPrintInLog} - 9 > 0 ? ${#variableToPrintInLog} - 9 : 0}" " " "${processName:0:5}" " " "${BASHPID:${#BASHPID} - 9 > 0 ? ${#BASHPID} - 9 : 0}" " " "${BASH_SUBSHELL:${#BASH_SUBSHELL} - 9 > 0 ? ${#BASH_SUBSHELL} - 9 : 0}" " " "${functionName:${#functionName} - 9 > 0 ? ${#functionName} - 9 : 0}" " " "${sourcePath:${#sourcePath} - 9 > 0 ? ${#sourcePath} - 9 : 0}" " " "${lineNumber:${#lineNumber} - 9 > 0 ? ${#lineNumber} - 9 : 0}" '
 REPLY3='0'
 REPLY4='
 local variableToPrintInLog="${COLOR_DEBUG:-}"
-local processName=${GLOBAL_PID_TO_PNAME[${BASHPID}]:-}; if [[ -z ${processName} ]]; then if [[ ${BASHPID} == "1234" ]]; then GLOBAL_PID_TO_PNAME[${BASHPID}]="main"; else string::numberToUniqueId "${BASHPID}"; GLOBAL_PID_TO_PNAME[${BASHPID}]="${REPLY}"; fi; processName=${GLOBAL_PID_TO_PNAME[${BASHPID}]}; fi'
+local processName=${GLOBAL_PID_TO_PNAME[${BASHPID}]:-}; if [[ -z ${processName} ]]; then if [[ ${BASHPID} == "1234" ]]; then GLOBAL_PID_TO_PNAME[${BASHPID}]="main"; else string::numberToUniqueId "${BASHPID}"; GLOBAL_PID_TO_PNAME[${BASHPID}]="${REPLY}"; fi; processName=${GLOBAL_PID_TO_PNAME[${BASHPID}]}; fi
+local functionName="${FUNCNAME[1]:-}"
+local sourcePath="${BASH_SOURCE[1]:-shell}"
+local lineNumber="${BASH_LINENO[1]:-0}"'
 ```
 
 ❯ `log::parseLogPattern $'<levelColor><level><colorDefault> <message>\n<wrapPadding><colorFaded>[<elapsedTime>] [<elapsedTimeSinceLastLog>] in [<sourceFile>]<colorDefault>'`
@@ -647,14 +653,15 @@ local processName=${GLOBAL_PID_TO_PNAME[${BASHPID}]:-}; if [[ -z ${processName} 
 Returned variables:
 
 ```text
-REPLY='%s%-8s%s%s%s%s%s%s%s%-7s%s%-7s%s%-10s%s%s\n'
-REPLY2='"${levelColor:-}" "${level:0:8}" "[39m" " " "${messageToPrintInLog:-}" "
+REPLY='%s%-7s%s%s%s%s%s%s%s%-7s%s%-7s%s%-10s%s%s\n'
+REPLY2='"${levelColor:-}" "${level:0:7}" "[39m" " " "${messageToPrintInLog:-}" "
 " "${GLOBAL_LOG_WRAP_PADDING}" "[90m" "[" "${loggedElapsedTime:0:7}" "] [" "${loggedElapsedTimeSinceLastLog:0:7}" "] in [" "${sourceFile:0:10}" "]" "[39m" '
-REPLY3='9'
+REPLY3='8'
 REPLY4='
 local REPLY; time::getProgramElapsedMicroseconds; time::getSecondsFromMicroseconds "${REPLY}" precision=3; local loggedElapsedTime="${REPLY}s"
 local REPLY; time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::getSecondsFromMicroseconds "${_LOG_ELAPSED_TIME}" precision=3; local loggedElapsedTimeSinceLastLog="${REPLY}s"; _LOG_ELAPSED_TIME=${currentTime}
-local sourceFile="${BASH_SOURCE[1]##*/}"'
+local sourceFile="${BASH_SOURCE[1]:-shell}"
+sourceFile="${sourceFile##*/}"'
 ```
 
 ❯ `log::parseLogPattern "${pat}"`
@@ -663,9 +670,11 @@ Returned variables:
 
 ```text
 REPLY='%s%s%s%s%s%s%s%s%s\n'
-REPLY2='"{\"level\": \"" "${level}" "\", \"message\": \"" "${messageToPrintInLog:-}" "\", \"source\": \"" "${BASH_SOURCE[1]}" "\", \"line\": \"" "${BASH_LINENO[1]}" "\"}" '
+REPLY2='"{\"level\": \"" "${level}" "\", \"message\": \"" "${messageToPrintInLog:-}" "\", \"source\": \"" "${sourcePath}" "\", \"line\": \"" "${lineNumber}" "\"}" '
 REPLY3='26'
-REPLY4=''
+REPLY4='
+local sourcePath="${BASH_SOURCE[1]:-shell}"
+local lineNumber="${BASH_LINENO[1]:-0}"'
 ```
 
 ❯ `log::parseLogPattern $'<level>{-2s}\n  <varSTUFF>{-5s}\n  <pid>{-04d}\n  <subshell>{-1s}\n  <function>{-5s}\n  <line>{-03d}\n  <source>{-5s}\n  <sourceFile>{-5s}\n  <elapsedTime>{-5s}\n  <elapsedTimeSinceLastLog>{-5s}\n  '`
@@ -678,9 +687,9 @@ REPLY2='"${level:0:2}" "
   " "${variableToPrintInLog:0:5}" "
   " "${BASHPID:0:04}" "
   " "${BASH_SUBSHELL:0:1}" "
-  " "${FUNCNAME[1]:0:5}" "
-  " "${BASH_LINENO[1]:0:03}" "
-  " "${BASH_SOURCE[1]:0:5}" "
+  " "${functionName:0:5}" "
+  " "${lineNumber:0:03}" "
+  " "${sourcePath:0:5}" "
   " "${sourceFile:0:5}" "
   " "${loggedElapsedTime:0:5}" "
   " "${loggedElapsedTimeSinceLastLog:0:5}" "
@@ -688,7 +697,11 @@ REPLY2='"${level:0:2}" "
 REPLY3='0'
 REPLY4='
 local variableToPrintInLog="${STUFF:-}"
-local sourceFile="${BASH_SOURCE[1]##*/}"
+local functionName="${FUNCNAME[1]:-}"
+local lineNumber="${BASH_LINENO[1]:-0}"
+local sourcePath="${BASH_SOURCE[1]:-shell}"
+local sourceFile="${BASH_SOURCE[1]:-shell}"
+sourceFile="${sourceFile##*/}"
 local REPLY; time::getProgramElapsedMicroseconds; time::getSecondsFromMicroseconds "${REPLY}" precision=3; local loggedElapsedTime="${REPLY}s"
 local REPLY; time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY}; _LOG_ELAPSED_TIME=$(( currentTime - ${_LOG_ELAPSED_TIME:-0} )); time::getSecondsFromMicroseconds "${_LOG_ELAPSED_TIME}" precision=3; local loggedElapsedTimeSinceLastLog="${REPLY}s"; _LOG_ELAPSED_TIME=${currentTime}'
 ```

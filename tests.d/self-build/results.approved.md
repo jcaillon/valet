@@ -71,7 +71,7 @@ self uninstall      A command to uninstall Valet.
 help                Show the help of this program or of a specific command.
 self add-command    Add a new command to the current extension.
 self add-library    Add a new library to the current extension.
-self build          Index all the commands and libraries present in the valet user directory and installation directory.
+self build          Index all the commands and libraries present in the valet extensions directory and installation directory.
 self config         Open the configuration file of Valet with your default editor.
 self document       Generate the documentation and code snippets for all the library functions of Valet.
 self extend         Extends Valet by creating or downloading a new extension in the user directory.

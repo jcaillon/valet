@@ -4,16 +4,16 @@ name: Self test install / extend
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
-      - 'tests.d/self-install/**'
-      - 'commands.d/self-install.sh'
-      - 'commands.d/self-extend.sh'
+      - "tests.d/self-install/**"
+      - "commands.d/self-install.sh"
+      - "commands.d/self-extend.sh"
   pull_request:
     paths:
-      - 'tests.d/self-install/**'
-      - 'commands.d/self-install.sh'
-      - 'commands.d/self-extend.sh'
+      - "tests.d/self-install/**"
+      - "commands.d/self-install.sh"
+      - "commands.d/self-extend.sh"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -50,4 +50,4 @@ jobs:
             -e RUNNING_IN_DOCKER=true \
             -e BRANCH_NAME=${BRANCH_NAME} \
             noyacode/minideb-bash5.0 \
-            ./tests.d/self-install/test self test -C
+            ./tests.d/self-install/test self test -c

@@ -129,7 +129,7 @@ Creates it if missing.
 
 Returns:
 
-- `${REPLY}`: the path to the valet user directory
+- `${REPLY}`: the path to the valet extensions directory
 
 Example usage:
 

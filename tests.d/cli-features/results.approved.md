@@ -111,7 +111,7 @@ Returned code: `1`
 /tmp/valet.d/d3-2/commands: line 1: 1/0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ builtin source "${commandsFile}"
-├─ in command::sourceUserCommands() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
+├─ in command::sourceCommandsIndex() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
 ├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:xxx
@@ -165,7 +165,7 @@ CMDERR   Error code ⌜1⌝ for the command:
 ├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
 ├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:99
+╰─ in main() at valet:100
 ```
 
 ### ✅ Testing exit code (exit 5) and custom exit function
@@ -183,7 +183,7 @@ EXIT     Explicit exit with code 5, stack:
 ├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
 ├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:99
+╰─ in main() at valet:100
 WARNING  This is a custom on exit function.
 ```
 
@@ -227,13 +227,13 @@ Please check your ⌜PATH⌝ variable.
 ├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
 ├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:99
+╰─ in main() at valet:100
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ thisIsAnUnknownCommandForTesting
 ├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh:65
 ├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
 ├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
 ├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:99
+╰─ in main() at valet:100
 ```
 

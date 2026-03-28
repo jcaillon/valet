@@ -15,7 +15,7 @@
 **Error output**:
 
 ```text
-WARNING  The current directory is not under the valet user directory ⌜/tmp/valet.valet.d⌝.
+WARNING  The current directory is not under the valet extensions directory ⌜/tmp/valet.valet.d⌝.
 SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝.
 ```
 

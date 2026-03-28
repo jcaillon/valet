@@ -44,12 +44,12 @@ description: |-
       in a bin directory already present in your PATH, or by adding the Valet
       directory to your PATH on shell startup.
 
-  - 4. Copy the showcase (command examples) in the valet user directory ~/.valet.d.
+  - 4. Copy the showcase (command examples) in the valet extensions directory ~/.valet.d.
 
   - 6. Run self setup command (in case of a new installation) or re-export the config.
 
   - 7. Try to update (fetch merge --ff-only) the git repositories and all
-      installed extensions in your valet user directory.
+      installed extensions in your valet extensions directory.
 
 options:
 - name: -u, --unattended
@@ -84,7 +84,7 @@ options:
   default: false
 - name: --no-showcase
   description: |-
-    Set to true to to not copy the showcase (command examples) to the valet user directory (~/.valet.d).
+    Set to true to to not copy the showcase (command examples) to the valet extensions directory (~/.valet.d).
 
     If you do not set this option, newer versions of the showcase will override the existing ones.
 
@@ -92,11 +92,11 @@ options:
   default: false
 - name: -U, --skip-extensions
   description: |-
-    Set to true to not attempt to update the installed extensions under the valet user directory (~/.valet.d).
+    Set to true to not attempt to update the installed extensions under the valet extensions directory (~/.valet.d).
   default: false
 - name: -e, --only-extensions
   description: |-
-    Set to true to only update the installed extensions under the valet user directory (~/.valet.d).
+    Set to true to only update the installed extensions under the valet extensions directory (~/.valet.d).
   default: false
 - name: --skip-extensions-setup
   description: |-
@@ -332,14 +332,14 @@ function selfUpdate() {
   fi
 
   # remove the user commands to rebuild them
-  command::deleteUserCommands
+  command::deleteCommandsIndex
   if [[ ${firstInstallation} == "true" ]]; then
     # shellcheck source=../libraries.d/main
     source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/main"
     log::debug "Sourcing the core functions from valet."
     selfUpdate_sourceDependencies
   else
-    command::reloadUserCommands
+    command::reloadCommandsIndex
   fi
 
   if [[ ${createShim} == "true" ]]; then
@@ -744,7 +744,7 @@ if [[ ${GLOBAL_MAIN_INCLUDED:-} != "true" ]]; then
     *) REPLY="unknown" ;;
     esac
   }
-  function core::getExtensionsDirectory() { REPLY="${VALET_CONFIG_USER_VALET_DIRECTORY:-${HOME}/.valet.d}"; }
+  function core::getExtensionsDirectory() { REPLY="${VALET_CONFIG_EXTENSIONS_DIRECTORY:-${HOME}/.valet.d}"; }
   function core::getUserDataDirectory() { REPLY="${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}"; }
   function interactive::confirm() {
     local \
@@ -776,7 +776,7 @@ if [[ ${GLOBAL_MAIN_INCLUDED:-} != "true" ]]; then
   function fs::readFile() { REPLY="$(<"${1}")"; }
   function progress::start() { :; }
   function progress::stop() { :; }
-  function command::deleteUserCommands() {
+  function command::deleteCommandsIndex() {
     core::getUserDataDirectory
     rm -f "${REPLY}/commands" 1>/dev/null || :
   }

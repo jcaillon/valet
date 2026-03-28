@@ -139,11 +139,11 @@ description: |-
 
   ## 6. Incoming features
 
-  # TODO: FEATURES TO IMPLEMENT:
-  #
-  # - add builtin "z" to jump to frequently used directories
-  # - auto source .env and .envrc files in the current directory
-  # - Provide a good and fast default prompt if atuin is not installed
+  TODO: FEATURES TO IMPLEMENT:
+
+  - add builtin "z" to jump to frequently used directories
+  - auto source .env and .envrc files in the current directory
+  - Provide a good and fast default prompt if atuin is not installed
 
 options:
 - name: --bash-scripts-directory <directory>
