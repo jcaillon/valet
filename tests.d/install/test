@@ -5,7 +5,7 @@ set -Eeu -o pipefail
 # installation of Valet and its extensions, as well as the update.
 
 # Run locally from valet directory:
-# ./tests.d/self-install/test
+# ./tests.d/install/test
 
 # We expect this script to run in a Docker container, with curl installed
 # and a 'me' user with sudo privileges.
@@ -15,15 +15,15 @@ set -Eeu -o pipefail
 function main() {
   if [[ -z ${RUNNING_IN_DOCKER:-} ]]; then
     # we are running this locally
-    if command -v docker &> /dev/null; then
+    if command -v docker &>/dev/null; then
       echo "Running the test in a container."
       # To build the image:
-      # - cd tests.d/self-install/docker-valet-test
+      # - cd tests.d/install/docker-valet-test
       # - docker build -t noyacode/minideb-bash5.0 .
       # Then to run it:
       # - docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash noyacode/minideb-bash5.0
-      # - ./tests.d/self-install/test
-      docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash noyacode/minideb-bash5.0 -c -o errexit -o nounset -o pipefail "chmod +x ./tests.d/self-install/test; ./tests.d/self-install/test"
+      # - ./tests.d/install/test
+      docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash noyacode/minideb-bash5.0 -c -o errexit -o nounset -o pipefail "chmod +x ./tests.d/install/test; ./tests.d/install/test"
       return 0
     fi
     echo "Need docker to run this test."
@@ -33,8 +33,6 @@ function main() {
   # we are running the following test on a container
   BRANCH_NAME="${BRANCH_NAME:-main}"
   export BRANCH_NAME
-
-
 
   echo "================================================"
   echo "Installing Valet: --unattended --use-branch --version ${BRANCH_NAME}."
@@ -63,8 +61,6 @@ function main() {
   unset -v ${!CMD_*}
 
   export VALET_VERBOSE=false
-
-
 
   echo "================================================"
   echo "Install extension: extension-1 using git."
@@ -120,9 +116,6 @@ function main() {
 
   echo "yyy" | valet self update
 
-
-
-
   echo "================================================"
   echo "Create extension: test-extension1."
   echo "================================================"
@@ -137,8 +130,6 @@ function main() {
   pushd ~/.valet.d/test-extension2 &>/dev/null
   valet self extend .
   popd &>/dev/null
-
-
 
   echo "================================================"
   echo "Updating Valet: --skip-extensions."
@@ -158,7 +149,7 @@ function main() {
 
   echo "Previous version:"
   valet --version
-  echo "0.0.0" > /opt/valet/version
+  echo "0.0.0" >/opt/valet/version
   #echo "y" | valet self update
 
   echo "Latest release version:"
@@ -181,7 +172,6 @@ function main() {
   which valet || echo "No valet command found."
   [[ -d /opt/valet ]] || echo "Valet directory removed."
 
-
   echo "================================================"
   echo "Installing Valet: --unattended --use-branch --version ${BRANCH_NAME} --installation-directory /valet --no-shim --no-showcase."
   echo "================================================"
@@ -193,9 +183,6 @@ function main() {
   echo "================================================"
 
   bash -c 'eval "$(valet self uninstall --script 2>/dev/null)"'
-
-
-
 
   echo "================================================"
   echo "Installing Valet as me: --use-branch --version ${BRANCH_NAME}."
@@ -222,8 +209,6 @@ function main() {
   echo "================================================"
 
   bash -c 'eval "$(valet self uninstall --script 2>/dev/null)"'
-
-
 
   echo "================================================"
   echo "Installing Valet: --use-branch --version ${BRANCH_NAME} --unattended --single-user-installation --no-showcase."

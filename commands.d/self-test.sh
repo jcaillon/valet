@@ -412,7 +412,7 @@ function selfTest_runSingleTestSuite() {
         # the function test::fail was called
         # Can be reproduced by inserting a `test::fail` call in the test script.
         fs::readFile "${GLOBAL_TEST_LOG_FILE}"
-        log::error "The test script ⌜${testScript##*/}⌝ at line ⌜${lineNumber}⌝ failed because an error was explicitly thrown in the test script:"$'\n\n'"${REPLY}"$'\n\n'"test::fail called in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}:${lineNumber}⌝."
+        log::error "The test script ⌜${testScript##*/}⌝ at line ⌜${lineNumber}⌝ failed because an error was explicitly thrown in the test script:"$'\n\n'"${REPLY}"$'\n'"test::fail called in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}:${lineNumber}⌝."
         log::printCallStack stackToSkip=0 stackToSkipAtEnd=11
 
       elif [[ ${scriptGotError} == "true" ]]; then

@@ -6,12 +6,12 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "tests.d/self-install/**"
+      - "tests.d/install/**"
       - "commands.d/self-install.sh"
       - "commands.d/self-extend.sh"
   pull_request:
     paths:
-      - "tests.d/self-install/**"
+      - "tests.d/install/**"
       - "commands.d/self-install.sh"
       - "commands.d/self-extend.sh"
 
@@ -42,12 +42,15 @@ jobs:
           RUNNING_IN_DOCKER: true
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
-          chmod +x ./tests.d/self-install/test
+          chmod +x ./tests.d/install/test
+          chmod +x ./tests.d/install/test
           docker run --rm \
             -v $PWD:/app \
             -w /app \
             -e VALET_CONFIG_ENABLE_COLORS=true \
             -e RUNNING_IN_DOCKER=true \
             -e BRANCH_NAME=${BRANCH_NAME} \
-            noyacode/minideb-bash5.0 \
-            ./tests.d/self-install/test self test -c
+            --user root \
+            --entrypoint /usr/local/bin/bash-5.0 \
+            noyacode/valet-tests-slimdeb:latest \
+            ./tests.d/install/test
