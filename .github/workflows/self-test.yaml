@@ -56,3 +56,42 @@ jobs:
             --user root \
             noyacode/valet-tests-slimdeb:latest \
             -c '${BASH} --version; ./valet self test -c'
+
+      - name: Run valet self test on bash5.1
+        run: |
+          chmod +x valet
+          docker run --rm \
+            -v $PWD:/app \
+            -w /app \
+            -e VALET_CONFIG_ENABLE_COLORS=true \
+            -e VALET_CONFIG_DISABLE_PROGRESS=true \
+            --entrypoint /usr/local/bin/bash-5.1 \
+            --user root \
+            noyacode/valet-tests-slimdeb:latest \
+            -c '${BASH} --version; ./valet self test -c'
+
+      - name: Run valet self test on bash5.2
+        run: |
+          chmod +x valet
+          docker run --rm \
+            -v $PWD:/app \
+            -w /app \
+            -e VALET_CONFIG_ENABLE_COLORS=true \
+            -e VALET_CONFIG_DISABLE_PROGRESS=true \
+            --entrypoint /usr/local/bin/bash-5.2 \
+            --user root \
+            noyacode/valet-tests-slimdeb:latest \
+            -c '${BASH} --version; ./valet self test -c'
+
+      - name: Run valet self test on bash5.3
+        run: |
+          chmod +x valet
+          docker run --rm \
+            -v $PWD:/app \
+            -w /app \
+            -e VALET_CONFIG_ENABLE_COLORS=true \
+            -e VALET_CONFIG_DISABLE_PROGRESS=true \
+            --entrypoint /usr/local/bin/bash-5.3 \
+            --user root \
+            noyacode/valet-tests-slimdeb:latest \
+            -c '${BASH} --version; ./valet self test -c'
