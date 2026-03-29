@@ -20,6 +20,7 @@ shortDescription: The command run after the installation of Valet to setup the t
 description: |-
   The command run after the installation of Valet to setup the tool.
 
+  copy the showcase
   Create a shim/proxy script in `~/.local/bin` that points to `~/.local/lib/valet/valet` (the valet entry point).
   Make the valet script readable and executable, either by adding a shim
   in a bin directory already present in your PATH, or by adding the Valet
@@ -106,4 +107,24 @@ function selfSetup_setupForWindows() {
 
   log::info "Adding ⌜${windowsInstallationPath}⌝ to the user windows PATH."
   windows::addToPath "${windowsInstallationPath}"
+}
+
+# Copy the showcase to the user directory.
+function copyShowcase() {
+  local \
+    installationDirectory="${1}" \
+    extensionsDirectory="${2}"
+
+  testCommand "mkdir"
+  testCommand "cp"
+
+  mkdir -p "${extensionsDirectory}" || core::fail "Could not create the extensions directory ⌜${extensionsDirectory}⌝."
+
+  if [[ -d "${extensionsDirectory}/showcase.d" ]]; then
+    rm -Rf "${extensionsDirectory}/showcase.d" &>/dev/null || core::fail "Could not remove the existing showcase (command examples) in ⌜${extensionsDirectory}⌝."
+  fi
+
+  cp -R "${installationDirectory}/showcase.d" "${extensionsDirectory}" || core::fail "Could not copy the showcase (command examples) to ⌜${extensionsDirectory}⌝."
+
+  log::success "The showcase has been copied to ⌜${extensionsDirectory}/showcase.d⌝."
 }

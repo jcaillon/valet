@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+
+# This is a test that is executed either in GitHub Actions or locally which tests the
+# installation of Valet and its extensions, as well as the update.
+
+# Run locally from valet directory:
+# ./tests.d/install/test
+
+# We expect this script to run in a Docker container, with curl installed
+# and a 'me' user with sudo privileges.
+
+# We start this script as root.
+
+function main() {
+  export GLOBAL_MOCK_EPOCHSECONDS=548902800
+
+  echo "================================================"
+  echo "VALET_VERSION=0.35.114 install.sh --unattended --skip-setup"
+  echo "================================================"
+
+  VALET_VERSION=0.35.114 /home/me/install.sh --unattended --skip-setup
+  checkInstallation
+  uninstallDefaultValet
+
+  echo
+  echo "================================================"
+  echo "VALET_SKIP_SETUP=true install.sh --installation-directory ~/valet --version 0.35.114"
+  echo "================================================"
+
+  local installationDirectory="${HOME}/valet"
+  echo y | VALET_SKIP_SETUP=true /home/me/install.sh --installation-directory "${installationDirectory}" --version 0.35.114
+  checkInstallation "${installationDirectory}"
+  uninstallDefaultValet
+
+  echo
+  echo "================================================"
+  echo "install.sh --from-branch main"
+  echo "================================================"
+
+  # simulate ENTER key press to accept the default options during the installation
+  export VALET_CONFIG_LOG_PATTERN="<level>{-8s} <message>"
+  echo $'\n\n\n\n\n\n\n\n\n\n' | /home/me/install.sh --from-branch main
+  checkInstallation
+}
+
+function uninstallDefaultValet() {
+  rm -rf "${HOME}/.local/lib/valet" &>/dev/null || :
+  rm -rf "${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}" &>/dev/null || :
+  rm -rf "${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}" &>/dev/null || :
+  rm -rf "${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}" &>/dev/null || :
+  rm -rf "${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}" &>/dev/null || :
+  rm -rf "${VALET_CONFIG_EXTENSIONS_DIRECTORY:-${HOME}/.valet.d}" &>/dev/null || :
+}
+
+function checkInstallation() {
+  local \
+    installationDirectory="${1:-"${HOME}/.local/lib/valet"}"
+
+  if [[ ! -f "${installationDirectory}/valet" ||
+    ! -d "${installationDirectory}/commands.d" ||
+    ! -d "${installationDirectory}/libraries.d" ||
+    ! -f "${installationDirectory}/version" ]]; then
+    echo "Missing files/folders in ${installationDirectory}, installation failed:"
+    ls -la "${installationDirectory}"
+    exit 1
+  fi
+}
+
+main
+
+echo "Installation tests passed."

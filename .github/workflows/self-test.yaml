@@ -31,7 +31,10 @@ jobs:
           fetch-depth: 1
           submodules: recursive
 
-      # Runs our tests
+      - name: Pull Docker images for tests
+        run: |
+          docker pull noyacode/valet-tests-slimdeb:latest
+
       - name: Run valet self test
         env:
           VALET_CONFIG_ENABLE_COLORS: true
@@ -41,12 +44,15 @@ jobs:
           chmod +x valet
           ./valet self test -c
 
-      # Runs tests with bash 5
-      - name: Run valet self test on bash5
+      - name: Run valet self test on bash5.0
         run: |
           chmod +x valet
           docker run --rm \
             -v $PWD:/app \
             -w /app \
-            noyacode/minideb-bash5.0 \
-            bash --version; VALET_CONFIG_ENABLE_COLORS=true VALET_CONFIG_DISABLE_PROGRESS=true ./valet self test -c
+            -e VALET_CONFIG_ENABLE_COLORS=true \
+            -e VALET_CONFIG_DISABLE_PROGRESS=true \
+            --entrypoint /usr/local/bin/bash-5.0 \
+            --user root \
+            noyacode/valet-tests-slimdeb:latest \
+            -c '${BASH} --version; ./valet self test -c'

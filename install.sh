@@ -20,39 +20,43 @@
 #
 # This script will:
 #
-# - 1. Download the given tar.gz release from GitHub (latest by default).
+# - 1. Download the tar.gz release from GitHub (latest by default).
 # - 2. Copy it in the Valet installation directory, which defaults to: `~/.local/lib/valet`
-# - 3. Copy the showcase (command examples) in the valet extensions directory ~/.valet.d.
-# - 4. Run `valet self setup` command to finish the installation.
+# - 3. Run `valet self setup` command to finish the installation.
 #
 # ########################
 #         OPTIONS
 # ########################
 #
-# All options can also be set using environment variables, starting with `VALET_`, in uppercase and with underscores
-# instead of dashes (e.g. `VALET_INSTALLATION_DIRECTORY` for `--installation-directory`).
-#
 # - `--unattended`:
 #           Set to true to install without user interaction/prompt (useful for automated installation).
+#           Can be set using the environment variable `VALET_UNATTENDED=true`.
 #           Defaults to false.
 #           Note: If you use the unattended mode, you can specify options for the `valet self setup` command using
 #                  environment variables. Please check the command documentation for available options:
 #                 <https://jcaillon.github.io/valet/docs/valet-commands/#-valet-self-setup>.
 # - `--installation-directory <path>`:
 #           The directory where Valet will be installed.
+#           Can be set using the environment variable `VALET_INSTALLATION_DIRECTORY=<path>`.
 #           Defaults to `~/.local/lib/valet`.
-# - `--extensions-directory <path>`:
-#           The directory in which to store the user extensions and commands. The showcase extension will be copied there.
-#           Defaults to `~/.valet.d`.
-# - `--without-showcase`:
-#           Set to true to to not copy the showcase extension (a set of example commands) to the valet extensions directory (~/.valet.d).
-#           If you do not set this option, newer versions of the showcase will override the existing ones.
 # - `--from-branch <branch_name>`:
 #           Download Valet from a given branch tarball instead of a release.
+#           Can be set using the environment variable `VALET_FROM_BRANCH=<branch_name>`.
 #           Defaults to empty, which means to download the latest release.
-#
-# Additionally, you can set the environment variable `VALET_VERBOSE` to `true` to get more verbose output during the installation.
-#
+# - `--skip-setup`:
+#           Set to true to skip the execution of the `valet self setup` command after the installation.
+#           You can then run `valet self setup` manually to finish the installation or add valet to your PATH by yourself.
+#           Can be set using the environment variable `VALET_SKIP_SETUP=true`.
+#           Defaults to false.
+# - `--verbose`:
+#           Set to true to get more verbose output during the installation.
+#           Can be set using the environment variable `VALET_VERBOSE=true`.
+#           Defaults to false.
+# - `--version <version>`:
+#           Install a specific version of Valet instead of the version corresponding to this script version
+#           (i.e. latest version by default).
+#           Can be set using the environment variable `VALET_VERSION=<version>`.
+#           This option is ignored if `--from-branch` is specified.
 #
 
 # check the bash version (and that we are running in bash), make it POSIX compliant
@@ -72,9 +76,10 @@ function main() {
   local \
     unattended="${VALET_UNATTENDED:-"false"}" \
     installationDirectory="${VALET_INSTALLATION_DIRECTORY:-"${HOME}/.local/lib/valet"}" \
-    extensionsDirectory="${VALET_EXTENSIONS_DIRECTORY:-"${HOME}/.valet.d"}" \
-    withoutShowcase="${VALET_WITHOUT_SHOWCASE:-"false"}" \
-    fromBranch="${VALET_FROM_BRANCH:-}"
+    fromBranch="${VALET_FROM_BRANCH:-}" \
+    skipSetup="${VALET_SKIP_SETUP:-"false"}" \
+    verbose="${VALET_VERBOSE:-"false"}" \
+    version="${VALET_VERSION:-"${VALET_RELEASED_VERSION}"}"
 
   log::debug "Parsing arguments: ⌜${*}⌝."
   while (($# > 0)); do
@@ -87,18 +92,21 @@ function main() {
       [[ $# -eq 0 ]] && core::fail "Missing value for 'the installation directory' after the option --installation-directory."
       installationDirectory="${1}"
       ;;
-    --extensions-directory)
-      shift
-      [[ $# -eq 0 ]] && core::fail "Missing value for 'the extensions directory' after the option --extensions-directory."
-      extensionsDirectory="${1}"
-      ;;
-    --without-showcase)
-      withoutShowcase="true"
-      ;;
     --from-branch)
       shift
       [[ $# -eq 0 ]] && core::fail "Missing value for 'the branch name' after the option --from-branch."
       fromBranch="${1}"
+      ;;
+    --skip-setup)
+      skipSetup="true"
+      ;;
+    --verbose)
+      verbose="true"
+      ;;
+    --version)
+      shift
+      [[ $# -eq 0 ]] && core::fail "Missing value for 'the version' after the option --version."
+      version="${1}"
       ;;
     -*) core::fail "Unknown option ⌜${1}⌝." ;;
     *) core::fail "This command takes no arguments, did not understand ⌜${1}⌝." ;;
@@ -107,16 +115,15 @@ function main() {
   done
 
   installationDirectory="${installationDirectory%/}"
-  extensionsDirectory="${extensionsDirectory%/}"
+  VALET_VERBOSE="${verbose}"
 
   # compute the release URL
   local releaseUrl version
   if [[ -n ${fromBranch} ]]; then
-    releaseUrl="https://github.com/jcaillon/valet/archive/${fromBranch}.tar.gz"
     version="branch ${fromBranch}"
+    releaseUrl="https://github.com/jcaillon/valet/archive/${fromBranch}.tar.gz"
   else
-    releaseUrl="https://github.com/jcaillon/valet/releases/download/v${VALET_RELEASED_VERSION}/valet.tar.gz"
-    version="${VALET_RELEASED_VERSION}"
+    releaseUrl="https://github.com/jcaillon/valet/releases/download/v${version}/valet.tar.gz"
   fi
 
   # display a recap to the user
@@ -124,11 +131,6 @@ function main() {
   printRecapLine "Version to install:" "${version}"
   printRecapLine "Download URL:" "${releaseUrl}"
   printRecapLine "Installation dir:" "${installationDirectory}"
-  if [[ ${withoutShowcase} != "true" ]]; then
-    printRecapLine "Copy showcase to:" "${extensionsDirectory}"
-  else
-    printRecapLine "Install without showcase:" "true"
-  fi
   printf '\n'
 
   # ask for confirmation
@@ -139,19 +141,18 @@ function main() {
   # download and install valet
   install "${releaseUrl}" "${fromBranch}" "${installationDirectory}"
 
-  # copy the showcase if needed
-  if [[ ${withoutShowcase} != "true" ]]; then
-    copyShowcase "${installationDirectory}" "${extensionsDirectory}"
-  fi
-
   log::success "Valet version ⌜${version}⌝ has been installed in ⌜${installationDirectory}⌝."
 
   # remove the user commands to rebuild them
   command::deleteCommandsIndex
 
-  # run the setup command
-  log::info "Running the self setup command."
-  "${installationDirectory}/valet" self setup
+  if [[ ${skipSetup} == "true" ]]; then
+    log::warning "Skipping the valet self setup command as --skip-setup has been passed."$'\n'"You can now run ⌜valet self setup⌝ manually to finish setting up valet."$'\n'"Or add ${installationDirectory} to your PATH."
+  else
+    # run the setup command
+    log::info "Running the self setup command."
+    VALET_VERBOSE="${VALET_VERBOSE}" VALET_UNATTENDED="${unattended}" "${installationDirectory}/valet" self setup
+  fi
 }
 
 function printRecapLine() {
@@ -220,26 +221,6 @@ function install() {
   log::success "Valet has been downloaded in ⌜${installationDirectory}⌝."
 }
 
-# Copy the showcase to the user directory.
-function copyShowcase() {
-  local \
-    installationDirectory="${1}" \
-    extensionsDirectory="${2}"
-
-  testCommand "mkdir"
-  testCommand "cp"
-
-  mkdir -p "${extensionsDirectory}" || core::fail "Could not create the extensions directory ⌜${extensionsDirectory}⌝."
-
-  if [[ -d "${extensionsDirectory}/showcase.d" ]]; then
-    rm -Rf "${extensionsDirectory}/showcase.d" &>/dev/null || core::fail "Could not remove the existing showcase (command examples) in ⌜${extensionsDirectory}⌝."
-  fi
-
-  cp -R "${installationDirectory}/showcase.d" "${extensionsDirectory}" || core::fail "Could not copy the showcase (command examples) to ⌜${extensionsDirectory}⌝."
-
-  log::success "The showcase has been copied to ⌜${extensionsDirectory}/showcase.d⌝."
-}
-
 # Downloads a file to a specific location.
 function downloadTarBall() {
   local url="${1}"
@@ -267,6 +248,12 @@ function testCommand() {
 function log::info() {
   local message="${1//⌜/${STYLE_COLOR_ACCENT}⌜}"
   printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_INFO}%-7s${STYLE_COLOR_DEFAULT}  %s\n" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}" "INFO" "${message//⌝/⌝${STYLE_COLOR_DEFAULT}}"
+}
+
+# log warning message
+function log::warning() {
+  local message="${1//⌜/${STYLE_COLOR_ACCENT}⌜}"
+  printf "${STYLE_COLOR_FADED}%(%H:%M:%S)T${STYLE_COLOR_DEFAULT} ${STYLE_COLOR_WARNING}%-7s${STYLE_COLOR_DEFAULT}  %s\n" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}" "WARNING" "${message//⌝/⌝${STYLE_COLOR_DEFAULT}}"
 }
 
 # log success message
@@ -347,6 +334,7 @@ function command::deleteCommandsIndex() {
     STYLE_COLOR_FADED=$'\e[90m'
     STYLE_COLOR_DEBUG=$'\e[90m'
     STYLE_COLOR_INFO=$'\e[36m'
+    STYLE_COLOR_WARNING=$'\e[33m'
     STYLE_COLOR_SUCCESS=$'\e[32m'
     STYLE_COLOR_ERROR=$'\e[31m'
   else
@@ -356,6 +344,7 @@ function command::deleteCommandsIndex() {
     STYLE_COLOR_FADED=''
     STYLE_COLOR_DEBUG=''
     STYLE_COLOR_INFO=''
+    STYLE_COLOR_WARNING=''
     STYLE_COLOR_SUCCESS=''
     STYLE_COLOR_ERROR=''
   fi

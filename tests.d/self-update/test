@@ -13,22 +13,7 @@ set -Eeu -o pipefail
 # We start this script as root.
 
 function main() {
-  if [[ -z ${RUNNING_IN_DOCKER:-} ]]; then
-    # we are running this locally
-    if command -v docker &>/dev/null; then
-      echo "Running the test in a container."
-      # To build the image:
-      # - cd tests.d/install/docker-valet-test
-      # - docker build -t noyacode/minideb-bash5.0 .
-      # Then to run it:
-      # - docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash noyacode/minideb-bash5.0
-      # - ./tests.d/install/test
-      docker run --rm -it -v .:/app -w /app -e RUNNING_IN_DOCKER=true --entrypoint /bin/bash noyacode/minideb-bash5.0 -c -o errexit -o nounset -o pipefail "chmod +x ./tests.d/install/test; ./tests.d/install/test"
-      return 0
-    fi
-    echo "Need docker to run this test."
-    exit 1
-  fi
+  chmod +x /home/me/install.sh
 
   # we are running the following test on a container
   BRANCH_NAME="${BRANCH_NAME:-main}"

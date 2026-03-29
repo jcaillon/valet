@@ -40,10 +40,12 @@ function selfUninstall() {
     local configurationDirectory="${REPLY}"
     core::getUserDataDirectory
     local userDataDirectory="${REPLY}"
-    core::getExtensionsDirectory
-    local extensionsDirectory="${REPLY}"
     core::getUserCacheDirectory
     local userCacheDirectory="${REPLY}"
+    core::getUserStateDirectory
+    local userStateDirectory="${REPLY}"
+    core::getExtensionsDirectory
+    local extensionsDirectory="${REPLY}"
 
     # shellcheck disable=SC2016
     echo '#!/usr/bin/env bash
@@ -55,12 +57,16 @@ rm -Rf "'"${configurationDirectory}"'"
 rm -Rf "'"${userDataDirectory}"'"
 # remove the user cache
 rm -Rf "'"${userCacheDirectory}"'"
+# remove the user state
+rm -Rf "'"${userStateDirectory}"'"
 # remove the user extensions directory
 rm -Rf "'"${extensionsDirectory}"'"
 # remove a possible symlink
-rm -f "'"$(which valet)"'" 2>/dev/null || :
-echo "Valet has been uninstalled."
 '
+    if which valet &>/dev/null; then
+      echo 'rm -f "'"$(which valet)"'" 2>/dev/null || :'$'\n'
+    fi
+    echo 'echo "Valet has been uninstalled."'$'\n'
   else
     log::warning "To uninstall Valet, you can run the following commands:"$'\n'"bash -c 'eval \"\$(valet self uninstall --script 2>/dev/null)\"'"
   fi
