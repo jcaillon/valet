@@ -657,3 +657,27 @@ function core::setShellOptions() {
   LC_ALL="${VALET_CONFIG_LOCALE:-C.UTF-8}"
   LANG="${LC_ALL}"
 }
+
+## core::sourceScriptWithApproval
+#
+# Sources a script in the current directory if it exists.
+# Asks for the user's approval before sourcing the file, to avoid sourcing malicious files.
+# The user can choose to always allow sourcing that file in the future.
+#
+# - $1: **script name** _as string_:
+#       the name of the script to source, should be in the current directory.
+#
+# ```bash
+# core::sourceScriptWithApproval ".envrc"
+# ```
+function core::sourceScriptWithApproval() {
+  local scriptName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local scriptPath="${PWD}/${scriptName}"
+  if [[ -f "${scriptPath}" ]]; then
+    #TODO: add yes/no/always/never prompt
+    # shellcheck disable=SC2034
+    GLOBAL_ON_EXIT_MESSAGE="Error sourcing the ${scriptName} file ⌜${scriptPath}⌝."$'\n'"Check the file for error and try again."
+    builtin source "${scriptPath}"
+    unset -v GLOBAL_ON_EXIT_MESSAGE
+  fi
+}

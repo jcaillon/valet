@@ -245,3 +245,15 @@ Returned code: `1`
 
 Returned code: `1`
 
+### ✅ Testing system::isDirectoryInPath
+
+❯ `system::isDirectoryInPath /usr/local/bin`
+
+❯ `system::isDirectoryInPath /usr/bin`
+
+❯ `system::isDirectoryInPath /bin`
+
+❯ `system::isDirectoryInPath /sbin`
+
+Returned code: `1`
+

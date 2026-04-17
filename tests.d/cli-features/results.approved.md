@@ -65,15 +65,17 @@ Returned code: `1`
 CMDMISS  Command not found: ⌜zeoifuhizefuhzeh⌝.
 Please check your ⌜PATH⌝ variable.
 ├─ in source() at .env:xxx
+├─ in core::sourceScriptWithApproval() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:xxx
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ zeoifuhizefuhzeh
 ├─ in source() at .env:xxx
+├─ in core::sourceScriptWithApproval() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:xxx
-ERROR    Error sourcing the env file ⌜.env⌝.
-Check the file for error and try again, or delete the file to discard your config.
+ERROR    Error sourcing the .env file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/cli-features/.env⌝.
+Check the file for error and try again.
 ```
 
 ### ✅ Testing the bad .envrc
@@ -88,15 +90,17 @@ Returned code: `1`
 CMDMISS  Command not found: ⌜unknowzaazea⌝.
 Please check your ⌜PATH⌝ variable.
 ├─ in source() at .envrc:xxx
+├─ in core::sourceScriptWithApproval() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:xxx
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ unknowzaazea
 ├─ in source() at .envrc:xxx
+├─ in core::sourceScriptWithApproval() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/core:xxx
 ├─ in source() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
 ╰─ in main() at valet:xxx
-ERROR    Error sourcing the envrc file ⌜.envrc⌝.
-Check the file for error and try again, or delete the file to discard your config.
+ERROR    Error sourcing the .envrc file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/cli-features/.envrc⌝.
+Check the file for error and try again.
 ```
 
 ### ✅ Testing the bad commands

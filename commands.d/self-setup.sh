@@ -6,6 +6,8 @@
 source interactive
 # shellcheck source=../libraries.d/lib-system
 source system
+# shellcheck source=../libraries.d/lib-exe
+source exe
 
 #===============================================================
 # >>> command: self setup
@@ -20,14 +22,31 @@ shortDescription: The command run after the installation of Valet to setup the t
 description: |-
   The command run after the installation of Valet to setup the tool.
 
-  copy the showcase
-  Create a shim/proxy script in `~/.local/bin` that points to `~/.local/lib/valet/valet` (the valet entry point).
-  Make the valet script readable and executable, either by adding a shim
-  in a bin directory already present in your PATH, or by adding the Valet
-  directory to your PATH on shell startup.
+  This command will do the following (with user approval for each step):
 
-  Adjust the Valet configuration according to the user environment.
-  Let the user know what to do next.
+  - Copy the showcase to the user extensions directory.
+  - Create a shim/proxy script in `~/.local/bin` or `~/bin` that points to the valet script.
+  - Add the Valet directory to the user PATH by editing the shell startup files.
+  - Add the Valet directory to the windows PATH if on windows.
+  - Adjust the Valet configuration according to the user environment.
+  - Let the user know what to do next.
+
+options:
+- name: --unattended
+  description: |-
+    Do not enter interactive mode for the setup (skip all actions except those explicitly specified).
+- name: --copy-showcase
+  description: |-
+    Copy the showcase to the user extensions directory.
+- name: --create-shim
+  description: |-
+    Create a shim/proxy script in `~/.local/bin` or `~/bin` (if one of them is in your PATH) that points to the valet script.
+- name: --add-to-path
+  description: |-
+    Add the Valet directory to the user PATH by editing the shell startup files.
+- name: --setup-for-windows
+  description: |-
+    Add the Valet directory to the windows PATH if on windows and set the VALET_WIN_BASH and VALET_WIN_INSTALLATION_DIRECTORY windows environment variables.
 COMMAND_YAML
 function selfSetup() {
   command::parseArguments "$@"
@@ -36,95 +55,204 @@ function selfSetup() {
 
   log::info "Now setting up Valet."
 
-  printf '%s\n' "─────────────────────────────────────"
-  printf '%s\n' $'\e'"[0;36mThis is a COLOR CHECK, this line should be COLORED (in cyan by default)."$'\e'"[0m"
-  printf '%s\n' $'\e'"[0;32mThis is a COLOR CHECK, this line should be COLORED (in green by default)."$'\e'"[0m"
-  printf '%s\n' "─────────────────────────────────────"
+  selfSetup_checkColors "${unattended:-false}"
 
-  if interactive::confirm "Do you see the colors in the color check above the line?"; then
-    VALET_CONFIG_ENABLE_COLORS=true
-  else
-    VALET_CONFIG_ENABLE_COLORS=false
-  fi
-  styles::init
-  log::init
+  selfSetup_checkNerdFontIcons "${unattended:-false}"
 
-  log::info "If you see an unusual or ? character in the lines below, it means you don't have a nerd-font setup in your terminal."$'\n'"You can download a nerd-font here: https://www.nerdfonts.com/font-downloads."
+  selfSetup_installShowcase "${unattended:-false}" "${copyShowcase:-false}"
 
-  printf '%s\n' "─────────────────────────────────────"
-  printf '%s\n' "This is a nerd icon check, check out the next lines:"
-  printf '%s\n' "A cross within a square: "$'\uf2d3'
-  printf '%s\n' "A warning sign: "$'\uf071'
-  printf '%s\n' "A checked box: "$'\uf14a'
-  printf '%s\n' "An information icon: "$'\uf05a'
-  printf '%s\n' "─────────────────────────────────────"
+  selfSetup_createShim "${unattended:-false}" "${createSystemShim:-false}"
+  local shimCreated="${REPLY}"
 
-  if ! interactive::confirm "Do you correctly see the nerd icons in lines above?" default=false; then
-    log::info "You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."$'\n'"You can then run the command ⌜valet self setup⌝ again to set up the use of this font."
-    VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
-  else
-    VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
-  fi
-  styles::init
-  log::init
+  selfSetup_addValetToPath "${unattended:-false}" "${shimCreated:-false}" "${addToPath:-false}"
+  local addedToPath="${REPLY}"
+
+  selfSetup_setupForWindows "${unattended:-false}" "${setupForWindows:-false}"
 
   # generate the config
   command::sourceFunction selfConfig
   selfConfig --export-current-values --no-edit --override
 
-  # on windows, we can add the installation path to the windows PATH
-  if system::isWindows && interactive::confirm "Valet can be setup to be called from the windows CMD or windows powershell."$'\n'"Do you want to add Valet to your windows PATH?" default=false; then
-    selfSetup_setupForWindows
+  local greetingMessage=""
+  if [[ ${unattended:-} != "true" ]]; then
+    greetingMessage=$'\n'$'\n'"To get started, use ⌜valet --help⌝."
   fi
 
-  log::success "You are all set!"
+  if ! command -v valet &>/dev/null; then
+    if [[ ${addedToPath:-} == "true" ]]; then
+      log::warning "Valet has been added to your PATH but it will only be available in new shell sessions."$'\n'"Please login again to apply the changes on your current shell or call valet directly with ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝.${greetingMessage}"
+    else
+      log::warning "Valet is not in your PATH yet. You need to add ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝ to your PATH or call valet directly with ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝.${greetingMessage}"
+    fi
+  else
+    log::success "You are all set!${greetingMessage}"
+  fi
 }
 
-# Add the valet install dir to the windows PATH
-# + set VALET_WIN_BASH
-# + set VALET_WIN_INSTALLATION_DIRECTORY.
-function selfSetup_setupForWindows() {
-  # shellcheck source=../libraries.d/lib-windows
-  source windows
-  # shellcheck source=../libraries.d/lib-fs
-  source fs
+function selfSetup_checkColors() {
+  local unattended="${1}"
 
-  local linuxInstallationPath="${GLOBAL_INSTALLATION_DIRECTORY}"
-  fs::getAbsolutePath "${linuxInstallationPath}" realpath=true
-  windows::getWindowsPathFromUnixPath "${REPLY}"
-  local windowsInstallationPath="${REPLY}"
+  local previousState="${VALET_CONFIG_ENABLE_COLORS:-}"
 
-  local linuxBashPath="${BASH}"
-  fs::getAbsolutePath "${linuxBashPath}" realpath=true
-  windows::getWindowsPathFromUnixPath "${REPLY}"
-  local windowsBashPath="${REPLY}"
+  if [[ ${unattended:-} != "true" ]]; then
+    if interactive::confirm "Do you see "$'\e[46m'"t"$'\e[43m'"h"$'\e[42m'"i"$'\e[45m'"s"$'\e[0m'" "$'\e[36m'"t"$'\e[33m'"e"$'\e[32m'"x"$'\e[35m'"t"$'\e[0m'" in colors?" default="${previousState:-false}"; then
+      VALET_CONFIG_ENABLE_COLORS=true
+    else
+      VALET_CONFIG_ENABLE_COLORS=false
+    fi
+  fi
 
-  log::info "Setting the windows variable VALET_WIN_BASH to ⌜${windowsBashPath}⌝."
-  windows::setEnvVar VALET_WIN_BASH "${windowsBashPath}"
-
-  log::info "Setting the windows variable VALET_WIN_INSTALLATION_DIRECTORY to ⌜${windowsInstallationPath}⌝."
-  windows::setEnvVar VALET_WIN_INSTALLATION_DIRECTORY "${windowsInstallationPath}"
-
-  log::info "Adding ⌜${windowsInstallationPath}⌝ to the user windows PATH."
-  windows::addToPath "${windowsInstallationPath}"
+  if [[ ${previousState:-} != "${VALET_CONFIG_ENABLE_COLORS:-}" ]]; then
+    log::debug "The value of VALET_CONFIG_ENABLE_COLORS has been changed, reinitializing styles and log system."
+    styles::init
+    log::init
+  fi
 }
 
-# Copy the showcase to the user directory.
-function copyShowcase() {
+function selfSetup_checkNerdFontIcons() {
+  local unattended="${1}"
+
+  local previousState="${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-}"
+
+  if [[ ${unattended:-} != "true" ]]; then
+    log::info "Valet can use a nerd-font to improve your terminal experience."$'\n'"You can download a nerd-font here: https://www.nerdfonts.com/font-downloads."
+  fi
+
+  if [[ ${unattended:-} != "true" ]] && interactive::confirm "Do you correctly see the icons in this prompt? "$'\uf14a'" "$'\uf05a'" "$'\uf059'" " default="${previousState:-false}"; then
+    VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
+  else
+    if [[ ${unattended:-} != "true" ]]; then
+      log::info "You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."$'\n'"You can then run the command ⌜valet self setup⌝ again to set up the use of this font."
+    fi
+    VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
+  fi
+
+  if [[ ${previousState:-} != "${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-}" ]]; then
+    log::debug "The value of VALET_CONFIG_ENABLE_NERDFONT_ICONS has been changed, reinitializing styles and log system."
+    styles::init
+    log::init
+  fi
+}
+
+function selfSetup_installShowcase() {
   local \
-    installationDirectory="${1}" \
-    extensionsDirectory="${2}"
+    unattended="${1}" \
+    copyShowcase="${2}"
 
-  testCommand "mkdir"
-  testCommand "cp"
+  log::debug "Installing the showcase (command examples) in the extensions directory."
 
-  mkdir -p "${extensionsDirectory}" || core::fail "Could not create the extensions directory ⌜${extensionsDirectory}⌝."
+  core::getExtensionsDirectory
+  local extensionsDirectory="${REPLY}"
 
-  if [[ -d "${extensionsDirectory}/showcase.d" ]]; then
-    rm -Rf "${extensionsDirectory}/showcase.d" &>/dev/null || core::fail "Could not remove the existing showcase (command examples) in ⌜${extensionsDirectory}⌝."
+  local showcaseDirectory="${extensionsDirectory}/showcase.d"
+  local showcasePromptMessage
+  if [[ -d ${showcaseDirectory} ]]; then
+    showcasePromptMessage="The showcase (command examples) already exists in your extensions directory ⌜${showcaseDirectory}⌝."$'\n'"Do you want to override it with the latest version?"
+  else
+    showcasePromptMessage="Valet comes with a showcase (command examples) that can be copied to your extensions directory ⌜${showcaseDirectory}⌝."$'\n'"Do you want to copy it now?"
   fi
 
-  cp -R "${installationDirectory}/showcase.d" "${extensionsDirectory}" || core::fail "Could not copy the showcase (command examples) to ⌜${extensionsDirectory}⌝."
+  if [[ ${copyShowcase:-} == "true" ]] || ([[ ${unattended:-} != "true" ]] && interactive::confirm "${showcasePromptMessage}" default=true); then
+    exe::invoke mkdir -p "${extensionsDirectory}" --- failMessage="Could not create the extensions directory ⌜${extensionsDirectory}⌝."
+    if [[ -d "${showcaseDirectory}" ]]; then
+      exe::invoke rm -Rf "${showcaseDirectory}" --- failMessage="Could not remove the existing showcase (command examples) in ⌜${extensionsDirectory}⌝."
+    fi
+    exe::invoke cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" "${extensionsDirectory}" --- failMessage="Could not copy the showcase (command examples) to ⌜${extensionsDirectory}⌝."
 
-  log::success "The showcase has been copied to ⌜${extensionsDirectory}/showcase.d⌝."
+    log::success "The showcase (command examples) has been copied to your extensions directory ⌜${showcaseDirectory}⌝."
+  fi
+}
+
+function selfSetup_createShim() {
+  local \
+    unattended="${1}" \
+    createSystemShim="${2}"
+
+  log::debug "Add valet to the PATH or create a shim in a directory already in the PATH."
+
+  local shimDirectory="${HOME}/.local/bin"
+  if ! system::isDirectoryInPath "${shimDirectory}"; then
+    shimDirectory="${HOME}/bin"
+    if ! system::isDirectoryInPath "${shimDirectory}"; then
+      shimDirectory=""
+    fi
+  fi
+
+  if [[ -z ${shimDirectory} ]]; then
+    REPLY="false"
+    return 0
+  fi
+
+  # create the shim in the bin directory
+  local valetBin="${shimDirectory}/valet"
+
+  if [[ ${createShim:-} == "true" ]] || ([[ ${unattended:-} != "true" ]] && interactive::confirm "Do you want to create a shim script in ⌜${shimDirectory}⌝ to add it to your PATH?" default=true); then
+    log::info "Creating a shim ⌜${valetBin}⌝ → ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝."
+    printf '#%s%s\nsource %s "$@"' "!" "/usr/bin/env bash" "'${GLOBAL_INSTALLATION_DIRECTORY}/valet'" 1>"${valetBin}"
+    exe::invoke chmod +x "${valetBin}"
+    log::success "Shim created in ⌜${valetBin}⌝."
+    REPLY="true"
+  else
+    REPLY="false"
+  fi
+}
+
+function selfSetup_addValetToPath() {
+  local \
+    unattended="${1}" \
+    shimCreated="${2}" \
+    addToPath="${3}"
+
+  log::debug "Add valet to the PATH by editing the shell startup files."
+
+  local addByDefault="true"
+  if [[ ${shimCreated} == "true" ]]; then
+    addByDefault="false"
+  fi
+
+  if [[ ${addToPath:-} == "true" ]] || ([[ ${unattended:-} != "true" ]] && interactive::confirm "Do you want to add Valet to your PATH by editing your shell startup files?" default="${addByDefault}"); then
+    system::addToPath "${GLOBAL_INSTALLATION_DIRECTORY}"
+    log::success "Valet has been added to your PATH."
+    REPLY="true"
+  fi
+
+  REPLY="false"
+}
+
+function selfSetup_setupForWindows() {
+  local \
+    unattended="${1}" \
+    setupForWindows="${2}"
+
+  if ! system::isWindows; then
+    return 0
+  fi
+
+  # on windows, we can add the installation path to the windows PATH
+  if [[ ${setupForWindows:-} == "true" ]] || ([[ ${unattended:-} != "true" ]] && interactive::confirm "Valet can be setup to be called from the windows CMD or windows powershell."$'\n'"Do you want to add Valet to your windows PATH?" default=true); then
+
+    # shellcheck source=../libraries.d/lib-windows
+    source windows
+    # shellcheck source=../libraries.d/lib-fs
+    source fs
+
+    local linuxInstallationPath="${GLOBAL_INSTALLATION_DIRECTORY}"
+    fs::getAbsolutePath "${linuxInstallationPath}" realpath=true
+    windows::getWindowsPathFromUnixPath "${REPLY}"
+    local windowsInstallationPath="${REPLY}"
+
+    local linuxBashPath="${BASH}"
+    fs::getAbsolutePath "${linuxBashPath}" realpath=true
+    windows::getWindowsPathFromUnixPath "${REPLY}"
+    local windowsBashPath="${REPLY}"
+
+    log::info "Setting the windows variable VALET_WIN_BASH to ⌜${windowsBashPath}⌝."
+    windows::setEnvVar VALET_WIN_BASH "${windowsBashPath}"
+
+    log::info "Setting the windows variable VALET_WIN_INSTALLATION_DIRECTORY to ⌜${windowsInstallationPath}⌝."
+    windows::setEnvVar VALET_WIN_INSTALLATION_DIRECTORY "${windowsInstallationPath}"
+
+    log::info "Adding ⌜${windowsInstallationPath}⌝ to the user windows PATH."
+    windows::addToPath "${windowsInstallationPath}"
+  fi
 }

@@ -76,7 +76,7 @@ function atuin::init() {
   string::split REPLY $'\n'
   local cmd
   for cmd in "${REPLY_ARRAY[@]}"; do
-    history -s "${cmd}"
+    history -s -- "${cmd}"
   done
 
   # Will be run before the prompt is drawn

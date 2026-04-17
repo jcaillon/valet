@@ -14,6 +14,17 @@ function main() {
   test_system::getEnvVars
   test_system::addToPath
   test_system::isWindowsWithoutNativeSymlinks
+  test_system::isDirectoryInPath
+}
+
+function test_system::isDirectoryInPath() {
+  test::title "✅ Testing system::isDirectoryInPath"
+
+  PATH="/usr/local/bin:/usr/bin:/bin"
+  test::func system::isDirectoryInPath "/usr/local/bin"
+  test::func system::isDirectoryInPath "/usr/bin"
+  test::func system::isDirectoryInPath "/bin"
+  test::func system::isDirectoryInPath "/sbin"
 }
 
 function test_system::isWindowsWithoutNativeSymlinks() {

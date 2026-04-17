@@ -59,39 +59,73 @@ Yes
 INFO     The commands index does not exist ⌜/home/me/.local/share/valet/commands⌝.
          Now silently building it using ⌜valet self build⌝ command.
 INFO     Now setting up Valet.
-─────────────────────────────────────
-[0;36mThis is a COLOR CHECK, this line should be COLORED (in cyan by default).[0m
-[0;32mThis is a COLOR CHECK, this line should be COLORED (in green by default).[0m
-─────────────────────────────────────
-   ╭──────────────────────────────────────────────────────────╮[0m
-░──┤[0m Do you see the colors in the color check above the line? [63G│[0m
-   ╰──────────────────────────────────────────────────────────╯[0m
+   ╭─────────────────────────────────────────────────────────────────────────────────╮[0m
+░──┤[0m Do you see [46mt[43mh[42mi[45ms[0m [36mt[33me[32mx[35mt[0m in colors? [86G│[0m
+   ╰─────────────────────────────────────────────────────────────────────────────────╯[0m
+[?25l
+[1F[0J[?25l    (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[9G╭─────╮[0m
+[9G│[0m No. [15G├──░[0m
+[9G╰─────╯[0m
+INFO     Valet can use a nerd-font to improve your terminal experience.
+         You can download a nerd-font here: https://www.nerdfonts.com/font-downloads.
+   ╭───────────────────────────────────────────────────────╮[0m
+░──┤[0m Do you correctly see the icons in this prompt?     [60G│[0m
+   ╰───────────────────────────────────────────────────────╯[0m
+[?25l
+[1F[0J[?25l    (Y)ES   [0m   [7m   (N)O   [0m[1G[0K[9G╭─────╮[0m
+[9G│[0m No. [15G├──░[0m
+[9G╰─────╯[0m
+INFO     You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
+         After that, you need to setup your terminal to use this newly installed font.
+         You can then run the command ⌜valet self setup⌝ again to set up the use of this font.
+   ╭─────────────────────────────────────────────────────────────────────────────────────────────────╮[0m
+░──┤[0m Valet comes with a showcase (command examples) that can be copied to your extensions directory  [102G│[0m
+   │[0m ⌜/home/me/.valet.d/showcase.d⌝. [102G│[0m
+   │[0m Do you want to copy it now? [102G│[0m
+   ╰─────────────────────────────────────────────────────────────────────────────────────────────────╯[0m
 [?25l
 [1F[0J[?25l [7m   (Y)ES   [0m      (N)O   [0m[1G[0K[9G╭──────╮[0m
 [9G│[0m Yes. [16G├──░[0m
 [9G╰──────╯[0m
-INFO     If you see an unusual or ? character in the lines below, it means you don't have a nerd-font setup in your 
-         terminal.
-         You can download a nerd-font here: https://www.nerdfonts.com/font-downloads.
-─────────────────────────────────────
-This is a nerd icon check, check out the next lines:
-A cross within a square: 
-A warning sign: 
-A checked box: 
-An information icon: 
-─────────────────────────────────────
-   [90m╭─────────────────────────────────────────────────────╮[0m
-[90m░──┤[0m Do you correctly see the nerd icons in lines above? [58G[90m│[0m
-   [90m╰─────────────────────────────────────────────────────╯[0m
+SUCCESS  The showcase (command examples) has been copied to your extensions directory ⌜/home/me/.valet.d/showcase.d⌝.
+   ╭────────────────────────────────────────────────────────────────────────────╮[0m
+░──┤[0m Do you want to add Valet to your PATH by editing your shell startup files? [81G│[0m
+   ╰────────────────────────────────────────────────────────────────────────────╯[0m
 [?25l
-[1F[0J[?25l [7m[90m   (Y)ES   [0m   [7m[95m   (N)O   [0m[1G[0K[9G[90m╭─────╮[0m
-[9G[90m│[0m No. [15G[90m├──░[0m
-[9G[90m╰─────╯[0m
-INFO     You can download any font here: https://www.nerdfonts.com/font-downloads and install it.
-         After that, you need to setup your terminal to use this newly installed font.
-         You can then run the command [95m⌜valet self setup⌝[39m again to set up the use of this font.
-INFO     Writing the valet config file [95m⌜/home/me/.config/valet/config⌝[39m.
+[1F[0J[?25l [7m   (Y)ES   [0m      (N)O   [0m[1G[0K[9G╭──────╮[0m
+[9G│[0m Yes. [16G├──░[0m
+[9G╰──────╯[0m
+INFO     Adding directory ⌜/home/me/.local/lib/valet⌝ to the PATH for ⌜bash⌝ shell.
+         Appending to ⌜/home/me/.bashrc⌝:
+         export PATH="/home/me/.local/lib/valet:${PATH}"
+INFO     Adding directory ⌜/home/me/.local/lib/valet⌝ to the PATH for ⌜ksh⌝ shell.
+         Appending to ⌜/home/me/.kshrc⌝:
+         export PATH="/home/me/.local/lib/valet:${PATH}"
+INFO     Adding directory ⌜/home/me/.local/lib/valet⌝ to the PATH for ⌜zsh⌝ shell.
+         Appending to ⌜/home/me/.zshrc⌝:
+         export PATH="/home/me/.local/lib/valet:${PATH}"
+INFO     Adding directory ⌜/home/me/.local/lib/valet⌝ to the PATH for ⌜tcsh⌝ shell.
+         Appending to ⌜/home/me/.tcshrc⌝:
+         set path = ($path '/home/me/.local/lib/valet')
+INFO     Adding directory ⌜/home/me/.local/lib/valet⌝ to the PATH for ⌜csh⌝ shell.
+         Appending to ⌜/home/me/.cshrc⌝:
+         set path = ($path '/home/me/.local/lib/valet')
+INFO     Adding directory ⌜/home/me/.local/lib/valet⌝ to the PATH for ⌜xonsh⌝ shell.
+         Appending to ⌜/home/me/.xonshrc⌝:
+         $PATH.append('/home/me/.local/lib/valet')
+INFO     Adding directory ⌜/home/me/.local/lib/valet⌝ to the PATH for ⌜fish⌝ shell.
+         Appending to ⌜/home/me/.config/fish/config.fish⌝:
+         fish_add_path '/home/me/.local/lib/valet'
+INFO     Adding directory ⌜/home/me/.local/lib/valet⌝ to the PATH for ⌜nu⌝ shell.
+         Appending to ⌜/home/me/.config/nushell/env.nu⌝:
+         $env.PATH = ($env.PATH | split row (char esep) | append "/home/me/.local/lib/valet")
+WARNING  The directory ⌜/home/me/.local/lib/valet⌝ has been added to the PATH for 8 shells.
+         Please login again to apply the changes on your current shell if you are not using bash.
+SUCCESS  Valet has been added to your PATH.
+INFO     Writing the valet config file ⌜/home/me/.config/valet/config⌝.
 SUCCESS  You are all set!
+         
+         To get started, use ⌜valet --help⌝.
 Installation tests passed.
 ```
 

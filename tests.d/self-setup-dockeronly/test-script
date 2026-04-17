@@ -13,6 +13,8 @@ set -Eeu -o pipefail
 # We start this script as root.
 
 function main() {
+  chmod +x /home/me/install.sh
+
   export GLOBAL_MOCK_EPOCHSECONDS=548902800
 
   echo "================================================"
@@ -40,7 +42,7 @@ function main() {
 
   # simulate ENTER key press to accept the default options during the installation
   export VALET_CONFIG_LOG_PATTERN="<level>{-8s} <message>"
-  echo $'\n\n\n\n\n\n\n\n\n\n\n\n' | /home/me/install.sh --from-branch main
+  echo $'\n\n\n\n\n\n\n\n\n\n' | /home/me/install.sh --from-branch main
   checkInstallation
 }
 
@@ -63,6 +65,26 @@ function checkInstallation() {
     ! -f "${installationDirectory}/version" ]]; then
     echo "Missing files/folders in ${installationDirectory}, installation failed:"
     ls -la "${installationDirectory}"
+    exit 1
+  fi
+}
+
+function uninstallValet() {
+  local \
+    installationDirectory="${1:-"${HOME}/.local/lib/valet"}"
+
+  eval "$("${installationDirectory}/valet" self uninstall --script)"
+
+  local \
+    installationDirectory="${1:-"${HOME}/.local/lib/valet"}"
+
+  if [[ -d "${installationDirectory}" ||
+    -d "${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}" ||
+    -d "${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}" ||
+    -d "${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}" ||
+    -d "${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}" ||
+    -d "${VALET_CONFIG_EXTENSIONS_DIRECTORY:-${HOME}/.valet.d}" ]]; then
+    echo "Some folders are still present, installation failed:"
     exit 1
   fi
 }

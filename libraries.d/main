@@ -154,17 +154,13 @@ if [[ -f ${GLOBAL_STARTUP_FILE} ]]; then
 fi
 
 # Source the env script
-if [[ ${GLOBAL_SOURCED_FOR_PROMPT:-} != "true" && ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENV_SCRIPT:-.env} ]]; then
-  GLOBAL_ON_EXIT_MESSAGE="Error sourcing the env file ⌜${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}⌝."$'\n'"Check the file for error and try again, or delete the file to discard your config."
-  builtin source "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
-  unset -v GLOBAL_ON_EXIT_MESSAGE
+if [[ ${GLOBAL_SOURCED_FOR_PROMPT:-} != "true" && ${VALET_CONFIG_DOT_ENV_SCRIPT:-} != "false" ]]; then
+  core::sourceScriptWithApproval "${VALET_CONFIG_DOT_ENV_SCRIPT:-.env}"
 fi
 
 # Source the envrc script
-if [[ ${GLOBAL_SOURCED_FOR_PROMPT:-} != "true" && ${VALET_CONFIG_DOT_ENVRC_SCRIPT:-} != "false" && -f ${VALET_CONFIG_DOT_ENVRC_SCRIPT:-.envrc} ]]; then
-  GLOBAL_ON_EXIT_MESSAGE="Error sourcing the envrc file ⌜${VALET_CONFIG_DOT_ENVRC_SCRIPT:-.envrc}⌝."$'\n'"Check the file for error and try again, or delete the file to discard your config."
-  builtin source "${VALET_CONFIG_DOT_ENVRC_SCRIPT:-.envrc}"
-  unset -v GLOBAL_ON_EXIT_MESSAGE
+if [[ ${GLOBAL_SOURCED_FOR_PROMPT:-} != "true" && ${VALET_CONFIG_DOT_ENVRC_SCRIPT:-} != "false" ]]; then
+  core::sourceScriptWithApproval "${VALET_CONFIG_DOT_ENVRC_SCRIPT:-.envrc}"
 fi
 
 # ## main::parseProgramArguments (private)

@@ -28,15 +28,20 @@ options:
     Will immediately source all the libraries functions.
 - name: -E, --no-exit
   description: |-
-    Override the ⌜core::fail⌝  function to not exit the script.
+    Override the ⌜core::fail⌝ and ⌜core::exit⌝ functions to not exit the script.
 - name: -p, --prompt-mode
   description: |-
     Source valet functions with modifications to be used in a shell prompt.
+    This will disable all traps and override the ⌜core::fail⌝ and ⌜core::exit⌝ functions to not exit the shell.
 examples:
 - name: !eval "$(valet self source)"
   description: |-
-    Source valet functions in your bash script or bash prompt.
+    Source valet functions in your bash session.
     You can then can then use valet function as if you were in a command script.
+    Perfect for CI/CD pipelines.
+- name: !eval "$(valet self source --prompt-mode)"
+  description: |-
+    The preferred mode to source valet functions in your shell prompt.
 COMMAND_YAML
 function selfSource() {
   command::parseArguments "$@"

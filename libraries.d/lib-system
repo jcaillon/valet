@@ -244,3 +244,28 @@ function system::addToPath() {
     log::warning "The directory ⌜${pathToAdd}⌝ has been added to the PATH for ${count} shells."$'\n'"Please login again to apply the changes on your current shell if you are not using bash."
   fi
 }
+
+## system::isDirectoryInPath
+#
+# Check if a given directory is in the PATH environment variable.
+#
+# - $1: **directory** _as string_:
+#       the directory to check.
+#
+# Returns:
+# - $?
+#   - 0 if the directory is in the PATH environment variable
+#   - 1 otherwise.
+#
+# ```bash
+# if system::isDirectoryInPath "/path/to/bin"; then
+#   printf 'The directory is in the PATH.'
+# fi
+# ```
+function system::isDirectoryInPath() {
+  local directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if [[ ":${PATH}:" == *":${directory}:"* ]]; then
+    return 0
+  fi
+  return 1
+}
