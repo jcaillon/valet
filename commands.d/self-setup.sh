@@ -29,6 +29,8 @@ description: |-
   - Add the Valet directory to the user PATH by editing the shell startup files.
   - Add the Valet directory to the windows PATH if on windows.
   - Adjust the Valet configuration according to the user environment.
+  - If the current user is root and the option is given, make Valet available for all users.
+    (set read permissions for all users on Valet files and directories and create a shim in /usr/local/bin).
   - Let the user know what to do next.
 
 options:
@@ -47,6 +49,9 @@ options:
 - name: --setup-for-windows
   description: |-
     Add the Valet directory to the windows PATH if on windows and set the VALET_WIN_BASH and VALET_WIN_INSTALLATION_DIRECTORY windows environment variables.
+- name: --global-installation
+  description: |-
+    If the current user is root and the option is given, make Valet available for all users (set read permissions for all users on Valet files and directories and create a shim in /usr/local/bin).
 COMMAND_YAML
 function selfSetup() {
   command::parseArguments "$@"
@@ -69,6 +74,13 @@ function selfSetup() {
 
   selfSetup_setupForWindows "${unattended:-false}" "${setupForWindows:-false}"
 
+  if [[ ${EUID:-"-1"} == "0" ]]; then
+    selfSetup_globalInstallation "${unattended:-false}" "${globalInstallation:-false}"
+    if [[ ${shimCreated} != "true" ]]; then
+      shimCreated="${REPLY}"
+    fi
+  fi
+
   # generate the config
   command::sourceFunction selfConfig
   selfConfig --export-current-values --no-edit --override
@@ -78,7 +90,7 @@ function selfSetup() {
     greetingMessage=$'\n'$'\n'"To get started, use ⌜valet --help⌝."
   fi
 
-  if ! command -v valet &>/dev/null; then
+  if [[ ${shimCreated:-} != "true" ]]; then
     if [[ ${addedToPath:-} == "true" ]]; then
       log::warning "Valet has been added to your PATH but it will only be available in new shell sessions."$'\n'"Please login again to apply the changes on your current shell or call valet directly with ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝.${greetingMessage}"
     else
@@ -214,9 +226,9 @@ function selfSetup_addValetToPath() {
     system::addToPath "${GLOBAL_INSTALLATION_DIRECTORY}"
     log::success "Valet has been added to your PATH."
     REPLY="true"
+  else
+    REPLY="false"
   fi
-
-  REPLY="false"
 }
 
 function selfSetup_setupForWindows() {
@@ -254,5 +266,28 @@ function selfSetup_setupForWindows() {
 
     log::info "Adding ⌜${windowsInstallationPath}⌝ to the user windows PATH."
     windows::addToPath "${windowsInstallationPath}"
+  fi
+}
+
+function selfSetup_globalInstallation() {
+  local \
+    unattended="${1}" \
+    globalInstallation="${2}"
+
+  log::debug "Setting up a global installation of Valet (make it available for all users)."
+
+  if [[ ${globalInstallation:-} == "true" ]] || ([[ ${unattended:-} != "true" ]] && interactive::confirm "Do you want to add Valet to make valet available for all users?" default=true); then
+
+    log::info "Setting read permissions for all users on Valet files and directories."
+    exe::invoke chmod -R a+rX "${GLOBAL_INSTALLATION_DIRECTORY}" --- failMessage="Could not set read permissions for all users on Valet files and directories."
+
+    local shimPath="/usr/local/bin/valet"
+    log::info "Creating a shim ⌜${shimPath}⌝ → ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝ to make Valet available for all users."
+    printf '#%s%s\nsource %s "$@"' "!" "/usr/bin/env bash" "'${GLOBAL_INSTALLATION_DIRECTORY}/valet'" 1>"${shimPath}"
+    exe::invoke chmod +x "${shimPath}" --- failMessage="Could not create the shim in ⌜${shimPath}⌝."
+    log::success "Global installation setup complete."
+    REPLY="true"
+  else
+    REPLY="false"
   fi
 }

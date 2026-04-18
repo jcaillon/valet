@@ -123,7 +123,9 @@ WARNING  The directory ⌜/home/me/.local/lib/valet⌝ has been added to the PAT
          Please login again to apply the changes on your current shell if you are not using bash.
 SUCCESS  Valet has been added to your PATH.
 INFO     Writing the valet config file ⌜/home/me/.config/valet/config⌝.
-SUCCESS  You are all set!
+WARNING  Valet has been added to your PATH but it will only be available in new shell sessions.
+         Please login again to apply the changes on your current shell or call valet directly with 
+         ⌜/home/me/.local/lib/valet/valet⌝.
          
          To get started, use ⌜valet --help⌝.
 Installation tests passed.

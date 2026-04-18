@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+
+# This script is executed in a Docker container
+
+function main() {
+  export VALET_CONFIG_LOG_PATTERN="<level>{-8s} <message>"
+  export VALET_CONFIG_LOG_COLUMNS=9999
+  export VALET_CONFIG_LOG_DISABLE_WRAP=true
+  export VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true
+  export VALET_CONFIG_ENABLE_COLORS=false
+
+  chmod +x /opt/valet/valet
+
+  echo "#!/usr/bin/env bash" >/root/chmod
+  chmod +x /root/chmod
+  export PATH="/root:${PATH}"
+
+  echo "EUID: ${EUID:-"unknown"}"
+
+  echo "================================================"
+  echo "valet self setup (with all default options)"
+  echo "================================================"
+
+  # setup with all default options (simulate pressing ENTER for all prompts)
+  echo $'\n\n\n\n\n\n\n\n\n\n' | /opt/valet/valet self setup
+
+  echo
+  echo "================================================"
+  echo "> cat /usr/local/bin/valet"
+  cat /usr/local/bin/valet
+  echo
+
+  echo
+  echo "================================================"
+  echo "valet self setup --unattended --global-installation"
+  echo "================================================"
+
+  /opt/valet/valet self setup --unattended --global-installation
+}
+
+main
+
+echo "Self setup tests passed."

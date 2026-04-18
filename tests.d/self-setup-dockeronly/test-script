@@ -1,94 +1,86 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
 
-# This is a test that is executed either in GitHub Actions or locally which tests the
-# installation of Valet and its extensions, as well as the update.
-
-# Run locally from valet directory:
-# ./tests.d/install/test
-
-# We expect this script to run in a Docker container, with curl installed
-# and a 'me' user with sudo privileges.
-
-# We start this script as root.
+# This script is executed in a Docker container
 
 function main() {
-  chmod +x /home/me/install.sh
-
-  export GLOBAL_MOCK_EPOCHSECONDS=548902800
-
-  echo "================================================"
-  echo "VALET_VERSION=0.35.114 install.sh --unattended --skip-setup"
-  echo "================================================"
-
-  VALET_VERSION=0.35.114 /home/me/install.sh --unattended --skip-setup
-  checkInstallation
-  uninstallDefaultValet
-
-  echo
-  echo "================================================"
-  echo "VALET_SKIP_SETUP=true install.sh --installation-directory ~/valet --version 0.35.114"
-  echo "================================================"
-
-  local installationDirectory="${HOME}/valet"
-  echo y | VALET_SKIP_SETUP=true /home/me/install.sh --installation-directory "${installationDirectory}" --version 0.35.114
-  checkInstallation "${installationDirectory}"
-  uninstallDefaultValet
-
-  echo
-  echo "================================================"
-  echo "install.sh --from-branch main"
-  echo "================================================"
-
-  # simulate ENTER key press to accept the default options during the installation
   export VALET_CONFIG_LOG_PATTERN="<level>{-8s} <message>"
-  echo $'\n\n\n\n\n\n\n\n\n\n' | /home/me/install.sh --from-branch main
-  checkInstallation
-}
+  export VALET_CONFIG_LOG_COLUMNS=9999
+  export VALET_CONFIG_LOG_DISABLE_WRAP=true
+  export VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true
+  export VALET_CONFIG_ENABLE_COLORS=false
 
-function uninstallDefaultValet() {
-  rm -rf "${HOME}/.local/lib/valet" &>/dev/null || :
-  rm -rf "${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}" &>/dev/null || :
-  rm -rf "${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}" &>/dev/null || :
-  rm -rf "${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}" &>/dev/null || :
-  rm -rf "${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}" &>/dev/null || :
-  rm -rf "${VALET_CONFIG_EXTENSIONS_DIRECTORY:-${HOME}/.valet.d}" &>/dev/null || :
-}
+  echo "#!/usr/bin/env bash" >/home/me/chmod
+  chmod +x /home/me/chmod
+  export PATH="/home/me:${PATH}"
 
-function checkInstallation() {
-  local \
-    installationDirectory="${1:-"${HOME}/.local/lib/valet"}"
+  echo "================================================"
+  echo "valet self setup (with all default options)"
+  echo "================================================"
 
-  if [[ ! -f "${installationDirectory}/valet" ||
-    ! -d "${installationDirectory}/commands.d" ||
-    ! -d "${installationDirectory}/libraries.d" ||
-    ! -f "${installationDirectory}/version" ]]; then
-    echo "Missing files/folders in ${installationDirectory}, installation failed:"
-    ls -la "${installationDirectory}"
-    exit 1
-  fi
-}
+  # setup with all default options (simulate pressing ENTER for all prompts)
+  echo $'\n\n\n\n\n\n\n\n\n\n' | /home/me/valet/valet self setup
 
-function uninstallValet() {
-  local \
-    installationDirectory="${1:-"${HOME}/.local/lib/valet"}"
+  echo
+  echo "================================================"
+  echo "> tail --lines=1 /home/me/.bashrc"
+  tail --lines=1 /home/me/.bashrc
 
-  eval "$("${installationDirectory}/valet" self uninstall --script)"
+  echo "> ls /home/me/.valet.d/showcase.d"
+  ls /home/me/.valet.d/showcase.d
 
-  local \
-    installationDirectory="${1:-"${HOME}/.local/lib/valet"}"
+  echo "> grep -E \"(VALET_CONFIG_ENABLE_COLORS|VALET_CONFIG_ENABLE_NERDFONT_ICONS)\" /home/me/.config/valet/config"
+  grep -E "(VALET_CONFIG_ENABLE_COLORS|VALET_CONFIG_ENABLE_NERDFONT_ICONS)" /home/me/.config/valet/config
 
-  if [[ -d "${installationDirectory}" ||
-    -d "${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}" ||
-    -d "${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}" ||
-    -d "${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}" ||
-    -d "${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}" ||
-    -d "${VALET_CONFIG_EXTENSIONS_DIRECTORY:-${HOME}/.valet.d}" ]]; then
-    echo "Some folders are still present, installation failed:"
-    exit 1
-  fi
+  echo
+  echo "================================================"
+  echo "valet self setup --unattended"
+  echo "================================================"
+
+  /home/me/valet/valet self setup --unattended
+
+  echo
+  echo "================================================"
+  echo "valet self setup (with no to all prompts)"
+  echo "================================================"
+
+  rm -Rf /home/me/.valet.d/showcase.d
+
+  # setup answering no to all prompts
+  echo $'nnnnnnnnnnn' | /home/me/valet/valet self setup
+
+  echo "================================================"
+  echo "> ls /home/me/.valet.d"
+  ls /home/me/.valet.d
+
+  echo
+  echo "================================================"
+  echo "valet self setup (with yes to all prompts)"
+  echo "================================================"
+
+  mkdir -p /home/me/.local/bin
+  export PATH="/home/me/.local/bin:${PATH}"
+
+  # setup answering yes to all prompts
+  echo $'yyyyyyyyyyy' | /home/me/valet/valet self setup
+
+  echo
+  echo "================================================"
+  echo "> cat /home/me/.local/bin/valet"
+  cat /home/me/.local/bin/valet
+
+  echo
+  echo "> grep -E \"(VALET_CONFIG_ENABLE_COLORS|VALET_CONFIG_ENABLE_NERDFONT_ICONS)\" /home/me/.config/valet/config"
+  grep -E "(VALET_CONFIG_ENABLE_COLORS|VALET_CONFIG_ENABLE_NERDFONT_ICONS)" /home/me/.config/valet/config
+
+  echo
+  echo "================================================"
+  echo "valet self setup --unattended --copy-showcase --create-shim --add-to-path --setup-for-windows --global-installation"
+  echo "================================================"
+
+  /home/me/valet/valet self setup --unattended --copy-showcase --create-shim --add-to-path --setup-for-windows --global-installation
 }
 
 main
 
-echo "Installation tests passed."
+echo "Self setup tests passed."

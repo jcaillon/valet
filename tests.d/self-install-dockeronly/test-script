@@ -1,16 +1,7 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
 
-# This is a test that is executed either in GitHub Actions or locally which tests the
-# installation of Valet and its extensions, as well as the update.
-
-# Run locally from valet directory:
-# ./tests.d/install/test
-
-# We expect this script to run in a Docker container, with curl installed
-# and a 'me' user with sudo privileges.
-
-# We start this script as root.
+# This script is executed in a Docker container
 
 function main() {
   export GLOBAL_MOCK_EPOCHSECONDS=548902800

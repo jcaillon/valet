@@ -185,31 +185,19 @@ function selfTest() {
   if ((${#_TEST_SKIPPED_TEST_SUITES[@]} > 0)); then
     local skippedMessage
     skippedMessage="A total of ⌜${#_TEST_SKIPPED_TEST_SUITES[@]}⌝ out of ${#_TEST_TEST_SUITE_NAME[@]} test(s) were skipped because they were not applicable:"$'\n'
-    local treeString="  ├─" treePadding="  │  " skippedTestSuite
-    local -i nb=0
+    local skippedTestSuite
     for skippedTestSuite in "${_TEST_SKIPPED_TEST_SUITES[@]}"; do
-      if ((nb == ${#_TEST_SKIPPED_TEST_SUITES[@]} - 1)); then
-        treeString="  ╰─"
-        treePadding="     "
-      fi
-      skippedMessage+=$'\n'"- ⌜${skippedTestSuite}⌝."
-      nb+=1
+      skippedMessage+=$'\n'"- ${skippedTestSuite}"
     done
-    log::warning "${skippedMessage}"$'\n'
+    log::warning "${skippedMessage}"
   fi
 
   if ((${#_TEST_FAILED_TEST_SUITES[@]} > 0)); then
     local failMessage
     failMessage="A total of ⌜${#_TEST_FAILED_TEST_SUITES[@]}⌝ out of ${#_TEST_TEST_SUITE_NAME[@]} test(s) failed:"$'\n'
-    local treeString="  ├─" treePadding="  │  " failedTestSuite
-    local -i nb=0
+    local failedTestSuite
     for failedTestSuite in "${_TEST_FAILED_TEST_SUITES[@]}"; do
-      if ((nb == ${#_TEST_FAILED_TEST_SUITES[@]} - 1)); then
-        treeString="  ╰─"
-        treePadding="     "
-      fi
-      failMessage+=$'\n'"- ⌜${failedTestSuite}⌝."
-      nb+=1
+      failMessage+=$'\n'"- ${failedTestSuite}"
     done
     if [[ ${_TEST_AUTO_APPROVE:-false} == "true" ]]; then
       failMessage+=$'\n'$'\n'"The received test result files were automatically approved."
@@ -400,7 +388,7 @@ function selfTest_runSingleTestSuite() {
         # the function test::skipTestSuite was called
         # Can be reproduced by inserting a `test::skipTestSuite` call in the test script.
         fs::readFile "${GLOBAL_TEST_LOG_FILE}"
-        log::warning "The test script ⌜${testScript##*/}⌝ at line ⌜${lineNumber}⌝ required to skip the test suite because it is not applicable:"$'\n\n'"${REPLY}"$'\n\n'"test::skipTestSuite called in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}:${lineNumber}⌝."
+        log::info "The test script ⌜${testScript##*/}⌝ at line ⌜${lineNumber}⌝ required to skip the test suite because it is not applicable:"$'\n\n'"${REPLY%$'\n'}"$'\n\n'"test::skipTestSuite called in ⌜${testScript/#"${GLOBAL_PROGRAM_STARTED_AT_DIRECTORY}/"/}:${lineNumber}⌝."
         log::printCallStack stackToSkip=0 stackToSkipAtEnd=11
         core::exit "${GLOBAL_TEST_SKIPPED_STATUS}" silent=true
       fi
