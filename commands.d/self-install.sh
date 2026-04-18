@@ -22,11 +22,11 @@ description: |-
 
   This script can also be used as a standalone script to install Valet:
 
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)"
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/install.sh)"
 
   If you need to pass options (e.g. --single-user-installation) to the script, you can do it like this:
 
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)" -s --single-user-installation
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/install.sh)" -s --single-user-installation
 
   The default behavior is to install Valet for all users, in /opt/valet, which might require
   you to type your password on sudo commands (you don't have to run this script with sudo, it will
@@ -112,10 +112,10 @@ examples:
 - name: self update
   description: |-
     Update Valet to the latest version.
-- name: !bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)"
+- name: !bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/install.sh)"
   description: |-
     Install the latest version of Valet, using all the default options.
-- name: !bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)" -s --single-user-installation --unattended
+- name: !bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/install.sh)" -s --single-user-installation --unattended
   description: |-
     Install the latest version of Valet in the user home directory and disable all interaction during the install process.
 COMMAND_YAML

@@ -20,16 +20,16 @@ Other external programs can be used if found but are not required[^exhaustive-pr
 Run the following command to install Valet:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/install.sh)"
 ```
 
 > [!IMPORTANT]
-> Please review the [installation script](https://github.com/jcaillon/valet/blob/latest/commands.d/self-install.sh) or the [self install command usage](../valet-commands/#-valet-self-update) to learn about the different installer options.
+> Please review the [installation script](https://github.com/jcaillon/valet/blob/latest/install.sh) or the [self install command usage](../valet-commands/#-valet-self-update) to learn about the different installer options.
 
-Here is an example command to install Valet with the options `--unattended --single-user-installation` (no interactive prompt during installation and installs itself in the home directory of the user):
+Here is an example command to install Valet with the options `--unattended` (no interactive prompt during installation):
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/commands.d/self-install.sh)" -s --unattended --single-user-installation
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/install.sh)" -s --unattended
 ```
 
 Finally, call `valet` to get started with the example commands!

@@ -185,9 +185,9 @@ function selfRelease::createRelease() {
     # write the current version in the self-install script
     # then commit the file
     if [[ "${dryRun:-}" != "true" ]]; then
-      exe::invoke sed -E -i "s/VALET_RELEASED_VERSION=\"[0-9]+\.[^\"]+\"/VALET_RELEASED_VERSION=\"${version}\"/" "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-install.sh"
+      exe::invoke sed -E -i "s/VALET_RELEASED_VERSION=\"[0-9]+\.[^\"]+\"/VALET_RELEASED_VERSION=\"${version}\"/" "${GLOBAL_INSTALLATION_DIRECTORY}/install.sh"
 
-      exe::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/commands.d/self-install.sh"
+      exe::invoke git add "${GLOBAL_INSTALLATION_DIRECTORY}/install.sh"
       exe::invoke git commit -m ":rocket: releasing version ${version}"
       log::success "The new version has been committed."
     fi
