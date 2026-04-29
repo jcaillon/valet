@@ -194,8 +194,8 @@ function trap::onResizeInternal() {
   # shellcheck disable=SC2034
   GLOBAL_SCREEN_REDRAW_REQUIRED=true
 
-  # need to re init the logs because might depend on the number of columns for wrapping
-  log::init
+  # need to reload the logs because might depend on the number of columns for wrapping
+  log::reload
 
   if declare -F progress::onResize &>/dev/null; then
     progress::onResize

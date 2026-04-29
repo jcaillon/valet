@@ -333,7 +333,7 @@ function coproc_program() {
 
   local IFS=' '$'\t'$'\n'
   if [[ -n ${redirectLogsToFile} ]]; then
-    log::init logFileDescriptor="${redirectLogsToFile}"
+    log::reload logFileDescriptor="${redirectLogsToFile}"
   fi
 
   # wait for the main process to retrieve our PID

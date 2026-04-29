@@ -299,3 +299,7 @@ ERROR: returning error from fake
 '
 ```
 
+Auto clean CR on windows.
+
+Keep CR on windows.
+

@@ -106,8 +106,8 @@ INFO     Writing the xxx functions documentation to the core libraries docs.
 🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/extras/base.code-snippets $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md $GLOBAL_INSTALLATION_DIRECTORY/extras/template-command-default.sh $GLOBAL_INSTALLATION_DIRECTORY/extras/template-library-default.sh $GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets
 🙈 mocked exe::invoke git commit -m :memo: updating the documentation
 SUCCESS  The documentation update has been committed.
-🙈 mocked exe::invoke sed -E -i s/VALET_RELEASED_VERSION="[0-9]+\.[^"]+"/VALET_RELEASED_VERSION="1.2.3"/ $GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-install.sh
-🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-install.sh
+🙈 mocked exe::invoke sed -E -i s/VALET_RELEASED_VERSION="[0-9]+\.[^"]+"/VALET_RELEASED_VERSION="1.2.3"/ $GLOBAL_INSTALLATION_DIRECTORY/install.sh
+🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/install.sh
 🙈 mocked exe::invoke git commit -m :rocket: releasing version 1.2.3
 SUCCESS  The new version has been committed.
 🙈 mocked interactive::confirm Do you want to continue with the release of version 1.2.3? default=false

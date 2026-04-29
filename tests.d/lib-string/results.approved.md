@@ -534,7 +534,7 @@ MY_STRING='this is a command'
 
 ```text
 MY_STRING='	
-this is a 	command  '
+this is a 	command  '
 ```
 
 ❯ `string::trimAll MY_STRING`

@@ -20,7 +20,7 @@ source terminal
 # This will run in the background and will not block the main thread.
 # The main thread can continue to output logs while this animation is running.
 #
-# - $1{template} _as string_:
+# - ${template} _as string_:
 #       (optional) The template to display. The template can contain the following placeholders:
 #
 #       - `<spinner>`: the spinner animation

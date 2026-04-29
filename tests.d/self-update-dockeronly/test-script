@@ -1,94 +1,50 @@
 #!/usr/bin/env bash
 set -Eeu -o pipefail
 
-# This is a test that is executed either in GitHub Actions or locally which tests the
-# installation of Valet and its extensions, as well as the update.
-
-# Run locally from valet directory:
-# ./tests.d/install/test
-
-# We expect this script to run in a Docker container, with curl installed
-# and a 'me' user with sudo privileges.
-
-# We start this script as root.
+# This script is executed in a Docker container
 
 function main() {
-  chmod +x /home/me/install.sh
-
   export GLOBAL_MOCK_EPOCHSECONDS=548902800
-
-  echo "================================================"
-  echo "VALET_VERSION=0.35.114 install.sh --unattended --skip-setup"
-  echo "================================================"
-
-  VALET_VERSION=0.35.114 /home/me/install.sh --unattended --skip-setup
-  checkInstallation
-  uninstallDefaultValet
-
-  echo
-  echo "================================================"
-  echo "VALET_SKIP_SETUP=true install.sh --installation-directory ~/valet --version 0.35.114"
-  echo "================================================"
-
-  local installationDirectory="${HOME}/valet"
-  echo y | VALET_SKIP_SETUP=true /home/me/install.sh --installation-directory "${installationDirectory}" --version 0.35.114
-  checkInstallation "${installationDirectory}"
-  uninstallDefaultValet
-
-  echo
-  echo "================================================"
-  echo "install.sh --from-branch main"
-  echo "================================================"
-
-  # simulate ENTER key press to accept the default options during the installation
   export VALET_CONFIG_LOG_PATTERN="<level>{-8s} <message>"
-  echo $'\n\n\n\n\n\n\n\n\n\n' | /home/me/install.sh --from-branch main
-  checkInstallation
-}
+  export VALET_CONFIG_LOG_COLUMNS=9999
+  export VALET_CONFIG_LOG_DISABLE_WRAP=true
+  export VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true
+  export VALET_CONFIG_ENABLE_COLORS=false
 
-function uninstallDefaultValet() {
-  rm -rf "${HOME}/.local/lib/valet" &>/dev/null || :
-  rm -rf "${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}" &>/dev/null || :
-  rm -rf "${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}" &>/dev/null || :
-  rm -rf "${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}" &>/dev/null || :
-  rm -rf "${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}" &>/dev/null || :
-  rm -rf "${VALET_CONFIG_EXTENSIONS_DIRECTORY:-${HOME}/.valet.d}" &>/dev/null || :
-}
+  echo "================================================"
+  echo "valet install"
+  echo "================================================"
 
-function checkInstallation() {
-  local \
-    installationDirectory="${1:-"${HOME}/.local/lib/valet"}"
+  /home/me/install.sh --from-branch main --unattended
 
-  if [[ ! -f "${installationDirectory}/valet" ||
-    ! -d "${installationDirectory}/commands.d" ||
-    ! -d "${installationDirectory}/libraries.d" ||
-    ! -f "${installationDirectory}/version" ]]; then
-    echo "Missing files/folders in ${installationDirectory}, installation failed:"
-    ls -la "${installationDirectory}"
+  echo
+  echo "================================================"
+  local before
+  before="$(cat /home/me/.local/lib/valet/version)"
+  printf '%s' "0.1.0" >~/.local/lib/valet/version
+  if [[ -z ${before} ]]; then
+    echo "Failed to read the current version, exiting test with error."
     exit 1
   fi
-}
+  cp /home/me/self-update.sh /home/me/.local/lib/valet/commands.d/self-update.sh
 
-function uninstallValet() {
-  local \
-    installationDirectory="${1:-"${HOME}/.local/lib/valet"}"
+  echo
+  echo "================================================"
+  echo "valet self update --unattended"
+  echo "================================================"
 
-  eval "$("${installationDirectory}/valet" self uninstall --script)"
-
-  local \
-    installationDirectory="${1:-"${HOME}/.local/lib/valet"}"
-
-  if [[ -d "${installationDirectory}" ||
-    -d "${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}" ||
-    -d "${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}" ||
-    -d "${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}" ||
-    -d "${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}" ||
-    -d "${VALET_CONFIG_EXTENSIONS_DIRECTORY:-${HOME}/.valet.d}" ]]; then
-    echo "Some folders are still present, installation failed:"
+  export VALET_FROM_BRANCH=main
+  export VALET_SKIP_SETUP=true
+  export VALET_TEST_OVERRIDE_LATEST_VERSION=main
+  /home/me/.local/lib/valet/valet self update --unattended
+  local after
+  after="$(cat /home/me/.local/lib/valet/version)"
+  if [[ -z ${after} || ${after} == "0.1.0" ]]; then
+    echo "Failed to read the updated version, exiting test with error."
     exit 1
   fi
 }
 
 main
 
-echo "Installation tests passed."
+echo "Self setup tests passed."

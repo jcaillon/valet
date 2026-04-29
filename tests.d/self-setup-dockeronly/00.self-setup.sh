@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-command::sourceFunction "selfSetup"
-
 # cancel the test suite if not running on windows
 if ! command -v docker &>/dev/null; then
   test::skipTestSuite "This test suite is only runnable on systems with Docker installed, skipping it."

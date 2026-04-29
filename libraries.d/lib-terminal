@@ -256,7 +256,7 @@ function terminal::rerouteLogs() {
     _TUI_LOG_FILE="${REPLY}"
   fi
 
-  log::init logFileDescriptor="${_TUI_LOG_FILE}"
+  log::reload logFileDescriptor="${_TUI_LOG_FILE}"
   GLOBAL_LOG_REROUTED_TO_FILE_ENABLED=true
 }
 
@@ -272,7 +272,7 @@ function terminal::restoreLogs() {
   if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} != "true" ]]; then
     return 0
   fi
-  log::init
+  log::reload
 
   # display the accumulated logs
   if [[ -s ${_TUI_LOG_FILE} ]]; then

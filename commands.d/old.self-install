@@ -12,8 +12,8 @@ if [ ${BASH_VERSINFO:-0} -lt 5 ]; then
 fi
 
 : <<"COMMAND_YAML"
-command: self update
-function: selfUpdate
+command: self update2
+function: selfUpdate2
 author: github.com/jcaillon
 shortDescription: Update valet and its extensions to the latest releases.
 
@@ -119,7 +119,7 @@ examples:
   description: |-
     Install the latest version of Valet in the user home directory and disable all interaction during the install process.
 COMMAND_YAML
-function selfUpdate() {
+function selfUpdate2() {
   local unattended singleUserInstallation version installationDirectory noShim noPath noShowcase skipExtensions onlyExtensions useBranch skipExtensionsSetup
 
   # if this script is run directly, we parse the arguments manually

@@ -49,7 +49,7 @@ function selfTestUtils_setupValetForConsistency() {
   export VALET_CONFIG_LOG_FILENAME_PATTERN=""
   export GLOBAL_LOG_LEVEL_INT=1
   export GLOBAL_LOG_LEVEL=info
-  log::init
+  log::reload
   GLOBAL_PROGRAM_STARTED_AT_DIRECTORY="${PWD}"
 
   # consistent styles

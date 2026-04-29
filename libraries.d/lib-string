@@ -21,7 +21,7 @@ function string::trimAll() {
   local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   # shellcheck disable=SC2086
   # shellcheck disable=SC2048
-  local IFS=$' \t\n'
+  local IFS=$' \t\r\n'
   # shellcheck disable=SC2086
   # shellcheck disable=SC2048
   set -- ${inputString_NameRef}
@@ -47,7 +47,7 @@ function string::trimAll() {
 function string::trimEdges() {
   local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
-    charsToTrim=$' \t\n' \
+    charsToTrim=$' \t\r\n' \
     IFS=$' '
   shift 1
   eval "local a= ${*@Q}"

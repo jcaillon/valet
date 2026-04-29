@@ -135,7 +135,7 @@ VALET_CONFIG_LOG_DISABLE_WRAP='false'
 VALET_CONFIG_LOG_DISABLE_HIGHLIGHT='false'
 ```
 
-❯ `log::init`
+❯ `log::reload`
 
 ❯ `styles::init`
 
@@ -441,7 +441,7 @@ Exited with code: `1`
                                              ⌜/unknown/file/path⌝.
 ```
 
-❯ `log::init`
+❯ `log::reload`
 
 ```text
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
@@ -463,7 +463,7 @@ if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 GLOBAL_LOG_WRAP_PADDING='                                             '
 ```
 
-❯ `VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true VALET_CONFIG_LOG_DISABLE_WRAP=false log::init`
+❯ `VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true VALET_CONFIG_LOG_DISABLE_WRAP=false log::reload`
 
 ```text
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
@@ -483,7 +483,7 @@ if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 GLOBAL_LOG_WRAP_PADDING='                                             '
 ```
 
-❯ `VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=local\ extra=1 log::init`
+❯ `VALET_CONFIG_LOG_FORMATTED_EXTRA_EVAL=local\ extra=1 log::reload`
 
 ```text
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
@@ -505,7 +505,7 @@ if [[ -v _PROGRESS_BAR_RUNNING ]]; then progress:redraw; fi
 GLOBAL_LOG_WRAP_PADDING='                                             '
 ```
 
-❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::init`
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp log::reload`
 
 ```text
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
@@ -523,7 +523,7 @@ printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/log-1987-05-25T01-00-00+0000--P
 GLOBAL_LOG_WRAP_PADDING='                                             '
 ```
 
-❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=tmp VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::reload`
 
 ```text
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
@@ -541,7 +541,7 @@ printf "%s" "${rawStringToPrintInLog:-}" 1>>"tmp/a"'
 GLOBAL_LOG_WRAP_PADDING='                                             '
 ```
 
-❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=true VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::init`
+❯ `VALET_CONFIG_LOG_FD=/tmp/valet-temp VALET_CONFIG_LOG_TO_DIRECTORY=true VALET_CONFIG_LOG_FILENAME_PATTERN=logFile=a log::reload`
 
 ```text
 GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG='local -n levelColor="STYLE_COLOR_${colorName}"
@@ -710,7 +710,7 @@ local REPLY; time::getProgramElapsedMicroseconds; local -i currentTime=${REPLY};
 
 ### ✅ Testing log levels
 
-❯ `log::init`
+❯ `log::reload`
 
 ❯ `log::setLevel trace`
 

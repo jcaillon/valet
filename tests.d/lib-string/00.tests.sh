@@ -187,9 +187,14 @@ function test_string::trimAll() {
 
   test::execWithString string::trimAll '  a  super test  '
   test::execWithString string::trimAll 'this is a command  '
-  test::execWithString string::trimAll $'\t\n''this is a '$'\t''command  '
+  test::execWithString string::trimAll $'\t\n''this is a '$'\r'$'\t''command  '
   test::execWithString string::trimAll 'count {1,2,3} test ${stuff} /* ? '
 
+  local myString=$'\r \t \nthing \n\r\t  here\r\n\t   '
+  string::trimAll myString
+  if [[ ${myString} != "thing here" ]]; then
+    test::fail "Expected 'thing here' but got '${myString}'"
+  fi
 }
 
 function test_string::trimEdges() {
@@ -199,6 +204,12 @@ function test_string::trimEdges() {
   test::execWithString string::trimEdges '_-_-_hello_-_' charsToTrim=_-
   test::execWithString string::trimEdges '  hello'
   test::execWithString string::trimEdges $'\n'$'\t''  hello'$'\n'$'\t'' '
+
+  local myString=$'\r \t \nthing    here\r\n\t   '
+  string::trimEdges myString
+  if [[ ${myString} != "thing    here" ]]; then
+    test::fail "Expected 'thing    here' but got '${myString}'"
+  fi
 }
 
 function test_string::getIndexOf() {

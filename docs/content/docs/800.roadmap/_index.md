@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- time better function time function to be able to use them opstools and compute timers and timeout !
 - make version a command instead of an option, and add a `valet version` command that shows the current version and the latest release. Also show the extension versions ?
 - implement fs::normalizePath
 - Modify self install: at the moment we count on the fact that some functions will still exist in valet after an update. The simplest is to redownload the self install script and run it again.

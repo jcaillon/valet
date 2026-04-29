@@ -4,7 +4,7 @@
 function main() {
   test::title "✅ Testing log levels"
 
-  test::exec log::init
+  test::exec log::reload
 
   test::exec log::setLevel trace
 

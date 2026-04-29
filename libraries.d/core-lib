@@ -1138,13 +1138,12 @@ function log::parseLogPattern() {
 function log::init() {
   local \
     logFileDescriptor="${VALET_CONFIG_LOG_FD:-}" \
-    logPattern="" \
+    logPattern="${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level> <icon><colorDefault> <message>"}" \
     IFS=$' '
   eval "local a= ${*@Q}"
 
   GLOBAL_LOG_COLUMNS="${VALET_CONFIG_LOG_COLUMNS:-${GLOBAL_COLUMNS}}"
   GLOBAL_LOG_DISABLE_WRAP="${VALET_CONFIG_LOG_DISABLE_WRAP:-false}"
-  GLOBAL_LOG_PATTERN="${logPattern:-${VALET_CONFIG_LOG_PATTERN:-"<colorFaded><time>{(%H:%M:%S)T}<colorDefault> <levelColor><level> <icon><colorDefault> <message>"}}"
 
   if [[ -v GLOBAL_FD_LOG ]]; then
     # close if already opened
@@ -1194,7 +1193,7 @@ function log::init() {
   local -n printfArguments=REPLY2
   local -n wrapPaddingLength=REPLY3
   local -n beforePrintStatementCode=REPLY4
-  log::parseLogPattern "${GLOBAL_LOG_PATTERN}"
+  log::parseLogPattern "${logPattern}"
 
   # string with the number of spaces necessary to align with other log messages
   if ((wrapPaddingLength > 0)); then
@@ -1258,6 +1257,17 @@ function log::init() {
     outputCode="1>>\"${GLOBAL_LOG_ADDITIONAL_LOG_FILE}\""
     GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG+=$'\n'"${formattedLogStatement} ${outputCode}"
     GLOBAL_LOG_PRINT_STATEMENT_STANDARD+=$'\n'"${standardStatement} ${outputCode}"
+  fi
+}
+
+# ## log::reload (private)
+#
+# If the log pattern or other related config variables are changed during runtime,
+# this function can be called to recompute the variables used to print the logs.
+function log::reload() {
+  if [[ -v GLOBAL_LOG_COLUMNS ]]; then
+    # log already initialized, we can reload it
+    log::init "${@}"
   fi
 }
 

@@ -54,25 +54,25 @@ function fs::getAbsolutePath() {
   fi
 
   # check if the path is an existing directory
-  if cd "${path}" &>/dev/null; then
+  if builtin cd "${path}" &>/dev/null; then
     if [[ ${realpath:-} == "true" ]]; then
       fs::getPwdRealPath
     else
       REPLY="${PWD}"
     fi
-    cd "${OLDPWD}" &>/dev/null || core::fail "Failed to cd back to the previous directory."
+    builtin cd "${OLDPWD}" &>/dev/null || core::fail "Failed to cd back to the previous directory."
     return 0
   fi
 
   # check if the path is an existing file
-  if cd "${path%/*}" &>/dev/null; then
+  if builtin cd "${path%/*}" &>/dev/null; then
     if [[ ${realpath:-} == "true" ]]; then
       fs::getPwdRealPath
       REPLY="${REPLY}/${path##*/}"
     else
       REPLY="${PWD}/${path##*/}"
     fi
-    cd "${OLDPWD}" &>/dev/null || core::fail "Failed to cd back to the previous directory."
+    builtin cd "${OLDPWD}" &>/dev/null || core::fail "Failed to cd back to the previous directory."
     return 0
   fi
 

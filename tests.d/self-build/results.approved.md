@@ -30,8 +30,6 @@ INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/s
 INFO                              ├── ⌜self document⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-extend.sh⌝.
 INFO                              ├── ⌜self extend⌝.
-INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-install.sh⌝.
-INFO                              ├── ⌜self update⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-release.sh⌝.
 INFO                              ├── ⌜self release⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-setup.sh⌝.
@@ -42,6 +40,8 @@ INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/s
 INFO                              ├── ⌜self test⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-uninstall.sh⌝.
 INFO                              ├── ⌜self uninstall⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-update.sh⌝.
+INFO                              ├── ⌜self update⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh⌝.
 INFO                              ├── ⌜self mock1⌝.
 INFO                              ├── ⌜self mock2⌝.
@@ -76,7 +76,7 @@ self config         Open the configuration file of Valet with your default edito
 self document       Generate the documentation and code snippets for all the library functions of Valet.
 self extend         Extends Valet by creating or downloading a new extension in the user directory.
 self test           Test your valet custom commands.
-self update         Update valet and its extensions to the latest releases.
+self update         Update valet to the latest release.
 
 INFO     The command definition variables have been written to ⌜/tmp/valet.d/d1-2/commands⌝.
 SUCCESS  The valet user commands have been successfully built.

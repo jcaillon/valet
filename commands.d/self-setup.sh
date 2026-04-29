@@ -8,6 +8,8 @@ source interactive
 source system
 # shellcheck source=../libraries.d/lib-exe
 source exe
+# shellcheck source=../libraries.d/lib-bash
+source bash
 
 #===============================================================
 # >>> command: self setup
@@ -94,7 +96,11 @@ function selfSetup() {
     if [[ ${addedToPath:-} == "true" ]]; then
       log::warning "Valet has been added to your PATH but it will only be available in new shell sessions."$'\n'"Please login again to apply the changes on your current shell or call valet directly with ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝.${greetingMessage}"
     else
-      log::warning "Valet is not in your PATH yet. You need to add ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝ to your PATH or call valet directly with ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝.${greetingMessage}"
+      if bash::getBuiltinOutput command -v valet && [[ ${REPLY%%$'\n'} == "${GLOBAL_INSTALLATION_DIRECTORY}/valet" ]]; then
+        log::debug "Valet is already in the PATH."
+      else
+        log::warning "Valet is not in your PATH yet. You need to add ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝ to your PATH or call valet directly with ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝.${greetingMessage}"
+      fi
     fi
   else
     log::success "You are all set!${greetingMessage}"
@@ -117,7 +123,7 @@ function selfSetup_checkColors() {
   if [[ ${previousState:-} != "${VALET_CONFIG_ENABLE_COLORS:-}" ]]; then
     log::debug "The value of VALET_CONFIG_ENABLE_COLORS has been changed, reinitializing styles and log system."
     styles::init
-    log::init
+    log::reload
   fi
 }
 
@@ -130,19 +136,19 @@ function selfSetup_checkNerdFontIcons() {
     log::info "Valet can use a nerd-font to improve your terminal experience."$'\n'"You can download a nerd-font here: https://www.nerdfonts.com/font-downloads."
   fi
 
-  if [[ ${unattended:-} != "true" ]] && interactive::confirm "Do you correctly see the icons in this prompt? "$'\uf14a'" "$'\uf05a'" "$'\uf059'" " default="${previousState:-false}"; then
-    VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
-  else
-    if [[ ${unattended:-} != "true" ]]; then
+  if [[ ${unattended:-} != "true" ]]; then
+    if interactive::confirm "Do you correctly see the icons in this prompt? "$'\uf14a'" "$'\uf05a'" "$'\uf059'" " default="${previousState:-false}"; then
+      VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
+    else
       log::info "You can download any font here: https://www.nerdfonts.com/font-downloads and install it."$'\n'"After that, you need to setup your terminal to use this newly installed font."$'\n'"You can then run the command ⌜valet self setup⌝ again to set up the use of this font."
+      VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
     fi
-    VALET_CONFIG_ENABLE_NERDFONT_ICONS=false
   fi
 
   if [[ ${previousState:-} != "${VALET_CONFIG_ENABLE_NERDFONT_ICONS:-}" ]]; then
     log::debug "The value of VALET_CONFIG_ENABLE_NERDFONT_ICONS has been changed, reinitializing styles and log system."
     styles::init
-    log::init
+    log::reload
   fi
 }
 
