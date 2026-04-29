@@ -335,7 +335,7 @@ function core::getVersion() {
 function core::getConfigurationDirectory() {
   REPLY="${VALET_CONFIG_DIRECTORY:-${XDG_CONFIG_HOME:-${HOME}/.config}/valet}"
   if [[ ! -d "${REPLY}" ]]; then
-    mkdir -p "${REPLY}"
+    command mkdir -p "${REPLY}"
   fi
 }
 
@@ -358,7 +358,7 @@ function core::getConfigurationDirectory() {
 function core::getUserDataDirectory() {
   REPLY="${VALET_CONFIG_USER_DATA_DIRECTORY:-${XDG_DATA_HOME:-${HOME}/.local/share}/valet}"
   if [[ ! -d "${REPLY}" ]]; then
-    mkdir -p "${REPLY}"
+    command mkdir -p "${REPLY}"
   fi
 }
 
@@ -381,7 +381,7 @@ function core::getUserDataDirectory() {
 function core::getUserCacheDirectory() {
   REPLY="${VALET_CONFIG_USER_CACHE_DIRECTORY:-${XDG_CACHE_HOME:-${HOME}/.cache}/valet}"
   if [[ ! -d "${REPLY}" ]]; then
-    mkdir -p "${REPLY}"
+    command mkdir -p "${REPLY}"
   fi
 }
 
@@ -405,7 +405,7 @@ function core::getUserCacheDirectory() {
 function core::getUserStateDirectory() {
   REPLY="${VALET_CONFIG_USER_STATE_DIRECTORY:-${XDG_STATE_HOME:-${HOME}/.local/state}/valet}"
   if [[ ! -d "${REPLY}" ]]; then
-    mkdir -p "${REPLY}"
+    command mkdir -p "${REPLY}"
   fi
 }
 
@@ -427,7 +427,7 @@ function core::getUserStateDirectory() {
 function core::getExtensionsDirectory() {
   REPLY="${VALET_CONFIG_EXTENSIONS_DIRECTORY:-${HOME}/.valet.d}"
   if [[ ! -d "${REPLY}" ]]; then
-    mkdir -p "${REPLY}"
+    command mkdir -p "${REPLY}"
   fi
 }
 
@@ -464,7 +464,7 @@ function core::createSavedFilePath() {
   printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d%s" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}" "${GLOBAL_MOCK_BASHPID:-${BASHPID}}" "${suffix}"
   core::getUserStateDirectory
   if [[ ! -d "${REPLY}/saved-files" ]]; then
-    mkdir -p "${REPLY}/saved-files"
+    command mkdir -p "${REPLY}/saved-files"
   fi
   REPLY="${REPLY}/saved-files/${filePath}"
 }
@@ -540,7 +540,7 @@ function core_dump() {
 
   core::getUserStateDirectory
   if [[ ! -d "${REPLY}/core-dumps" ]]; then
-    mkdir -p "${REPLY}/core-dumps"
+    command mkdir -p "${REPLY}/core-dumps"
   fi
   filePath="${REPLY}/core-dumps/${filePath}"
 
@@ -549,7 +549,7 @@ function core_dump() {
     # shellcheck disable=SC1091
     source bash
     for fd in /proc/"${BASHPID}"/fd/*; do
-      bash::getBuiltinOutput readlink -f "${fd}" 2>/dev/null
+      bash::getBuiltinOutput command readlink -f "${fd}" 2>/dev/null
       if [[ -n ${REPLY} ]]; then
         listOfFds+="${fd} -> ${REPLY%$'\n'*}"$'\n'
       else
@@ -566,19 +566,19 @@ function core_dump() {
     echo "${REPLY}"
     if command -v ps &>/dev/null; then
       echo "================="$'\n'"Processes:"
-      ps -l || :
+      command ps -l || :
     fi
     echo "================="$'\n'"File descriptors:"
     echo "${listOfFds}"
   } >"${filePath}"
   if command -v ls &>/dev/null && [[ -d /proc/"${BASHPID}"/fd ]]; then
     echo "From ls:" >>"${filePath}"
-    ls -l /proc/"${BASHPID}"/fd >>"${filePath}" || :
+    command ls -l /proc/"${BASHPID}"/fd >>"${filePath}" || :
   fi
   {
     if command -v lsof &>/dev/null; then
       echo "================="$'\n'"Open files:"
-      lsof -p "${BASHPID}" 2>/dev/null || :
+      command lsof -p "${BASHPID}" 2>/dev/null || :
     fi
     echo "================="$'\n'"Options:"
     shopt

@@ -227,7 +227,7 @@ function fs::createDirectoryIfNeeded() {
   local dirPath="${REPLY}"
 
   if [[ ! -d "${dirPath}" ]]; then
-    if ! mkdir -p "${dirPath}" 1>/dev/null; then
+    if ! command mkdir -p "${dirPath}" 1>/dev/null; then
       core::fail "Failed to create the directory ⌜${dirPath}⌝."
     fi
   fi
@@ -605,12 +605,12 @@ function fs::isDirectoryWritable() {
   eval "local a= ${*@Q}"
 
   directory="${directory%/}"
-  if ! mkdir -p "${directory}" &>/dev/null; then
+  if ! command mkdir -p "${directory}" &>/dev/null; then
     return 1
   fi
   local path="${directory}/${testFileName}"
   if { : >"${path}"; } &>/dev/null; then
-    if ! rm -f "${path}" 1>/dev/null; then
+    if ! command rm -f "${path}" 1>/dev/null; then
       return 1
     fi
     return 0
@@ -671,9 +671,9 @@ function fs::createLink() {
   if [[ -e ${linkPath} || -L ${linkPath} ]] && ! fs::isValidLink "${linkedPath}" "${linkPath}" hardlink="${hardlink}"; then
     # if force, delete target if it exists
     if [[ ${force} == true ]]; then
-      if [[ -d "${linkPath}" ]] && ! rm -Rf "${linkPath}"; then
+      if [[ -d "${linkPath}" ]] && ! command rm -Rf "${linkPath}"; then
         core::fail "Failed to delete the existing target directory ⌜${linkPath}⌝ to replace it."
-      elif ! rm -f "${linkPath}"; then
+      elif ! command rm -f "${linkPath}"; then
         core::fail "Failed to delete the existing target file ⌜${linkPath}⌝ to replace it."
       fi
     else

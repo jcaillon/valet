@@ -4,8 +4,14 @@
 source curl
 # shellcheck source=../../libraries.d/lib-fs
 source fs
+# shellcheck source=../../libraries.d/lib-exe
+source exe
 
 function main() {
+  # override curl for the tests
+  chmod +x "${PWD}/curl"
+  export PATH="${PWD}:${PATH}"
+
   test_curl::download
   test_curl::request
 }
@@ -56,34 +62,6 @@ function test_curl::request() {
   test::exec log::setLevel info
 
   unset NO_CURL_CONTENT
-}
-
-# Override curl for tests
-# shellcheck disable=SC2317
-function curl() {
-  local IFS=" "
-  echo "(curl logs) mocking curl $*" 1>&2
-
-  while [[ $# -gt 0 ]]; do
-    case "${1}" in
-    --error)
-      echo "Returning 1 from curl." 1>&2
-      return 1
-      ;;
-    --code)
-      shift
-      echo -n "${1}"
-      ;;
-    -o | --output)
-      shift
-      if [[ "${NO_CURL_CONTENT:-}" != true ]]; then
-        echo -n "(request body response) Writing stuff to file because the --output option was given." >"${1}"
-      fi
-      ;;
-    *) ;;
-    esac
-    shift
-  done
 }
 
 main

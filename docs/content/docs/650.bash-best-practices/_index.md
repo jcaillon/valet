@@ -23,6 +23,12 @@ Valet is trying to follow the best practices for CLI applications. One good guid
 
 TODO: copy some of the sections from <https://google.github.io/styleguide/shellguide.html>.
 
+### Calling external programs
+
+Always use `command` to call external programs. This is to avoid any potential conflicts with functions or aliases that have the same name as the external program.
+
+E.g. instead of `mkdir -p /my/dir`, we should write `command mkdir -p /my/dir`.
+
 ### Naming conventions
 
 #### Files

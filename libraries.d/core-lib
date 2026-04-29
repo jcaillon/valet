@@ -20,7 +20,7 @@ function fs::setupTempFileGlobalVariable() {
 
   GLOBAL_TEMPORARY_FILE_PREFIX="${VALET_CONFIG_RUNTIME_DIRECTORY:-${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}}"
   if [[ ! -d ${GLOBAL_TEMPORARY_DIRECTORY_PREFIX} ]]; then
-    mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}" 1>/dev/null
+    command mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}" 1>/dev/null
   fi
   GLOBAL_TEMPORARY_FILE_PREFIX="${GLOBAL_TEMPORARY_FILE_PREFIX%/}/vt-${BASHPID}"
 
@@ -47,7 +47,7 @@ function fs::setupTempFileGlobalVariable() {
 # the dir gets cleanup when the main process ends.
 function fs::setupSubshellTempFileGlobalVariable() {
   TMPDIR="${GLOBAL_TEMPORARY_DIRECTORY}/job-${BASHPID}"
-  mkdir -p "${TMPDIR}" 1>/dev/null
+  command mkdir -p "${TMPDIR}" 1>/dev/null
   unset -v VALET_CONFIG_RUNTIME_DIRECTORY VALET_CONFIG_TEMP_DIRECTORY XDG_RUNTIME_DIR
   fs::setupTempFileGlobalVariable
 }
@@ -81,7 +81,7 @@ function fs::createTempFile() {
   if [[ ! -v TEMPORARY_FILE_NUMBER ]]; then
     TEMPORARY_FILE_NUMBER=0
     if [[ ! -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
-      mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
+      command mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
     fi
   fi
   TEMPORARY_FILE_NUMBER=$((TEMPORARY_FILE_NUMBER + 1))
@@ -120,13 +120,13 @@ function fs::createTempDirectory() {
   if [[ ! -v TEMPORARY_DIRECTORY_NUMBER ]]; then
     TEMPORARY_DIRECTORY_NUMBER=0
     if [[ ${pathOnly} == "true" && ! -d ${GLOBAL_TEMPORARY_DIRECTORY} ]]; then
-      mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
+      command mkdir -p "${GLOBAL_TEMPORARY_DIRECTORY}" 1>/dev/null
     fi
   fi
   TEMPORARY_DIRECTORY_NUMBER=$((TEMPORARY_DIRECTORY_NUMBER + 1))
   REPLY="${GLOBAL_TEMPORARY_DIRECTORY}/d${TEMPORARY_DIRECTORY_NUMBER}-${BASH_SUBSHELL}"
   if [[ ${pathOnly} != "true" ]]; then
-    mkdir -p "${REPLY}" 1>/dev/null
+    command mkdir -p "${REPLY}" 1>/dev/null
   fi
 }
 
@@ -141,15 +141,15 @@ function fs::createTempDirectory() {
 function fs::cleanTempFiles() {
   if [[ -d ${GLOBAL_TEMPORARY_DIRECTORY:-} ]]; then
     log::debug "Deleting temporary directory."
-    rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" &>/dev/null || :
+    command rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" &>/dev/null || :
   fi
   if [[ -n ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} && -d ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY} ]]; then
     log::debug "Deleting temporary windows directory."
-    rm -Rf "${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY}" &>/dev/null || :
+    command rm -Rf "${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY}" &>/dev/null || :
   fi
   if [[ -n ${GLOBAL_TEMPORARY_FILE_PREFIX:-} ]]; then
     log::debug "Deleting temporary files."
-    rm -f "${GLOBAL_TEMPORARY_FILE_PREFIX}"* &>/dev/null || :
+    command rm -f "${GLOBAL_TEMPORARY_FILE_PREFIX}"* &>/dev/null || :
   fi
   unset -v TEMPORARY_FILE_NUMBER TEMPORARY_DIRECTORY_NUMBER
 }
@@ -820,7 +820,7 @@ function log::saveFile() {
 
   core::createSavedFilePath suffix="${suffix}"
   local newFilePath="${REPLY}"
-  cp "${filePath}" "${newFilePath}"
+  command cp "${filePath}" "${newFilePath}"
   if [[ ${silent} != "true" ]]; then
     log::printString "${newFilePath}"
   fi
@@ -1250,7 +1250,7 @@ function log::init() {
       VALET_CONFIG_LOG_TO_DIRECTORY="${REPLY}/logs"
     fi
     if [[ ! -d "${VALET_CONFIG_LOG_TO_DIRECTORY}" ]]; then
-      mkdir -p "${VALET_CONFIG_LOG_TO_DIRECTORY}" 1>/dev/null
+      command mkdir -p "${VALET_CONFIG_LOG_TO_DIRECTORY}" 1>/dev/null
     fi
     # append the log to the file
     GLOBAL_LOG_ADDITIONAL_LOG_FILE="${VALET_CONFIG_LOG_TO_DIRECTORY%/}/${logFile}"

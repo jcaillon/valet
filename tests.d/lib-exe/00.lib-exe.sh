@@ -62,6 +62,13 @@ function test_exe::invoke() {
   test::markdown "Only warn on errors:"
   test::func exe::invoke fake --error --- warnOnFailure=true
 
+  test::markdown "Starting with command:"
+  log::setLevel trace silent=true
+  chmod +x "${PWD}/fake-command"
+  export PATH="${PWD}:${PATH}"
+  test::func exe::invoke command fake-command --std-in --- noFail=true stdin="input_stream"
+  log::setLevel info
+
   OSTYPE="msys"
   test::markdown "Auto clean CR on windows."
   exe::invoke fakeWindows

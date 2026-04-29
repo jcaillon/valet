@@ -72,7 +72,7 @@ INFO     Found 16 commands with documentation.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md content
 INFO     The commands documentation has been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md⌝.
 INFO     Writing the xxx functions documentation to the core libraries docs.
-🙈 mocked exe::invoke rm -f ...
+🙈 mocked exe::invoke command rm ...
 🙈 mocked fs::writeToFile ...
 🙈 mocked fs::writeToFile ...
 🙈 mocked fs::writeToFile ...
@@ -97,9 +97,9 @@ INFO     Writing the xxx functions documentation to the core libraries docs.
 🙈 mocked fs::writeToFile ...
 🙈 mocked fs::writeToFile ...
 🙈 mocked fs::writeToFile ...
-🙈 mocked exe::invoke cp -f $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/config.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/config.md
-🙈 mocked exe::invoke cp -f $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/lib-valet.md
-🙈 mocked exe::invoke cp -f $GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/valet-commands.md
+🙈 mocked exe::invoke command cp -f $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/config.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/config.md
+🙈 mocked exe::invoke command cp -f $GLOBAL_INSTALLATION_DIRECTORY/extras/lib-valet.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/lib-valet.md
+🙈 mocked exe::invoke command cp -f $GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/valet-commands.md
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/docs/static/stats.yaml statsContent
 🙈 mocked exe::invoke git add $GLOBAL_INSTALLATION_DIRECTORY/docs/static/config.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/lib-valet.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/valet-commands.md $GLOBAL_INSTALLATION_DIRECTORY/docs/static/stats.yaml
 🙈 mocked exe::invoke git add ...
@@ -132,15 +132,15 @@ SUCCESS  The ⌜latest⌝ branch has been updated.
     "prerelease": false
   } --- failOnError=true acceptableCodes=201,422
 SUCCESS  The new version has been released on GitHub.
-🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/showcase.d .
-🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/commands.d .
-🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/libraries.d .
-🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/extras .
-🙈 mocked exe::invoke cp -R valet .
-🙈 mocked exe::invoke cp -R valet.cmd .
-🙈 mocked exe::invoke cp -R valet.ps1 .
-🙈 mocked exe::invoke cp -R $GLOBAL_INSTALLATION_DIRECTORY/version .
-🙈 mocked exe::invoke tar -czvf valet.tar.gz showcase.d commands.d libraries.d extras valet valet.cmd valet.ps1 version
+🙈 mocked exe::invoke command cp -R $GLOBAL_INSTALLATION_DIRECTORY/showcase.d .
+🙈 mocked exe::invoke command cp -R $GLOBAL_INSTALLATION_DIRECTORY/commands.d .
+🙈 mocked exe::invoke command cp -R $GLOBAL_INSTALLATION_DIRECTORY/libraries.d .
+🙈 mocked exe::invoke command cp -R $GLOBAL_INSTALLATION_DIRECTORY/extras .
+🙈 mocked exe::invoke command cp -R valet .
+🙈 mocked exe::invoke command cp -R valet.cmd .
+🙈 mocked exe::invoke command cp -R valet.ps1 .
+🙈 mocked exe::invoke command cp -R $GLOBAL_INSTALLATION_DIRECTORY/version .
+🙈 mocked exe::invoke command tar -czvf valet.tar.gz showcase.d commands.d libraries.d extras valet valet.cmd valet.ps1 version
 INFO     Uploading the artifact ⌜valet.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 🙈 mocked curl::request https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz --- failOnError=true
 INFO     The current version of valet is: 1.2.3.

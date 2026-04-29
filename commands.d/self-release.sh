@@ -259,8 +259,8 @@ function selfRelease::uploadArtifact() {
 
   # prepare a temp folder to store the release
   local tempDir="${GLOBAL_INSTALLATION_DIRECTORY}/.tmp"
-  rm -Rf "${tempDir}"
-  mkdir -p "${tempDir}"
+  command rm -Rf "${tempDir}"
+  command mkdir -p "${tempDir}"
   pushd "${tempDir}" 1>/dev/null
 
   local -a files
@@ -269,12 +269,12 @@ function selfRelease::uploadArtifact() {
   # copy each file from valet dir to current dir
   local file
   for file in "${files[@]}"; do
-    exe::invoke cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/${file}" .
+    exe::invoke command cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/${file}" .
   done
 
   # prepare artifact
   local artifactPath="valet.tar.gz"
-  exe::invoke tar -czvf "${artifactPath}" "${files[@]}"
+  exe::invoke command tar -czvf "${artifactPath}" "${files[@]}"
   log::debug "The artifact has been created at ⌜${artifactPath}⌝ with:"$'\n'"${REPLY}"
 
   # upload the artifact
@@ -288,9 +288,9 @@ function selfRelease::uploadArtifact() {
       --- failOnError=true
   fi
 
-  rm -f "${artifactPath}"
+  command rm -f "${artifactPath}"
   popd 1>/dev/null
-  rm -Rf "${tempDir}"
+  command rm -Rf "${tempDir}"
 }
 
 function selfRelease::extractUploadUrl() {
@@ -345,9 +345,9 @@ function selfRelease::updateDocumentation() {
   selfRelease_writeAllFunctionsDocumentation "${pageFooter}"
 
   # export the valet config md and full documentation to the documentation
-  exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/config.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
-  exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/extras/lib-valet.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/lib-valet.md"
-  exe::invoke cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/extras/valet-commands.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/valet-commands.md"
+  exe::invoke command cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/config.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/config.md"
+  exe::invoke command cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/extras/lib-valet.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/lib-valet.md"
+  exe::invoke command cp -f "${GLOBAL_INSTALLATION_DIRECTORY}/extras/valet-commands.md" "${GLOBAL_INSTALLATION_DIRECTORY}/docs/static/valet-commands.md"
 
   # export stats
   # shellcheck disable=SC2034
@@ -396,7 +396,7 @@ function selfRelease_writeAllFunctionsDocumentation() {
     fi
     files+=("${file}")
   done
-  exe::invoke rm -f "${files[@]}"
+  exe::invoke command rm -f "${files[@]}"
 
   local -A documentationPageContent
 

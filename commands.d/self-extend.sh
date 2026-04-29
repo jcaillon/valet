@@ -200,7 +200,7 @@ function selfExtend_createExtension() {
         log::info "The extension ⌜${extensionName}⌝ will not be created."
         return 0
       fi
-      rm -Rf "${extensionDirectory}"
+      command rm -Rf "${extensionDirectory}"
     fi
 
     local -a subDirectories=(commands.d libraries.d tests.d)
@@ -229,8 +229,8 @@ function selfExtend_createExtension() {
   # vscode stuff
   if command -v code &>/dev/null; then
     fs::createDirectoryIfNeeded "${extensionDirectory}/.vscode"
-    cp -n "${GLOBAL_INSTALLATION_DIRECTORY}/extras/.vscode/settings.json" "${extensionDirectory}/.vscode/settings.json" || log::error "Could not copy the vscode settings file."
-    cp -n "${GLOBAL_INSTALLATION_DIRECTORY}/extras/.vscode/extensions.json" "${extensionDirectory}/.vscode/extensions.json" || log::error "Could not copy the vscode extensions file."
+    command cp -n "${GLOBAL_INSTALLATION_DIRECTORY}/extras/.vscode/settings.json" "${extensionDirectory}/.vscode/settings.json" || log::error "Could not copy the vscode settings file."
+    command cp -n "${GLOBAL_INSTALLATION_DIRECTORY}/extras/.vscode/extensions.json" "${extensionDirectory}/.vscode/extensions.json" || log::error "Could not copy the vscode extensions file."
 
     # link the snippets
     fs::createLink "${extensionsDirectory}/valet.code-snippets" "${extensionDirectory}/.vscode/valet.code-snippets" || log::error "Could not create a symbolic link to the vscode snippets."
@@ -298,16 +298,16 @@ function selfExtend_downloadTarball() {
   progress::stop
 
   # untar
-  tar -xzf "${tempDirectory}/${sha1}.tar.gz" -C "${tempDirectory}" || core::fail "Could not untar the extension tarball ⌜${tempDirectory}/${sha1}.tar.gz⌝ using tar."
+  command tar -xzf "${tempDirectory}/${sha1}.tar.gz" -C "${tempDirectory}" || core::fail "Could not untar the extension tarball ⌜${tempDirectory}/${sha1}.tar.gz⌝ using tar."
 
   # move the files to the target directory
-  rm -Rf "${targetDirectory}" 1>/dev/null || core::fail "Could not remove the existing files in ⌜${targetDirectory}⌝."
+  command rm -Rf "${targetDirectory}" 1>/dev/null || core::fail "Could not remove the existing files in ⌜${targetDirectory}⌝."
   fs::createDirectoryIfNeeded "${targetDirectory}"
   fs::listDirectories "${tempDirectory}"
   if ((${#REPLY_ARRAY[@]} != 1)); then
     core::fail "The tarball ⌜${tempDirectory}/${sha1}.tar.gz⌝ did not contain a single directory."
   fi
-  mv "${REPLY_ARRAY[0]}"/* "${targetDirectory}" || core::fail "Could not move the files from ⌜${REPLY_ARRAY[0]}⌝ to ⌜${targetDirectory}⌝."
+  command mv "${REPLY_ARRAY[0]}"/* "${targetDirectory}" || core::fail "Could not move the files from ⌜${REPLY_ARRAY[0]}⌝ to ⌜${targetDirectory}⌝."
 
   # write the sha1 to the targetDirectory so we known which commit we fetched
   fs::writeToFile "${targetDirectory}/.sha1" sha1
@@ -383,7 +383,7 @@ function selfExtend_gitClone() {
   args+=("${url}")
   args+=("${targetDirectory}")
 
-  rm -Rf "${targetDirectory}"
+  command rm -Rf "${targetDirectory}"
 
   log::info "Cloning the git repository ⌜${url}⌝ with reference ⌜${version}⌝ in ⌜${targetDirectory}⌝."
   progress::start template="<spinner> Cloning repo, please wait..."

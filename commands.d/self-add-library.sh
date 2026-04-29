@@ -65,7 +65,7 @@ function selfAddLibrary() {
       log::info "Aborting the creation of the library."
       return 0
     fi
-    rm -f "${newCommandFilePath}"
+    command rm -f "${newCommandFilePath}"
   fi
 
   # create the commands directory if it does not exist

@@ -125,7 +125,7 @@ Input stream from string with trace mode:
 TRACE    Executing the command fake with arguments: 
 --std-in
 TRACE    The command will be executed as:
-"${executable}" "${@}" <<<'input_stream' 1>"/tmp/valet-stdout.f" 2>"/tmp/valet-stderr.f"
+"fake" "${@}" <<<'input_stream' 1>"/tmp/valet-stdout.f" 2>"/tmp/valet-stderr.f"
 TRACE    Options: noFail=true, warnOnFailure=false, acceptableCodes=0, replyPathOnly=false
 TRACE    Fake standard input from string:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stdin
@@ -297,6 +297,36 @@ REPLY='🙈 mocking fake --error
 REPLY2='INFO: log line from fake mock to stderr
 ERROR: returning error from fake
 '
+```
+
+Starting with command:
+
+❯ `exe::invoke command fake-command --std-in --- noFail=true stdin=input_stream`
+
+**Error output**:
+
+```text
+TRACE    Executing the command fake-command with arguments: 
+fake-command --std-in
+TRACE    The command will be executed as:
+"command" "${@}" <<<'input_stream' 1>"/tmp/valet-stdout.f" 2>"/tmp/valet-stderr.f"
+TRACE    Options: noFail=true, warnOnFailure=false, acceptableCodes=0, replyPathOnly=false
+TRACE    Fake-command standard input from string:
+/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-command-stdin
+TRACE    Fake-command standard output stream:
+/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-command-stdout
+   1 ░ ok
+TRACE    Fake-command had no standard error stream.
+DEBUG    The command fake-command ended with exit code 0 in 25.000s.
+```
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY='ok
+'
+REPLY2=''
 ```
 
 Auto clean CR on windows.

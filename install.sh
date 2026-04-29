@@ -175,9 +175,9 @@ function install() {
   # temporary directory for the installation
   local tempDirectory="${TMPDIR:-/tmp}/valet.install.d"
   if [[ -d ${tempDirectory} ]]; then
-    rm -Rf "${tempDirectory}" 1>/dev/null || :
+    command rm -Rf "${tempDirectory}" 1>/dev/null || :
   fi
-  mkdir -p "${tempDirectory}" || core::fail "Could not create the temporary directory ⌜${tempDirectory}⌝."
+  command mkdir -p "${tempDirectory}" || core::fail "Could not create the temporary directory ⌜${tempDirectory}⌝."
 
   # download the release and unpack it
   local releaseFile="${tempDirectory}/valet.tar.gz"
@@ -186,7 +186,7 @@ function install() {
   downloadTarBall "${releaseUrl}" "${releaseFile}"
 
   log::debug "Unpacking the release."
-  tar -xzf "${releaseFile}" -C "${tempDirectory}" || core::fail "Could not unpack the release ⌜${releaseFile}⌝ using tar."
+  command tar -xzf "${releaseFile}" -C "${tempDirectory}" || core::fail "Could not unpack the release ⌜${releaseFile}⌝ using tar."
 
   if [[ -n ${fromBranch} ]]; then
     # when downloaded from a tarball, a sub director named valet-branch is created
@@ -196,26 +196,26 @@ function install() {
       core::fail "The downloaded branch tarball does not contain the expected directory ⌜${subDirectory}⌝."
     fi
     log::debug "Moving the content of ⌜${subDirectory}⌝ to ⌜${tempDirectory}⌝."
-    mv -f "${subDirectory}"/* "${tempDirectory}" || core::fail "Could not move the content of ⌜${subDirectory}⌝ to ⌜${tempDirectory}⌝."
-    rm -Rf "${subDirectory}" 1>/dev/null || :
+    command mv -f "${subDirectory}"/* "${tempDirectory}" || core::fail "Could not move the content of ⌜${subDirectory}⌝ to ⌜${tempDirectory}⌝."
+    command rm -Rf "${subDirectory}" 1>/dev/null || :
   fi
 
   log::debug "Removing old files."
-  rm -f "${releaseFile}"
-  rm -Rf "${installationDirectory}" || core::fail "Could not remove the existing installation directory ⌜${installationDirectory}⌝."
-  mkdir -p "${installationDirectory%/*}" || core::fail "Could not create the directory ⌜${installationDirectory%/*}⌝."
+  command rm -f "${releaseFile}"
+  command rm -Rf "${installationDirectory}" || core::fail "Could not remove the existing installation directory ⌜${installationDirectory}⌝."
+  command mkdir -p "${installationDirectory%/*}" || core::fail "Could not create the directory ⌜${installationDirectory%/*}⌝."
 
   log::debug "Copying the release to the installation directory ⌜${installationDirectory}⌝."
-  mv -f "${tempDirectory}" "${installationDirectory}" || core::fail "Could not move the release to the installation directory ⌜${installationDirectory}⌝."
+  command mv -f "${tempDirectory}" "${installationDirectory}" || core::fail "Could not move the release to the installation directory ⌜${installationDirectory}⌝."
 
   log::debug "Making valet executable."
   if [[ ! -f ${installationDirectory}/valet ]]; then
     core::fail "The valet executable was not found in the installation directory ⌜${installationDirectory}⌝ after downloading (did we get the correct version or branch?)."
   fi
-  chmod +x "${installationDirectory}/valet" || core::fail "Could not make the valet executable at ⌜${installationDirectory}/valet⌝."
+  command chmod +x "${installationDirectory}/valet" || core::fail "Could not make the valet executable at ⌜${installationDirectory}/valet⌝."
 
   if [[ -d ${tempDirectory} ]]; then
-    rm -Rf "${tempDirectory}" 1>/dev/null || :
+    command rm -Rf "${tempDirectory}" 1>/dev/null || :
   fi
 
   log::success "Valet has been downloaded in ⌜${installationDirectory}⌝."
@@ -227,9 +227,9 @@ function downloadTarBall() {
   local output="${2}"
 
   if command -v curl &>/dev/null; then
-    curl --fail --silent --show-error --location --output "${output}" "${url}" || core::fail "Could not download from ⌜${url}⌝ to ⌜${output}⌝, verify the url (bad version or branch?)."
+    command curl --fail --silent --show-error --location --output "${output}" "${url}" || core::fail "Could not download from ⌜${url}⌝ to ⌜${output}⌝, verify the url (bad version or branch?)."
   elif command -v wget &>/dev/null; then
-    wget --quiet --output-document="${output}" "${url}" || core::fail "Could not download from ⌜${url}⌝ to ⌜${output}⌝, verify the url (bad version or branch?)."
+    command wget --quiet --output-document="${output}" "${url}" || core::fail "Could not download from ⌜${url}⌝ to ⌜${output}⌝, verify the url (bad version or branch?)."
   else
     core::fail "You need ⌜curl⌝ or ⌜wget⌝ installed and in your PATH."
   fi
@@ -308,7 +308,7 @@ function interactive::confirm() {
 
 # Delete the cached commands index.
 function command::deleteCommandsIndex() {
-  rm -f "${VALET_CONFIG_USER_DATA_DIRECTORY:-"${XDG_DATA_HOME:-"${HOME}/.local/share"}/valet"}/commands" 1>/dev/null || :
+  command rm -f "${VALET_CONFIG_USER_DATA_DIRECTORY:-"${XDG_DATA_HOME:-"${HOME}/.local/share"}/valet"}/commands" 1>/dev/null || :
 }
 
 #===============================================================

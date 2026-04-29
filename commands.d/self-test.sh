@@ -330,7 +330,7 @@ function selfTest_runSingleTestSuite() {
   GLOBAL_TEST_REPORT_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/report"
   GLOBAL_TEST_STACK_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/stack"
   GLOBAL_TEST_LOG_FILE="${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}/log"
-  mkdir -p "${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}"
+  command mkdir -p "${GLOBAL_TEST_OUTPUT_TEMPORARY_DIRECTORY}"
   exec {GLOBAL_FD_TEST_LOG}>"${GLOBAL_TEST_LOG_FILE}"
 
   # write the test suite title
@@ -465,15 +465,15 @@ function selfTest_runSingleTest() {
 
   # reset the temporary location (to have consistency when using fs::createTempDirectory for example)
   if [[ -d ${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY} ]]; then
-    rm -Rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
+    command rm -Rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
   fi
   fs::setupTempFileGlobalVariable
   fs::cleanTempFiles
-  mkdir -p "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
+  command mkdir -p "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
 
   # set a new user directories so that commands are correctly recreated if calling
   # valet from a test
-  cp -R "${testUserDataDirectory}" "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
+  command cp -R "${testUserDataDirectory}" "${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
   export VALET_CONFIG_EXTENSIONS_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
   export VALET_CONFIG_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"
   export VALET_CONFIG_USER_DATA_DIRECTORY="${GLOBAL_TEMPORARY_DIRECTORY_PREFIX}.valet.d"

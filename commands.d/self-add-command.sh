@@ -68,7 +68,7 @@ function selfAddCommand() {
       log::info "Aborting the creation of the command."
       return 0
     fi
-    rm -f "${newCommandFilePath}"
+    command rm -f "${newCommandFilePath}"
   fi
 
   # create the commands directory if it does not exist

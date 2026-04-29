@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+IFS=" "
+echo "(curl logs) mocking curl $*" 1>&2
+
+while [[ $# -gt 0 ]]; do
+  case "${1}" in
+  --error)
+    echo "Returning 1 from curl." 1>&2
+    return 1
+    ;;
+  --code)
+    shift
+    echo -n "${1}"
+    ;;
+  -o | --output)
+    shift
+    if [[ "${NO_CURL_CONTENT:-}" != true ]]; then
+      echo -n "(request body response) Writing stuff to file because the --output option was given." >"${1}"
+    fi
+    ;;
+  *) ;;
+  esac
+  shift
+done

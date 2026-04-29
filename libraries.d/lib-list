@@ -1041,7 +1041,7 @@ function list_stopAsyncFiltering() {
 
   unset -v _LIST_ASYNC_FILTER_JOB "GLOBAL_BACKGROUND_PROCESSES[LIST_ASYNC_FILTER_JOB]"
 
-  rm -f "${_ASYNC_FILTERED_ITEMS_FILE}" \
+  command rm -f "${_ASYNC_FILTERED_ITEMS_FILE}" \
     "${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
 }
 
@@ -1144,16 +1144,16 @@ function list_asyncFilterJob() {
         mv -f "${fzfOutputFile}" "${fzfPreviousOutputFile}"
       fi
 
-      fzf --ignore-case \
+      command fzf --ignore-case \
         --tiebreak=begin,end,index \
         --filter="${filterString}" \
         --nth=2 \
         --delimiter='\t' <"${fzfInputFile}" >"${fzfOutputFile}"
 
-      awk "{print \$1 >\"${intermediateItemsCorrespondencesFile}\"; print \$2 >\"${intermediateItemsFile}\"}" "${fzfOutputFile}"
+      command awk "{print \$1 >\"${intermediateItemsCorrespondencesFile}\"; print \$2 >\"${intermediateItemsFile}\"}" "${fzfOutputFile}"
 
-      mv -f "${intermediateItemsFile}" "${_ASYNC_FILTERED_ITEMS_FILE}"
-      mv -f "${intermediateItemsCorrespondencesFile}" "${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+      command mv -f "${intermediateItemsFile}" "${_ASYNC_FILTERED_ITEMS_FILE}"
+      command mv -f "${intermediateItemsCorrespondencesFile}" "${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
       ;;
     grep+gawk)
       # sort with grep and gawk
@@ -1167,8 +1167,8 @@ function list_asyncFilterJob() {
         "${intermediateItemsFile}" \
         "${intermediateItemsCorrespondencesFile}"
 
-      mv -f "${intermediateItemsFile}" "${_ASYNC_FILTERED_ITEMS_FILE}"
-      mv -f "${intermediateItemsCorrespondencesFile}" "${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
+      command mv -f "${intermediateItemsFile}" "${_ASYNC_FILTERED_ITEMS_FILE}"
+      command mv -f "${intermediateItemsCorrespondencesFile}" "${_ASYNC_FILTERED_ITEMS_CORRESPONDENCES_FILE}"
       ;;
     *)
       # sort with bash
@@ -1304,8 +1304,8 @@ function list_fuzzyFilterSortFileWithGrepAndGawk() {
 
   # we use grep to pre-filter the lines.
   # We could do everything in gawk but it would be slower for huge files.
-  grep --ignore-case --line-number "${grepRegex}" "${fileToFilter}" |
-    gawk "
+  command grep --ignore-case --line-number "${grepRegex}" "${fileToFilter}" |
+    command gawk "
     BEGIN {
       # Ignore case when matching the searchString
       IGNORECASE = 1;
@@ -1369,5 +1369,5 @@ function list_fuzzyFilterSortFileWithGrepAndGawk() {
         quickSort(keys, lines, right + 1, high)
     }
   "
-  mv "${_ARRAY_TEMP_FILTERED_FILE}" "${outputFilteredFile}"
+  command mv "${_ARRAY_TEMP_FILTERED_FILE}" "${outputFilteredFile}"
 }

@@ -171,11 +171,11 @@ function selfSetup_installShowcase() {
   fi
 
   if [[ ${copyShowcase:-} == "true" ]] || ([[ ${unattended:-} != "true" ]] && interactive::confirm "${showcasePromptMessage}" default=true); then
-    exe::invoke mkdir -p "${extensionsDirectory}" --- failMessage="Could not create the extensions directory ⌜${extensionsDirectory}⌝."
+    exe::invoke command mkdir -p "${extensionsDirectory}" --- failMessage="Could not create the extensions directory ⌜${extensionsDirectory}⌝."
     if [[ -d "${showcaseDirectory}" ]]; then
-      exe::invoke rm -Rf "${showcaseDirectory}" --- failMessage="Could not remove the existing showcase (command examples) in ⌜${extensionsDirectory}⌝."
+      exe::invoke command rm -Rf "${showcaseDirectory}" --- failMessage="Could not remove the existing showcase (command examples) in ⌜${extensionsDirectory}⌝."
     fi
-    exe::invoke cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" "${extensionsDirectory}" --- failMessage="Could not copy the showcase (command examples) to ⌜${extensionsDirectory}⌝."
+    exe::invoke command cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" "${extensionsDirectory}" --- failMessage="Could not copy the showcase (command examples) to ⌜${extensionsDirectory}⌝."
 
     log::success "The showcase (command examples) has been copied to your extensions directory ⌜${showcaseDirectory}⌝."
   fi
@@ -207,7 +207,7 @@ function selfSetup_createShim() {
   if [[ ${createShim:-} == "true" ]] || ([[ ${unattended:-} != "true" ]] && interactive::confirm "Do you want to create a shim script in ⌜${shimDirectory}⌝ to add it to your PATH?" default=true); then
     log::info "Creating a shim ⌜${valetBin}⌝ → ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝."
     printf '#%s%s\nsource %s "$@"' "!" "/usr/bin/env bash" "'${GLOBAL_INSTALLATION_DIRECTORY}/valet'" 1>"${valetBin}"
-    exe::invoke chmod +x "${valetBin}"
+    exe::invoke command chmod +x "${valetBin}"
     log::success "Shim created in ⌜${valetBin}⌝."
     REPLY="true"
   else
@@ -285,12 +285,12 @@ function selfSetup_globalInstallation() {
   if [[ ${globalInstallation:-} == "true" ]] || ([[ ${unattended:-} != "true" ]] && interactive::confirm "Do you want to add Valet to make valet available for all users?" default=true); then
 
     log::info "Setting read permissions for all users on Valet files and directories."
-    exe::invoke chmod -R a+rX "${GLOBAL_INSTALLATION_DIRECTORY}" --- failMessage="Could not set read permissions for all users on Valet files and directories."
+    exe::invoke command chmod -R a+rX "${GLOBAL_INSTALLATION_DIRECTORY}" --- failMessage="Could not set read permissions for all users on Valet files and directories."
 
     local shimPath="/usr/local/bin/valet"
     log::info "Creating a shim ⌜${shimPath}⌝ → ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝ to make Valet available for all users."
     printf '#%s%s\nsource %s "$@"' "!" "/usr/bin/env bash" "'${GLOBAL_INSTALLATION_DIRECTORY}/valet'" 1>"${shimPath}"
-    exe::invoke chmod +x "${shimPath}" --- failMessage="Could not create the shim in ⌜${shimPath}⌝."
+    exe::invoke command chmod +x "${shimPath}" --- failMessage="Could not create the shim in ⌜${shimPath}⌝."
     log::success "Global installation setup complete."
     REPLY="true"
   else

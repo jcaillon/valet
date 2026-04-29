@@ -134,7 +134,7 @@ function selfTestUtils_compareWithApproved() {
   if ${command} 1>&"${GLOBAL_FD_LOG}"; then
     log::success "→ test suite has passed."
     if [[ -f "${receivedFile}" ]]; then
-      rm -f "${receivedFile}" 1>/dev/null
+      command rm -f "${receivedFile}" 1>/dev/null
     fi
     return 0
   else
@@ -145,17 +145,17 @@ function selfTestUtils_compareWithApproved() {
   # if the option is activated, we approve the received file
   if [[ ${_TEST_AUTO_APPROVE:-false} == "true" ]]; then
     log::info "→ test suite KO but auto-approving."
-    cp -f "${receivedFileToCopy}" "${approvedFile}"
+    command cp -f "${receivedFileToCopy}" "${approvedFile}"
     if [[ -n ${GLOBAL_TEST_REPORT_FILE_MODE:-} ]]; then
-      chmod "${GLOBAL_TEST_REPORT_FILE_MODE}" "${approvedFile}"
+      command chmod "${GLOBAL_TEST_REPORT_FILE_MODE}" "${approvedFile}"
     fi
     if [[ -f "${receivedFile}" ]]; then
-      rm -f "${receivedFile}" 1>/dev/null
+      command rm -f "${receivedFile}" 1>/dev/null
     fi
   else
-    cp -f "${receivedFileToCopy}" "${receivedFile}"
+    command cp -f "${receivedFileToCopy}" "${receivedFile}"
     if [[ -n ${GLOBAL_TEST_REPORT_FILE_MODE:-} ]]; then
-      chmod "${GLOBAL_TEST_REPORT_FILE_MODE}" "${approvedFile}"
+      command chmod "${GLOBAL_TEST_REPORT_FILE_MODE}" "${approvedFile}"
     fi
   fi
 
@@ -199,15 +199,15 @@ function selfTestUtils_setupDiffCommand() {
   if [[ -z ${GLOBAL_TEST_DIFF_COMMAND} ]]; then
     if command -v delta &>/dev/null; then
       log::debug "Using delta as diff command."
-      GLOBAL_TEST_DIFF_COMMAND="delta --paging=never --no-gitconfig --line-numbers --width ${GLOBAL_COLUMNS} --side-by-side %APPROVED_FILE% %RECEIVED_FILE%"
+      GLOBAL_TEST_DIFF_COMMAND="command delta --paging=never --no-gitconfig --line-numbers --width ${GLOBAL_COLUMNS} --side-by-side %APPROVED_FILE% %RECEIVED_FILE%"
       # delta compares the file modes, so we need to match them
       GLOBAL_TEST_REPORT_FILE_MODE="${VALET_CONFIG_TEST_REPORT_FILE_MODE:-644}"
     elif command -v diff &>/dev/null; then
       log::debug "Using diff as diff command."
-      GLOBAL_TEST_DIFF_COMMAND="diff --color -u %APPROVED_FILE% %RECEIVED_FILE%"
+      GLOBAL_TEST_DIFF_COMMAND="command diff --color -u %APPROVED_FILE% %RECEIVED_FILE%"
     elif command -v cmp &>/dev/null; then
       log::warning "Using cmp as diff command, consider setting up a diff tool using the VALET_CONFIG_TEST_DIFF_COMMAND config variable."
-      GLOBAL_TEST_DIFF_COMMAND="cmp %APPROVED_FILE% %RECEIVED_FILE%"
+      GLOBAL_TEST_DIFF_COMMAND="command cmp %APPROVED_FILE% %RECEIVED_FILE%"
     else
       log::warning "Using internal comparison function, consider setting up a diff tool using the VALET_CONFIG_TEST_DIFF_COMMAND config variable."
       GLOBAL_TEST_DIFF_COMMAND="selfTestUtils_internalCompare %APPROVED_FILE% %RECEIVED_FILE%"

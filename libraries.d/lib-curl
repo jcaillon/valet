@@ -59,7 +59,7 @@ function curl::download() {
 
   # call curl
   local httpStatusCode errors
-  exe::invoke curl --silent --show-error --location --write-out "%{response_code}" --output "${output}" "$@" "${url}" --- noFail=true
+  exe::invoke command curl --silent --show-error --location --write-out "%{response_code}" --output "${output}" "$@" "${url}" --- noFail=true
   local -i exitCode="${REPLY_CODE}"
   httpStatusCode="${REPLY}"
   errors="${REPLY2}"
@@ -68,7 +68,7 @@ function curl::download() {
   # and for a bug in curl https://github.com/Homebrew/homebrew-core/issues/173294
   if [[ ${exitCode} != "0" && (${errors} == *"bad argument"* || ${errors} == *"is unknown"*) ]]; then
     log::debug "Trying to use curl without the many options."
-    exe::invoke curl --location -v --output "${output}" "$@" --- noFail=true
+    exe::invoke command curl --location -v --output "${output}" "$@" --- noFail=true
     exitCode="${REPLY_CODE}"
     if [[ ${REPLY}${REPLY2} =~ "< HTTP/"([0-9.]+)" "([0-9]+)" " ]]; then
       httpStatusCode="${BASH_REMATCH[2]}"

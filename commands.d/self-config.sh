@@ -38,7 +38,8 @@ examples:
     Create (or recreate) the configuration file of Valet reusing the possible current values of the variables.
 COMMAND_YAML
 function selfConfig() {
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   core::getConfigurationDirectory
@@ -65,7 +66,7 @@ function selfConfig() {
 
 function selfConfig_writeConfigFile() {
   if [[ ! -d "${valetConfigFile%/*}" ]]; then
-    mkdir -p "${valetConfigFile%/*}"
+    command mkdir -p "${valetConfigFile%/*}"
   fi
 
   selfConfig::getFileContent "${@}"

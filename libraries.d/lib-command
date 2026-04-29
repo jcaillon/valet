@@ -1477,5 +1477,5 @@ function command::reloadCommandsIndex() {
 # ```
 function command::deleteCommandsIndex() {
   core::getUserDataDirectory
-  rm -f "${REPLY}/commands" 1>/dev/null || :
+  command rm -f "${REPLY}/commands" 1>/dev/null || :
 }

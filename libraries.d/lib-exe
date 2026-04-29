@@ -129,7 +129,7 @@ function exe::invoke() {
   # compute the necessary redirects
   # shellcheck disable=SC2016
   local \
-    toEval='"${executable}" "${@}"' \
+    toEval='"'"${executable}"'" "${@}"' \
     redirectExtraSymbol=""
   if [[ -n ${stdin} ]]; then
     toEval+=" <<<${stdin@Q}"
@@ -146,6 +146,10 @@ function exe::invoke() {
     else
       toEval+=" 1>${redirectExtraSymbol}\"${stdoutPath}\" 2>${redirectExtraSymbol}\"${stderrPath}\""
     fi
+  fi
+
+  if [[ ${executable} == "command" ]]; then
+    executable="${1:-}"
   fi
 
   local isTraceEnabled=false

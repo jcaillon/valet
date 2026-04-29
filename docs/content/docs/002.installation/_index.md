@@ -10,8 +10,8 @@ description: Learn how to install Valet on your system.
 ## 📦 Dependencies
 
 - Bash version 5 or superior is required (it uses bash `EPOCHREALTIME` among other features introduced in bash 5).
-- [GNU coreutils][gnu-core-utils]: valet uses `rm`, `mv`, `cp`, `mkdir` as they can't be done in pure bash. It also uses `chmod`, `touch` for the installation/updates.
-- [curl][curl] and [tar][tar]: needed only if you want to use the `self update` or `self extend` command.
+- [GNU coreutils][gnu-core-utils]: valet uses `rm`, `mv`, `cp`, `mkdir` as they can't be done in pure bash. It also uses `chmod` for the installation/updates.
+- [curl][curl] and [tar][tar]: needed only if you want to use the automated installation, `self update` or `self extend` command.
   
 Other external programs can be used if found but are not required[^exhaustive-programs-list].
 
@@ -24,7 +24,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/in
 ```
 
 > [!IMPORTANT]
-> Please review the [installation script](https://github.com/jcaillon/valet/blob/latest/install.sh) or the [self install command usage](../valet-commands/#-valet-self-update) to learn about the different installer options.
+> Please review the [installation script](https://github.com/jcaillon/valet/blob/latest/install.sh) to learn about the different installer options.
 
 Here is an example command to install Valet with the options `--unattended` (no interactive prompt during installation):
 
@@ -82,6 +82,6 @@ Find the list of image tags under [Valet packages][valetImageTagsLink].
 [nerdFontsLink]: https://www.nerdfonts.com/font-downloads
 [msys2Link]: https://www.msys2.org/
 
-[^exhaustive-programs-list]: Other external programs that can be used by Valet if present: `delta`, `diff`, `git`, `cmp`, `readlink`, `ls`, `lsof`, `ps`, `fzf`, `grep`, `cygpath`.
+[^exhaustive-programs-list]: Other external programs that can be used by Valet if present: `delta`, `diff`, `cmp`, `git`, `readlink`, `ls`, `lsof`, `ps`, `fzf`, `grep`, `awk`, `gawk`.
 
 {{< main-section-end >}}
