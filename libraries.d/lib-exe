@@ -6,6 +6,8 @@
 source fs
 # shellcheck source=lib-time
 source time
+# shellcheck source=lib-system
+source system
 
 # ## exe::invoke
 #
@@ -14,6 +16,8 @@ source time
 # By default it redirects the stdout and stderr and captures them to output variables.
 # This makes the executes silent unless the executable fails.
 # By default, it will exit (core::fail) if the executable returns a non-zero exit code.
+# By default, on windows, it will remove carriage return characters (\r) from the outputs
+# to make them more consistent with other OSes.
 #
 # This function should be used as a wrapper around any external program as it allows to easily
 # mock the program during tests and facilitates debugging with trace level log.
@@ -66,6 +70,10 @@ source time
 # - ${noRedirection} _as bool_:
 #       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.
 #       (defaults to false)
+# - ${keepWindowsCr} _as bool_:
+#       (optional) If set to true, the function will not remove Windows
+#       carriage return characters (\r) from the stdout and stderr.
+#       (defaults to false)
 #
 # Returns:
 #
@@ -112,7 +120,8 @@ function exe::invoke() {
     warnOnFailure=false \
     appendRedirect=false \
     groupRedirect=false \
-    noRedirection=false
+    noRedirection=false \
+    keepWindowsCr=false
   shift 1
   core::parseFunctionOptions "${@}"
   eval "${REPLY}"
@@ -243,6 +252,13 @@ function exe::invoke() {
     # shellcheck disable=SC2034
     REPLY2="${REPLY}"
     fs::readFile "${stdoutPath}"
+    if system::isWindows; then
+      if [[ ${keepWindowsCr} != "true" ]]; then
+        # remove carriage return characters on windows for consistency with other OSes
+        REPLY="${REPLY//$'\r\n'/$'\n'}"
+        REPLY2="${REPLY2//$'\r\n'/$'\n'}"
+      fi
+    fi
   fi
 
   # shellcheck disable=SC2034

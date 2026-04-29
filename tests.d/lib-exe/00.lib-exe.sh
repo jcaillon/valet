@@ -61,6 +61,19 @@ function test_exe::invoke() {
 
   test::markdown "Only warn on errors:"
   test::func exe::invoke fake --error --- warnOnFailure=true
+
+  OSTYPE="msys"
+  test::markdown "Auto clean CR on windows."
+  exe::invoke fakeWindows
+  if [[ ${REPLY} == *$'\r'* || ${REPLY2} == *$'\r'* ]]; then
+    test::fail "exe::invoke did not remove Windows CR characters from the output on windows."
+  fi
+
+  test::markdown "Keep CR on windows."
+  exe::invoke fakeWindows --- keepWindowsCr=true
+  if [[ ${REPLY} != *$'\r'* || ${REPLY2} != *$'\r'* ]]; then
+    test::fail "exe::invoke did not keep Windows CR characters in the output on windows."
+  fi
 }
 
 function fake() {
@@ -83,6 +96,11 @@ function fake() {
     echo "ERROR: returning error from fake" 1>&2
     return 1
   fi
+}
+
+function fakeWindows() {
+  printf "Line 1 with Windows CR\r\nLine 2 with Windows CR\r\n"
+  printf "Error line 1 with Windows CR\r\nError line 2 with Windows CR\r\n" 1>&2
 }
 
 main
