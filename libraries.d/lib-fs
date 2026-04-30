@@ -43,7 +43,8 @@ function fs::getAbsolutePath() {
     local REPLY_CODE REPLY2
     # shellcheck source=./lib-exe
     source exe
-    exe::invoke readlink "${path}"
+    # TODO: use realpath if available and fallback to readlink if not? (with or without -f ?)
+    exe::invoke command readlink "${path}"
     REPLY="${REPLY%[[:space:]]}"
     return 0
   fi
@@ -671,7 +672,7 @@ function fs::createLink() {
   if [[ -e ${linkPath} || -L ${linkPath} ]] && ! fs::isValidLink "${linkedPath}" "${linkPath}" hardlink="${hardlink}"; then
     # if force, delete target if it exists
     if [[ ${force} == true ]]; then
-      if [[ -d "${linkPath}" ]] && ! command rm -Rf "${linkPath}"; then
+      if [[ -d "${linkPath}" ]] && ! command rm -rf "${linkPath}"; then
         core::fail "Failed to delete the existing target directory ⌜${linkPath}⌝ to replace it."
       elif ! command rm -f "${linkPath}"; then
         core::fail "Failed to delete the existing target file ⌜${linkPath}⌝ to replace it."

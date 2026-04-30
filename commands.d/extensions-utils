@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: this script is a valet command
+
+# shellcheck source=../libraries.d/lib-exe
+source exe
+# shellcheck source=../libraries.d/lib-fs
+source fs
+# shellcheck source=../libraries.d/lib-string
+source string
+# shellcheck source=../libraries.d/lib-interactive
+source interactive
+# shellcheck source=../libraries.d/lib-bash
+source bash
+
+# ## extensions::getVersion (private)
+#
+# Get the version of an extension.
+#
+# - $1: **extension directory** _as string_:
+#       The directory of the extension for which we want to get the version.
+#
+function extensions::getVersion() {
+  local extensionDirectory="${1}"
+
+  local file
+  for file in "version" "VERSION"; do
+    if [[ -f ${extensionDirectory}/${file} ]]; then
+      fs::readFile "${extensionDirectory}/${file}"
+      string::trimAll REPLY
+      return 0
+    fi
+  done
+
+  if [[ ! -d ${extensionDirectory}/.git ]]; then
+    REPLY=""
+    return 0
+  fi
+
+  exe::invoke command git -C "${extensionDirectory}" rev-parse HEAD
+  if ((REPLY_CODE != 0)); then
+    REPLY=""
+    return 0
+  fi
+  string::trimAll REPLY
+  REPLY="${REPLY:0:7}"
+}
+
+# ## extensions::getSetupSuccessFile (private)
+#
+# Get the path to the file used to record the successful execution of the setup script for an extension.
+#
+# - $1: **extension directory** _as string_:
+#       The directory of the extension for which we want to get the path to the setup success file.
+#
+function extensions::getSetupSuccessFile() {
+  REPLY="${1}/.git/.valet-setup-executed"
+}
+
+# Execute the `extension.setup.sh` script of the extension, if any.
+function extensions::executeSetupScript() {
+  local \
+    extensionDirectory="${1}" \
+    unattended="${2}"
+
+  extensions::getSetupSuccessFile "${extensionDirectory}"
+  local \
+    extensionName="${extensionDirectory##*/}" \
+    successFile="${REPLY}"
+
+  if [[ ! -f ${extensionDirectory}/extension.setup.sh ]]; then
+    log::info "No ⌜extension.setup.sh⌝ script found in the extension directory ⌜${extensionDirectory}⌝."
+    return 0
+  fi
+
+  log::info "Found setup script for the extension ${extensionName}: ⌜${extensionDirectory}/extension.setup.sh⌝."
+
+  command rm -f "${successFile}"
+
+  # ask for confirmation before executing the setup script
+  if [[ ${unattended} != "true" ]] && ! interactive::confirm "The extension ⌜${extensionName}⌝ comes with a setup script usually used to finalize the installation."$'\n'"Make sure this script is safe to run before confirming this prompt."$'\n'$'\n'"Do you trust the setup script for the extension ⌜${extensionName}⌝ and wish to execute it?"; then
+    log::info "The setup script for the extension ⌜${extensionName}⌝ was not trusted, skipping the setup."
+    return 0
+  fi
+
+  log::info "Executing the setup script."
+  # shellcheck disable=SC1091
+  bash::runInSubshell source "${extensionDirectory}/extension.setup.sh"
+  if ((REPLY_CODE != 0)); then
+    log::error "The extension setup script failed."
+    if [[ ${unattended} == "true" ]] || ! interactive::confirm "The setup script for the extension ⌜${extensionName}⌝ failed (see above), do you want to continue anyway?" default=false; then
+      command rm -rf "${extensionDirectory}"
+      core::fail "The setup script for the extension ⌜${extensionName}⌝ failed, aborting installation."
+    fi
+    log::info "You can manually retry the setup by running the script ⌜${extensionDirectory}/extension.setup.sh⌝."
+  else
+    # record for which commit we executed the setup script
+    exe::invoke command git -C "${extensionDirectory}" rev-parse HEAD
+    # shellcheck disable=SC2034
+    local sha1="${REPLY}"
+    string::trimAll sha1
+    fs::writeToFile "${successFile}" sha1
+    log::success "The setup script for the extension ⌜${extensionName}⌝ has been executed successfully."
+  fi
+}

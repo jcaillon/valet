@@ -20,9 +20,9 @@ Returned code: `1`
 
 ```text
 INFO     This is a test function.
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 25: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 43: ((: 0 / 0: division by 0 (error token is "0")
 INFO     This line will be executed since we catch errors.
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 27: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 45: ((: 0 / 0: division by 0 (error token is "0")
 INFO     Again.
 ```
 
@@ -34,14 +34,14 @@ GLOBAL_ERROR_TRAP_ERROR_CODES=(
 )
 GLOBAL_ERROR_TRAP_ERROR_STACKS=(
 [0]='Error code ⌜1⌝ for the command:
-╭ ((0/0))
+╭ ((0 / 0))
 ├─ in log::printCallStack() at core:10
 ├─ in log::error() at core:100
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
 '
 [1]='Error code ⌜1⌝ for the command:
-╭ ((0/0))
+╭ ((0 / 0))
 ├─ in log::printCallStack() at core:10
 ├─ in log::error() at core:100
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -95,9 +95,9 @@ REPLY_CODE='0'
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 63: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 81: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
-╭ ((0/0))
+╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
 ```
@@ -113,9 +113,9 @@ REPLY_CODE='1'
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 63: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 81: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
-╭ ((0/0))
+╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
 ```
@@ -133,9 +133,9 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 63: ((: 0/0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 81: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
-╭ ((0/0))
+╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
 ```
@@ -175,7 +175,7 @@ test_function_to_reexport ()
     local secondArg="${2}";
     local -A thirdArg="${3:-egez}";
     local -a fourth="${4?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}";
-    if (( firstArg == 0 )); then
+    if ((firstArg == 0)); then
         echo "cool";
     fi;
     if [[ "${secondArg}" == "cool" ]]; then
@@ -199,7 +199,7 @@ test_function_to_reexport ()
 ```text
 new_name () 
 { 
-    if (( FIRST_ARG == 0 )); then
+    if ((FIRST_ARG == 0)); then
         echo "cool";
     fi;
     if [[ "${SECOND_ARG}" == "cool" ]]; then
@@ -230,7 +230,7 @@ new_name ()
     local secondArg="${2}";
     local -A thirdArg="${3:-egez}";
     local -a fourth="${4?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}";
-    if (( firstArg == 0 )); then
+    if ((firstArg == 0)); then
         echo "cool";
     fi;
     if [[ "${secondArg}" == "cool" ]]; then
@@ -431,6 +431,7 @@ REPLY='bash::getBuiltinOutput ()
         REPLY_CODE=0;
     else
         REPLY_CODE=$?;
+        IFS='"'"''"'"' read -rd '"'"''"'"' REPLY < "${GLOBAL_TEMPORARY_STDOUT_FILE}" || :;
     fi
 }
 '
@@ -443,5 +444,56 @@ Returned variables:
 ```text
 REPLY_CODE='1'
 REPLY=''
+```
+
+❯ `bash::getBuiltinOutput testOutput`
+
+Returned variables:
+
+```text
+REPLY_CODE='42'
+REPLY='This is stdout
+This is stderr
+'
+```
+
+### ✅ Testing bash::pushd and bash::popd
+
+❯ `bash::pushd /tmp`
+
+Current directory after pushd: /tmp
+
+❯ `bash::popd`
+
+Current directory after pushd: $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash
+
+❯ `bash::popd`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+FAIL     Failed to change the current directory, the directory stack is empty.
+```
+
+❯ `bash::pushd non-existing-directory`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+FAIL     Failed to change the current directory to ⌜non-existing-directory⌝.
+```
+
+❯ `bash::popd`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+FAIL     Failed to change the current directory to ⌜still-not-existing⌝.
 ```
 

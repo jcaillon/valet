@@ -259,7 +259,7 @@ function selfRelease::uploadArtifact() {
 
   # prepare a temp folder to store the release
   local tempDir="${GLOBAL_INSTALLATION_DIRECTORY}/.tmp"
-  command rm -Rf "${tempDir}"
+  command rm -rf "${tempDir}"
   command mkdir -p "${tempDir}"
   pushd "${tempDir}" 1>/dev/null
 
@@ -271,6 +271,9 @@ function selfRelease::uploadArtifact() {
   for file in "${files[@]}"; do
     exe::invoke command cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/${file}" .
   done
+
+  # remove self-release command
+  exe::invoke command rm -f "commands.d/self-release.sh"
 
   # prepare artifact
   local artifactPath="valet.tar.gz"
@@ -290,7 +293,7 @@ function selfRelease::uploadArtifact() {
 
   command rm -f "${artifactPath}"
   popd 1>/dev/null
-  command rm -Rf "${tempDir}"
+  command rm -rf "${tempDir}"
 }
 
 function selfRelease::extractUploadUrl() {

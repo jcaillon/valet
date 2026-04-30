@@ -472,6 +472,7 @@ function bash::getBuiltinOutput() {
   else
     # shellcheck disable=SC2034
     REPLY_CODE=$?
+    IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
   fi
 }
 
@@ -576,5 +577,48 @@ function bash::clearCachedVariables() {
       unset -v "_BASH_VAR_CACHED_${1}"
       shift
     done
+  fi
+}
+
+# ## bash::pushd
+#
+# Change the current directory and push the old one to the directory stack.
+#
+# Contrary to the builtin pushd, this function does not print the directory stack after changing the directory
+# and will print an error message before calling core::fail if the directory change fails.
+#
+# - $1: **directory** _as string_:
+#       The directory to change to.
+#
+# ```bash
+# bash::pushd "/path/to/directory"
+# ```
+function bash::pushd() {
+  if ! pushd "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" &>/dev/null; then
+    core::fail "Failed to change the current directory to ⌜${1}⌝."
+  fi
+}
+
+# ## bash::popd
+#
+# Change the current directory to the one on top of the directory stack and remove it from the stack.
+#
+# Contrary to the builtin popd, this function does not print the directory stack after changing the directory
+# and will print an error message before calling core::fail if the directory change fails.
+#
+# ```bash
+# bash::popd
+# ```
+function bash::popd() {
+  local REPLY
+  bash::getBuiltinOutput dirs -0
+  local previousDir="${REPLY%$'\n'}"
+  bash::getBuiltinOutput popd
+  if ((REPLY_CODE != 0)); then
+    if [[ ${REPLY} == *"directory stack empty"* ]]; then
+      core::fail "Failed to change the current directory, the directory stack is empty."
+    else
+      core::fail "Failed to change the current directory to ⌜${previousDir}⌝."
+    fi
   fi
 }

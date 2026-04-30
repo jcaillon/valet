@@ -200,7 +200,7 @@ function selfExtend_createExtension() {
         log::info "The extension ⌜${extensionName}⌝ will not be created."
         return 0
       fi
-      command rm -Rf "${extensionDirectory}"
+      command rm -rf "${extensionDirectory}"
     fi
 
     local -a subDirectories=(commands.d libraries.d tests.d)
@@ -301,7 +301,7 @@ function selfExtend_downloadTarball() {
   command tar -xzf "${tempDirectory}/${sha1}.tar.gz" -C "${tempDirectory}" || core::fail "Could not untar the extension tarball ⌜${tempDirectory}/${sha1}.tar.gz⌝ using tar."
 
   # move the files to the target directory
-  command rm -Rf "${targetDirectory}" 1>/dev/null || core::fail "Could not remove the existing files in ⌜${targetDirectory}⌝."
+  command rm -rf "${targetDirectory}" 1>/dev/null || core::fail "Could not remove the existing files in ⌜${targetDirectory}⌝."
   fs::createDirectoryIfNeeded "${targetDirectory}"
   fs::listDirectories "${tempDirectory}"
   if ((${#REPLY_ARRAY[@]} != 1)); then
@@ -383,7 +383,7 @@ function selfExtend_gitClone() {
   args+=("${url}")
   args+=("${targetDirectory}")
 
-  command rm -Rf "${targetDirectory}"
+  command rm -rf "${targetDirectory}"
 
   log::info "Cloning the git repository ⌜${url}⌝ with reference ⌜${version}⌝ in ⌜${targetDirectory}⌝."
   progress::start template="<spinner> Cloning repo, please wait..."

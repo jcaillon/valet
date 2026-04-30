@@ -15,6 +15,24 @@ function main() {
   test_bash::isCommand
   test_bash::isFunction
   test_bash::getBuiltinOutput
+  test_bash::pushd
+}
+
+function test_bash::pushd() {
+  test::title "✅ Testing bash::pushd and bash::popd"
+
+  dirs -c
+
+  test::exec bash::pushd /tmp
+  test::markdown "Current directory after pushd: ${PWD}"
+  test::exec bash::popd
+  test::markdown "Current directory after pushd: ${PWD}"
+
+  test::exit bash::popd
+  test::exit bash::pushd non-existing-directory
+
+  pushd -n still-not-existing &>/dev/null
+  test::exit bash::popd
 }
 
 function test_bash::catchErrors() {
@@ -22,9 +40,9 @@ function test_bash::catchErrors() {
 
   function testFunction() {
     log::info "This is a test function."
-    ((0/0)) # This will fail and trigger the error trap
+    ((0 / 0)) # This will fail and trigger the error trap
     log::info "This line will be executed since we catch errors."
-    ((0/0)) # This will fail and trigger the error trap
+    ((0 / 0)) # This will fail and trigger the error trap
     log::info "Again."
   }
 
@@ -60,7 +78,7 @@ function test_bash::runInSubshell() {
   test::func bash::runInSubshell log::info "hello"
 
   function subshellThatFails() {
-    ((0/0)) # This will fail and exit the subshell
+    ((0 / 0)) # This will fail and exit the subshell
     log::info "This line will not be executed because the previous command failed."
   }
 
@@ -89,7 +107,7 @@ function test_bash::isFdValid() {
 function test_bash::injectCodeInFunction() {
   test::title "✅ Testing bash::injectCodeInFunction"
 
-  function simpleFunction() { :;}
+  function simpleFunction() { :; }
   test::exec declare -f simpleFunction
   test::exec bash::injectCodeInFunction simpleFunction "echo 'injected at the beginning!'" injectAtBeginning=true
   test::prompt "echo \${REPLY}; echo \${REPLY2};"
@@ -116,7 +134,7 @@ function test_function_to_reexport() {
   local -A thirdArg="${3:-egez}"
   local -a fourth="${4?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if (( firstArg == 0 )); then
+  if ((firstArg == 0)); then
     echo "cool"
   fi
   if [[ "${secondArg}" == "cool" ]]; then
@@ -138,7 +156,6 @@ function test_bash::getFunctionDefinitionWithGlobalVars() {
   test::prompt "echo \${REPLY}"
   echo "${REPLY}"
   test::flush
-
 
   test::markdown "Testing without arguments"
   test::exec bash::getFunctionDefinitionWithGlobalVars test_function_to_reexport new_name
@@ -199,7 +216,7 @@ function test_bash::isFunction() {
 
   unset -v func1
   test::exec bash::isFunction func1
-  function func1() { :;}
+  function func1() { :; }
   test::exec bash::isFunction func1
 }
 
@@ -209,6 +226,14 @@ function test_bash::getBuiltinOutput() {
   test::func bash::getBuiltinOutput echo coucou
   test::func bash::getBuiltinOutput declare -f bash::getBuiltinOutput
   test::func bash::getBuiltinOutput false
+
+  function testOutput() {
+    echo "This is stdout"
+    echo "This is stderr" >&2
+    return 42
+  }
+
+  test::func bash::getBuiltinOutput testOutput
 }
 
 main

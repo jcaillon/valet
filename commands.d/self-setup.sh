@@ -96,7 +96,7 @@ function selfSetup() {
     if [[ ${addedToPath:-} == "true" ]]; then
       log::warning "Valet has been added to your PATH but it will only be available in new shell sessions."$'\n'"Please login again to apply the changes on your current shell or call valet directly with ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝.${greetingMessage}"
     else
-      if bash::getBuiltinOutput command -v valet && [[ ${REPLY%%$'\n'} == "${GLOBAL_INSTALLATION_DIRECTORY}/valet" ]]; then
+      if command -v valet &>/dev/null; then
         log::debug "Valet is already in the PATH."
       else
         log::warning "Valet is not in your PATH yet. You need to add ⌜${GLOBAL_INSTALLATION_DIRECTORY}⌝ to your PATH or call valet directly with ⌜${GLOBAL_INSTALLATION_DIRECTORY}/valet⌝.${greetingMessage}"

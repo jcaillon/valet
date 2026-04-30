@@ -3,7 +3,7 @@
 # description: this script is a valet command
 
 # shellcheck source=self-test-utils
-source self-test-utils
+source ./self-test-utils
 # shellcheck source=../libraries.d/lib-string
 source string
 # shellcheck source=../libraries.d/lib-progress
@@ -465,7 +465,7 @@ function selfTest_runSingleTest() {
 
   # reset the temporary location (to have consistency when using fs::createTempDirectory for example)
   if [[ -d ${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY} ]]; then
-    command rm -Rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
+    command rm -rf "${GLOBAL_TEST_BASE_TEMPORARY_DIRECTORY}"
   fi
   fs::setupTempFileGlobalVariable
   fs::cleanTempFiles

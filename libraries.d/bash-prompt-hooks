@@ -4,6 +4,8 @@
 
 # shellcheck source=../libraries.d/lib-bash
 source bash
+# shellcheck source=../libraries.d/lib-string
+source string
 
 function bashHooks::init() {
   GLOBAL_LAST_COMMAND_STARTED_AT_SECOND="${GLOBAL_PROGRAM_STARTED_AT_SECOND}"
@@ -29,9 +31,6 @@ function bashHooks::setReturn() { return "${1:-0}"; }
 
 # Will be run before the prompt is drawn
 function bashHooks::prePromptDrawn() {
-  local -
-  set -o noglob
-
   # Save the command status
   local -i GLOBAL_LAST_COMMAND_STATUS=$?
   local IFS=$' \t\n'
@@ -43,8 +42,9 @@ function bashHooks::prePromptDrawn() {
   jobs &>/dev/null
   local -i GLOBAL_JOB_COUNT=0
   bash::getBuiltinOutput jobs -r
-  local IFS=$'\n' line
-  for line in ${REPLY}; do
+  string::split REPLY $'\n'
+  local line
+  for line in "${REPLY_ARRAY[@]}"; do
     if [[ ${line} == "["* ]]; then
       GLOBAL_JOB_COUNT+=1
     fi

@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+IFS=" "
+echo "mocking git $*" 1>&2
+
+if [[ ${1} == "-C" ]]; then
+  targetDirectory="${2}"
+  shift 2
+else
+  targetDirectory="${PWD}"
+fi
+
+case "${1}" in
+rev-parse)
+  if [[ ${2} == *"error"* ]]; then
+    echo "Simulating an error in git rev-parse." 1>&2
+    exit 1
+  fi
+  echo "mocking git rev-parse HEAD with a fake commit hash" 1>&2
+  echo "abc1234000000"
+  exit 0
+  ;;
+clone)
+  targetDirectory="${4}"
+  mkdir -p "${targetDirectory}"
+  echo "targetDirectory: ${targetDirectory}" 1>&2
+  if [[ ${3} == *"error"* ]]; then
+    echo "Simulating an error in git clone." 1>&2
+    exit 1
+  fi
+  if [[ ${3} == *"fail"* ]]; then
+    echo 'core::fail "Simulating a fail in the setup script."' >"${targetDirectory}/extension.setup.sh"
+  fi
+  if [[ ${3} == *"setup"* ]]; then
+    echo 'log::warning "This is a setup script!"' >"${targetDirectory}/extension.setup.sh"
+  fi
+  if [[ ${3} == *"version"* ]]; then
+    echo '1.0.0' >"${targetDirectory}/version"
+  fi
+  if [[ ${3} == *"VERSION"* ]]; then
+    echo '1.2.3' >"${targetDirectory}/VERSION"
+  fi
+  exit 0
+  ;;
+checkout)
+  if [[ ${*} == *"error"* ]]; then
+    echo "Simulating an error in git checkout." 1>&2
+    exit 1
+  fi
+  exit 0
+  ;;
+*)
+  echo "mocking git with no specific behavior for the command: ${*}" 1>&2
+  exit 1
+  ;;
+esac
+shift

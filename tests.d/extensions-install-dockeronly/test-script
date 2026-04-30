@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -Eeu -o pipefail
+
+# This script is executed in a Docker container
+
+function main() {
+  export VALET_CONFIG_LOG_PATTERN="<level>{-8s} <message>"
+  export VALET_CONFIG_LOG_COLUMNS=9999
+  export VALET_CONFIG_LOG_DISABLE_WRAP=true
+  export VALET_CONFIG_LOG_DISABLE_HIGHLIGHT=true
+  export VALET_CONFIG_ENABLE_COLORS=false
+
+  echo "================================================"
+  echo "Install extension: extension-1 using git."
+  echo "================================================"
+
+  export VALET_DISABLE_PROGRESS_BARS=true
+  /home/me/valet/valet extensions install https://github.com/jcaillon/valet.git --version extension-1 --name extension-1 --unattended
+
+  echo
+  echo "================================================"
+  echo "> ls /home/me/.valet.d"
+  ls /home/me/.valet.d
+}
+
+main

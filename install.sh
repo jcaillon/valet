@@ -175,7 +175,7 @@ function install() {
   # temporary directory for the installation
   local tempDirectory="${TMPDIR:-/tmp}/valet.install.d"
   if [[ -d ${tempDirectory} ]]; then
-    command rm -Rf "${tempDirectory}" 1>/dev/null || :
+    command rm -rf "${tempDirectory}" 1>/dev/null || :
   fi
   command mkdir -p "${tempDirectory}" || core::fail "Could not create the temporary directory ⌜${tempDirectory}⌝."
 
@@ -197,12 +197,12 @@ function install() {
     fi
     log::debug "Moving the content of ⌜${subDirectory}⌝ to ⌜${tempDirectory}⌝."
     command mv -f "${subDirectory}"/* "${tempDirectory}" || core::fail "Could not move the content of ⌜${subDirectory}⌝ to ⌜${tempDirectory}⌝."
-    command rm -Rf "${subDirectory}" 1>/dev/null || :
+    command rm -rf "${subDirectory}" 1>/dev/null || :
   fi
 
   log::debug "Removing old files."
   command rm -f "${releaseFile}"
-  command rm -Rf "${installationDirectory}" || core::fail "Could not remove the existing installation directory ⌜${installationDirectory}⌝."
+  command rm -rf "${installationDirectory}" || core::fail "Could not remove the existing installation directory ⌜${installationDirectory}⌝."
   command mkdir -p "${installationDirectory%/*}" || core::fail "Could not create the directory ⌜${installationDirectory%/*}⌝."
 
   log::debug "Copying the release to the installation directory ⌜${installationDirectory}⌝."
@@ -215,7 +215,7 @@ function install() {
   command chmod +x "${installationDirectory}/valet" || core::fail "Could not make the valet executable at ⌜${installationDirectory}/valet⌝."
 
   if [[ -d ${tempDirectory} ]]; then
-    command rm -Rf "${tempDirectory}" 1>/dev/null || :
+    command rm -rf "${tempDirectory}" 1>/dev/null || :
   fi
 
   log::success "Valet has been downloaded in ⌜${installationDirectory}⌝."

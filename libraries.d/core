@@ -535,6 +535,7 @@ function core::dump() {
 
 # Private function to create a core dump file.
 function core_dump() {
+  # shellcheck disable=SC2034
   local filePath REPLY_CODE
   printf -v filePath "%(%FT%H-%M-%S%z)T--PID_%06d%s" "${GLOBAL_MOCK_EPOCHSECONDS:-${EPOCHSECONDS}}" "${GLOBAL_MOCK_BASHPID:-${BASHPID}}" "${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
@@ -545,16 +546,12 @@ function core_dump() {
   filePath="${REPLY}/core-dumps/${filePath}"
 
   local fd listOfFds=""
-  if command -v readlink &>/dev/null && [[ -d /proc/"${BASHPID}"/fd ]]; then
+  if [[ -d /proc/"${BASHPID}"/fd ]]; then
     # shellcheck disable=SC1091
-    source bash
+    source fs
     for fd in /proc/"${BASHPID}"/fd/*; do
-      bash::getBuiltinOutput command readlink -f "${fd}" 2>/dev/null
-      if [[ -n ${REPLY} ]]; then
-        listOfFds+="${fd} -> ${REPLY%$'\n'*}"$'\n'
-      else
-        listOfFds+="${fd} -> ?? (readlink failed)"$'\n'
-      fi
+      fs::getAbsolutePath "${fd}" realpath=true
+      listOfFds+="${fd} -> ${REPLY%$'\n'*}"$'\n'
     done
   fi
 
@@ -571,10 +568,12 @@ function core_dump() {
     echo "================="$'\n'"File descriptors:"
     echo "${listOfFds}"
   } >"${filePath}"
+
   if command -v ls &>/dev/null && [[ -d /proc/"${BASHPID}"/fd ]]; then
     echo "From ls:" >>"${filePath}"
     command ls -l /proc/"${BASHPID}"/fd >>"${filePath}" || :
   fi
+
   {
     if command -v lsof &>/dev/null; then
       echo "================="$'\n'"Open files:"

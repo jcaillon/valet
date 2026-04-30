@@ -68,7 +68,7 @@ INFO     The prototype script has been generated in ⌜$GLOBAL_INSTALLATION_DIRE
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets content
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets originalContent append=true
 INFO     The vscode snippets have been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/valet.code-snippets⌝.
-INFO     Found 16 commands with documentation.
+INFO     Found 17 commands with documentation.
 🙈 mocked fs::writeToFile $GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md content
 INFO     The commands documentation has been generated in ⌜$GLOBAL_INSTALLATION_DIRECTORY/extras/valet-commands.md⌝.
 INFO     Writing the xxx functions documentation to the core libraries docs.
@@ -140,6 +140,7 @@ SUCCESS  The new version has been released on GitHub.
 🙈 mocked exe::invoke command cp -R valet.cmd .
 🙈 mocked exe::invoke command cp -R valet.ps1 .
 🙈 mocked exe::invoke command cp -R $GLOBAL_INSTALLATION_DIRECTORY/version .
+🙈 mocked exe::invoke command rm -f commands.d/self-release.sh
 🙈 mocked exe::invoke command tar -czvf valet.tar.gz showcase.d commands.d libraries.d extras valet valet.cmd valet.ps1 version
 INFO     Uploading the artifact ⌜valet.tar.gz⌝ to ⌜https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets⌝.
 🙈 mocked curl::request https://uploads.github.com/repos/jcaillon/valet/releases/xxxx/assets?name=valet.tar.gz -X POST -H Authorization: token token -H Content-Type: application/tar+gzip --data-binary @valet.tar.gz --- failOnError=true

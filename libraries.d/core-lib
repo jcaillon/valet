@@ -141,11 +141,11 @@ function fs::createTempDirectory() {
 function fs::cleanTempFiles() {
   if [[ -d ${GLOBAL_TEMPORARY_DIRECTORY:-} ]]; then
     log::debug "Deleting temporary directory."
-    command rm -Rf "${GLOBAL_TEMPORARY_DIRECTORY}" &>/dev/null || :
+    command rm -rf "${GLOBAL_TEMPORARY_DIRECTORY}" &>/dev/null || :
   fi
   if [[ -n ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY:-} && -d ${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY} ]]; then
     log::debug "Deleting temporary windows directory."
-    command rm -Rf "${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY}" &>/dev/null || :
+    command rm -rf "${GLOBAL_WINDOWS_TEMPORARY_DIRECTORY}" &>/dev/null || :
   fi
   if [[ -n ${GLOBAL_TEMPORARY_FILE_PREFIX:-} ]]; then
     log::debug "Deleting temporary files."
@@ -205,12 +205,12 @@ function terminal::getTerminalSize() {
 #
 # - $1: **log level** _as string_:
 #       The log level to set (or defaults to info), acceptable values are:
-#   - trace
-#   - debug
-#   - info
-#   - success
-#   - warning
-#   - error
+#         - trace
+#         - debug
+#         - info
+#         - success
+#         - warning
+#         - error
 # - ${silent} _as bool_:
 #       (optional) true to silently switch log level, i.e. does not print a message
 #       (defaults to false)
