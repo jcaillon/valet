@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# this lib is supposed to be used in tests; but if the user wants to use it outside tests, replace test::fail with core::fail
+if ! declare -F test::fail &>/dev/null; then
+  function test::fail() {
+    core::fail "${@}"
+  }
+fi
+
+# ## assert::isPath
+#
+# Assert that the given path exists (can be a file, directory, or link).
+#
+# - $1: **file path** _as string_:
+#       The path of the file to check.
+#
+# ```bash
+# assert::isPath "/path/to/file"
+# ```
+function assert::isPath() {
+  local filePath="${1}"
+  if [[ ! -e "${filePath}" && ! -L "${filePath}" ]]; then
+    test::fail "Expected path ⌜${filePath}⌝ does not exist."
+  fi
+}
+
+# ## assert::isFile
+#
+# Assert that the given file exists and is a regular file.
+#
+# - $1: **file path** _as string_:
+#       The path of the file to check.
+#
+# ```bash
+# assert::isFile "/path/to/file"
+# ```
+function assert::isFile() {
+  local filePath="${1}"
+  if [[ ! -f "${filePath}" || -L "${filePath}" ]]; then
+    test::fail "Expected file ⌜${filePath}⌝ does not exist or is not a regular file."
+  fi
+}
+
+# ## assert::isDirectory
+#
+# Assert that the given directory exists and is a directory.
+#
+# - $1: **directory path** _as string_:
+#       The path of the directory to check.
+#
+# ```bash
+# assert::isDirectory "/path/to/directory"
+# ```
+function assert::isDirectory() {
+  local directoryPath="${1}"
+  if [[ ! -d "${directoryPath}" ]]; then
+    test::fail "Expected directory ⌜${directoryPath}⌝ does not exist or is not a directory."
+  fi
+}
+
+# ## assert::isLink
+#
+# Assert that the given path exists and is a symbolic link.
+#
+# - $1: **link path** _as string_:
+#       The path of the symbolic link to check.
+#
+# ```bash
+# assert::isLink "/path/to/link"
+# ```
+function assert::isLink() {
+  local linkPath="${1}"
+  if [[ ! -L "${linkPath}" ]]; then
+    test::fail "Expected link ⌜${linkPath}⌝ does not exist or is not a symbolic link."
+  fi
+}
+
+# ## assert::equals
+#
+# Assert that the two given values are equal.
+#
+# - $1: **expected value** _as string_:
+#       The expected value.
+# - $2: **actual value** _as string_:
+#       The actual value to compare with the expected value.
+#
+# ```bash
+# assert::equals "expected value" "actual value"
+# ```
+function assert::equals() {
+  local \
+    expectedValue="${1}" \
+    actualValue="${2}"
+  if [[ "${expectedValue}" != "${actualValue}" ]]; then
+    test::fail "Expected value ⌜${expectedValue}⌝ does not equal actual value ⌜${actualValue}⌝."
+  fi
+}
