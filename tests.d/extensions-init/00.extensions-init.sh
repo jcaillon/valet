@@ -12,11 +12,10 @@ function main() {
   local extensionDirectory="${REPLY}/my-extension"
   # override git for the tests
   local testDirectory="${PWD}"
-  chmod +x "${testDirectory}/git"
-  chmod +x "${testDirectory}/code"
+  chmod +x "${testDirectory}/git" "${testDirectory}/code"
 
   test::title "✅ Testing extensions init without git/code in PATH, on windows and outside the ext directory"
-  export PATH="/usr/bin"
+  export PATH="/usr/bin:${testDirectory}/git"
   OSTYPE="msys"
   resetExtensionDirectory
   bash::pushd "${extensionDirectory}"
@@ -27,7 +26,7 @@ function main() {
   assert::isLink "${VALET_CONFIG_EXTENSIONS_DIRECTORY}/my-extension"
 
   test::title "✅ Testing extensions init with git/code in PATH, on linux, outside the ext directory but registered"
-  export PATH="${testDirectory}:/usr/bin"
+  export PATH="${testDirectory}/code:/usr/bin:${testDirectory}/git"
   OSTYPE="linux-gnu"
   resetExtensionDirectory
   test::exec extensionsInit
@@ -36,7 +35,7 @@ function main() {
   test::cat "${extensionDirectory}/.gitignore"
 
   test::title "✅ Testing extensions init with existing extension and not overwriting"
-  export PATH="/usr/bin"
+  export PATH="/usr/bin:${testDirectory}/git"
   OSTYPE="linux-gnu"
   resetExtensionsDirectory
   resetExtensionDirectory
@@ -91,6 +90,10 @@ function windows::startPs1Batch() {
 
 function windows::endPs1Batch() {
   log::info "Ending the batch of ps1 commands and executing them."
+}
+
+function windows::createLink() {
+  ln -s "${1}" "${2}"
 }
 
 main

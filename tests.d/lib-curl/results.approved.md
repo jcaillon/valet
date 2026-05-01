@@ -195,3 +195,4 @@ REPLY3='200'
 ```
 
 ❯ `log::setLevel info`
+

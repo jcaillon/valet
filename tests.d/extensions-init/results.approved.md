@@ -30,6 +30,7 @@ SUCCESS  The extension my-extension is ready to be used.
 Listing of `/tmp/valet.d/d2-2/my-extension` (recursively) (including hidden):
 
 ```text
+F .gitignore
 L lib-valet
 L lib-valet.md
 ```
@@ -107,6 +108,7 @@ SUCCESS  The extension my-extension is ready to be used.
 Listing of `/tmp/valet.d/d2-2/my-extension` (recursively) (including hidden):
 
 ```text
+F .gitignore
 L lib-valet
 L lib-valet.md
 ```
@@ -182,6 +184,7 @@ SUCCESS  The extension my-extension is ready to be used.
 Listing of `/tmp/valet.d/d1-2/my-extension` (recursively) (including hidden):
 
 ```text
+F .gitignore
 L lib-valet
 L lib-valet.md
 ```
