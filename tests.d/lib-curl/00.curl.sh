@@ -21,7 +21,7 @@ function test_curl::download() {
 
   test::markdown "Writing to an output file:"
   test::func curl::download https://fuu --code 200 --- failOnError=true acceptableCodes=200 output="${GLOBAL_TEST_TEMP_FILE}"
-  test::exec fs::cat "${GLOBAL_TEST_TEMP_FILE}"
+  test::cat "${GLOBAL_TEST_TEMP_FILE}"
 
   test::markdown "Downloading to a temp file:"
   test::func curl::download https://fuu --code 200 --- failOnError=true acceptableCodes=200

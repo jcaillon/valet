@@ -18,12 +18,11 @@ function test_command::sortCommands() {
   VALET_CONFIG_USER_DATA_DIRECTORY="${REPLY}"
   VALET_CONFIG_REMEMBER_LAST_CHOICES=5
 
-
   local -a commands=("cm1  This is command 1"
-"cm2  This is command 2"
-"sub cmd1  This is sub command 1"
-"sub cmd2  This is sub command 2"
-"another3  This is another command 3")
+    "cm2  This is command 2"
+    "sub cmd1  This is sub command 1"
+    "sub cmd2  This is sub command 2"
+    "another3  This is another command 3")
   declare -a -g COMMANDS=("${commands[@]}")
 
   test::printVars VALET_CONFIG_USER_DATA_DIRECTORY VALET_CONFIG_REMEMBER_LAST_CHOICES COMMANDS
@@ -60,13 +59,13 @@ function test_command::sortCommands() {
   for i in {1..4}; do
     test::exec command::addLastChoice "my-id1" "cm${i}"
   done
-  test::exec fs::cat "${VALET_CONFIG_USER_DATA_DIRECTORY}/last-choices-my-id1"
+  test::cat "${VALET_CONFIG_USER_DATA_DIRECTORY}/last-choices-my-id1"
 
   test::markdown "testing commands that adding the same command multiple times only keeps the last one"
   test::exec command::addLastChoice "my-id1" "another3"
   test::exec command::addLastChoice "my-id1" "another3"
   test::exec command::addLastChoice "my-id1" "another3"
-  test::exec fs::cat "${VALET_CONFIG_USER_DATA_DIRECTORY}/last-choices-my-id1"
+  test::cat "${VALET_CONFIG_USER_DATA_DIRECTORY}/last-choices-my-id1"
 }
 
 main

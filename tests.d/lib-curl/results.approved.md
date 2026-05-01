@@ -18,9 +18,7 @@ REPLY2='(curl logs) mocking curl --silent --show-error --location --write-out %{
 REPLY3='200'
 ```
 
-❯ `fs::cat /tmp/valet-temp`
-
-**Standard output**:
+> cat `/tmp/valet-temp`
 
 ```text
 (request body response) Writing stuff to file because the --output option was given.
@@ -197,4 +195,3 @@ REPLY3='200'
 ```
 
 ❯ `log::setLevel info`
-

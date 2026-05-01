@@ -59,18 +59,18 @@ function test_logOutputOptions() {
   test::title "✅ Testing that we can output the logs to a specific file name additionally to console"
   test::exec VALET_CONFIG_LOG_FILENAME_PATTERN='logFile=test.log' VALET_CONFIG_LOG_TO_DIRECTORY="true" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
   core::getUserStateDirectory
-  test::exec fs::cat "${REPLY}/logs/test.log"
+  test::cat "${REPLY}/logs/test.log"
 
   test::title "✅ Testing that we can output the logs to a specific file descriptor"
   test::exec VALET_CONFIG_LOG_FD="${logDir}/test2.log" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
-  test::exec fs::cat "${logDir}/test2.log"
+  test::cat "${logDir}/test2.log"
 
   test::title "✅ Testing that we can output the logs to a specific numbered fd"
   local myFd
   exec {myFd}>>"${logDir}/test3.log"
   test::prompt export VALET_CONFIG_LOG_FD=11
   VALET_CONFIG_LOG_FD="${myFd}" test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
-  test::exec fs::cat "${logDir}/test3.log"
+  test::cat "${logDir}/test3.log"
 }
 
 main

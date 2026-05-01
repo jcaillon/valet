@@ -1,6 +1,6 @@
 # Test suite extensions-install
 
-## Test script 01.extensions-install
+## Test script 00.extensions-install
 
 ### ✅ Testing extensions install command with no options
 
@@ -43,7 +43,7 @@ SUCCESS  The extension ⌜repo-version-with-setup⌝ version ⌜1.0.0⌝ is read
 
 ```text
 INFO     The extension will be installed under ⌜/tmp/valet.d/d1-2/repo-version-with-setup⌝.
-WARNING  The extension ⌜repo-version-with-setup⌝ already exists in ⌜/tmp/valet.d/d1-2/repo-version-with-setup⌝.
+WARNING  The extension ⌜repo-version-with-setup⌝ already exists in ⌜/tmp/valet.d/d1-2⌝.
    ╭─────────────────────────────────────────────────────────────────────────────────╮
 ░──┤ You are about to replace the existing extension, it will delete existing files. 86│
    │ Do you want to overwrite the existing ⌜repo-version-with-setup⌝ extension? 86│
@@ -61,7 +61,7 @@ INFO     The extension ⌜repo-version-with-setup⌝ will not be installed.
 
 ```text
 INFO     The extension will be installed under ⌜/tmp/valet.d/d1-2/repo-version-with-setup⌝.
-WARNING  The extension ⌜repo-version-with-setup⌝ already exists in ⌜/tmp/valet.d/d1-2/repo-version-with-setup⌝.
+WARNING  The extension ⌜repo-version-with-setup⌝ already exists in ⌜/tmp/valet.d/d1-2⌝.
 INFO     The extension ⌜repo-version-with-setup⌝ will not be installed.
 ```
 
@@ -82,7 +82,7 @@ TRACE    Git standard error stream:
    1 ░ mocking git clone --no-checkout https://git.ok/repo-error.git /tmp/valet.d/d1-2/xxxx
    2 ░ targetDirectory: /tmp/valet.d/d1-2/xxxx
    3 ░ Simulating an error in git clone.
-FAIL     The command git ended with exit code 1 in 7.000s.
+FAIL     The command git ended with exit code 1 in 13.000s.
 ```
 
 ### ✅ Testing extensions install error on checkout and unattended
@@ -153,7 +153,7 @@ INFO     Found setup script for the extension other2: ⌜/tmp/valet.d/d1-2/other
 9╰──────╯
 INFO     Executing the setup script.
 FAIL     Simulating a fail in the setup script.
-ERROR    The extension setup script failed.
+ERROR    The setup script for the extension ⌜other2⌝ failed.
    ╭─────────────────────────────────────────────────────────────────────────────────────────────────╮
 ░──┤ The setup script for the extension ⌜other2⌝ failed (see above), do you want to continue anyway? 102│
    ╰─────────────────────────────────────────────────────────────────────────────────────────────────╯
@@ -188,7 +188,7 @@ INFO     Found setup script for the extension repo-fail: ⌜/tmp/valet.d/d1-2/re
 9╰──────╯
 INFO     Executing the setup script.
 FAIL     Simulating a fail in the setup script.
-ERROR    The extension setup script failed.
+ERROR    The setup script for the extension ⌜repo-fail⌝ failed.
    ╭────────────────────────────────────────────────────────────────────────────────────────────────────╮
 ░──┤ The setup script for the extension ⌜repo-fail⌝ failed (see above), do you want to continue anyway? 105│
    ╰────────────────────────────────────────────────────────────────────────────────────────────────────╯

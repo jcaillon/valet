@@ -27,10 +27,10 @@ source ./extensions-utils
 command: extensions install
 function: extensionsInstall
 author: github.com/jcaillon
-shortDescription: Download and install a new extension in the user directory using GIT.
+shortDescription: Download and install an extension in the user extensions directory using GIT.
 
 description: |-
-  Download and install a new extension in the user directory using GIT.
+  Download and install an extension in the user extensions directory using GIT.
 
   This command will download the given extension (GIT repository) and install it in the valet extensions directory.
 
@@ -97,7 +97,7 @@ function extensionsInstall() {
 
   # if the extension already exists, ask the user for a confirmation
   if [[ -d "${extensionDirectory}" ]]; then
-    log::warning "The extension ⌜${extensionName}⌝ already exists in ⌜${extensionDirectory}⌝."
+    log::warning "The extension ⌜${extensionName}⌝ already exists in ⌜${extensionsDirectory}⌝."
     if [[ ${unattended:-} == "true" ]] || ! interactive::confirm "You are about to replace the existing extension, it will delete existing files."$'\n'"Do you want to overwrite the existing ⌜${extensionName}⌝ extension?"; then
       log::info "The extension ⌜${extensionName}⌝ will not be installed."
       return 0
@@ -119,6 +119,13 @@ function extensionsInstall() {
   # execute the setup script of the extension, if any
   if [[ ${skipSetup:-} != "true" ]]; then
     extensions::executeSetupScript "${extensionDirectory}" "${unattended}"
+    if ((REPLY_CODE != 0)); then
+      if [[ ${unattended} == "true" ]] || ! interactive::confirm "The setup script for the extension ⌜${extensionName}⌝ failed (see above), do you want to continue anyway?" default=false; then
+        exe::invoke command rm -rf "${extensionDirectory}"
+        core::fail "The setup script for the extension ⌜${extensionName}⌝ failed, aborting installation."
+      fi
+      log::info "You can manually retry the setup by running the script ⌜${extensionDirectory}/extension.setup.sh⌝."
+    fi
   else
     log::info "Skipping the execution of the ⌜extension.setup.sh⌝ script."
   fi
@@ -153,7 +160,7 @@ function extensionsInstall_gitClone() {
   log::info "Cloning the git repository ⌜${url}⌝ in ⌜${targetDirectory}⌝."
 
   progress::start template="<spinner> Cloning repo, please wait..."
-  command rm -rf "${targetDirectory}"
+  exe::invoke command rm -rf "${targetDirectory}"
   exe::invoke command git clone --no-checkout "${url}" "${targetDirectory}"
   progress::stop
 
@@ -167,13 +174,13 @@ function extensionsInstall_gitClone() {
     fi
 
     if [[ ${unattended} == "true" || -z ${newReference} ]]; then
-      command rm -rf "${targetDirectory}"
+      exe::invoke command rm -rf "${targetDirectory}"
       core::fail "The reference ⌜${version}⌝ was not found in the repository ⌜${url}⌝, please specify an existing reference using the ⌜--version⌝ option."
       return 0
     fi
 
     if ! interactive::confirm "The reference ⌜${version}⌝ was not found in the repository ⌜${url}⌝, do you want to use the default reference ⌜${newReference}⌝ instead?"; then
-      command rm -rf "${targetDirectory}"
+      exe::invoke command rm -rf "${targetDirectory}"
       core::fail "Installation aborted by the user due to missing reference."
     fi
 

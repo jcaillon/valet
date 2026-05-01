@@ -36,9 +36,7 @@ INFO     More: arg2.
 INFO     Disabling profiler.
 ```
 
-❯ `fs::cat /tmp/valet.d/f1-2`
-
-**Standard output**:
+> cat `/tmp/valet.d/f1-2`
 
 ```text
 (D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)
@@ -100,9 +98,7 @@ INFO     More: arg2.
 INFO     Disabling profiler.
 ```
 
-❯ `fs::cat /tmp/valet.d/f1-2`
-
-**Standard output**:
+> cat `/tmp/valet.d/f1-2`
 
 ```text
 (D=function depth, I=level of indirection, S=subshell level, timer=elapsed time in seconds, delta=delta between the last command in seconds, caller source:line=the source file and line number of the caller of the function, function=the name of the function in which the command is executed, command=the executed command)

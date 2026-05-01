@@ -494,6 +494,11 @@ function selfTest_runSingleTest() {
   # run a custom user script before the tests if it exists
   selfTestUtils_runHookScript "${GLOBAL_TESTS_D_DIRECTORY}/before-tests"
 
+  # TODO: ideally, we want to unset all included lib functions here because otherwise
+  # a test can be successful even if include was not called. But be careful to only unset functions
+  # comming from libs (and not the one from core!).
+  # Other problem, the lib-test itself does load some other libs :/
+
   # run the test
   # shellcheck disable=SC1090
   builtin source "${testScript}"

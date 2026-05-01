@@ -230,9 +230,7 @@ REPLY='/tmp/valet-temp'
 REPLY2='/tmp/valet.d/f1-2'
 ```
 
-❯ `fs::cat /tmp/valet-temp`
-
-**Standard output**:
+> cat `/tmp/valet-temp`
 
 ```text
 🙈 mocking fake 

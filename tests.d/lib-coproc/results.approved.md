@@ -114,7 +114,7 @@ INFO     Stopping the coproc (_COPROC_9).
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 156: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 155: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -134,12 +134,10 @@ Exited with code: `1`
 FAIL     The coproc ⌜_COPROC_21⌝ did not start correctly.
 ```
 
-❯ `fs::cat /tmp/valet-temp`
-
-**Standard output**:
+> cat `/tmp/valet-temp`
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 176: 1: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 175: 1: unbound variable
 ERROR    Exiting subshell depth 4 with code 1, stack:
 ╭ local a="${1}"
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200

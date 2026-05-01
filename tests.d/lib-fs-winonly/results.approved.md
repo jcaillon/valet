@@ -56,6 +56,8 @@ FAIL     Failed to create a link to ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/li
 
 ❯ `fs::createLink file1 target/existing-file3 force=true`
 
+❯ `fs::createLink file1 target/link1`
+
 ### ✅ Testing fs::isValidLink
 
 ❯ `fs::isValidLink file1 target/link1`

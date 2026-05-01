@@ -105,13 +105,13 @@ function test_system::addToPath() {
 
   test::exec system::addToPath "/coucou"
 
-  test::exec fs::cat resources/gitignored/.zshrc
-  test::exec fs::cat resources/gitignored/.tcshrc
-  test::exec fs::cat resources/gitignored/.cshrc
-  test::exec fs::cat resources/gitignored/.xonshrc
-  test::exec fs::cat resources/gitignored/.config/fish/config.fish
-  test::exec fs::cat resources/gitignored/.kshrc
-  test::exec fs::cat resources/gitignored/.config/nushell/env.nu
+  test::cat resources/gitignored/.zshrc
+  test::cat resources/gitignored/.tcshrc
+  test::cat resources/gitignored/.cshrc
+  test::cat resources/gitignored/.xonshrc
+  test::cat resources/gitignored/.config/fish/config.fish
+  test::cat resources/gitignored/.kshrc
+  test::cat resources/gitignored/.config/nushell/env.nu
 
   test::exec system::addToPath "/coucou"
 

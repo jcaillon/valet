@@ -20,6 +20,7 @@ source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main"
 ```text
 source "$GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main"
 source array
+source assert
 source bash
 source benchmark
 source command

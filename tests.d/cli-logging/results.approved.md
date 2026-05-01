@@ -188,9 +188,7 @@ WARNING This is a warning message.
 With a second line.
 ```
 
-❯ `fs::cat /tmp/valet.valet.d/logs/test.log`
-
-**Standard output**:
+> cat `/tmp/valet.valet.d/logs/test.log`
 
 ```text
 TRACE   This is an error trace message which is always displayed.
@@ -205,9 +203,7 @@ With a second line.
 
 ❯ `VALET_CONFIG_LOG_FD=/tmp/valet.d/d1-2/test2.log valet self mock1 logging-level`
 
-❯ `fs::cat /tmp/valet.d/d1-2/test2.log`
-
-**Standard output**:
+> cat `/tmp/valet.d/d1-2/test2.log`
 
 ```text
 TRACE   This is an error trace message which is always displayed.
@@ -224,9 +220,7 @@ With a second line.
 
 ❯ `valet self mock1 logging-level`
 
-❯ `fs::cat /tmp/valet.d/d1-2/test3.log`
-
-**Standard output**:
+> cat `/tmp/valet.d/d1-2/test3.log`
 
 ```text
 TRACE   This is an error trace message which is always displayed.

@@ -412,6 +412,7 @@ function fs::tail() {
 # > - It will correctly list files under symbolic link directories.
 # > - #TODO: see if we are faster with ** and then looping over dirs to check for symbolic links
 # > - #TODO: introduce an optional (with default 10k) parameter to limit the number of results to avoid looping for too long
+# > - #TODO: introduce an optional parameter for max depth for recursive listing
 function fs::listPaths() {
   local -
   local \
@@ -668,8 +669,14 @@ function fs::createLink() {
     core::fail "Failed to create a link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝, the linked path does not exist."
   fi
 
+  # check if the link already exists and is valid
+  if [[ -L ${linkPath} ]] && fs::isValidLink "${linkedPath}" "${linkPath}" hardlink="${hardlink}"; then
+    log::debug "The link path ⌜${linkPath}⌝ already exists but is not a valid link to the target ⌜${linkedPath}⌝."
+    return 0
+  fi
+
   # check if the link path already exists and is not a valid link to the target
-  if [[ -e ${linkPath} || -L ${linkPath} ]] && ! fs::isValidLink "${linkedPath}" "${linkPath}" hardlink="${hardlink}"; then
+  if [[ -e ${linkPath} || -L ${linkPath} ]]; then
     # if force, delete target if it exists
     if [[ ${force} == true ]]; then
       if [[ -d "${linkPath}" ]] && ! command rm -rf "${linkPath}"; then

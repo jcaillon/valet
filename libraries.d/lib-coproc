@@ -102,19 +102,30 @@ function coproc::runInParallel() {
       # wait for one of the coproc to finish (or all of them if they are all scheduled)
       endedCoprocExitStatus=0
       wait -n -p endedCoprocPid "${runningPids[@]}" || endedCoprocExitStatus=$?
-      exitCodes+=("${endedCoprocExitStatus}")
 
       if [[ -z ${endedCoprocPid:-} ]]; then
+        # wait does not always wait for our list of PIDs, it sometimes returns without setting the endedCoprocPid variable
+        # that is the case when we resize the window for instance
+        log::debug "The PID of the ended process is empty, continuing."
         continue
       fi
 
       # find the index of the ended coproc in the pids array
-      for endedCoprocIndex in "${!pids[@]}"; do
-        if [[ ${pids[endedCoprocIndex]} == "${endedCoprocPid}" ]]; then
-          log::debug "The coproc with PID ${endedCoprocPid} is at index ${endedCoprocIndex} in ${pids[*]}."
+      endedCoprocIndex=-1
+      for pid in "${!pids[@]}"; do
+        if [[ ${pids[pid]} == "${endedCoprocPid}" ]]; then
+          endedCoprocIndex=${pid}
           break
         fi
       done
+
+      if ((endedCoprocIndex == -1)); then
+        log::debug "Could not find the index of the coproc with PID ${endedCoprocPid} in [ ${pids[*]} ], this does not concern us."
+        continue
+      fi
+
+      exitCodes+=("${endedCoprocExitStatus}")
+
       coprocName="${coprocNamePrefix}${endedCoprocIndex}"
 
       log::debug "The parallel coproc ${endedCoprocIndex} with PID ${endedCoprocPid} is completed with code ${endedCoprocExitStatus}."
@@ -160,8 +171,10 @@ function coproc::runInParallel() {
         core::exit 1 silent=true
       fi
 
+      log::debug "There are ${#exitCodes[@]} ended coprocs vs ${#jobCommands_nameRef[@]} to run, exit codes so far: [ ${exitCodes[*]} ]."
+
       # if all coproc are scheduled and completed, we can exit the loop
-      if ((${#exitCodes[@]} == ${#jobCommands_nameRef[@]})); then
+      if ((${#exitCodes[@]} >= ${#jobCommands_nameRef[@]})); then
         REPLY=0
         break 2
       fi
@@ -537,12 +550,25 @@ function coproc::wait() {
 
   log::debug "Waiting for coproc ⌜${coprocVarName}⌝ (PID: ${pid}) to finish."
 
-  local -i exitStatus=0
-  if ! wait -f "${pid}"; then
-    exitStatus="${PIPESTATUS[0]:-}"
-  fi
+  local -i endedCoprocPid exitStatus
+  while true; do
+    exitStatus=0
+    if ! wait -n -p endedCoprocPid "${pid}"; then
+      exitStatus="${PIPESTATUS[0]:-}"
+    fi
+
+    if [[ -z ${endedCoprocPid:-} ]]; then
+      # wait does not always wait for our list of PIDs, it sometimes returns without setting the endedCoprocPid variable
+      # that is the case when we resize the window for instance
+      log::debug "The PID of the ended process is empty, continuing."
+      continue
+    fi
+
+    break
+  done
 
   coproc_cleanBackgroundProcess "${coprocVarName}"
+  # shellcheck disable=SC2034
   REPLY_CODE="${exitStatus}"
 }
 

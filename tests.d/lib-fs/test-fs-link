@@ -36,6 +36,9 @@ function test_fs::Link() {
   test::exit fs::createLink file1 target/existing-file3
   test::exec fs::createLink file1 target/existing-file3 force=true
 
+  # valid link already exists
+  test::exec fs::createLink file1 target/link1
+
   if declare -f windows::endPs1Batch &>/dev/null; then
     windows::endPs1Batch
   fi

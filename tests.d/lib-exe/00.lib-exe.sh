@@ -51,7 +51,7 @@ function test_exe::invoke() {
   test::markdown "Use custom files:"
   fs::createTempFile pathOnly=true
   test::func exe::invoke fake --- replyPathOnly=true stderrPath="${REPLY}" stdoutPath="${GLOBAL_TEST_TEMP_FILE}"
-  test::exec fs::cat "${GLOBAL_TEST_TEMP_FILE}"
+  test::cat "${GLOBAL_TEST_TEMP_FILE}"
 
   test::markdown "Append output:"
   test::func exe::invoke fake --- appendRedirect=true stdoutPath="${GLOBAL_TEST_TEMP_FILE}"

@@ -88,7 +88,6 @@ function test_coproc::run_simpleTests() {
   fi
   test::flush
 
-
   test::title "✅ Testing coproc messages when coproc is killed"
 
   test::prompt coproc::run _COPROC_5 waitForMainEnd=true
@@ -177,11 +176,10 @@ function test_coproc::run_testError() {
     log::info "This line will not be executed because the previous command failed ${a}."
   }
 
-
   test::prompt coproc::run _COPROC_21 mainCommand=mainCommand waitForMainEnd=true redirectLogsToFile="${GLOBAL_TEST_TEMP_FILE}"
   test::exit coproc::run _COPROC_21 mainCommand=mainCommand waitForMainEnd=true redirectLogsToFile="${GLOBAL_TEST_TEMP_FILE}"
 
-  test::exec fs::cat "${GLOBAL_TEST_TEMP_FILE}"
+  test::cat "${GLOBAL_TEST_TEMP_FILE}"
 
   test::unsetTestCallStack
 }

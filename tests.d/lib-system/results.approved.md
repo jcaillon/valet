@@ -137,9 +137,7 @@ WARNING  The directory ⌜/coucou⌝ has been added to the PATH for 8 shells.
 Please login again to apply the changes on your current shell if you are not using bash.
 ```
 
-❯ `fs::cat resources/gitignored/.zshrc`
-
-**Standard output**:
+> cat `resources/gitignored/.zshrc`
 
 ```text
 
@@ -148,9 +146,7 @@ export PATH="/coucou:${PATH}"
 
 ```
 
-❯ `fs::cat resources/gitignored/.tcshrc`
-
-**Standard output**:
+> cat `resources/gitignored/.tcshrc`
 
 ```text
 
@@ -159,9 +155,7 @@ set path = ($path '/coucou')
 
 ```
 
-❯ `fs::cat resources/gitignored/.cshrc`
-
-**Standard output**:
+> cat `resources/gitignored/.cshrc`
 
 ```text
 
@@ -170,9 +164,7 @@ set path = ($path '/coucou')
 
 ```
 
-❯ `fs::cat resources/gitignored/.xonshrc`
-
-**Standard output**:
+> cat `resources/gitignored/.xonshrc`
 
 ```text
 
@@ -181,9 +173,7 @@ $PATH.append('/coucou')
 
 ```
 
-❯ `fs::cat resources/gitignored/.config/fish/config.fish`
-
-**Standard output**:
+> cat `resources/gitignored/.config/fish/config.fish`
 
 ```text
 
@@ -192,9 +182,7 @@ fish_add_path '/coucou'
 
 ```
 
-❯ `fs::cat resources/gitignored/.kshrc`
-
-**Standard output**:
+> cat `resources/gitignored/.kshrc`
 
 ```text
 
@@ -203,9 +191,7 @@ export PATH="/coucou:${PATH}"
 
 ```
 
-❯ `fs::cat resources/gitignored/.config/nushell/env.nu`
-
-**Standard output**:
+> cat `resources/gitignored/.config/nushell/env.nu`
 
 ```text
 

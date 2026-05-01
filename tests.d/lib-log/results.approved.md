@@ -1102,9 +1102,7 @@ TRACE    This is a errorTrace message, always shown.
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important
 ```
 
-❯ `fs::cat /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important`
-
-**Standard output**:
+> cat `/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important`
 
 ```text
 test
@@ -1129,9 +1127,7 @@ REPLY='/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--impo
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important2
 ```
 
-❯ `fs::cat /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important2`
-
-**Standard output**:
+> cat `/tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--important2`
 
 ```text
 test
