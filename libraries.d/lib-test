@@ -653,3 +653,101 @@ function test::setupBashForConsistency() {
 
   test::setTestCallStack
 }
+
+# ## test::listPaths
+#
+# Print the content of a directory in a consistent way for testing, by sorting the entries
+# and printing the type of each entry (file, directory or link).
+#
+# - $1: **directory** _as string_:
+#       The directory to list.
+# - ${recursive} _as bool_:
+#       (optional) true to list recursively, false otherwise
+#       (defaults to false)
+# - ${includeHidden} _as bool_:
+#       (optional) true to list hidden paths, false otherwise
+#       (defaults to false)
+#
+# ```bash
+# test::listPaths "/path/to/directory" recursive=true includeHidden=true
+# ```
+function test::listPaths() {
+  local \
+    directory="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    recursive="false" \
+    includeHidden="false" \
+    IFS=$' '
+  shift 1
+  eval "local a= ${*@Q}"
+
+  if [[ ! -d "${directory}" ]]; then
+    test::fail "Directory ⌜${directory}⌝ does not exist, could not execute ⌜test::listPaths ${directory}⌝."
+  fi
+
+  # shellcheck source=lib-fs
+  source fs
+  # shellcheck source=lib-array
+  source array
+
+  local REPLY_ARRAY
+  fs::listPaths "${directory}" recursive="${recursive}" includeHidden="${includeHidden}"
+  array::sort REPLY_ARRAY
+
+  local output="" path type
+  for path in "${REPLY_ARRAY[@]}"; do
+    type="?"
+    if [[ -L "${path}" ]]; then
+      type="L"
+    elif [[ -d "${path}" ]]; then
+      type="D"
+    elif [[ -f "${path}" ]]; then
+      type="F"
+    fi
+    output+="${type} ${path#"${directory}/"}"$'\n'
+  done
+
+  local mode=""
+  if [[ ${recursive} == "true" ]]; then
+    mode+=" (recursively)"
+  fi
+  if [[ ${includeHidden} == "true" ]]; then
+    mode+=" (including hidden)"
+  fi
+
+  # shellcheck disable=SC2016
+  printf 'Listing of `%s`%s:\n\n```text\n%s```\n\n' "${directory}" "${mode}" "${output}" >>"${GLOBAL_TEST_REPORT_FILE}"
+}
+
+# ## test::cat
+#
+# Print the content of a file in a consistent way for testing.
+# It will also print the file path before the content.
+#
+# - $1: **file** _as string_:
+#       The file to print.
+#
+# ```bash
+# test::cat "/path/to/file"
+# ```
+function test::cat() {
+  local file="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  if [[ ! -f "${file}" ]]; then
+    test::fail "File ⌜${file}⌝ does not exist, could not execute ⌜test::cat ${file}⌝."
+  fi
+
+  # shellcheck source=lib-fs
+  source fs
+
+  local REPLY=""
+  local -n GLOBAL_TEST_OUTPUT_CONTENT=REPLY
+  fs::readFile "${file}"
+
+  if declare -F test::scrubOutput &>/dev/null; then
+    test::scrubOutput
+  fi
+
+  # shellcheck disable=SC2016
+  printf '> cat `%s`\n\n```text\n%s\n```\n\n' "${file}" "${GLOBAL_TEST_OUTPUT_CONTENT}" >>"${GLOBAL_TEST_REPORT_FILE}"
+
+}

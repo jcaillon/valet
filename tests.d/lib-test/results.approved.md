@@ -268,6 +268,48 @@ MY_VAR3=(
 )
 ```
 
+### 📁 Listing directory content
+
+You can manually report the content of a directory using the `test::listPaths` function.
+
+Listing of `/tmp/valet.d/d1-2`:
+
+```text
+D directory1
+F file1
+L link-to-file1
+```
+
+Listing of `/tmp/valet.d/d1-2` (including hidden):
+
+```text
+F .file-hidden
+D directory1
+F file1
+L link-to-file1
+```
+
+Listing of `/tmp/valet.d/d1-2` (recursively) (including hidden):
+
+```text
+F .file-hidden
+D directory1
+F directory1/file2
+F file1
+L link-to-file1
+```
+
+### 👀 Displaying the content of a file
+
+You can manually report the content of a file using the `test::cat` function.
+
+> cat `/tmp/valet.d/d1-2/file1`
+
+```text
+File content.
+Another line
+```
+
 ### 🫧 Scrubbers
 
 You can use scrubbers to remove dynamic content from the test report.
@@ -282,6 +324,12 @@ Scrubbers are required when we need to convert non-deterministic text to somethi
 If a tested function or command does not produce the expected output, you can explicitly throw an error to stop the test suite execution by calling `test::fail`.
 
 This will mark the test suite as failed and it will log your message as well as the line number and file of the test failure for easier debugging.
+
+### ✔️ Direct assertions
+
+If you need to make direct assertions, you can use the assert library (include `assert`).
+
+It provides a set of convenient assertion functions such as `assert::equals`, `assert::isPath`, etc... that will throw an error with a detailed message if the assertion is not verified.
 
 ### ✋ Conditionally skipping a test suite
 

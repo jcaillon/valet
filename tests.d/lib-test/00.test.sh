@@ -88,6 +88,23 @@ function main() {
   test::prompt "test::printVars MY_VAR1 MY_VAR2 MY_VAR3"
   test::printVars MY_VAR1 MY_VAR2 MY_VAR3
 
+  test::title "📁 Listing directory content"
+  test::markdown 'You can manually report the content of a directory using the `test::listPaths` function.'
+  fs::createTempDirectory
+  local tempDirectory="${REPLY}"
+  printf '%s\n%s' "File content." "Another line" >"${tempDirectory}/file1"
+  : >"${tempDirectory}/.file-hidden"
+  ln -s "${tempDirectory}/file1" "${tempDirectory}/link-to-file1"
+  mkdir "${tempDirectory}/directory1"
+  : >"${tempDirectory}/directory1/file2"
+  test::listPaths "${tempDirectory}"
+  test::listPaths "${tempDirectory}" includeHidden=true
+  test::listPaths "${tempDirectory}" includeHidden=true recursive=true
+
+  test::title "👀 Displaying the content of a file"
+  test::markdown 'You can manually report the content of a file using the `test::cat` function.'
+  test::cat "${tempDirectory}/file1"
+
   test::title "🫧 Scrubbers"
   test::markdown "You can use scrubbers to remove dynamic content from the test report." \
     "Scrubbers are required when we need to convert non-deterministic text to something stable so that tests are reproducible." \
@@ -96,6 +113,10 @@ function main() {
   test::title "❌ Throw an error to fail a test"
   test::markdown "If a tested function or command does not produce the expected output, you can explicitly throw an error to stop the test suite execution by calling \`test::fail\`." \
     "This will mark the test suite as failed and it will log your message as well as the line number and file of the test failure for easier debugging."
+
+  test::title "✔️ Direct assertions"
+  test::markdown "If you need to make direct assertions, you can use the assert library (include \`assert\`)." \
+    "It provides a set of convenient assertion functions such as \`assert::equals\`, \`assert::isPath\`, etc... that will throw an error with a detailed message if the assertion is not verified."
 
   test::title "✋ Conditionally skipping a test suite"
   test::markdown "Sometimes, your tests will require a certain dependency which might not always be fulfilled." \
