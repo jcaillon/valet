@@ -6,7 +6,7 @@ source time
 function main() {
   test::setProgramElapsedFunction 0 increment=1000000 incrementIncrement=0
 
-  test_time::isTimeElapsed
+  test_time::isSpamming
   test_time::getMicrosecondsFromSeconds
   test_time::getSecondsFromMicroseconds
   test_time::startTimer
@@ -14,43 +14,43 @@ function main() {
   test_time::getHumanTimeFromMicroseconds
 }
 
-function test_time::isTimeElapsed() {
-  test::title "✅ Testing time::isTimeElapsed function"
+function test_time::isSpamming() {
+  test::title "✅ Testing time::isSpamming function"
 
-  test::func time::isTimeElapsed 1900000
-  test::func time::isTimeElapsed 1900000
-  test::func time::isTimeElapsed 1900000
+  test::func time::isSpamming 1900000
+  test::func time::isSpamming 1900000
+  test::func time::isSpamming 1900000
 
-  test::title "✅ Testing time::isTimeElapsed called from a different function"
-  if time::isTimeElapsed 1900000; then
-    test::fail "time::isTimeElapsed should have returned false"
+  test::title "✅ Testing time::isSpamming called from a different function"
+  if ! time::isSpamming 1900000; then
+    test::fail "time::isSpamming bad returned value"
   fi
-  if time::isTimeElapsed 1900000; then
-    test::fail "time::isTimeElapsed should have returned false"
+  if ! time::isSpamming 1900000; then
+    test::fail "time::isSpamming bad returned value"
   fi
-  function test_time::isTimeElapsed_sub() {
-    if time::isTimeElapsed 1900000; then
-      test::fail "time::isTimeElapsed should have returned false"
+  function test_time::isSpamming_sub() {
+    if ! time::isSpamming 1900000; then
+      test::fail "time::isSpamming bad returned value"
     fi
   }
-  test_time::isTimeElapsed_sub
-  if ! time::isTimeElapsed 1900000; then
-    test::fail "time::isTimeElapsed should have returned true"
+  test_time::isSpamming_sub
+  if time::isSpamming 1900000; then
+    test::fail "time::isSpamming bad returned value"
   fi
 
-  test::title "✅ Testing time::isTimeElapsed using timerName"
-  if time::isTimeElapsed 1900000 timerName=myTimerName; then
-    test::fail "time::isTimeElapsed should have returned false"
+  test::title "✅ Testing time::isSpamming using timerName"
+  if ! time::isSpamming 1900000 timerName=myTimerName; then
+    test::fail "time::isSpamming bad returned value"
   fi
-  if time::isTimeElapsed 1900000 timerName=myTimerName; then
-    test::fail "time::isTimeElapsed should have returned false"
+  if ! time::isSpamming 1900000 timerName=myTimerName; then
+    test::fail "time::isSpamming bad returned value"
   fi
-  function test_time::isTimeElapsed_sub2() {
-    if ! time::isTimeElapsed 1900000 timerName=myTimerName; then
-      test::fail "time::isTimeElapsed should have returned true"
+  function test_time::isSpamming_sub2() {
+    if time::isSpamming 1900000 timerName=myTimerName; then
+      test::fail "time::isSpamming bad returned value"
     fi
   }
-  test_time::isTimeElapsed_sub2
+  test_time::isSpamming_sub2
 }
 
 function test_time::getMicrosecondsFromSeconds() {

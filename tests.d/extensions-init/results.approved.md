@@ -2,7 +2,7 @@
 
 ## Test script 00.extensions-init
 
-### ✅ Testing extensions init without git/code in PATH, on windows and outside the ext directory
+### ✅ Testing extensions init without code in PATH, on windows and outside the ext directory
 
 ❯ `extensionsInit`
 
@@ -35,7 +35,7 @@ L lib-valet
 L lib-valet.md
 ```
 
-### ✅ Testing extensions init with git/code in PATH, on linux, outside the ext directory but registered
+### ✅ Testing extensions init with code in PATH, on linux, outside the ext directory but registered
 
 ❯ `extensionsInit`
 

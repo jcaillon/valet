@@ -22,7 +22,7 @@ rev-parse)
   ;;
 clone)
   targetDirectory="${4}"
-  mkdir -p "${targetDirectory}"
+  mkdir -p "${targetDirectory}/.git"
   echo "targetDirectory: ${targetDirectory}" 1>&2
   if [[ ${3} == *"error"* ]]; then
     echo "Simulating an error in git clone." 1>&2

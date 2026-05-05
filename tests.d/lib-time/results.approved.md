@@ -2,21 +2,19 @@
 
 ## Test script 00.lib-time
 
-### ✅ Testing time::isTimeElapsed function
+### ✅ Testing time::isSpamming function
 
-❯ `time::isTimeElapsed 1900000`
+❯ `time::isSpamming 1900000`
+
+❯ `time::isSpamming 1900000`
+
+❯ `time::isSpamming 1900000`
 
 Returned code: `1`
 
-❯ `time::isTimeElapsed 1900000`
+### ✅ Testing time::isSpamming called from a different function
 
-Returned code: `1`
-
-❯ `time::isTimeElapsed 1900000`
-
-### ✅ Testing time::isTimeElapsed called from a different function
-
-### ✅ Testing time::isTimeElapsed using timerName
+### ✅ Testing time::isSpamming using timerName
 
 ### ✅ Testing time::getMicrosecondsFromSeconds function
 

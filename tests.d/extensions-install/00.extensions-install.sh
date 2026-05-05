@@ -18,7 +18,7 @@ function main() {
   test::exec extensionsInstall https://git.ok/repo-version-with-setup.git
 
   fs::readFile "${VALET_CONFIG_EXTENSIONS_DIRECTORY}/repo-version-with-setup/.git/.valet-setup-executed"
-  if [[ ${REPLY} != "abc1234000000" ]]; then
+  if [[ ${REPLY} != "1.0.0" ]]; then
     test::fail "The setup script of the extension has not been executed (REPLY: ${REPLY})."
   fi
 
@@ -50,6 +50,11 @@ function main() {
 
   test::title "✅ Testing extensions install setup unattended"
   test::exit extensionsInstall https://git.ok/repo-setup-ok-unattended.git --unattended
+
+  fs::readFile "${VALET_CONFIG_EXTENSIONS_DIRECTORY}/repo-setup-ok-unattended/.git/.valet-setup-executed"
+  if [[ ${REPLY} != "abc1234" ]]; then
+    test::fail "The setup script of the extension has not been executed (REPLY: ${REPLY})."
+  fi
 }
 
 function selfDocument() {

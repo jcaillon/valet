@@ -26,7 +26,7 @@ INFO     Found setup script for the extension repo-version-with-setup: ⌜/tmp/v
 9╰──────╯
 INFO     Executing the setup script.
 WARNING  This is a setup script!
-SUCCESS  The setup script for the extension ⌜repo-version-with-setup⌝ has been executed successfully.
+SUCCESS  The setup script for the extension ⌜repo-version-with-setup⌝ (version 1.0.0) has been executed successfully.
 SUCCESS  The extension ⌜repo-version-with-setup⌝ version ⌜1.0.0⌝ has been successfully installed.
 INFO     Rebuilding the command cache.
 INFO     Called command::reloadCommandsIndex.
@@ -82,7 +82,7 @@ TRACE    Git standard error stream:
    1 ░ mocking git clone --no-checkout https://git.ok/repo-error.git /tmp/valet.d/d1-2/xxxx
    2 ░ targetDirectory: /tmp/valet.d/d1-2/xxxx
    3 ░ Simulating an error in git clone.
-FAIL     The command git ended with exit code 1 in 13.000s.
+FAIL     The command git ended with exit code 1 in 11.000s.
 ```
 
 ### ✅ Testing extensions install error on checkout and unattended
@@ -174,7 +174,7 @@ FAIL     The setup script for the extension ⌜other2⌝ failed, aborting instal
 INFO     The extension will be installed under ⌜/tmp/valet.d/d1-2/repo-fail⌝.
 INFO     Cloning the git repository ⌜https://git.ok/repo-fail.git⌝ in ⌜/tmp/valet.d/d1-2/repo-fail⌝.
 INFO     Checking out the reference ⌜latest⌝.
-INFO     The extension ⌜repo-fail⌝ has been downloaded in ⌜/tmp/valet.d/d1-2/repo-fail⌝.
+INFO     The extension ⌜repo-fail⌝ version ⌜abc1234⌝ has been downloaded in ⌜/tmp/valet.d/d1-2/repo-fail⌝.
 INFO     Found setup script for the extension repo-fail: ⌜/tmp/valet.d/d1-2/repo-fail/extension.setup.sh⌝.
    ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 ░──┤ The extension ⌜repo-fail⌝ comes with a setup script usually used to finalize the installation. 101│
@@ -197,12 +197,12 @@ ERROR    The setup script for the extension ⌜repo-fail⌝ failed.
 9│ Yes. 16├──░
 9╰──────╯
 INFO     You can manually retry the setup by running the script ⌜/tmp/valet.d/d1-2/repo-fail/extension.setup.sh⌝.
-SUCCESS  The extension ⌜repo-fail⌝ has been successfully installed.
+SUCCESS  The extension ⌜repo-fail⌝ version ⌜abc1234⌝ has been successfully installed.
 INFO     Rebuilding the command cache.
 INFO     Called command::reloadCommandsIndex.
 INFO     Rebuilding the documentation.
 INFO     Called selfDocument.
-SUCCESS  The extension ⌜repo-fail⌝ is ready to be used.
+SUCCESS  The extension ⌜repo-fail⌝ version ⌜abc1234⌝ is ready to be used.
 ```
 
 ### ✅ Testing extensions install skipping setup
@@ -215,14 +215,14 @@ SUCCESS  The extension ⌜repo-fail⌝ is ready to be used.
 INFO     The extension will be installed under ⌜/tmp/valet.d/d1-2/repo-setup-ok⌝.
 INFO     Cloning the git repository ⌜https://git.ok/repo-setup-ok.git⌝ in ⌜/tmp/valet.d/d1-2/repo-setup-ok⌝.
 INFO     Checking out the reference ⌜latest⌝.
-INFO     The extension ⌜repo-setup-ok⌝ has been downloaded in ⌜/tmp/valet.d/d1-2/repo-setup-ok⌝.
+INFO     The extension ⌜repo-setup-ok⌝ version ⌜abc1234⌝ has been downloaded in ⌜/tmp/valet.d/d1-2/repo-setup-ok⌝.
 INFO     Skipping the execution of the ⌜extension.setup.sh⌝ script.
-SUCCESS  The extension ⌜repo-setup-ok⌝ has been successfully installed.
+SUCCESS  The extension ⌜repo-setup-ok⌝ version ⌜abc1234⌝ has been successfully installed.
 INFO     Rebuilding the command cache.
 INFO     Called command::reloadCommandsIndex.
 INFO     Rebuilding the documentation.
 INFO     Called selfDocument.
-SUCCESS  The extension ⌜repo-setup-ok⌝ is ready to be used.
+SUCCESS  The extension ⌜repo-setup-ok⌝ version ⌜abc1234⌝ is ready to be used.
 ```
 
 ### ✅ Testing extensions install setup unattended
@@ -235,16 +235,16 @@ SUCCESS  The extension ⌜repo-setup-ok⌝ is ready to be used.
 INFO     The extension will be installed under ⌜/tmp/valet.d/d1-2/repo-setup-ok-unattended⌝.
 INFO     Cloning the git repository ⌜https://git.ok/repo-setup-ok-unattended.git⌝ in ⌜/tmp/valet.d/d1-2/repo-setup-ok-unattended⌝.
 INFO     Checking out the reference ⌜latest⌝.
-INFO     The extension ⌜repo-setup-ok-unattended⌝ has been downloaded in ⌜/tmp/valet.d/d1-2/repo-setup-ok-unattended⌝.
+INFO     The extension ⌜repo-setup-ok-unattended⌝ version ⌜abc1234⌝ has been downloaded in ⌜/tmp/valet.d/d1-2/repo-setup-ok-unattended⌝.
 INFO     Found setup script for the extension repo-setup-ok-unattended: ⌜/tmp/valet.d/d1-2/repo-setup-ok-unattended/extension.setup.sh⌝.
 INFO     Executing the setup script.
 WARNING  This is a setup script!
-SUCCESS  The setup script for the extension ⌜repo-setup-ok-unattended⌝ has been executed successfully.
-SUCCESS  The extension ⌜repo-setup-ok-unattended⌝ has been successfully installed.
+SUCCESS  The setup script for the extension ⌜repo-setup-ok-unattended⌝ (version abc1234) has been executed successfully.
+SUCCESS  The extension ⌜repo-setup-ok-unattended⌝ version ⌜abc1234⌝ has been successfully installed.
 INFO     Rebuilding the command cache.
 INFO     Called command::reloadCommandsIndex.
 INFO     Rebuilding the documentation.
 INFO     Called selfDocument.
-SUCCESS  The extension ⌜repo-setup-ok-unattended⌝ is ready to be used.
+SUCCESS  The extension ⌜repo-setup-ok-unattended⌝ version ⌜abc1234⌝ is ready to be used.
 ```
 

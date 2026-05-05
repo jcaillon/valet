@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+if [[ $* == *"rev-parse HEAD"* ]]; then
+  echo "abcdefghijklmnopqrstuvwxyz1234567890"
+  exit 0
+fi

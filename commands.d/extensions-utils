@@ -46,6 +46,39 @@ function extensions::getVersion() {
   REPLY="${REPLY:0:7}"
 }
 
+# ## extensions::isSetupExecuted (private)
+#
+# Check if the setup script for an extension has been executed successfully.
+#
+# - $1: **extension directory** _as string_:
+#       The directory of the extension for which we want to get the version.
+# - $2: **version** _as string_ (optional):
+#       The version of the extension to check. If not provided, the version will be computed using `extensions::getVersion`.
+#
+function extensions::isSetupExecuted() {
+  local \
+    extensionDirectory="${1}" \
+    version="${2:-}"
+
+  extensions::getSetupSuccessFile "${extensionDirectory}"
+  local successFile="${REPLY}"
+
+  if [[ ! -f ${successFile} ]]; then
+    return 1
+  fi
+
+  if [[ -z ${version} ]]; then
+    extensions::getVersion "${extensionDirectory}"
+    version="${REPLY}"
+  fi
+
+  fs::readFile "${successFile}"
+  string::trimAll REPLY
+  if [[ ${REPLY} != "${version}" ]]; then
+    return 1
+  fi
+}
+
 # ## extensions::getSetupSuccessFile (private)
 #
 # Get the path to the file used to record the successful execution of the setup script for an extension.
@@ -92,13 +125,14 @@ function extensions::executeSetupScript() {
     log::error "The setup script for the extension ⌜${extensionName}⌝ failed."
     return 0
   else
-    # record for which commit we executed the setup script
-    exe::invoke command git -C "${extensionDirectory}" rev-parse HEAD
-    # shellcheck disable=SC2034
-    local sha1="${REPLY}"
-    string::trimAll sha1
-    fs::writeToFile "${successFile}" sha1
-    log::success "The setup script for the extension ⌜${extensionName}⌝ has been executed successfully."
+    # record for which version we executed the setup script
+    extensions::getVersion "${extensionDirectory}"
+    local version="${REPLY}"
+    fs::writeToFile "${successFile}" version
+    if [[ -n ${version} ]]; then
+      version=" (version ${version})"
+    fi
+    log::success "The setup script for the extension ⌜${extensionName}⌝${version} has been executed successfully."
   fi
 
   REPLY_CODE=0

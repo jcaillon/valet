@@ -12,9 +12,9 @@ function main() {
   local extensionDirectory="${REPLY}/my-extension"
   # override git for the tests
   local testDirectory="${PWD}"
-  chmod +x "${testDirectory}/git" "${testDirectory}/code"
+  chmod +x "${testDirectory}/git/git" "${testDirectory}/code/code"
 
-  test::title "✅ Testing extensions init without git/code in PATH, on windows and outside the ext directory"
+  test::title "✅ Testing extensions init without code in PATH, on windows and outside the ext directory"
   export PATH="/usr/bin:${testDirectory}/git"
   OSTYPE="msys"
   resetExtensionDirectory
@@ -25,7 +25,7 @@ function main() {
   test::listPaths "${extensionDirectory}" recursive=true includeHidden=true
   assert::isLink "${VALET_CONFIG_EXTENSIONS_DIRECTORY}/my-extension"
 
-  test::title "✅ Testing extensions init with git/code in PATH, on linux, outside the ext directory but registered"
+  test::title "✅ Testing extensions init with code in PATH, on linux, outside the ext directory but registered"
   export PATH="${testDirectory}/code:/usr/bin:${testDirectory}/git"
   OSTYPE="linux-gnu"
   resetExtensionDirectory
