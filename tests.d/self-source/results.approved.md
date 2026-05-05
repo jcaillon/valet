@@ -26,7 +26,6 @@ source benchmark
 source command
 source coproc
 source curl
-source data
 source exe
 source fs
 source http
@@ -43,6 +42,7 @@ source terminal
 source test
 source time
 source tui
+source variable
 source version
 source windows
 

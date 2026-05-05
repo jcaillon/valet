@@ -139,7 +139,7 @@ function selfExtend() {
     # if Git is not installed, we download the source tarball and extract it
     # We will only be able to do that for a few git servers however
     log::info "Git is not installed, we will attempt to download the source tarball for the extension ⌜${extensionName}⌝."
-    if bash::getMissingCommands curl tar; then
+    if bash::isMissingCommands curl tar; then
       local IFS=$'\n'
       core::fail "The following tools are required for this command but are not installed:"$'\n'"${REPLY_ARRAY[*]}"
     fi
@@ -171,8 +171,6 @@ function selfExtend() {
 function selfExtend_createExtension() {
   local extensionName="${1}"
   local extensionsDirectory="${2}"
-
-
 
   log::success "The extension ⌜${extensionName}⌝ has been setup in ⌜${extensionDirectory}⌝."
 }

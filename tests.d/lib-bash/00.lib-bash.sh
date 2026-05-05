@@ -2,7 +2,6 @@
 
 function main() {
   test_bash::catchErrors
-  test_bash::isVariableCachedWithValue
   test_bash::runInSubshell
   test_bash::isFdValid
   test_bash::getFunctionDefinitionWithGlobalVars
@@ -10,8 +9,7 @@ function main() {
   test_bash::sleep
   test_bash::readStdIn
   test_bash::countArgs
-  test_bash::getMissingVariables
-  test_bash::getMissingCommands
+  test_bash::isMissingCommands
   test_bash::isCommand
   test_bash::isFunction
   test_bash::getBuiltinOutput
@@ -53,21 +51,6 @@ function test_bash::catchErrors() {
   test::exec bash::catchErrors testFunction
   test::printVars GLOBAL_ERROR_TRAP_LAST_ERROR_CODE GLOBAL_ERROR_TRAP_ERROR_CODES GLOBAL_ERROR_TRAP_ERROR_STACKS
   test::unsetTestCallStack
-}
-
-function test_bash::isVariableCachedWithValue() {
-  test::title "✅ Testing bash::isVariableCachedWithValue"
-
-  test::func bash::isVariableCachedWithValue VAR1 val1 VAR2 val2
-  test::func bash::isVariableCachedWithValue VAR1 val1
-  test::func bash::isVariableCachedWithValue VAR1 val2
-
-  # shellcheck disable=SC2119
-  test::func bash::clearCachedVariables
-  test::func bash::isVariableCachedWithValue VAR2 val2
-  test::func bash::clearCachedVariables VAR2
-  test::func bash::isVariableCachedWithValue VAR2 val2
-  test::func bash::isVariableCachedWithValue VAR2 val2
 }
 
 # shellcheck disable=SC2317
@@ -188,20 +171,12 @@ function test_bash::countArgs() {
   test::func bash::countArgs "\${PWD}/resources/*"
 }
 
-function test_bash::getMissingVariables() {
-  test::title "✅ Testing bash::getMissingVariables"
+function test_bash::isMissingCommands() {
+  test::title "✅ Testing bash::isMissingCommands"
 
-  test::func bash::getMissingVariables
-  test::exec ABC="ok"
-  test::func bash::getMissingVariables GLOBAL_TEST_TEMP_FILE dfg ABC NOP
-}
+  test::func bash::isMissingCommands
 
-function test_bash::getMissingCommands() {
-  test::title "✅ Testing bash::getMissingCommands"
-
-  test::func bash::getMissingCommands
-
-  test::func bash::getMissingCommands NONEXISTINGSTUFF bash::getMissingCommands rm YETANOTHERONEMISSING
+  test::func bash::isMissingCommands NONEXISTINGSTUFF bash::isMissingCommands rm YETANOTHERONEMISSING
 }
 
 function test_bash::isCommand() {

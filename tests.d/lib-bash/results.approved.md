@@ -20,9 +20,9 @@ Returned code: `1`
 
 ```text
 INFO     This is a test function.
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 43: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 41: ((: 0 / 0: division by 0 (error token is "0")
 INFO     This line will be executed since we catch errors.
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 45: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 43: ((: 0 / 0: division by 0 (error token is "0")
 INFO     Again.
 ```
 
@@ -50,30 +50,6 @@ GLOBAL_ERROR_TRAP_ERROR_STACKS=(
 )
 ```
 
-### ✅ Testing bash::isVariableCachedWithValue
-
-❯ `bash::isVariableCachedWithValue VAR1 val1 VAR2 val2`
-
-Returned code: `1`
-
-❯ `bash::isVariableCachedWithValue VAR1 val1`
-
-❯ `bash::isVariableCachedWithValue VAR1 val2`
-
-Returned code: `1`
-
-❯ `bash::clearCachedVariables`
-
-❯ `bash::isVariableCachedWithValue VAR2 val2`
-
-❯ `bash::clearCachedVariables VAR2`
-
-❯ `bash::isVariableCachedWithValue VAR2 val2`
-
-Returned code: `1`
-
-❯ `bash::isVariableCachedWithValue VAR2 val2`
-
 ### ✅ Testing bash::runInSubshell
 
 ❯ `bash::runInSubshell log::info hello`
@@ -95,7 +71,7 @@ REPLY_CODE='0'
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 81: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 64: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -113,7 +89,7 @@ REPLY_CODE='1'
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 81: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 64: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -133,7 +109,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 81: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 64: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -352,32 +328,13 @@ Returned variables:
 REPLY='1'
 ```
 
-### ✅ Testing bash::getMissingVariables
+### ✅ Testing bash::isMissingCommands
 
-❯ `bash::getMissingVariables`
-
-Returned code: `1`
-
-❯ `ABC=ok`
-
-❯ `bash::getMissingVariables GLOBAL_TEST_TEMP_FILE dfg ABC NOP`
-
-Returned variables:
-
-```text
-REPLY_ARRAY=(
-[0]='dfg'
-[1]='NOP'
-)
-```
-
-### ✅ Testing bash::getMissingCommands
-
-❯ `bash::getMissingCommands`
+❯ `bash::isMissingCommands`
 
 Returned code: `1`
 
-❯ `bash::getMissingCommands NONEXISTINGSTUFF bash::getMissingCommands rm YETANOTHERONEMISSING`
+❯ `bash::isMissingCommands NONEXISTINGSTUFF bash::isMissingCommands rm YETANOTHERONEMISSING`
 
 Returned variables:
 

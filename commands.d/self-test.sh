@@ -16,8 +16,8 @@ source coproc
 source fs
 # shellcheck source=../libraries.d/lib-time
 source time
-# shellcheck source=../libraries.d/lib-data
-source data
+# shellcheck source=../libraries.d/lib-variable
+source variable
 
 #===============================================================
 # >>> command: self test
@@ -151,7 +151,7 @@ function selfTest() {
 
   if [[ ${replayFailedTests:-} == "true" ]]; then
     # replay the failed tests from the previous run (or run all tests if none failed)
-    data::deserialize user-data/failed-test-directories
+    variable::deserialize user-data/failed-test-directories
     eval "${REPLY}"
     if ((${#_TEST_FAILED_TEST_SUITE_DIRECTORIES[@]} > 0)); then
       log::info "Replying ⌜${#_TEST_FAILED_TEST_SUITE_DIRECTORIES[@]}⌝ failed test suites from the previous run."
@@ -218,7 +218,7 @@ function selfTest() {
   fi
 
   # record the failed tests so we can replay them later
-  data::serialize user-data/failed-test-directories _TEST_FAILED_TEST_SUITE_DIRECTORIES
+  variable::serialize user-data/failed-test-directories _TEST_FAILED_TEST_SUITE_DIRECTORIES
 
   if ((${#_TEST_FAILED_TEST_SUITE_NAMES[@]} > 0)); then
     local failMessage

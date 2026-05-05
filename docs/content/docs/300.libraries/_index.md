@@ -96,6 +96,7 @@ You can also browse the list of available libraries and their functions here;
 
 {{< cards >}}
   {{< card link="array" icon="table" title="array" subtitle="Manipulate bash arrays." >}}
+  {{< card link="assert" icon="badge-check" title="assert" subtitle="Assertions for bash scripts." >}}
   {{< card link="bash" icon="code" title="bash" subtitle="Extend bash capabilities." >}}
   {{< card link="benchmark" icon="trending-up" title="benchmark" subtitle="Benchmark bash functions." >}}
   {{< card link="command" icon="ticket" title="command" subtitle="Functions to be used in your commands." >}}
@@ -107,6 +108,7 @@ You can also browse the list of available libraries and their functions here;
   {{< card link="fs" icon="document" title="fs" subtitle="Manipulate the files and directories." >}}
   {{< card link="http" icon="cloud-download" title="http" subtitle="Naive http implementation." >}}
   {{< card link="interactive" icon="cursor-click" title="interactive" subtitle="Make your command interactive." >}}
+  <!-- {{< card link="list" icon="clipboard-list" title="list" subtitle="Display lists with optional fuzzy filter." >}} -->
   {{< card link="log" icon="pencil-alt" title="log" subtitle="Logging functions." >}}
   {{< card link="profiler" icon="finger-print" title="profiler" subtitle="Enable and disable the bash profiler." >}}
   {{< card link="progress" icon="dots-horizontal" title="progress" subtitle="Display a progress bar or a spinner." >}}
@@ -119,6 +121,7 @@ You can also browse the list of available libraries and their functions here;
   {{< card link="test" icon="beaker" title="test" subtitle="Functions usable in your test scripts." >}}
   {{< card link="time" icon="clock" title="time" subtitle="Functions related to time." >}}
   <!-- {{< card link="tui" icon="view-boards" title="tui" subtitle="Functions to build a TUI application." >}} -->
+  {{< card link="variable" icon="cube" title="variable" subtitle="Manipulate bash variables." >}}
   {{< card link="version" icon="calculator" title="version" subtitle="Compare and manipulate semantic versions." >}}
   {{< card link="windows" icon="view-grid" title="windows" subtitle="Functions specific to windows systems." >}}
 {{< /cards >}}

@@ -1,0 +1,189 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# shellcheck source=lib-fs
+source fs
+
+# ## variable::serialize
+#
+# Serialize the variables given as arguments to a script that can be evaluated to restore the variables with the same values.
+# (call variable::deserialize to restore the variables from the script).
+#
+# - $1: **file** _as string_:
+#       If an absolute file path (starting with /) is given, the script will be written to this file.
+#       Otherwise, the script will be written to a file created in the user state directory with the given file name.
+# - $@: **variable names** _as string_:
+#       The variable names to serialize. At least one variable name must be given.
+#
+# Returns:
+#
+# - ${REPLY}: the path of the file containing the script to restore the variables.
+#
+# ```bash
+# variable::serialize my-variables VAR1 VAR2
+# local scriptPath="${REPLY}"
+# ```
+function variable::serialize() {
+  local file="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  shift 1
+  if ((${#@} == 0)); then
+    core::fail "The function ⌜${FUNCNAME:-?}⌝ requires at least one variable name to serialize."
+  fi
+
+  local finalPath
+  if [[ ${file} == /* ]]; then
+    finalPath="${file}"
+  else
+    core::getUserStateDirectory
+    finalPath="${REPLY}/${file}"
+  fi
+  fs::createFileIfNeeded "${finalPath}"
+
+  if ! declare -p "${@}" 1>"${finalPath}" 2>"${GLOBAL_TEMPORARY_STDOUT_FILE}"; then
+    IFS='' read -rd '' REPLY <"${GLOBAL_TEMPORARY_STDOUT_FILE}" || :
+    core::fail "Failed to serialize variables ⌜${*}⌝ to script ⌜${finalPath}⌝:"$'\n'"${REPLY}"
+  fi
+
+  REPLY="${finalPath}"
+}
+
+# ## variable::deserialize
+#
+# Get a string to eval in order to restore the variables stored using variable::serialize.
+#
+# - $1: **file** _as string_:
+#       If an absolute file path (starting with /) is given, the variables will be restored from this file.
+#       Otherwise, the variables will be restored from a file in the user state directory with the given file name.
+#
+# Returns:
+#
+# - ${REPLY}: a string to eval in order to restore the variables stored using variable::serialize.
+# - ${REPLY_CODE}:
+#   - 0 if the file exists and was successfully sourced to restore the variables.
+#   - 1 if the file does not exist
+#
+# ```bash
+# variable::deserialize my-variables
+# eval "${REPLY}"
+# ```
+function variable::deserialize() {
+  local file="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local finalPath
+  if [[ ${file} == /* ]]; then
+    finalPath="${file}"
+  else
+    core::getUserStateDirectory
+    finalPath="${REPLY}/${file}"
+  fi
+
+  if [[ ! -f ${finalPath} ]]; then
+    log::debug "The script file ⌜${finalPath}⌝ to deserialize does not exist."
+    REPLY_CODE=1
+    REPLY=""
+    return 0
+  fi
+
+  fs::readFile "${finalPath}"
+  REPLY_CODE=0
+}
+
+# ## variable::isCachedWithValue (private)
+#
+# Check if one or more variables are cached with the given value.
+# If all the variables given already have the same value cached,
+# the function will return true.
+# Otherwise, it will return false and cache the given value in the variables.
+#
+# - $1: **variable name** _as string_:
+#       the name of the variable to check
+# - $2: **value** _as any_:
+#       the value to check against the variable
+# - $@: **variable/value pair** _as any_:
+#       additional variable/value pairs to check
+#
+# Returns:
+#
+# - $?:
+#   - 0 if all the variables have the same value as the given value
+#   - 1 otherwise
+#
+# ```bash
+# if variable::isCachedWithValue "MY_VAR" "my_value"; then
+#   echo "MY_VAR is cached with the value 'my_value'"
+# else
+#   echo "MY_VAR is not cached with the value 'my_value'"
+# fi
+# ```
+function variable::isCachedWithValue() {
+  local -i nbNotCached=0
+  local varName varValue
+  while (($# > 0)); do
+    varName="_VARIABLES_CACHED_${1}"
+    varValue="${2}"
+    shift 2
+    if [[ ! -v "${varName}" || ${!varName} != "${varValue}" ]]; then
+      nbNotCached=$((nbNotCached + 1))
+      eval "${varName}=\"${varValue}\""
+    fi
+  done
+  return $((nbNotCached == 0 ? 0 : 1))
+}
+
+# ## variable::clearCachedVariables (private)
+#
+# Clear the cached variables used by variable::isCachedWithValue.
+# This will unset all variables starting with _VARIABLES_CACHED_.
+#
+# - $@ : **variable names** _as any_:
+#       (optional) the names of the variables to clear
+#       (defaults to all cached variables)
+#
+# ```bash
+# variable::clearCachedVariables
+# variable::clearCachedVariables "MY_VAR" "ANOTHER_VAR"
+# ```
+function variable::clearCachedVariables() {
+  if (($# == 0)); then
+    # shellcheck disable=SC2086
+    unset -v ${!_VARIABLES_CACHED_*}
+  else
+    while (($# > 0)); do
+      unset -v "_VARIABLES_CACHED_${1}"
+      shift
+    done
+  fi
+}
+
+# ## variable::isMissing
+#
+# This function returns the list of undeclared variables for the given names.
+#
+# - $@: **variable names** _as string_:
+#       the list of variable names to check.
+#
+# Returns:
+#
+# - $?
+#   - 0 if there are variable undeclared
+#   - 1 otherwise.
+# - ${REPLY_ARRAY[@]}: the list of undeclared variables.
+#
+# ```bash
+# if variable::isMissing "var1" "var2"; then
+#   printf 'The following variables are not declared: %s' "${REPLY_ARRAY[*]}"
+# fi
+# ```
+function variable::isMissing() {
+  REPLY_ARRAY=()
+  local var
+  for var in "$@"; do
+    if [[ ! -v "${var}" ]]; then
+      REPLY_ARRAY+=("${var}")
+    fi
+  done
+  if [[ ${#REPLY_ARRAY[@]} -gt 0 ]]; then
+    return 0
+  fi
+  return 1
+}
