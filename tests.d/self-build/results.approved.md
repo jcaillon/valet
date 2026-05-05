@@ -20,6 +20,8 @@ INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/e
 INFO                              ├── ⌜extensions init⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/extensions-install.sh⌝.
 INFO                              ├── ⌜extensions install⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/extensions-list.sh⌝.
+INFO                              ├── ⌜extensions list⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/help.sh⌝.
 INFO                              ├── ⌜help⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-add-command.sh⌝.
@@ -52,9 +54,9 @@ INFO                              ├── ⌜self mock2⌝.
 INFO                              ├── ⌜self mock3⌝.
 INFO     == Summary of the commands ==
 
-- Number of variables declared: ⌜354⌝.
-- Number of functions: ⌜21⌝.
-- Number of commands: ⌜20⌝.
+- Number of variables declared: ⌜368⌝.
+- Number of functions: ⌜22⌝.
+- Number of commands: ⌜21⌝.
 - Number of user library directories found: ⌜0⌝.
 - Maximum sub command level: ⌜1⌝.
 
@@ -74,6 +76,7 @@ self uninstall        A command to uninstall Valet.
 
 extensions init       Initialize/setup the current directory as a Valet extension.
 extensions install    Download and install an extension in the user extensions directory using GIT.
+extensions list       List all Valet extensions.
 help                  Show the help of this program or of a specific command.
 self add-command      Add a new command to the current extension.
 self add-library      Add a new library to the current extension.

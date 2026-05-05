@@ -26,6 +26,7 @@ source benchmark
 source command
 source coproc
 source curl
+source data
 source exe
 source fs
 source http

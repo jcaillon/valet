@@ -237,8 +237,6 @@ function bash::readStdIn() {
 # - count the number of variables starting with VALET_
 #   `bash::countArgs "${!VALET_@}" && local numberOfVariables="${REPLY}"`
 #
-# Inputs:
-#
 # - $@: **arguments** _as any_:
 #       the arguments to count
 #

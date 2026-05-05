@@ -16,6 +16,8 @@ source coproc
 source fs
 # shellcheck source=../libraries.d/lib-time
 source time
+# shellcheck source=../libraries.d/lib-data
+source data
 
 #===============================================================
 # >>> command: self test
@@ -36,6 +38,9 @@ options:
 - name: -a, --auto-approve
   description: |-
     The received test result files will automatically be approved.
+- name: -r, --replay-failed-tests
+  description: |-
+    Replay the failed tests from the previous run (or run all tests if none failed).
 - name: -c, --core-only
   description: |-
     Only test the valet core functions. Skips the tests for user commands.
@@ -75,13 +80,13 @@ function selfTest() {
   eval "${REPLY}"
   command::checkParsedResults
 
+  # TODO: add an interactive to accept the changes one by one (pause and interactively ask the user for each diff)
+
   time::getProgramElapsedMicroseconds
   local startTimeInMicroSeconds="${REPLY}"
 
   # set the options
-  unset _TEST_AUTO_APPROVE \
-    _TEST_INCLUDE_PATTERN \
-    _TEST_EXCLUDE_PATTERN
+  local _TEST_AUTO_APPROVE _TEST_INCLUDE_PATTERN _TEST_EXCLUDE_PATTERN
   if [[ -n ${autoApprove:-} ]]; then
     _TEST_AUTO_APPROVE="true"
   fi
@@ -93,8 +98,15 @@ function selfTest() {
     log::info "Excluding all test suites that match the pattern ⌜${exclude}⌝."
     _TEST_EXCLUDE_PATTERN="${exclude}"
   fi
+
   _TEST_NB_PARALLEL_TEST_SUITES="${parallelTestSuites:-}"
   log::debug "Running up to ⌜${_TEST_NB_PARALLEL_TEST_SUITES}⌝ test suites in parallel."
+
+  # user extension directory
+  if [[ -z ${extensionsDirectory:-} ]]; then
+    core::getExtensionsDirectory
+    extensionsDirectory="${REPLY}"
+  fi
 
   # check what will be used to display the diff between received and approved files
   selfTestUtils_setupDiffCommand
@@ -104,60 +116,73 @@ function selfTest() {
   GLOBAL_TEST_IMPLEMENTATION_FAILURE_STATUS=241
   GLOBAL_TEST_APPROVAL_FAILURE_STATUS=242
   GLOBAL_TEST_SKIPPED_STATUS=243
-  declare -g -i _TEST_FAILURE_STATUS=0
-  declare -g -a _TEST_FAILED_TEST_SUITES=()
-  declare -g -a _TEST_SKIPPED_TEST_SUITES=()
 
-  # prepare a list of all the test suites to run (with extra info for each test suite)
-  log::info "Listing all test suites to run."
-
-  progress::start template="<spinner>"
-
+  local -i _TEST_FAILURE_STATUS=0
   local -a \
-    _TEST_TEST_SUITE_NAME=() \
-    _TEST_TEST_SUITE_DIRECTORY=() \
-    _TEST_COMMAND=()
+    _TEST_FAILED_TEST_SUITE_NAMES=() \
+    _TEST_FAILED_TEST_SUITE_DIRECTORIES=() \
+    _TEST_SKIPPED_TEST_SUITE_NAMES=()
 
-  local tempUserDataDirectory
-
-  # test suites in the user directory
-  if [[ ${coreOnly:-false} != "true" ]]; then
-    fs::createTempDirectory
-    tempUserDataDirectory="${REPLY}"
-
-    core::getExtensionsDirectory
-    extensionsDirectory="${extensionsDirectory:-${REPLY}}"
-
-    # rebuild the commands for the user dir
-    selfTestUtils_rebuildCommands --extensions-directory "${extensionsDirectory}" --output "${tempUserDataDirectory}"
-
-    fs::listDirectories "${extensionsDirectory}"
-    local extensionDirectory
-    for extensionDirectory in "${REPLY_ARRAY[@]}"; do
-      if [[ -d ${extensionDirectory}/tests.d ]]; then
-        selfTest_addTestSuites "${extensionDirectory}/tests.d" "${tempUserDataDirectory}"
-      fi
-    done
+  if [[ ${coreOnly:-} == "true" && ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/tests.d ]]; then
+    core::fail "The valet core tests directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/tests.d⌝ does not exist, cannot run core tests."
   fi
 
+  # re-build the commands either for the core or user directory and store the output
+  # in a temporary directory to be used by the tests (avoid rebuilding in each test suite)
+  progress::start template="<spinner> <message>" message="Rebuilding commands..."
+  fs::createTempDirectory
+  local buildOutputDirectory="${REPLY}"
+
   # core test suites
-  if [[ ${coreOnly:-false} == "true" ]]; then
-    if [[ ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/tests.d ]]; then
-      core::fail "The valet core tests directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/tests.d⌝ does not exist, cannot run core tests."
-    fi
-
+  if [[ ${coreOnly} == "true" ]]; then
     # we need to rebuild the commands for the core commands only
-    fs::createTempDirectory
-    tempUserDataDirectory="${REPLY}"
+    selfTestUtils_rebuildCommands --extensions-directory "${GLOBAL_INSTALLATION_DIRECTORY}/no-directory" --extra-extension-directories "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.mock-extension,${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" --output "${buildOutputDirectory}"
+  else
+    # rebuild the commands for the user dir
+    selfTestUtils_rebuildCommands --extensions-directory "${extensionsDirectory}" --output "${buildOutputDirectory}"
+  fi
 
-    selfTestUtils_rebuildCommands --extensions-directory "${GLOBAL_INSTALLATION_DIRECTORY}/no-directory" --extra-extension-directories "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.mock-extension,${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" --output "${tempUserDataDirectory}"
-    selfTest_addTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d" "${tempUserDataDirectory}"
+  # prepare a list of all the test suites to run (with extra info for each test suite)
+  progress::update message="Listing test suites to run..."
+  local -a \
+    _TEST_SUITE_NAMES=() \
+    _TEST_SUITE_DIRECTORIES=() \
+    _TEST_COMMANDS=()
 
-    # now we can also test the commands in showcase.d if the directory is there
-    if [[ ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d ]]; then
-      log::warning "The valet showcase directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d⌝ does not exist, cannot run the tests on the core showcase."
+  if [[ ${replayFailedTests:-} == "true" ]]; then
+    # replay the failed tests from the previous run (or run all tests if none failed)
+    data::deserialize user-data/failed-test-directories
+    eval "${REPLY}"
+    if ((${#_TEST_FAILED_TEST_SUITE_DIRECTORIES[@]} > 0)); then
+      log::info "Replying ⌜${#_TEST_FAILED_TEST_SUITE_DIRECTORIES[@]}⌝ failed test suites from the previous run."
+      selfTest_addTestSuitesFromArray _TEST_FAILED_TEST_SUITE_DIRECTORIES "${buildOutputDirectory}"
+      _TEST_FAILED_TEST_SUITE_DIRECTORIES=()
     else
-      selfTest_addTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d/tests.d" "${tempUserDataDirectory}"
+      log::info "No failed test suite found from the previous run, running all test suites."
+    fi
+  fi
+
+  if ((${#_TEST_SUITE_NAMES[@]} == 0)); then
+    if [[ ${coreOnly:-false} == "true" ]]; then
+      # core test suites
+      selfTest_addTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d" "${buildOutputDirectory}"
+
+      # now we can also test the commands in showcase.d if the directory is there
+      if [[ -d ${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d ]]; then
+        selfTest_addTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d/tests.d" "${buildOutputDirectory}"
+      else
+        log::warning "The valet showcase directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d⌝ does not exist, cannot run the tests on the core showcase."
+      fi
+
+    else
+      # user test suites
+      fs::listDirectories "${extensionsDirectory}"
+      local extensionDirectory
+      for extensionDirectory in "${REPLY_ARRAY[@]}"; do
+        if [[ -d ${extensionDirectory}/tests.d ]]; then
+          selfTest_addTestSuites "${extensionDirectory}/tests.d" "${buildOutputDirectory}"
+        fi
+      done
     fi
   fi
 
@@ -166,12 +191,12 @@ function selfTest() {
   time::getProgramElapsedMicroseconds
   local runStartTimeInMicroSeconds="${REPLY}"
   time::getHumanTimeFromMicroseconds $((REPLY - startTimeInMicroSeconds)) format="%S seconds and %l ms"
-  log::info "Found ${#_TEST_TEST_SUITE_NAME[@]} test suites in ⌜${REPLY}⌝."
+  log::info "Found ${#_TEST_SUITE_NAMES[@]} test suites (it took ${REPLY})."
 
   # run all tests suites
   progress::start message="Running test suites."
 
-  coproc::runInParallel _TEST_COMMAND \
+  coproc::runInParallel _TEST_COMMANDS \
     maxInParallel="${_TEST_NB_PARALLEL_TEST_SUITES}" \
     completedCallback=selfTest_parallelCallback \
     printRedirectedLogs=true
@@ -182,21 +207,24 @@ function selfTest() {
   time::getHumanTimeFromMicroseconds $((REPLY - runStartTimeInMicroSeconds)) format="%S seconds and %l ms"
   log::info "Total time running tests: ⌜${REPLY}⌝."
 
-  if ((${#_TEST_SKIPPED_TEST_SUITES[@]} > 0)); then
+  if ((${#_TEST_SKIPPED_TEST_SUITE_NAMES[@]} > 0)); then
     local skippedMessage
-    skippedMessage="A total of ⌜${#_TEST_SKIPPED_TEST_SUITES[@]}⌝ out of ${#_TEST_TEST_SUITE_NAME[@]} test(s) were skipped because they were not applicable:"$'\n'
+    skippedMessage="A total of ⌜${#_TEST_SKIPPED_TEST_SUITE_NAMES[@]}⌝ out of ${#_TEST_SUITE_NAMES[@]} test(s) were skipped because they were not applicable:"$'\n'
     local skippedTestSuite
-    for skippedTestSuite in "${_TEST_SKIPPED_TEST_SUITES[@]}"; do
+    for skippedTestSuite in "${_TEST_SKIPPED_TEST_SUITE_NAMES[@]}"; do
       skippedMessage+=$'\n'"- ${skippedTestSuite}"
     done
     log::warning "${skippedMessage}"
   fi
 
-  if ((${#_TEST_FAILED_TEST_SUITES[@]} > 0)); then
+  # record the failed tests so we can replay them later
+  data::serialize user-data/failed-test-directories _TEST_FAILED_TEST_SUITE_DIRECTORIES
+
+  if ((${#_TEST_FAILED_TEST_SUITE_NAMES[@]} > 0)); then
     local failMessage
-    failMessage="A total of ⌜${#_TEST_FAILED_TEST_SUITES[@]}⌝ out of ${#_TEST_TEST_SUITE_NAME[@]} test(s) failed:"$'\n'
+    failMessage="A total of ⌜${#_TEST_FAILED_TEST_SUITE_NAMES[@]}⌝ out of ${#_TEST_SUITE_NAMES[@]} test(s) failed:"$'\n'
     local failedTestSuite
-    for failedTestSuite in "${_TEST_FAILED_TEST_SUITES[@]}"; do
+    for failedTestSuite in "${_TEST_FAILED_TEST_SUITE_NAMES[@]}"; do
       failMessage+=$'\n'"- ${failedTestSuite}"
     done
     if [[ ${_TEST_AUTO_APPROVE:-false} == "true" ]]; then
@@ -211,8 +239,8 @@ function selfTest() {
       fi
       core::fail "${failMessage}"
     fi
-  elif ((${#_TEST_TEST_SUITE_NAME[@]} > 0)); then
-    log::success "A total of ⌜${#_TEST_TEST_SUITE_NAME[@]}⌝ tests passed!"
+  elif ((${#_TEST_SUITE_NAMES[@]} > 0)); then
+    log::success "A total of ⌜${#_TEST_SUITE_NAMES[@]}⌝ tests passed!"
   else
     log::warning "No eligible test suites found."
   fi
@@ -222,8 +250,10 @@ function selfTest() {
 #
 # Add all the test suites in the given `tests.d` directory to the global test suite lists.
 function selfTest_addTestSuites() {
-  local testsDotDirectory="${1}"
-  local testUserDataDirectory="${2}"
+  local \
+    testsDotDirectory="${1}" \
+    testUserDataDirectory="${2}"
+
   log::debug "Adding all test suites in directory ⌜${testsDotDirectory}⌝."
 
   # make a list of all test suite directories
@@ -237,9 +267,27 @@ function selfTest_addTestSuites() {
 
   local testDirectory
   for testDirectory in "${REPLY_ARRAY[@]}"; do
-    _TEST_TEST_SUITE_NAME+=("${testDirectory##*/}")
-    _TEST_TEST_SUITE_DIRECTORY+=("${testDirectory}")
-    _TEST_COMMAND+=("selfTest_runSingleTestSuite '${testDirectory}' '${testUserDataDirectory}'")
+    _TEST_SUITE_NAMES+=("${testDirectory##*/}")
+    _TEST_SUITE_DIRECTORIES+=("${testDirectory}")
+    _TEST_COMMANDS+=("selfTest_runSingleTestSuite '${testDirectory}' '${testUserDataDirectory}'")
+  done
+}
+
+# ## selfTest_addTestSuitesFromArray
+#
+# Add all the test suites from a list of directories to the global test suite lists.
+function selfTest_addTestSuitesFromArray() {
+  local -n directories="${1}"
+  local testUserDataDirectory="${2}"
+
+  local testDirectory
+  for testDirectory in "${directories[@]}"; do
+    if ! selfTest_filterTestSuiteDirectories "${testDirectory}"; then
+      continue
+    fi
+    _TEST_SUITE_NAMES+=("${testDirectory##*/}")
+    _TEST_SUITE_DIRECTORIES+=("${testDirectory}")
+    _TEST_COMMANDS+=("selfTest_runSingleTestSuite '${testDirectory}' '${testUserDataDirectory}'")
   done
 }
 
@@ -278,13 +326,14 @@ function selfTest_parallelCallback() {
   local -i exitCode="${2}"
   local -i percent="${3}"
 
-  progress::update percent="${percent}" message="Done running test suite ⌜${_TEST_TEST_SUITE_NAME[index]}⌝."
+  progress::update percent="${percent}" message="Done running test suite ⌜${_TEST_SUITE_NAMES[index]}⌝."
 
   if ((exitCode == GLOBAL_TEST_SKIPPED_STATUS)); then
     # the test was purposefully cancelled because it is not applicable, we don't consider it as a failure
-    _TEST_SKIPPED_TEST_SUITES+=("${_TEST_TEST_SUITE_NAME[index]}")
+    _TEST_SKIPPED_TEST_SUITE_NAMES+=("${_TEST_SUITE_NAMES[index]}")
   elif ((exitCode != 0)); then
-    _TEST_FAILED_TEST_SUITES+=("${_TEST_TEST_SUITE_NAME[index]}")
+    _TEST_FAILED_TEST_SUITE_NAMES+=("${_TEST_SUITE_NAMES[index]}")
+    _TEST_FAILED_TEST_SUITE_DIRECTORIES+=("${_TEST_SUITE_DIRECTORIES[index]}")
     if ((exitCode > _TEST_FAILURE_STATUS)); then
       _TEST_FAILURE_STATUS="${exitCode}"
     fi

@@ -196,6 +196,7 @@ function fs::writeToFile() {
   shift 2
   eval "local a= ${*@Q}"
 
+  local REPLY
   fs::createFileIfNeeded "${filePath}"
   if [[ ${append} == "true" ]]; then
     printf '%s' "${content_nameRef}" >>"${filePath}"
@@ -835,7 +836,7 @@ function fs::getScriptDirectory() {
 
 # ## fs::getCommandPath
 #
-# Get the absolute path of a command.
+# Get the absolute path of a command ().
 #
 # - $1: **command** _as string_:
 #       the command to find

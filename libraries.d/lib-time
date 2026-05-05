@@ -241,10 +241,13 @@ function time::getMicrosecondsFromSeconds() {
   REPLY="$((integerPart * 1000000 + 10#${decimalPart:0:6}))"
 }
 
-# ## time::isTimeElapsed
+# ## time::isSpamming
 #
-# Check if a given time in microseconds has elapsed since the last call
+# Check if a given time in microseconds has not been elapsed since the last call
 # to this function.
+#
+# Can be used to check if a function is being called too often, for example a user
+# spamming a command or key.
 #
 # - $1: **microseconds** _as int_:
 #       the microseconds to check
@@ -257,15 +260,15 @@ function time::getMicrosecondsFromSeconds() {
 #
 # Returns:
 #
-# - 0 if the time has elapsed
-# - 1 if the time has not yet elapsed
+# - 0 if the time has not elapsed yet (spamming)
+# - 1 if the time has elapsed (not spamming)
 #
 # ```bash
-# if time::isTimeElapsed 500000; then
+# if time::isSpamming 500000; then
 #   echo "500ms has elapsed since the last call to this function"
 # fi
 # ```
-function time::isTimeElapsed() {
+function time::isSpamming() {
   local \
     microseconds="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     timerName="${FUNCNAME[1]:-main}" \
@@ -281,15 +284,15 @@ function time::isTimeElapsed() {
   if [[ ! -v _TIME_IS_TIME_ELAPSED_${timerName} ]]; then
     # initialize the variable to 0 if it does not exist
     declare -g "_TIME_IS_TIME_ELAPSED_${timerName}=${REPLY}"
-    return 1
+    return 0
   fi
 
   local -n lastTime="_TIME_IS_TIME_ELAPSED_${timerName}"
 
   if ((REPLY - lastTime >= microseconds)); then
     lastTime="${REPLY}"
-    return 0
+    return 1
   fi
 
-  return 1
+  return 0
 }
