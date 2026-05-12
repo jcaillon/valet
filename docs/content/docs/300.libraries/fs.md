@@ -89,8 +89,6 @@ Reminder:
 - A hard link is a directory entry that associates a new pathname with an existing
   file (inode + data block) on a file system.
 
-See `windows::createLink` for Windows.
-
 Inputs:
 
 - `$1`: **linked path** _as string_:
@@ -214,7 +212,7 @@ echo "${REPLY}"
 
 ## ⚡ fs::getCommandPath
 
-Get the absolute path of a command.
+Get the absolute path of a command ().
 
 Inputs:
 
@@ -347,6 +345,40 @@ Example usage:
 ```bash
 if fs::isDirectoryWritable "/path/to/directory"; then
   echo "The directory is writable."
+fi
+```
+
+## ⚡ fs::isValidLink
+
+Check if the linked path is a valid link to the target.
+
+Inputs:
+
+- `$1`: **linked path** _as string_:
+
+  the path to link to (the original file)
+
+- `$2`: **link path** _as string_:
+
+  the path where to create the link
+
+- `${hardlink}` _as boolean_:
+
+  (optional) True to create a hard link, false to create a symbolic link
+
+  (defaults to false)
+
+Returns:
+
+- `$?`:
+  - 0 if the linked path is a valid link to the target
+  - 1 otherwise
+
+Example usage:
+
+```bash
+if fs::isValidLink "/path/to/link" "/path/to/linked"; then
+  echo "The link is valid."
 fi
 ```
 
@@ -506,6 +538,7 @@ done
 > - It will correctly list files under symbolic link directories.
 > - #TODO: see if we are faster with ** and then looping over dirs to check for symbolic links
 > - #TODO: introduce an optional (with default 10k) parameter to limit the number of results to avoid looping for too long
+> - #TODO: introduce an optional parameter for max depth for recursive listing
 
 ## ⚡ fs::readFile
 
@@ -571,4 +604,4 @@ fs::tail myFile 10
 > #TODO: use mapfile quantum to not have to read the whole file in a single go.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).

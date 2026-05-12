@@ -12,6 +12,8 @@ This function call an executable with its optional arguments.
 By default it redirects the stdout and stderr and captures them to output variables.
 This makes the executes silent unless the executable fails.
 By default, it will exit (core::fail) if the executable returns a non-zero exit code.
+By default, on windows, it will remove carriage return characters (\r) from the outputs
+to make them more consistent with other OSes.
 
 This function should be used as a wrapper around any external program as it allows to easily
 mock the program during tests and facilitates debugging with trace level log.
@@ -106,6 +108,13 @@ Inputs:
 
   (defaults to false)
 
+- `${keepWindowsCr}` _as bool_:
+
+  (optional) If set to true, the function will not remove Windows
+  carriage return characters (\r) from the stdout and stderr.
+
+  (defaults to false)
+
 Returns:
 
 - `${REPLY_CODE}`: The exit code of the executable.
@@ -141,4 +150,4 @@ exe::invoke cat --- stdin="Hello World"
 > - On linux, you can use a tmpfs directory for massive gains over subshells.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).

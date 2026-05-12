@@ -5,6 +5,23 @@ cascade:
 url: /docs/libraries/test
 ---
 
+## ⚡ test::cat
+
+Print the content of a file in a consistent way for testing.
+It will also print the file path before the content.
+
+Inputs:
+
+- `$1`: **file** _as string_:
+
+  The file to print.
+
+Example usage:
+
+```bash
+test::cat "/path/to/file"
+```
+
 ## ⚡ test::exec
 
 Call this function to execute a command and write the command and its output to the report file.
@@ -42,9 +59,10 @@ test::exit exit 3
 
 ## ⚡ test::fail
 
-Call this function to log a message and exit with the status 142, which
-indicates to the self test command that the test failed and that we know the
-reason (it is a bad implementation of the test itself).
+Call this function to log a message and exit with the status 142.
+This should be used to purposefully throw a test failure.
+For example, it can be used to indicate that a tested function did not produce the
+expected output, or that a tested command did not return the expected exit code.
 
 Inputs:
 
@@ -126,6 +144,35 @@ Example usage:
 
 ```bash
 test::func myFunction
+```
+
+## ⚡ test::listPaths
+
+Print the content of a directory in a consistent way for testing, by sorting the entries
+and printing the type of each entry (file, directory or link).
+
+Inputs:
+
+- `$1`: **directory** _as string_:
+
+  The directory to list.
+
+- `${recursive}` _as bool_:
+
+  (optional) true to list recursively, false otherwise
+
+  (defaults to false)
+
+- `${includeHidden}` _as bool_:
+
+  (optional) true to list hidden paths, false otherwise
+
+  (defaults to false)
+
+Example usage:
+
+```bash
+test::listPaths "/path/to/directory" recursive=true includeHidden=true
 ```
 
 ## ⚡ test::log
@@ -275,6 +322,24 @@ Example usage:
 test::setupBashForConsistency
 ```
 
+## ⚡ test::skipTestSuite
+
+Call this function to log a message and exit with the status 143.
+This can be used to skip the current test suite without failing the whole test execution,
+for example because a required dependency is not fulfilled.
+
+Inputs:
+
+- `$@`: **message** _as string_:
+
+  The message to log.
+
+Example usage:
+
+```bash
+test::skipTestSuite "This test is not applicable."
+```
+
 ## ⚡ test::title
 
 Call this function to add an H3 title in the report file.
@@ -292,4 +357,4 @@ test::title "Testing something"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).

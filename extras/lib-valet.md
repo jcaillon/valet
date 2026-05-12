@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).
 
 ## ⚡ array::appendIfNotPresent
 
@@ -226,6 +226,90 @@ echo "${REPLY_ARRAY[@]}"
 > - The sorting is not stable (the order of equal elements is not preserved).
 > - It is not appropriate for large array, use the `sort` binary for such cases.
 
+## ⚡ assert::equals
+
+Assert that the two given values are equal.
+
+Inputs:
+
+- `$1`: **expected value** _as string_:
+
+  The expected value.
+
+- `$2`: **actual value** _as string_:
+
+  The actual value to compare with the expected value.
+
+Example usage:
+
+```bash
+assert::equals "expected value" "actual value"
+```
+
+## ⚡ assert::isDirectory
+
+Assert that the given directory exists and is a directory.
+
+Inputs:
+
+- `$1`: **directory path** _as string_:
+
+  The path of the directory to check.
+
+Example usage:
+
+```bash
+assert::isDirectory "/path/to/directory"
+```
+
+## ⚡ assert::isFile
+
+Assert that the given file exists and is a regular file.
+
+Inputs:
+
+- `$1`: **file path** _as string_:
+
+  The path of the file to check.
+
+Example usage:
+
+```bash
+assert::isFile "/path/to/file"
+```
+
+## ⚡ assert::isLink
+
+Assert that the given path exists and is a symbolic link.
+
+Inputs:
+
+- `$1`: **link path** _as string_:
+
+  The path of the symbolic link to check.
+
+Example usage:
+
+```bash
+assert::isLink "/path/to/link"
+```
+
+## ⚡ assert::isPath
+
+Assert that the given path exists (can be a file, directory, or link).
+
+Inputs:
+
+- `$1`: **file path** _as string_:
+
+  The path of the file to check.
+
+Example usage:
+
+```bash
+assert::isPath "/path/to/file"
+```
+
 ## ⚡ bash::catchErrors
 
 This function runs a command and will catch any error that occurs instead of failing the program.
@@ -258,26 +342,6 @@ fi
 > is still triggered and you can use trace level debugging to see the caught issues.
 > Additionally, it will report all the errors that occurred during the execution of the command.
 
-## ⚡ bash::clearCachedVariables
-
-Clear the cached variables used by bash::isVariableCachedWithValue.
-This will unset all variables starting with _TUI_CACHED_.
-
-Inputs:
-
-- `$@` : **variable names** _as any_:
-
-  (optional) the names of the variables to clear
-
-  (defaults to all cached variables)
-
-Example usage:
-
-```bash
-bash::clearCachedVariables
-bash::clearCachedVariables "MY_VAR" "ANOTHER_VAR"
-```
-
 ## ⚡ bash::countArgs
 
 Returns the number of arguments passed.
@@ -288,8 +352,6 @@ A convenient function that can be used to:
   `bash::countArgs "${PWD}"/* && local numberOfFiles="${REPLY}"`
 - count the number of variables starting with VALET_
   `bash::countArgs "${!VALET_@}" && local numberOfVariables="${REPLY}"`
-
-Inputs:
 
 Inputs:
 
@@ -332,56 +394,6 @@ Example usage:
 ```bash
 bash::getBuiltinOutput declare -f bash::getBuiltinOutput
 echo "${REPLY}"
-```
-
-## ⚡ bash::getMissingCommands
-
-This function returns the list of not existing commands for the given names.
-
-Inputs:
-
-- `$@`: **command names** _as string_:
-
-  the list of command names to check.
-
-Returns:
-
-- `$?`
-  - 0 if there are not existing commands
-  - 1 otherwise.
-- `${REPLY_ARRAY[@]}`: the list of not existing commands.
-
-Example usage:
-
-```bash
-if bash::getMissingCommands "command1" "command2"; then
-  printf 'The following commands do not exist: %s' "${REPLY_ARRAY[*]}"
-fi
-```
-
-## ⚡ bash::getMissingVariables
-
-This function returns the list of undeclared variables for the given names.
-
-Inputs:
-
-- `$@`: **variable names** _as string_:
-
-  the list of variable names to check.
-
-Returns:
-
-- `$?`
-  - 0 if there are variable undeclared
-  - 1 otherwise.
-- `${REPLY_ARRAY[@]}`: the list of undeclared variables.
-
-Example usage:
-
-```bash
-if bash::getMissingVariables "var1" "var2"; then
-  printf 'The following variables are not declared: %s' "${REPLY_ARRAY[*]}"
-fi
 ```
 
 ## ⚡ bash::injectCodeInFunction
@@ -493,41 +505,61 @@ if bash::isFunction "function1"; then
 fi
 ```
 
-## ⚡ bash::isVariableCachedWithValue
+## ⚡ bash::isMissingCommands
 
-Check if one or more variables are cached with the given value.
-If all the variables given already have the same value cached,
-the function will return true.
-Otherwise, it will return false and cache the given value in the variables.
+This function returns the list of not existing commands for the given names.
 
 Inputs:
 
-- `$1`: **variable name** _as string_:
+- `$@`: **command names** _as string_:
 
-  the name of the variable to check
-
-- `$2`: **value** _as any_:
-
-  the value to check against the variable
-
-- `$@`: **variable/value pair** _as any_:
-
-  additional variable/value pairs to check
+  the list of command names to check.
 
 Returns:
 
-- `$?`:
-  - 0 if all the variables have the same value as the given value
-  - 1 otherwise
+- `$?`
+  - 0 if there are not existing commands
+  - 1 otherwise.
+- `${REPLY_ARRAY[@]}`: the list of not existing commands.
 
 Example usage:
 
 ```bash
-if bash::isVariableCachedWithValue "MY_VAR" "my_value"; then
-  echo "MY_VAR is cached with the value 'my_value'"
-else
-  echo "MY_VAR is not cached with the value 'my_value'"
+if bash::isMissingCommands "command1" "command2"; then
+  printf 'The following commands do not exist: %s' "${REPLY_ARRAY[*]}"
 fi
+```
+
+## ⚡ bash::popd
+
+Change the current directory to the one on top of the directory stack and remove it from the stack.
+
+Contrary to the builtin popd, this function does not print the directory stack after changing the directory
+and will print an error message before calling core::fail if the directory change fails.
+
+Example usage:
+
+```bash
+bash::popd
+```
+
+## ⚡ bash::pushd
+
+Change the current directory and push the old one to the directory stack.
+
+Contrary to the builtin pushd, this function does not print the directory stack after changing the directory
+and will print an error message before calling core::fail if the directory change fails.
+
+Inputs:
+
+- `$1`: **directory** _as string_:
+
+  The directory to change to.
+
+Example usage:
+
+```bash
+bash::pushd "/path/to/directory"
 ```
 
 ## ⚡ bash::readStdIn
@@ -670,6 +702,7 @@ Parse the arguments and options of a function and return a string that can be ev
 This should be called from a command function for which you want to parse the arguments.
 
 See the documentation for more details on the parser: <https://jcaillon.github.io/valet/docs/new-commands/#-implement-your-command>.
+
 
 Inputs:
 
@@ -985,7 +1018,6 @@ Example usage:
 declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
 coproc::runInParallel jobCommands maxParallelCoprocs=2
 ```
-
 TODO: implement unit tests for this function
 
 ## ⚡ coproc::sendMessage
@@ -1029,7 +1061,6 @@ Inputs:
   The variable name to use for the coproc.
 
 Returns:
-
 - `${REPLY_CODE}`: The exit status of the coproc (or -1 if the coproc is not running).
 
 Example usage:
@@ -1398,24 +1429,24 @@ They are defined as variables and not as functions. Please check the content of 
 
 References:
 
-- <https://jvns.ca/blog/2025/03/07/escape-code-standards/>
-- <https://invisible-island.net/xterm/ctlseqs/ctlseqs.html>
-- <https://en.wikipedia.org/wiki/ANSI_escape_code>
-- <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797>
-- <https://paulbourke.net/dataformats/ascii/>
-- <https://www.aivosto.com/articles/control-characters.html>
-- <https://github.com/tmux/tmux/blob/master/tools/ansicode.txt>
-- <https://vt100.net/docs/vt102-ug/chapter5.html>
-- <https://vt100.net/docs/vt100-ug/chapter3.html#S3.3>
-- <https://github.com/tmux/tmux/blob/882fb4d295deb3e4b803eb444915763305114e4f/tools/ansicode.txt>
+- https://jvns.ca/blog/2025/03/07/escape-code-standards/
+- https://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+- https://en.wikipedia.org/wiki/ANSI_escape_code
+- https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+- https://paulbourke.net/dataformats/ascii/
+- https://www.aivosto.com/articles/control-characters.html
+- https://github.com/tmux/tmux/blob/master/tools/ansicode.txt
+- https://vt100.net/docs/vt102-ug/chapter5.html
+- https://vt100.net/docs/vt100-ug/chapter3.html#S3.3
+- https://github.com/tmux/tmux/blob/882fb4d295deb3e4b803eb444915763305114e4f/tools/ansicode.txt
 
 Ascii graphics:
 
-- <https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9>
-- <https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing>
-- <https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements>
+- https://gist.github.com/dsample/79a97f38bf956f37a0f99ace9df367b9
+- https://en.wikipedia.org/wiki/List_of_Unicode_characters#Box_Drawing
+- https://en.wikipedia.org/wiki/List_of_Unicode_characters#Block_Elements
 
-An interesting read: <https://sw.kovidgoyal.net/kitty/keyboard-protocol/>
+An interesting read: https://sw.kovidgoyal.net/kitty/keyboard-protocol/
 
 > While it could be very handy to define a function for each of these instructions,
 > it would also be slower to execute (function overhead + multiple printf calls).
@@ -1427,6 +1458,8 @@ This function call an executable with its optional arguments.
 By default it redirects the stdout and stderr and captures them to output variables.
 This makes the executes silent unless the executable fails.
 By default, it will exit (core::fail) if the executable returns a non-zero exit code.
+By default, on windows, it will remove carriage return characters (\r) from the outputs
+to make them more consistent with other OSes.
 
 This function should be used as a wrapper around any external program as it allows to easily
 mock the program during tests and facilitates debugging with trace level log.
@@ -1518,6 +1551,13 @@ Inputs:
 - `${noRedirection}` _as bool_:
 
   (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.
+
+  (defaults to false)
+
+- `${keepWindowsCr}` _as bool_:
+
+  (optional) If set to true, the function will not remove Windows
+  carriage return characters (\r) from the stdout and stderr.
 
   (defaults to false)
 
@@ -1638,8 +1678,6 @@ Reminder:
   form of an absolute or relative path.
 - A hard link is a directory entry that associates a new pathname with an existing
   file (inode + data block) on a file system.
-
-See `windows::createLink` for Windows.
 
 Inputs:
 
@@ -1764,7 +1802,7 @@ echo "${REPLY}"
 
 ## ⚡ fs::getCommandPath
 
-Get the absolute path of a command.
+Get the absolute path of a command ().
 
 Inputs:
 
@@ -1897,6 +1935,40 @@ Example usage:
 ```bash
 if fs::isDirectoryWritable "/path/to/directory"; then
   echo "The directory is writable."
+fi
+```
+
+## ⚡ fs::isValidLink
+
+Check if the linked path is a valid link to the target.
+
+Inputs:
+
+- `$1`: **linked path** _as string_:
+
+  the path to link to (the original file)
+
+- `$2`: **link path** _as string_:
+
+  the path where to create the link
+
+- `${hardlink}` _as boolean_:
+
+  (optional) True to create a hard link, false to create a symbolic link
+
+  (defaults to false)
+
+Returns:
+
+- `$?`:
+  - 0 if the linked path is a valid link to the target
+  - 1 otherwise
+
+Example usage:
+
+```bash
+if fs::isValidLink "/path/to/link" "/path/to/linked"; then
+  echo "The link is valid."
 fi
 ```
 
@@ -2056,6 +2128,7 @@ done
 > - It will correctly list files under symbolic link directories.
 > - #TODO: see if we are faster with ** and then looping over dirs to check for symbolic links
 > - #TODO: introduce an optional (with default 10k) parameter to limit the number of results to avoid looping for too long
+> - #TODO: introduce an optional parameter for max depth for recursive listing
 
 ## ⚡ fs::readFile
 
@@ -2308,6 +2381,7 @@ interactive::displayPrompt "Do you want to continue?"
 ## ⚡ list::onTick
 
 This function must be called regularly (on refresh tick) and is responsible for redrawing the list if necessary.
+
 
 ## ⚡ list::setItems
 
@@ -2672,12 +2746,12 @@ Inputs:
 - `$1`: **log level** _as string_:
 
   The log level to set (or defaults to info), acceptable values are:
-  - trace
-  - debug
-  - info
-  - success
-  - warning
-  - error
+    - trace
+    - debug
+    - info
+    - success
+    - warning
+    - error
 
 - `${silent}` _as bool_:
 
@@ -2802,7 +2876,7 @@ The main thread can continue to output logs while this animation is running.
 
 Inputs:
 
-- `$1{template}` _as string_:
+- `${template}` _as string_:
 
   (optional) The template to display. The template can contain the following placeholders:
 
@@ -2970,7 +3044,7 @@ regex::getFirstGroup MY_STRING "name:(.*)"
 echo "${REPLY}"
 ```
 
-> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
+> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
 ## ⚡ regex::getFuzzySearchRegexFromSearchString
 
@@ -3041,7 +3115,7 @@ for match in "${REPLY_ARRAY[@]}"; do
 done
 ```
 
-> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
+> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
 ## ⚡ regex::replace
 
@@ -3077,6 +3151,7 @@ Inputs:
 
   (defaults to false)
 
+
 Example usage:
 
 ```bash
@@ -3086,7 +3161,7 @@ regex::replace MY_STRING "name: (.*)" "\1" maxCount=1 onlyMatches=true
 echo "${MY_STRING}"
 ```
 
-> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
+> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
 ## ⚡ sfzf::show
 
@@ -3117,6 +3192,7 @@ Inputs:
   - $2: the item number;
   - $3: the current panel width;
   - it should return the details of the item in the `REPLY` variable.
+
 
   (defaults to empty, no callback)
 
@@ -3252,6 +3328,28 @@ string::doForEachLine myString myCallback
 > This function provides a convenient way to avoid using a "here string" and handles extra
 > newlines (which is not the case with a "for loop" using parameter expansion and IFS=$'\n').
 > Here string is significantly slower than using this.
+
+## ⚡ string::expandVariables
+
+Expand variables in a string.
+If a variable is not defined, it will be replaced by an empty string.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string in which to expand variables.
+
+Returns:
+- `${REPLY}`: the string with expanded variables
+
+Example usage:
+
+```bash
+MY_STRING="Hello $USER, today is $DAY"
+string::expandVariables MY_STRING
+echo "${REPLY}"
+```
 
 ## ⚡ string::extractBetween
 
@@ -3611,7 +3709,6 @@ Inputs:
   (defaults to $'\n')
 
 Returns:
-
 - `${REPLY}`: the joined string
 
 Example usage:
@@ -3758,7 +3855,6 @@ Inputs:
   (defaults to false)
 
 Returns:
-
 - `${REPLY}`: the space left after truncation
 
 Example usage:
@@ -4004,6 +4100,24 @@ Example usage:
 ```bash
 if system::isWindows; then
   printf 'The current OS is Windows.'
+fi
+```
+
+## ⚡ system::isWindowsWithoutNativeSymlinks
+
+Check if the current system is Windows and does not support native symbolic links (i.e. does not have developer mode enabled).
+
+Returns:
+
+- `$?`
+  - 0 if the current system is windows and does not support native symbolic links
+  - 1 otherwise.
+
+Example usage:
+
+```bash
+if system::isWindowsWithoutNativeSymlinks; then
+  printf 'The current system does not support native symbolic links.'
 fi
 ```
 
@@ -4258,6 +4372,7 @@ See @terminal::testWaitForKeyPress for an implementation example.
 
 This allows to use the `-e` option with the read command and receive events for special key press.
 
+
 This function should be called before using terminal::waitForKeyPress.
 
 You can call `terminal::restoreBindings` to restore the default bindings. However, this is not
@@ -4424,6 +4539,7 @@ Use `terminal::waitForKeyPress` if you need to listen to special keys.
 This simple implementation does not rely on GNU readline and does not require terminal options
 to be set using `terminal::setRawMode`.
 
+
 Inputs:
 
 - `$@`: read parameters _as any_:
@@ -4490,6 +4606,23 @@ terminal::waitForKeyPress -t 0.1
 >    For advanced key combinations, you will need to use a terminal that allows to remap such keys
 >    and send a specific sequence of characters that you can bind in bash.
 
+## ⚡ test::cat
+
+Print the content of a file in a consistent way for testing.
+It will also print the file path before the content.
+
+Inputs:
+
+- `$1`: **file** _as string_:
+
+  The file to print.
+
+Example usage:
+
+```bash
+test::cat "/path/to/file"
+```
+
 ## ⚡ test::exec
 
 Call this function to execute a command and write the command and its output to the report file.
@@ -4527,9 +4660,10 @@ test::exit exit 3
 
 ## ⚡ test::fail
 
-Call this function to log a message and exit with the status 142, which
-indicates to the self test command that the test failed and that we know the
-reason (it is a bad implementation of the test itself).
+Call this function to log a message and exit with the status 142.
+This should be used to purposefully throw a test failure.
+For example, it can be used to indicate that a tested function did not produce the
+expected output, or that a tested command did not return the expected exit code.
 
 Inputs:
 
@@ -4611,6 +4745,35 @@ Example usage:
 
 ```bash
 test::func myFunction
+```
+
+## ⚡ test::listPaths
+
+Print the content of a directory in a consistent way for testing, by sorting the entries
+and printing the type of each entry (file, directory or link).
+
+Inputs:
+
+- `$1`: **directory** _as string_:
+
+  The directory to list.
+
+- `${recursive}` _as bool_:
+
+  (optional) true to list recursively, false otherwise
+
+  (defaults to false)
+
+- `${includeHidden}` _as bool_:
+
+  (optional) true to list hidden paths, false otherwise
+
+  (defaults to false)
+
+Example usage:
+
+```bash
+test::listPaths "/path/to/directory" recursive=true includeHidden=true
 ```
 
 ## ⚡ test::log
@@ -4760,6 +4923,24 @@ Example usage:
 test::setupBashForConsistency
 ```
 
+## ⚡ test::skipTestSuite
+
+Call this function to log a message and exit with the status 143.
+This can be used to skip the current test suite without failing the whole test execution,
+for example because a required dependency is not fulfilled.
+
+Inputs:
+
+- `$@`: **message** _as string_:
+
+  The message to log.
+
+Example usage:
+
+```bash
+test::skipTestSuite "This test is not applicable."
+```
+
 ## ⚡ test::title
 
 Call this function to add an H3 title in the report file.
@@ -4830,6 +5011,7 @@ Inputs:
   - %S: total seconds
   - %L: total milliseconds
   - %U: total microseconds
+
 
   (defaults to "%HH:%MM:%SS")
 
@@ -4948,10 +5130,13 @@ time::getTimerMicroseconds logElapsedTime=true
 echo "Total microseconds: ${REPLY}"
 ```
 
-## ⚡ time::isTimeElapsed
+## ⚡ time::isSpamming
 
-Check if a given time in microseconds has elapsed since the last call
+Check if a given time in microseconds has not been elapsed since the last call
 to this function.
+
+Can be used to check if a function is being called too often, for example a user
+spamming a command or key.
 
 Inputs:
 
@@ -4970,13 +5155,13 @@ Inputs:
 
 Returns:
 
-- 0 if the time has elapsed
-- 1 if the time has not yet elapsed
+- 0 if the time has not elapsed yet (spamming)
+- 1 if the time has elapsed (not spamming)
 
 Example usage:
 
 ```bash
-if time::isTimeElapsed 500000; then
+if time::isSpamming 500000; then
   echo "500ms has elapsed since the last call to this function"
 fi
 ```
@@ -4990,6 +5175,83 @@ Example usage:
 ```bash
 time::startTimer
 time::getTimerMicroseconds
+```
+
+## ⚡ variable::deserialize
+
+Get a string to eval in order to restore the variables stored using variable::serialize.
+
+Inputs:
+
+- `$1`: **file** _as string_:
+
+  If an absolute file path (starting with /) is given, the variables will be restored from this file.
+  Otherwise, the variables will be restored from a file in the user state directory with the given file name.
+
+Returns:
+
+- `${REPLY}`: a string to eval in order to restore the variables stored using variable::serialize.
+- `${REPLY_CODE}`:
+  - 0 if the file exists and was successfully sourced to restore the variables.
+  - 1 if the file does not exist
+
+Example usage:
+
+```bash
+variable::deserialize my-variables
+eval "${REPLY}"
+```
+
+## ⚡ variable::isMissing
+
+This function returns the list of undeclared variables for the given names.
+
+Inputs:
+
+- `$@`: **variable names** _as string_:
+
+  the list of variable names to check.
+
+Returns:
+
+- `$?`
+  - 0 if there are variable undeclared
+  - 1 otherwise.
+- `${REPLY_ARRAY[@]}`: the list of undeclared variables.
+
+Example usage:
+
+```bash
+if variable::isMissing "var1" "var2"; then
+  printf 'The following variables are not declared: %s' "${REPLY_ARRAY[*]}"
+fi
+```
+
+## ⚡ variable::serialize
+
+Serialize the variables given as arguments to a script that can be evaluated to restore the variables with the same values.
+(call variable::deserialize to restore the variables from the script).
+
+Inputs:
+
+- `$1`: **file** _as string_:
+
+  If an absolute file path (starting with /) is given, the script will be written to this file.
+  Otherwise, the script will be written to a file created in the user state directory with the given file name.
+
+- `$@`: **variable names** _as string_:
+
+  The variable names to serialize. At least one variable name must be given.
+
+Returns:
+
+- `${REPLY}`: the path of the file containing the script to restore the variables.
+
+Example usage:
+
+```bash
+variable::serialize my-variables VAR1 VAR2
+local scriptPath="${REPLY}"
 ```
 
 ## ⚡ version::bump
@@ -5083,51 +5345,6 @@ windows::addToPath "/path/to/bin" prepend=true
 ```
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
-
-## ⚡ windows::createLink
-
-Create a soft or hard link (original ← link).
-
-Reminder:
-
-- A soft (symbolic) link is a new file that contains a reference to another file or directory in the
-  form of an absolute or relative path.
-- A hard link is a directory entry that associates a new pathname with an existing
-  file (inode + data block) on a file system.
-
-Inputs:
-
-- `$1`: **linked path** _as string_:
-
-  the path to link to (the original file)
-
-- `$2`: **link path** _as string_:
-
-  the path where to create the link
-
-- `${hardlink}` _as boolean_:
-
-  (optional) True to create a hard link, false to create a symbolic link
-
-  (defaults to false)
-
-- `${force}` _as boolean_:
-
-  (optional) True to overwrite the link or file if it already exists.
-  Otherwise, the function will fail on an existing link.
-
-  (defaults to false)
-
-Example usage:
-
-```bash
-windows::createLink "/path/to/link" "/path/to/linked"
-windows::createLink "/path/to/link" "/path/to/linked" hardlink=true force=true
-```
-
-> On Windows, the function uses `powershell` (and optionally ls to check the existing link).
-> If you have the windows "developer mode" enabled + MSYS=winsymlinks:nativestrict,
-> then it uses the ln command.
 
 ## ⚡ windows::createTempDirectory
 
@@ -5336,4 +5553,6 @@ windows::runPs1 "Write-Host \"World\""
 windows::endPs1Batch
 ```
 
-> Documentation generated for the version 0.36.26 (2025-10-10).
+
+
+> Documentation generated for the version 0.37.1138 (2026-05-12).

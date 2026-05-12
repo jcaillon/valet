@@ -358,12 +358,12 @@ Inputs:
 - `$1`: **log level** _as string_:
 
   The log level to set (or defaults to info), acceptable values are:
-  - trace
-  - debug
-  - info
-  - success
-  - warning
-  - error
+    - trace
+    - debug
+    - info
+    - success
+    - warning
+    - error
 
 - `${silent}` _as bool_:
 
@@ -427,4 +427,4 @@ log::warning "This is a warning message."
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).

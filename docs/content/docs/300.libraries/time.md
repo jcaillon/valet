@@ -178,10 +178,13 @@ time::getTimerMicroseconds logElapsedTime=true
 echo "Total microseconds: ${REPLY}"
 ```
 
-## ⚡ time::isTimeElapsed
+## ⚡ time::isSpamming
 
-Check if a given time in microseconds has elapsed since the last call
+Check if a given time in microseconds has not been elapsed since the last call
 to this function.
+
+Can be used to check if a function is being called too often, for example a user
+spamming a command or key.
 
 Inputs:
 
@@ -200,13 +203,13 @@ Inputs:
 
 Returns:
 
-- 0 if the time has elapsed
-- 1 if the time has not yet elapsed
+- 0 if the time has not elapsed yet (spamming)
+- 1 if the time has elapsed (not spamming)
 
 Example usage:
 
 ```bash
-if time::isTimeElapsed 500000; then
+if time::isSpamming 500000; then
   echo "500ms has elapsed since the last call to this function"
 fi
 ```
@@ -223,4 +226,4 @@ time::getTimerMicroseconds
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).

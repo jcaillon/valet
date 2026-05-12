@@ -33,51 +33,6 @@ windows::addToPath "/path/to/bin" prepend=true
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
-## ⚡ windows::createLink
-
-Create a soft or hard link (original ← link).
-
-Reminder:
-
-- A soft (symbolic) link is a new file that contains a reference to another file or directory in the
-  form of an absolute or relative path.
-- A hard link is a directory entry that associates a new pathname with an existing
-  file (inode + data block) on a file system.
-
-Inputs:
-
-- `$1`: **linked path** _as string_:
-
-  the path to link to (the original file)
-
-- `$2`: **link path** _as string_:
-
-  the path where to create the link
-
-- `${hardlink}` _as boolean_:
-
-  (optional) True to create a hard link, false to create a symbolic link
-
-  (defaults to false)
-
-- `${force}` _as boolean_:
-
-  (optional) True to overwrite the link or file if it already exists.
-  Otherwise, the function will fail on an existing link.
-
-  (defaults to false)
-
-Example usage:
-
-```bash
-windows::createLink "/path/to/link" "/path/to/linked"
-windows::createLink "/path/to/link" "/path/to/linked" hardlink=true force=true
-```
-
-> On Windows, the function uses `powershell` (and optionally ls to check the existing link).
-> If you have the windows "developer mode" enabled + MSYS=winsymlinks:nativestrict,
-> then it uses the ln command.
-
 ## ⚡ windows::createTempDirectory
 
 Create a temporary directory on Windows and return the path both for Windows and Unix.
@@ -286,4 +241,4 @@ windows::endPs1Batch
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).

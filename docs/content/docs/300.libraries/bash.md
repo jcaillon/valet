@@ -37,26 +37,6 @@ fi
 > is still triggered and you can use trace level debugging to see the caught issues.
 > Additionally, it will report all the errors that occurred during the execution of the command.
 
-## ⚡ bash::clearCachedVariables
-
-Clear the cached variables used by bash::isVariableCachedWithValue.
-This will unset all variables starting with _TUI_CACHED_.
-
-Inputs:
-
-- `$@` : **variable names** _as any_:
-
-  (optional) the names of the variables to clear
-
-  (defaults to all cached variables)
-
-Example usage:
-
-```bash
-bash::clearCachedVariables
-bash::clearCachedVariables "MY_VAR" "ANOTHER_VAR"
-```
-
 ## ⚡ bash::countArgs
 
 Returns the number of arguments passed.
@@ -67,8 +47,6 @@ A convenient function that can be used to:
   `bash::countArgs "${PWD}"/* && local numberOfFiles="${REPLY}"`
 - count the number of variables starting with VALET_
   `bash::countArgs "${!VALET_@}" && local numberOfVariables="${REPLY}"`
-
-Inputs:
 
 Inputs:
 
@@ -111,56 +89,6 @@ Example usage:
 ```bash
 bash::getBuiltinOutput declare -f bash::getBuiltinOutput
 echo "${REPLY}"
-```
-
-## ⚡ bash::getMissingCommands
-
-This function returns the list of not existing commands for the given names.
-
-Inputs:
-
-- `$@`: **command names** _as string_:
-
-  the list of command names to check.
-
-Returns:
-
-- `$?`
-  - 0 if there are not existing commands
-  - 1 otherwise.
-- `${REPLY_ARRAY[@]}`: the list of not existing commands.
-
-Example usage:
-
-```bash
-if bash::getMissingCommands "command1" "command2"; then
-  printf 'The following commands do not exist: %s' "${REPLY_ARRAY[*]}"
-fi
-```
-
-## ⚡ bash::getMissingVariables
-
-This function returns the list of undeclared variables for the given names.
-
-Inputs:
-
-- `$@`: **variable names** _as string_:
-
-  the list of variable names to check.
-
-Returns:
-
-- `$?`
-  - 0 if there are variable undeclared
-  - 1 otherwise.
-- `${REPLY_ARRAY[@]}`: the list of undeclared variables.
-
-Example usage:
-
-```bash
-if bash::getMissingVariables "var1" "var2"; then
-  printf 'The following variables are not declared: %s' "${REPLY_ARRAY[*]}"
-fi
 ```
 
 ## ⚡ bash::injectCodeInFunction
@@ -272,41 +200,61 @@ if bash::isFunction "function1"; then
 fi
 ```
 
-## ⚡ bash::isVariableCachedWithValue
+## ⚡ bash::isMissingCommands
 
-Check if one or more variables are cached with the given value.
-If all the variables given already have the same value cached,
-the function will return true.
-Otherwise, it will return false and cache the given value in the variables.
+This function returns the list of not existing commands for the given names.
 
 Inputs:
 
-- `$1`: **variable name** _as string_:
+- `$@`: **command names** _as string_:
 
-  the name of the variable to check
-
-- `$2`: **value** _as any_:
-
-  the value to check against the variable
-
-- `$@`: **variable/value pair** _as any_:
-
-  additional variable/value pairs to check
+  the list of command names to check.
 
 Returns:
 
-- `$?`:
-  - 0 if all the variables have the same value as the given value
-  - 1 otherwise
+- `$?`
+  - 0 if there are not existing commands
+  - 1 otherwise.
+- `${REPLY_ARRAY[@]}`: the list of not existing commands.
 
 Example usage:
 
 ```bash
-if bash::isVariableCachedWithValue "MY_VAR" "my_value"; then
-  echo "MY_VAR is cached with the value 'my_value'"
-else
-  echo "MY_VAR is not cached with the value 'my_value'"
+if bash::isMissingCommands "command1" "command2"; then
+  printf 'The following commands do not exist: %s' "${REPLY_ARRAY[*]}"
 fi
+```
+
+## ⚡ bash::popd
+
+Change the current directory to the one on top of the directory stack and remove it from the stack.
+
+Contrary to the builtin popd, this function does not print the directory stack after changing the directory
+and will print an error message before calling core::fail if the directory change fails.
+
+Example usage:
+
+```bash
+bash::popd
+```
+
+## ⚡ bash::pushd
+
+Change the current directory and push the old one to the directory stack.
+
+Contrary to the builtin pushd, this function does not print the directory stack after changing the directory
+and will print an error message before calling core::fail if the directory change fails.
+
+Inputs:
+
+- `$1`: **directory** _as string_:
+
+  The directory to change to.
+
+Example usage:
+
+```bash
+bash::pushd "/path/to/directory"
 ```
 
 ## ⚡ bash::readStdIn
@@ -387,4 +335,4 @@ bash::sleep 1.5
 > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).

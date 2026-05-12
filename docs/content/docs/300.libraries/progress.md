@@ -18,7 +18,7 @@ The main thread can continue to output logs while this animation is running.
 
 Inputs:
 
-- `$1{template}` _as string_:
+- `${template}` _as string_:
 
   (optional) The template to display. The template can contain the following placeholders:
 
@@ -139,4 +139,4 @@ progress::update percent=50 message="Doing something..."
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).

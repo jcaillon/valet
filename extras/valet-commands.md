@@ -1,17 +1,253 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).
 
-## ▶️ valet self add-command
+## ▶️ valet bash bootstrap
 
-Call this function in an extension directory to add a new command to the extension.
+### Synopsis
 
-This will create a file from a command template in the **commands.d** directory.
+Bootstrap your bash session.
+
+This command is intended to be used in your bash configuration file (e.g. ~/.bashrc) to set up your bash
+session with Valet features.
+Below is a minimalist example of your ~/.bashrc file:
+
+```bash
+#!/usr/bin/env bash
+# this is a good place to set VALET_* environment variables to configure valet features.
+eval "$(valet bash bootstrap)"
+```
+
+By bootstrapping your bash session with Valet, you get access to many features described in the chapters below.
+
+--------------------------
+
+#### 1. PATH management
+
+You can now manage your PATH declaratively.
+
+Valet will use the files under the `~/.config/.paths.d` directory (by default) to compute your PATH variable.
+
+Each file under `~/.config/.paths.d` can contain multiple paths, one per line, and they will be added to your
+PATH variable in the same order as they appear in the file.
+
+The following rules are applied when parsing the files:
+
+- A line starting with # is a comment.
+- A path may use ~ which will be replaced by the user home directory.
+- A path that does not match an existing directory will be skipped.
+- A line starting with ^ is a path to add before the original path.
+- Any other line is a path to add after the original path.
+
+The files in the ~/.config/.paths.d directory are processed in alphabetical order, allowing you to control the order of the paths in your PATH variable.
+
+The following rules are applied when listing the files to consider in the ~/.config/.paths.d directory:
+
+- If the path file is hidden (starts with a dot), it is skipped.
+- If the path file is a markdown file, it is skipped.
+- If the path file contains -linux and the current os is not linux, it is skipped.
+- If the path file contains -windows and the current os is not windows, it is skipped.
+- If the path file contains -darwin and the current os is not macos, it is skipped.
+
+> The original path is stored in ORIGINAL_PATH, allowing you to restore it if needed.
+
+Examples of path definition files are available here:
+<https://github.com/jcaillon/valet/tree/dotfiles-example>
+
+--------------------------
+
+#### 2. Bashrc management
+
+You can now split your bash configuration into multiple files under the `~/.config/.bash.d` directory (by default).
+
+This allows you to organize your bash configuration and easily enable/disable parts of it by adding/removing files in this directory.
+
+The files in the `~/.config/.bash.d` directory are sourced in alphabetical order.
+
+The following rules are applied when listing the files to source in the `~/.config/.bash.d` directory:
+
+- If the file is hidden (starts with a dot), it is skipped.
+- If the file does not have a .sh or .bash extension, it is skipped.
+- If the file contains -linux and the current os is not linux, it is skipped.
+- If the file contains -windows and the current os is not windows, it is skipped.
+- If the file contains -darwin and the current os is not macos, it is skipped.
+
+> Additionally, a script containing -bash-init in its name will be sourced before the PATH variable is computed,
+> allowing you to set environment variables that can be used in the path definition files.
+
+All valet functions can be used in these scripts.
+
+Examples of bash scripts are available here:
+<https://github.com/jcaillon/valet/tree/dotfiles-example>
+
+--------------------------
+
+#### 3. Bash hooks for prompt and command execution
+
+You can now define functions to be executed before the prompt is drawn and before a command is executed.
+
+This works exactly like the precmd and preexec hooks in zsh, with the difference that due to bash limitations,
+the preexec functions are executed in a subshell and thus cannot modify the environment.
+
+See: <https://zsh.sourceforge.io/Doc/Release/Functions.html#Hook-Functions>.
+
+- `precmd_functions`: array of functions to be executed before the prompt is drawn
+  Functions can expect the following variables to be set:
+  - GLOBAL_LAST_COMMAND_STATUS: the status of the last command executed
+  - GLOBAL_LAST_PIPE_STATUS: the status of the last pipeline executed
+  - GLOBAL_LAST_ELAPSED_MICROSECONDS: the elapsed time for the command in microseconds
+    (will be 0 if no command was executed since the last prompt)
+  - GLOBAL_JOB_COUNT: the number of background jobs
+  They can also call the function bashHooks::getCurrentCommand to get the last command executed.
+- `preexec_functions`: array of functions to be executed before the command is executed
+  Functions are invoked with the command to execute as the first argument $1.
+  /!\ they are executed in a subshell, so they cannot modify the environment!
+      this can be fixed in bash 5.3 with the ${ exec} variable expansion (see implementation of the hooks).
+
+--------------------------
+
+#### 4. Use Valet functions in your shell
+
+You can now use valet functions directly in your shell, as if you were in a command script.
+
+E.g.: `log::info "Cool logs!"`.
+
+--------------------------
+
+#### 5. Integration with bash tools
+
+Valet also sets up integration with some popular bash tools:
+
+- Starship: a better, fully featured prompt <https://starship.rs/>.
+- Atuin: a better shell history manager <https://atuin.sh/>.
+
+--------------------------
+
+#### 6. Incoming features
+
+TODO: FEATURES TO IMPLEMENT:
+
+- add builtin "z" to jump to frequently used directories
+- auto source .env and .envrc files in the current directory
+- Provide a good and fast default prompt if atuin is not installed
+
 
 ### Usage
 
 ```bash
-valet self add-command [options] [--] <command-name>
+valet bash bootstrap [options]
+```
+
+### Options
+
+- `--bash-scripts-directory <directory>`
+
+  Path to the directory containing bash scripts to source during bootstrap.
+  This option can be set by exporting the variable VALET_BASH_SCRIPTS_DIRECTORY='<directory>'.
+
+- `--path-definition-directory <directory>`
+
+  Path to the directory containing path definition files to compute the PATH variable.
+  
+  This option can be set by exporting the variable VALET_PATH_DEFINITION_DIRECTORY='<directory>'.
+
+- `-h, --help`
+
+  Display the help for this command.
+
+### Examples
+
+- `eval "$(valet bash bootstrap)"`
+
+  Source valet functions in your bash script or bash prompt.
+  You can then can then use valet function as if you were in a command script.
+
+## ▶️ valet bash links
+
+### Synopsis
+
+This command allows you to create symbolic links declaratively, based on simple definitions written in text files.
+
+By default, it will look for link definition files in the directory `~/.config/.links.d`.
+
+Each file under `~/.config/.links.d` can contain multiple link definitions, one per line.
+
+A valid line should have one of the following formats:
+
+```
+<soft_link_path> :-> <source_path>
+```
+
+Or to create a hard link:
+
+```
+<hard_link_path> :h-> <source_path>
+```
+
+The following rules are applied when parsing the files:
+
+- A line starting with # is a comment.
+- A path may use ~ which will be replaced by the user home directory.
+- A path may contain variables in bash format `${VAR}` or `${VAR:-default}`, which will be replaced by their value.
+
+The following rules are applied when listing the files to consider in the ~/.config/.links.d directory:
+
+- If the path file is hidden (starts with a dot), it is skipped.
+- If the path file contains -linux and the current os is not linux, it is skipped.
+- If the path file contains -windows and the current os is not windows, it is skipped.
+- If the path file contains -darwin and the current os is not macos, it is skipped.
+
+Examples of link definition files are available here:
+<https://github.com/jcaillon/valet/tree/dotfiles-example>
+
+
+### Usage
+
+```bash
+valet bash links [options]
+```
+
+### Options
+
+- `--force`
+
+  Replace existing targets without confirmation when creating the links (dangerous).
+  This option can be set by exporting the variable VALET_FORCE='true'.
+
+- `--links-definition-directory <directory>`
+
+  Path to the directory containing link definition files to create symbolic links.
+  This option can be set by exporting the variable VALET_LINKS_DEFINITION_DIRECTORY='<directory>'.
+
+- `--dotfiles <directory>`
+
+  Path to the your dotfiles directory. All links referring to the "./" directory will be
+  resolved relative to this directory.
+  Will default to the current working directory.
+  
+  This option can be set by exporting the variable VALET_DOTFILES='<directory>'.
+
+- `-h, --help`
+
+  Display the help for this command.
+
+### Examples
+
+- `valet bash links`
+
+  Create symbolic links as defined in the links definition directory.
+
+## ▶️ valet extensions create
+
+### Synopsis
+
+Create a new Valet extension.
+
+
+### Usage
+
+```bash
+valet extensions create [options] [--] <name>
 ```
 
 ### Options
@@ -22,26 +258,33 @@ valet self add-command [options] [--] <command-name>
 
 ### Arguments
 
-- `command-name`
+- `name`
 
-  The name of the command to create.
+  The name of the extension to create.
 
 ### Examples
 
-- `valet self add-command my-command`
+- `valet extensions create`
 
-  Create a new command named **my-command** in the current extension under the **commands.d** directory.
+  Create a new Valet extension.
 
-## ▶️ valet self add-library
+## ▶️ valet extensions init
 
-Call this function in an extension directory to add a new library to the extension.
+### Synopsis
 
-This will create a file from a library template in the **libraries.d** directory.
+Initialize/setup the current directory as a Valet extension.
+
+This command will:
+
+- Ask the user if they want to register the current directory as an extension by linking it in the valet extensions directory (if it's not already the case).
+- Link lib-valet and lib-valet.md in the current directory.
+- If vscode is installed, copy the recommended settings and extensions for valet development in a .vscode directory in the current directory.
+
 
 ### Usage
 
 ```bash
-valet self add-library [options] [--] <library-name>
+valet extensions init [options]
 ```
 
 ### Options
@@ -50,25 +293,157 @@ valet self add-library [options] [--] <library-name>
 
   Display the help for this command.
 
+### Examples
+
+- `valet extensions init`
+
+  Initialize the current directory as a Valet extension.
+
+## ▶️ valet extensions install
+
+### Synopsis
+
+Download and install an extension in the user extensions directory using GIT.
+
+This command will download the given extension (GIT repository) and install it in the valet extensions directory.
+
+For downloaded extensions, if a `extension.setup.sh` script is present in the repository root directory,
+it will be executed. This gives the extension the opportunity to setup itself.
+
+Once an extension is installed, you can use the `valet extensions update` command to update it.
+
+
+### Usage
+
+```bash
+valet extensions install [options] [--] <git-repo>
+```
+
+### Options
+
+- `-n, --name <extension-name>`
+
+  The name to give to this extension.
+  If a name is not provided, the name of the repository will be used.
+  This option can be set by exporting the variable VALET_NAME='<extension-name>'.
+
+- `-v, --version <version>`
+
+  The version (git reference) to checkout for the repository to download.
+  Usually a tag or a branch name.
+  This option can be set by exporting the variable VALET_VERSION='<version>'.
+
+- `--skip-setup`
+
+  Skip the execution of the `extension.setup.sh` script even if it exists.
+  This option can be set by exporting the variable VALET_SKIP_SETUP='true'.
+
+- `--unattended`
+
+  Set to true to install without interactive confirmation.
+  This option can be set by exporting the variable VALET_UNATTENDED='true'.
+
+- `-h, --help`
+
+  Display the help for this command.
+
 ### Arguments
 
-- `library-name`
+- `git-repo`
 
-  The name of the library to create.
+  The GIT repository of the extension to install.
+  
+  For example `https://github.com/jcaillon/valet-devops-toolbox.git`.
+  
+  > If the repository is private, you can pass the URL with the username and password like this:
+  > `https://username:password@my.gitlab.private/group/project.git`.
 
 ### Examples
 
-- `valet self add-library my-library`
+- `valet extensions install https://github.com/jcaillon/valet-devops-toolbox.git`
 
-  Create a new library named **my-library** in the current extension under the **libraries.d** directory.
+  Download the latest version of the valet-devops-toolbox application and install it for Valet.
+
+- `valet extensions install https://github.com/jcaillon/valet-devops-toolbox.git --name extension-1 --version main --skip-setup`
+
+  Download the **main** reference of the jcaillon/valet-devops-toolbox repository and install it as **extension-1** for Valet.
+  Skip the execution of the `extension.setup.sh` script.
+
+## ▶️ valet extensions list
+
+### Synopsis
+
+List all Valet extensions, their versions and if the setup script has been executed.
+
+
+### Usage
+
+```bash
+valet extensions list [options]
+```
+
+### Options
+
+- `-h, --help`
+
+  Display the help for this command.
+
+### Examples
+
+- `valet extensions list`
+
+  List all Valet extensions.
+
+## ▶️ valet extensions update
+
+### Synopsis
+
+Update Valet extensions.
+
+
+### Usage
+
+```bash
+valet extensions update [options]
+```
+
+### Options
+
+- `-n, --name <extension-name>`
+
+  The name of the extension to update.
+  If not provided, defaults to updating all extensions.
+  This option can be set by exporting the variable VALET_NAME='<extension-name>'.
+
+- `--skip-setup`
+
+  Skip the execution of the `extension.setup.sh` scripts even when they exist.
+  This option can be set by exporting the variable VALET_SKIP_SETUP='true'.
+
+- `--unattended`
+
+  Set to true to install without interactive confirmation.
+  This option can be set by exporting the variable VALET_UNATTENDED='true'.
+
+- `-h, --help`
+
+  Display the help for this command.
+
+### Examples
+
+- `valet extensions update`
+
+  Update all Valet extensions.
 
 ## ▶️ valet self build
+
+### Synopsis
 
 Index all the command and libraries present in the valet extensions directory and installation directory.
 
 This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
 
-Please check <https://jcaillon.github.io/valet/docs/new-commands/> or check the examples in **showcase.d** directory to learn how to create and modified your commands.
+Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in **showcase.d** directory to learn how to create and modified your commands.
 
 This scripts:
 
@@ -135,6 +510,8 @@ valet self build [options]
 
 ## ▶️ valet self config
 
+### Synopsis
+
 Open the configuration file of Valet with your default editor.
 
 This allows you to set advanced options for Valet.
@@ -182,6 +559,8 @@ valet self config [options]
 
 ## ▶️ valet self document
 
+### Synopsis
+
 Generate the documentation and code snippets for all the library functions of Valet.
 
 It will parse all the library files and generate:
@@ -220,98 +599,13 @@ valet self document [options]
 
   Generate the documentation for all the library functions of Valet and output to the default directory.
 
-## ▶️ valet self extend
-
-Extends Valet by creating or downloading a new extension in the user directory.
-Extensions can add new commands or functions to Valet.
-
-This command will either:
-
-- Create and setup a new extension directory under the valet extensions directory,
-- setup an existing directory as a valet extension,
-- or download the given extension (repository) and install it in the valet extensions directory.
-
-For downloaded extensions, all GIT repositories are supported.
-For the specific cases of GitHub and GitLab repositories, this command will:
-
-1. If git is installed, clone the repository for the given reference (version option).
-2. If git is not installed, download source tarball for the given reference and extract it.
-
-For downloaded extensions, if a `extension.setup.sh` script is present in the repository root directory,
-it will be executed. This gives the extension the opportunity to setup itself.
-
-Once an extension is installed, you can use the `valet self update` command to update it.
-
-### Usage
-
-```bash
-valet self extend [options] [--] <extension-uri>
-```
-
-### Options
-
-- `-v, --version <version>`
-
-  The version of the repository to download.
-  Usually a tag or a branch name.
-  This option can be set by exporting the variable VALET_VERSION='<version>'.
-
-- `-n, --name <extension-name>`
-
-  The name to give to this extension.
-  If a name is not provided, the name of the repository will be used.
-  This option can be set by exporting the variable VALET_NAME='<extension-name>'.
-
-- `--skip-setup`
-
-  Skip the execution of the `extension.setup.sh` script even if it exists.
-  This option can be set by exporting the variable VALET_SKIP_SETUP='true'.
-
-- `-h, --help`
-
-  Display the help for this command.
-
-### Arguments
-
-- `extension-uri`
-
-  The URI of the extension to install or create.
-  
-  1. If you want to create a new extension, this argument should be the name of your
-    new extension (e.g. `my-new-extension`).
-  2. If you want to setup an existing directory as an extension, this argument should be `.`.
-  3. If you want to download an extension, this argument should be the URL of the repository.
-    Usually a GitHub or GitLab repository URL such as `https://github.com/jcaillon/valet-devops-toolbox.git`.
-  
-  > If the repository is private, you can pass the URL with the username and password like this:
-  > `https://username:password@my.gitlab.private/group/project.git`.
-
-### Examples
-
-- `valet self extend my-new-extension`
-
-  Create a new extension named **my-new-extension** in the user directory.
-
-- `valet self extend .`
-
-  Setup the current directory as an extension in the user directory.
-
-- `valet self extend https://github.com/jcaillon/valet-devops-toolbox.git`
-
-  Download the latest version of the valet-devops-toolbox application and install it for Valet.
-
-- `valet self extend https://github.com/jcaillon/valet --version extension-1 --name extension-1 --skip-setup`
-
-  Download the **extension-1** reference of the valet repository and install it as **extension-1** for Valet.
-  Skip the execution of the `extension.setup.sh` script.
-  (This is actually a fake extension for testing purposes).
-
 ## ▶️ valet self release
+
+### Synopsis
 
 Release a new version of valet.
 
 It will:
-
 - write the current version in the self-install script,
 - commit the file,
 - update the documentation,
@@ -352,10 +646,21 @@ valet self release [options]
 
 ## ▶️ valet self setup
 
+### Synopsis
+
 The command run after the installation of Valet to setup the tool.
 
-Adjust the Valet configuration according to the user environment.
-Let the user know what to do next.
+This command will do the following (with user approval for each step):
+
+- Copy the showcase to the user extensions directory.
+- Create a shim/proxy script in `~/.local/bin` or `~/bin` that points to the valet script.
+- Add the Valet directory to the user PATH by editing the shell startup files.
+- Add the Valet directory to the windows PATH if on windows.
+- Adjust the Valet configuration according to the user environment.
+- If the current user is root and the option is given, make Valet available for all users.
+  (set read permissions for all users on Valet files and directories and create a shim in /usr/local/bin).
+- Let the user know what to do next.
+
 
 ### Usage
 
@@ -365,11 +670,44 @@ valet self setup [options]
 
 ### Options
 
+- `--unattended`
+
+  Do not enter interactive mode for the setup (skip all actions except those explicitly specified).
+  This option can be set by exporting the variable VALET_UNATTENDED='true'.
+
+- `--copy-showcase`
+
+  Copy the showcase to the user extensions directory.
+  This option can be set by exporting the variable VALET_COPY_SHOWCASE='true'.
+
+- `--create-shim`
+
+  Create a shim/proxy script in `~/.local/bin` or `~/bin` (if one of them is in your PATH) that points to the valet script.
+  This option can be set by exporting the variable VALET_CREATE_SHIM='true'.
+
+- `--add-to-path`
+
+  Add the Valet directory to the user PATH by editing the shell startup files.
+  This option can be set by exporting the variable VALET_ADD_TO_PATH='true'.
+
+- `--setup-for-windows`
+
+  Add the Valet directory to the windows PATH if on windows and set the VALET_WIN_BASH and VALET_WIN_INSTALLATION_DIRECTORY windows environment variables.
+  This option can be set by exporting the variable VALET_SETUP_FOR_WINDOWS='true'.
+
+- `--global-installation`
+
+  If the current user is root and the option is given, make Valet available for all users (set read permissions for all users on Valet files and directories and create a shim in /usr/local/bin).
+  
+  This option can be set by exporting the variable VALET_GLOBAL_INSTALLATION='true'.
+
 - `-h, --help`
 
   Display the help for this command.
 
 ## ▶️ valet self source
+
+### Synopsis
 
 If you want to use Valet functions directly in bash, you can use this command like this:
 
@@ -396,12 +734,13 @@ valet self source [options]
 
 - `-E, --no-exit`
 
-  Override the **core::fail**  function to not exit the script.
+  Override the **core::fail** and **core::exit** functions to not exit the script.
   This option can be set by exporting the variable VALET_NO_EXIT='true'.
 
 - `-p, --prompt-mode`
 
   Source valet functions with modifications to be used in a shell prompt.
+  This will disable all traps and override the **core::fail** and **core::exit** functions to not exit the shell.
   This option can be set by exporting the variable VALET_PROMPT_MODE='true'.
 
 - `-h, --help`
@@ -412,10 +751,17 @@ valet self source [options]
 
 - `eval "$(valet self source)"`
 
-  Source valet functions in your bash script or bash prompt.
+  Source valet functions in your bash session.
   You can then can then use valet function as if you were in a command script.
+  Perfect for CI/CD pipelines.
+
+- `eval "$(valet self source --prompt-mode)"`
+
+  The preferred mode to source valet functions in your shell prompt.
 
 ## ▶️ valet self test
+
+### Synopsis
 
 Test your valet custom commands using approval tests approach.
 
@@ -439,16 +785,16 @@ valet self test [options]
   The received test result files will automatically be approved.
   This option can be set by exporting the variable VALET_AUTO_APPROVE='true'.
 
-- `-c, --with-core`
+- `-r, --replay-failed-tests`
 
-  Also test the valet core functions.
-  
-  This is only if you modified valet core functions themselves.
-  This option can be set by exporting the variable VALET_WITH_CORE='true'.
+  Replay the failed tests from the previous run (or run all tests if none failed).
+  This option can be set by exporting the variable VALET_REPLAY_FAILED_TESTS='true'.
 
-- `-C, --core-only`
+- `-c, --core-only`
 
   Only test the valet core functions. Skips the tests for user commands.
+  
+  This option is intended to be used by people modifying valet itself.
   This option can be set by exporting the variable VALET_CORE_ONLY='true'.
 
 - `-i, --include <pattern>`
@@ -494,6 +840,8 @@ valet self test [options]
 
 ## ▶️ valet self uninstall
 
+### Synopsis
+
 Generate a bash script that can be used to uninstall Valet.
 Without any option, this script will print instructions instead.
 
@@ -523,38 +871,10 @@ valet self uninstall [options]
 
 ## ▶️ valet self update
 
-Update valet using the latest release on GitHub. Also update all installed extensions.
+### Synopsis
 
-This script can also be used as a standalone script to install Valet:
+Update valet using the latest release on GitHub.
 
-bash -c "$(curl -fsSL <https://raw.githubusercontent.com/jcaillon/valet/latest/install.sh>)"
-
-If you need to pass options (e.g. --single-user-installation) to the script, you can do it like this:
-
-bash -c "$(curl -fsSL <https://raw.githubusercontent.com/jcaillon/valet/latest/install.sh>)" -s --single-user-installation
-
-The default behavior is to install Valet for all users, in /opt/valet, which might require
-you to type your password on sudo commands (you don't have to run this script with sudo, it will
-ask for your password when needed).
-
-This script will:
-
-- 1. Download the given release from GitHub (latest by default).
-
-- 1. Copy it in the Valet home directory, which defaults to:
-  - /opt/valet in case of a multi user installation
-  - ~/.local/valet otherwise
-
-- 1. Make the valet script readable and executable, either by adding a shim
-    in a bin directory already present in your PATH, or by adding the Valet
-    directory to your PATH on shell startup.
-
-- 1. Copy the showcase (command examples) in the valet extensions directory ~/.valet.d.
-
-- 1. Run self setup command (in case of a new installation) or re-export the config.
-
-- 1. Try to update (fetch merge --ff-only) the git repositories and all
-    installed extensions in your valet extensions directory.
 
 ### Usage
 
@@ -564,73 +884,10 @@ valet self update [options]
 
 ### Options
 
-- `-u, --unattended`
+- `--unattended`
 
-  Set to true to not enter interactive mode for the setup (useful for automated installation).
+  Set to true to update without interactive confirmation.
   This option can be set by exporting the variable VALET_UNATTENDED='true'.
-
-- `-s, --single-user-installation`
-
-  Set to true to install Valet for the current user only.
-  
-  Note: for windows, the installation is always for the current user.
-  This option can be set by exporting the variable VALET_SINGLE_USER_INSTALLATION='true'.
-
-- `-v, --version <version>`
-
-  The version number to install (do not including the starting 'v').
-  
-  Released versions can be found here: <https://github.com/jcaillon/valet/releases>
-  
-  This option can be set by exporting the variable VALET_VERSION='<version>'.
-
-- `-d, --installation-directory <path>`
-
-  The directory where Valet will be installed.
-  
-  Defaults to /opt/valet for a multi user installation and ~/.local/valet otherwise.
-  This option can be set by exporting the variable VALET_INSTALLATION_DIRECTORY='<path>'.
-
-- `-S, --no-shim`
-
-  Set to true to not create the shim script in /usr/local/bin.
-  This option can be set by exporting the variable VALET_NO_SHIM='true'.
-
-- `-P, --no-path`
-
-  Set to true to not add the Valet directory to the PATH (append to your .bashrc file).
-  This option can be set by exporting the variable VALET_NO_PATH='true'.
-
-- `--no-showcase`
-
-  Set to true to to not copy the showcase (command examples) to the valet extensions directory (~/.valet.d).
-  
-  If you do not set this option, newer versions of the showcase will override the existing ones.
-  
-  In case of an update, if the showcase.d directory does not exist, the showcase will not be copied.
-  This option can be set by exporting the variable VALET_NO_SHOWCASE='true'.
-
-- `-U, --skip-extensions`
-
-  Set to true to not attempt to update the installed extensions under the valet extensions directory (~/.valet.d).
-  This option can be set by exporting the variable VALET_SKIP_EXTENSIONS='true'.
-
-- `-e, --only-extensions`
-
-  Set to true to only update the installed extensions under the valet extensions directory (~/.valet.d).
-  This option can be set by exporting the variable VALET_ONLY_EXTENSIONS='true'.
-
-- `--skip-extensions-setup`
-
-  Set to true to skip the execution of extension setup scripts (if any, when updating extensions).
-  This option can be set by exporting the variable VALET_SKIP_EXTENSIONS_SETUP='true'.
-
-- `-b, --use-branch`
-
-  Set to true to download Valet from a branch tarball instead of a release.
-  In that case, the version is the branch name.
-  Only works for new installations, not for updates.
-  This option can be set by exporting the variable VALET_USE_BRANCH='true'.
 
 - `-h, --help`
 
@@ -642,15 +899,13 @@ valet self update [options]
 
   Update Valet to the latest version.
 
-- `bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/install.sh)"`
+- `valet self update --unattended`
 
-  Install the latest version of Valet, using all the default options.
-
-- `bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/install.sh)" -s --single-user-installation --unattended`
-
-  Install the latest version of Valet in the user home directory and disable all interaction during the install process.
+  Update Valet to the latest version without interactive confirmation.
 
 ## ▶️ valet help
+
+### Synopsis
 
 Show the help of this program or of the help of a specific command.
 
@@ -696,21 +951,24 @@ valet help [options] [--] [commands...]
 
 ## ▶️ valet
 
+### Synopsis
+
 Valet helps you browse, understand and execute your custom bash commands.
 
 Online documentation is available at <https://jcaillon.github.io/valet/>.
 
 You can call valet without any commands to start an interactive session.
 
-**Configuration through environment variables:**
+#### Configuration through environment variables
 
 Core features variables can be defined in the valet user config file. Run **valet self config** to open the configuration file with your default editor (the file will get created if it does not yet exist).
 
 Command options can also be set through environment variables. Check the command help for more information.
 
-**Create your own commands:**
+#### Create your own commands
 
 You can create your own commands and have them available in valet.
+
 A command is part of an extension, which is a collection of commands.
 
 To get started, run the command **valet self create-extension**.
@@ -733,7 +991,7 @@ valet [options] [--] [commands...]
 
 - `--log-level, --log <level>`
 
-  Set the log level of valet (defaults to info).
+  Set the log level (defaults to info).
   Possible values are: trace, debug, success, info, success, warning, error.
   This option can be set by exporting the variable VALET_LOG_LEVEL='<level>'.
 
@@ -755,7 +1013,7 @@ valet [options] [--] [commands...]
 
 - `--source`
 
-  Returns in the path to the valet file to source in order to use valet in your scripts.
+  Returns in the path of a script file to source in order to use valet library functions in your scripts.
   Usage: `source "$(valet --source)"`.
 
 - `--version`
@@ -783,13 +1041,17 @@ valet [options] [--] [commands...]
 
   Generate the yaml from the given kustomize directory.
 
-- `autoscaler`
+- `auto-merge`
 
-  Allows to scale down and scale back a k8s cluster.
+  Automatically merge given branches to target branches.
 
 - `aws-cleanup-resources`
 
   Cleanup AWS resources.
+
+- `aws-find-secret`
+
+  Find a secret from AWS Secrets Manager.
 
 - `aws-login`
 
@@ -799,21 +1061,25 @@ valet [options] [--] [commands...]
 
   Log out of AWS.
 
-- `bootstrap`
+- `aws-switch`
 
-  Bootstrap a k8s cluster by applying Kustomize configuration step by step.
+  Allows to switch on/off aws resources.
+
+- `bash bootstrap`
+
+  Returns a string that can be evaluated to bootstrap your bash session.
+
+- `bash links`
+
+  Create symbolic links as defined in the links definition directory.
 
 - `chart-inflator`
 
   (Kustomize plugin) Inflates helm chart(s) from the given Kustomize generator specifications.
 
-- `delete-resources`
+- `clean-up`
 
-  Delete k8s resources.
-
-- `extension1`
-
-  Do nothing.
+  Clean up the system.
 
 - `extension2`
 
@@ -823,33 +1089,93 @@ valet [options] [--] [commands...]
 
   Do nothing.
 
-- `find-aws-secret`
+- `extensions create`
 
-  Find a secret from AWS Secrets Manager.
+  Create a new Valet extension.
 
-- `find-k8s-issues`
+- `extensions init`
 
-  Find issues in the k8s cluster and report them.
+  Initialize/setup the current directory as a Valet extension.
+
+- `extensions install`
+
+  Download and install an extension in the user extensions directory using GIT.
+
+- `extensions list`
+
+  List all Valet extensions.
+
+- `extensions update`
+
+  Update Valet extensions.
+
+- `fix-videos-name`
+
+  Rename videos files in a directory.
 
 - `generate`
 
   Generate the yaml from the given kustomize directory.
 
-- `generate-manifests`
+- `gitops-generate-manifests`
 
   Generate the k8s manifests as seen by ArgoCD for a GitOps repository.
+
+- `gitops-test-repository`
+
+  Test the validity of the gitops repository.
 
 - `help`
 
   Show the help of this program or of a specific command.
 
+- `hibernator`
+
+  Allows to either hibernate or awake a given tenant.
+
+- `k8s-argocd`
+
+  Interact with ArgoCD.
+
+- `k8s-bootstrap`
+
+  Bootstrap a k8s cluster by applying Kustomize configuration step by step.
+
+- `k8s-delete-bad-pdbs`
+
+  Remove problematic PodDisruptionBudgets that would prevent nodes from being drained.
+
+- `k8s-delete-resources`
+
+  Delete k8s resources.
+
+- `k8s-find-issues`
+
+  Find issues in the k8s cluster and report them.
+
+- `k8s-switch`
+
+  Allows to switch on/off k8s resources.
+
+- `k8s-uninstall-deployment-charts`
+
+  Uninstall helm charts for the given deployments.
+
+- `k8s-wait-for-pods`
+
+  Wait for the k8s pods/jobs to be ready/complete.
+
+- `k8s-wait-for-resources`
+
+  Wait for k8s resources to be created.
+
 - `mustache-generator`
 
   (Kustomize plugin) Generate k8s resource list from a combination of mustaches templates and scopes.
 
-- `reset-argo-cd`
+- `notify-team`
 
-  Deletes all the ArgoCD resources from a cluster.
+  Sends a notification to the team.
 
 - `self add-command`
 
@@ -897,7 +1223,11 @@ valet [options] [--] [commands...]
 
 - `self update`
 
-  Update valet and its extensions to the latest releases.
+  Update valet to the latest release.
+
+- `send-repo-status`
+
+  Send a report of the current repository status.
 
 - `showcase command1`
 
@@ -911,17 +1241,17 @@ valet [options] [--] [commands...]
 
   Init, validate, destroy, plan or apply a terraform configuration.
 
-- `test-repository`
-
-  Test the validity of the gitops repository.
-
 - `wait-pods`
 
-  Wait for the k8s pods to be ready.
+  DEPRECATED! Wait for the k8s pods to be ready.
 
 - `wait-resources`
 
-  Wait for the k8s resources to be created.
+  DEPRECATED! Wait for the k8s resources to be created.
+
+- `yaml-query-transformer`
+
+  (Kustomize plugin) A Kustomize transformer that runs the resources list through a yq query.
 
 ### Examples
 
@@ -933,4 +1263,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).

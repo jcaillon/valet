@@ -144,5 +144,23 @@ if system::isWindows; then
 fi
 ```
 
+## ⚡ system::isWindowsWithoutNativeSymlinks
+
+Check if the current system is Windows and does not support native symbolic links (i.e. does not have developer mode enabled).
+
+Returns:
+
+- `$?`
+  - 0 if the current system is windows and does not support native symbolic links
+  - 1 otherwise.
+
+Example usage:
+
+```bash
+if system::isWindowsWithoutNativeSymlinks; then
+  printf 'The current system does not support native symbolic links.'
+fi
+```
+
 > [!IMPORTANT]
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).

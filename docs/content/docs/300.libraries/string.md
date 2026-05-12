@@ -72,6 +72,28 @@ string::doForEachLine myString myCallback
 > newlines (which is not the case with a "for loop" using parameter expansion and IFS=$'\n').
 > Here string is significantly slower than using this.
 
+## ⚡ string::expandVariables
+
+Expand variables in a string.
+If a variable is not defined, it will be replaced by an empty string.
+
+Inputs:
+
+- `$1`: **string variable name** _as string_:
+
+  The variable name that contains the string in which to expand variables.
+
+Returns:
+- `${REPLY}`: the string with expanded variables
+
+Example usage:
+
+```bash
+MY_STRING="Hello $USER, today is $DAY"
+string::expandVariables MY_STRING
+echo "${REPLY}"
+```
+
 ## ⚡ string::extractBetween
 
 Extract the text between two strings within a string.
@@ -686,4 +708,4 @@ echo "${REPLY}"
 > - It considers escape sequence for text formatting and does not count them as visible characters.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.36.26 (2025-10-10).
+> Documentation generated for the version 0.37.1138 (2026-05-12).
