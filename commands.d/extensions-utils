@@ -13,6 +13,29 @@ source interactive
 # shellcheck source=../libraries.d/lib-bash
 source bash
 
+# ## extensions::getHead (private)
+#
+# Get the HEAD of an extension.
+#
+# - $1: **extension directory** _as string_:
+#       The directory of the extension for which we want to get the HEAD.
+#
+function extensions::getHead() {
+  local extensionDirectory="${1}"
+
+  if [[ ! -d ${extensionDirectory}/.git ]]; then
+    REPLY=""
+    return 0
+  fi
+
+  exe::invoke command git -C "${extensionDirectory}" rev-parse HEAD
+  if ((REPLY_CODE != 0)); then
+    REPLY=""
+    return 0
+  fi
+  string::trimAll REPLY
+}
+
 # ## extensions::getVersion (private)
 #
 # Get the version of an extension.
@@ -32,17 +55,7 @@ function extensions::getVersion() {
     fi
   done
 
-  if [[ ! -d ${extensionDirectory}/.git ]]; then
-    REPLY=""
-    return 0
-  fi
-
-  exe::invoke command git -C "${extensionDirectory}" rev-parse HEAD
-  if ((REPLY_CODE != 0)); then
-    REPLY=""
-    return 0
-  fi
-  string::trimAll REPLY
+  extensions::getHead "${extensionDirectory}"
   REPLY="${REPLY:0:7}"
 }
 

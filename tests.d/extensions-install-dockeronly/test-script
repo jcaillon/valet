@@ -21,6 +21,21 @@ function main() {
   echo "================================================"
   echo "> ls /home/me/.valet.d"
   ls /home/me/.valet.d
+  git -C /home/me/.valet.d/extension-1 log --oneline -1
+
+  echo
+  echo "================================================"
+  echo "Update extension: extension-1 using git (already updated)."
+  echo "================================================"
+  /home/me/valet/valet extensions update
+
+  git -C /home/me/.valet.d/extension-1 reset --hard HEAD^
+
+  echo
+  echo "================================================"
+  echo "Update extension: extension-1 using git."
+  echo "================================================"
+  echo y | /home/me/valet/valet extensions update -n extension-1
 }
 
 main

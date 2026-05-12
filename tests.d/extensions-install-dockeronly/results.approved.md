@@ -38,5 +38,35 @@ lib-valet
 lib-valet.md
 valet.code-snippets
 valet-commands.md
+46dcbbf :sparkles: update valet 0.33
+
+================================================
+Update extension: extension-1 using git (already updated).
+================================================
+INFO     The extension extension-1 is already up-to-date.
+SUCCESS  Updated 0 extensions:
+
+Extension name[0m │ Previous version[0m │ New version[0m │ Setup status          [0m
+───────────────┼──────────────────┼─────────────┼───────────────────────
+extension-1    │ 46dcbbf         [0m │ 46dcbbf     │ Already up-to-date[0m
+HEAD is now at 07cda5f :sparkles: updated for valet 0.30
+
+================================================
+Update extension: extension-1 using git.
+================================================
+   ╭─────────────────────────────────────────────────────────────────────────────╮[0m
+░──┤[0m A new version is available for the extension extension-1: 07cda5f..46dcbbf. [82G│[0m
+   │[0m Do you want to update the ⌜extension-1⌝ extension? [82G│[0m
+   ╰─────────────────────────────────────────────────────────────────────────────╯[0m
+[?25l
+[1F[0J[?25l [7m   (Y)ES   [0m      (N)O   [0m[1G[0K[9G╭──────╮[0m
+[9G│[0m Yes. [16G├──░[0m
+[9G╰──────╯[0m
+SUCCESS  The extension extension-1 has been updated 07cda5f..46dcbbf.
+SUCCESS  Updated 1 extensions:
+
+Extension name[0m │ Previous version[0m │ New version[0m │ Setup status[0m
+───────────────┼──────────────────┼─────────────┼─────────────
+extension-1    │ 07cda5f         [0m │ 46dcbbf     │ Updated[0m
 ```
 

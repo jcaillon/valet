@@ -376,8 +376,8 @@ function selfExtend::updateExtensions() {
   for path in "${REPLY_ARRAY[@]}"; do
     local updateSuccess=false
     local extensionName="${path##*/}"
+if [[ -f "${path}/.git/HEAD" ]]; then
 
-    if [[ -f "${path}/.git/HEAD" ]]; then
       log::debug "Found a git repository for extension ⌜${extensionName}⌝."
       if ! command -v git &>/dev/null; then
         log::warning "The command ⌜git⌝ is not installed or not found in your PATH, skipping git update for repo ⌜${path}⌝."
@@ -457,62 +457,6 @@ function selfExtend_updateTarBall() {
     hasBeenUpdated=true
   else
     log::info "The extension ⌜${extensionName}⌝ (tarball) is already up-to-date."
-  fi
-
-  REPLY="${hasBeenUpdated}"
-  return 0
-}
-
-# Update a git repository.
-#
-# Returns:
-# - $?:0 if the repository was checked without errors, 1 otherwise.
-# - ${REPLY}: true if the repository was updated, false otherwise.
-function selfExtend_updateGitRepository() {
-  local repoPath="${1}"
-
-  local extensionName="${repoPath##*/}"
-  local hasBeenUpdated=false
-
-  log::debug "Updating the git repository ⌜${repoPath}⌝."
-
-  selfExtend_getCurrentCommit "${repoPath}"
-  local currentHead="${REPLY}"
-
-  log::debug "Current HEAD is ${currentHead}."
-
-  fs::readFile "${repoPath}/.git/HEAD"
-  if [[ ${REPLY} =~ ^"ref: refs/heads/"(.+) ]]; then
-    local branch="${BASH_REMATCH[1]:-}"
-    branch="${branch%%$'\n'*}"
-    log::debug "Fetching and merging branch ⌜${branch}⌝ from ⌜origin⌝ remote."
-    pushd "${repoPath}" &>/dev/null || core::fail "Could not change to the directory ⌜${repoPath}⌝."
-    progress::start template="<spinner> Fetching reference ${branch} for extension ${extensionName}..."
-    if ! git fetch -q; then
-      popd &>/dev/null || :
-      progress::stop
-      log::warning "Failed to fetch from ⌜origin⌝ remote for the repo ⌜${path}⌝."
-      return 1
-    fi
-    progress::stop
-    if ! git merge -q --ff-only "origin/${branch}" &>/dev/null; then
-      popd &>/dev/null || :
-      log::warning "Failed to update the git repository ⌜${path}⌝, clean your workarea first (e.g. git stash, or git commit)."
-      return 1
-    fi
-    popd &>/dev/null || :
-
-    selfExtend_getCurrentCommit "${repoPath}"
-    local newHead="${REPLY}"
-
-    if [[ ${newHead} == "${currentHead}" ]]; then
-      log::info "The extension ⌜${extensionName}⌝ (git) is already up-to-date."
-    else
-      log::success "The extension ⌜${extensionName}⌝ (git) has been updated ⌜${currentHead:1:5}..${newHead:1:5}⌝."
-      hasBeenUpdated=true
-    fi
-  else
-    log::warning "The extension ⌜${extensionName}⌝ (git) with repository ⌜${repoPath}⌝ has a detached HEAD, could not update it (please check out a branch first)."
   fi
 
   REPLY="${hasBeenUpdated}"

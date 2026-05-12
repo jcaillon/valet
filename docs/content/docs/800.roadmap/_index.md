@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- Fix: A spinner or progress bar is already running.
 - time better function time function to be able to use them opstools and compute timers and timeout !
 - make version a command instead of an option, and add a `valet version` command that shows the current version and the latest release. Also show the extension versions ?
 - implement fs::normalizePath
