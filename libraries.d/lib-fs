@@ -708,12 +708,12 @@ function fs::createLink() {
   local linkType
   if [[ ${hardlink} == "true" ]]; then
     linkType="hard"
-    if ! ln "${linkedPath}" "${linkPath}"; then
+    if ! command ln "${linkedPath}" "${linkPath}"; then
       core::fail "Failed to create the hard link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
     fi
   else
     linkType="symbolic"
-    if ! ln -s "${linkedPath}" "${linkPath}"; then
+    if ! command ln -s "${linkedPath}" "${linkPath}"; then
       core::fail "Failed to create the symbolic link ⌜${linkedPath}⌝ ← ⌜${linkPath}⌝."
     fi
   fi

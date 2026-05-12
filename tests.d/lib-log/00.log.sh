@@ -62,6 +62,8 @@ function test_log::init() {
   }
 
   # test bad descriptors
+  exec 5>&-
+  exec 5<&-
   test::exit VALET_CONFIG_LOG_FD=5 log::init
   test::exit VALET_CONFIG_LOG_FD=/unknown/file/path log::init
 
