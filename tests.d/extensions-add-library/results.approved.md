@@ -1,25 +1,25 @@
-# Test suite self-add-library
+# Test suite extensions-add-library
 
-## Test script 00.self-add-library
+## Test script 00.extensions-add-library
 
-### ✅ Testing self add-library
+### ✅ Testing extensions add-library
 
-❯ `selfAddLibrary new-cool-lib`
+❯ `extensionsAddLibrary new-cool-lib`
 
 **Standard output**:
 
 ```text
-🙈 mocking interactive::confirm It does not look like the current directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-library/resources/gitignored⌝ is a valet extension, do you want to proceed anyway?
+🙈 mocking interactive::confirm It does not look like the current directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/extensions-add-library/resources/gitignored⌝ is a valet extension, do you want to proceed anyway?
 ```
 
 **Error output**:
 
 ```text
 WARNING  The current directory is not under the valet extensions directory ⌜/tmp/valet.valet.d⌝.
-SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝.
+SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/extensions-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝.
 ```
 
-❯ `selfAddLibrary new-cool-lib`
+❯ `extensionsAddLibrary new-cool-lib`
 
 **Standard output**:
 
@@ -30,8 +30,8 @@ SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBA
 **Error output**:
 
 ```text
-WARNING  The library file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝ already exists.
-SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝.
+WARNING  The library file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/extensions-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝ already exists.
+SUCCESS  The library ⌜new-cool-lib⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/extensions-add-library/resources/gitignored/libraries.d/lib-new-cool-lib⌝.
 ```
 
 > cat `libraries.d/lib-new-cool-lib`

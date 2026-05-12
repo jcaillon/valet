@@ -46,7 +46,7 @@ A more up-to-date list can be found in [extensions.json](https://raw.githubuserc
 
 ### 🆎 Autocompletion on Valet library functions
 
-You can use the Valet [vscode snippets](https://github.com/jcaillon/valet/blob/latest/extras/valet.code-snippets) which should already be present in your extension directory. If not, you can setup your directory with `valet self extend .`.
+You can use the Valet [vscode snippets](https://github.com/jcaillon/valet/blob/latest/extras/valet.code-snippets) which should already be present in your extension directory. If not, you can setup your directory with `valet extensions init`.
 
 Additionally, the already configured `.vscode/settings.json` will contain the following settings:
 

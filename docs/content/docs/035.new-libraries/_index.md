@@ -50,7 +50,7 @@ Run the following command to create a new library file named `lib-mylib.sh` in t
 _Replace `mylib` with the name of your command._
 
 ```bash
-valet self add-library mylib
+valet extensions add-library mylib
 ```
 
 Alternatively, create the file manually.

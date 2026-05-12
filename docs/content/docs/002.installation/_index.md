@@ -10,8 +10,9 @@ description: Learn how to install Valet on your system.
 ## 📦 Dependencies
 
 - Bash version 5 or superior is required (it uses bash `EPOCHREALTIME` among other features introduced in bash 5).
-- [GNU coreutils][gnu-core-utils]: valet uses `rm`, `mv`, `cp`, `mkdir` as they can't be done in pure bash. It also uses `chmod` for the installation/updates.
-- [curl][curl] and [tar][tar]: needed only if you want to use the automated installation, `self update` or `self extend` command.
+- [GNU coreutils][gnu-core-utils]: valet uses `rm`, `mv`, `cp`, `mkdir`, `ln` as they can't be done in pure bash. It also uses `chmod` for the installation/updates.
+- [curl][curl] and [tar][tar]: needed only if you want to use the automated installation and the `self update` command.
+- [git][git] : needed only if you want to install and update extensions.
   
 Other external programs can be used if found but are not required[^exhaustive-programs-list].
 
@@ -74,6 +75,7 @@ Find the list of image tags under [Valet packages][valetImageTagsLink].
 [latest-release]: https://github.com/jcaillon/valet/releases/latest
 [gnu-core-utils]: https://www.gnu.org/software/coreutils/
 [git-for-windows-link]: https://gitforwindows.org/
+[git]: https://git-scm.com/
 [wsl-installation-link]: https://learn.microsoft.com/en-us/windows/wsl/install
 [windows-terminal-link]: https://github.com/microsoft/terminal
 [docker]: https://www.docker.com/

@@ -10,28 +10,31 @@ source fs
 source interactive
 
 #===============================================================
-# >>> command: self add-command
+# >>> command: extensions add-command
 #===============================================================
 
 : <<"COMMAND_YAML"
-command: self add-command
-function: selfAddCommand
+command: extensions add-command
+function: extensionsAddCommand
 author: github.com/jcaillon
 shortDescription: Add a new command to the current extension.
+
 description: |-
   Call this function in an extension directory to add a new command to the extension.
 
   This will create a file from a command template in the ⌜commands.d⌝ directory.
+
 arguments:
 - name: command-name
   description: |-
     The name of the command to create.
+
 examples:
-- name: self add-command my-command
+- name: extensions add-command my-command
   description: |-
     Create a new command named ⌜my-command⌝ in the current extension under the ⌜commands.d⌝ directory.
 COMMAND_YAML
-function selfAddCommand() {
+function extensionsAddCommand() {
   local commandName
   command::parseArguments "$@"
   eval "${REPLY}"
@@ -51,7 +54,7 @@ function selfAddCommand() {
     log::warning "The current directory is not under the valet extensions directory ⌜${REPLY}⌝."
     if ! interactive::confirm "It does not look like the current directory ⌜${PWD}⌝ is a valet extension, do you want to proceed anyway?"; then
       log::info "Aborting the creation of the command."
-      log::info "You should first create an extension with ⌜valet self extend⌝ and then cd into the created directory."
+      log::info "You should first create an extension with ⌜valet extensions create⌝ and then cd into the created directory."
       return 0
     fi
   fi

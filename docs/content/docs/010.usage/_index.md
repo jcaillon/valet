@@ -10,7 +10,7 @@ url: /docs/usage
 
 Valet is a CLI tool that exposes usable **commands** (e.g. `valet help`) or **sub commands** (e.g. `valet self update`).
 
-Each command can accept **options** (e.g. `--help` or `-v`) and/or **arguments** (e.g. in `valet self extend my-extension`, `my-extension` is an argument of the `valet self extend` command).
+Each command can accept **options** (e.g. `--help` or `-v`) and/or **arguments** (e.g. in `valet extensions create my-extension`, `my-extension` is an argument of the `valet extensions create` command).
 
 Each command has properties that enable Valet to:
 

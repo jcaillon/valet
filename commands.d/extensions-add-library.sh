@@ -10,12 +10,12 @@ source fs
 source interactive
 
 #===============================================================
-# >>> command: self add-library
+# >>> command: extensions add-library
 #===============================================================
 
 : <<"COMMAND_YAML"
-command: self add-library
-function: selfAddLibrary
+command: extensions add-library
+function: extensionsAddLibrary
 author: github.com/jcaillon
 shortDescription: Add a new library to the current extension.
 description: |-
@@ -27,11 +27,11 @@ arguments:
   description: |-
     The name of the library to create.
 examples:
-- name: self add-library my-library
+- name: extensions add-library my-library
   description: |-
     Create a new library named ⌜my-library⌝ in the current extension under the ⌜libraries.d⌝ directory.
 COMMAND_YAML
-function selfAddLibrary() {
+function extensionsAddLibrary() {
   local libraryName
   command::parseArguments "$@"
   eval "${REPLY}"
@@ -51,30 +51,30 @@ function selfAddLibrary() {
     log::warning "The current directory is not under the valet extensions directory ⌜${REPLY}⌝."
     if ! interactive::confirm "It does not look like the current directory ⌜${PWD}⌝ is a valet extension, do you want to proceed anyway?"; then
       log::info "Aborting the creation of the library."
-      log::info "You should first create an extension with ⌜valet self extend⌝ and then cd into the created directory."
+      log::info "You should first create an extension with ⌜valet extensions create⌝ and then cd into the created directory."
       return 0
     fi
   fi
 
-  local newCommandFilePath="${PWD}/libraries.d/lib-${libraryName}"
-  local commandTemplateFile="${GLOBAL_INSTALLATION_DIRECTORY}/extras/template-library-${templateFlavor}.sh"
+  local newLibraryFilePath="${PWD}/libraries.d/lib-${libraryName}"
+  local libraryTemplateFile="${GLOBAL_INSTALLATION_DIRECTORY}/extras/template-library-${templateFlavor}.sh"
 
-  if [[ -f ${newCommandFilePath} ]]; then
-    log::warning "The library file ⌜${newCommandFilePath}⌝ already exists."
+  if [[ -f ${newLibraryFilePath} ]]; then
+    log::warning "The library file ⌜${newLibraryFilePath}⌝ already exists."
     if ! interactive::confirm "Do you want to override the existing library file?"; then
       log::info "Aborting the creation of the library."
       return 0
     fi
-    command rm -f "${newCommandFilePath}"
+    command rm -f "${newLibraryFilePath}"
   fi
 
-  # create the commands directory if it does not exist
+  # create the libraries directory if it does not exist
   fs::createDirectoryIfNeeded "${PWD}/libraries.d"
 
-  fs::readFile "${commandTemplateFile}"
+  fs::readFile "${libraryTemplateFile}"
   local templateContent="${REPLY//_LIBRARY_NAME_/"${libraryName}"}"
 
-  printf "%s" "${templateContent}" >"${newCommandFilePath}"
+  printf "%s" "${templateContent}" >"${newLibraryFilePath}"
 
-  log::success "The library ⌜${libraryName}⌝ has been created with the file ⌜${newCommandFilePath}⌝."
+  log::success "The library ⌜${libraryName}⌝ has been created with the file ⌜${newLibraryFilePath}⌝."
 }

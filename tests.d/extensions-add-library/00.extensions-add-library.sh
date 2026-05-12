@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 
-command::sourceFunction "selfAddCommand"
+command::sourceFunction "extensionsAddLibrary"
 
 function main() {
-  test::title "✅ Testing self add-command"
+  test::title "✅ Testing extensions add-library"
 
   HOME="/nop"
   mkdir -p resources/gitignored
 
   pushd resources/gitignored &>/dev/null || test::fail "Unable to change directory"
 
-  test::exec selfAddCommand 'new cool command'
-  test::exec selfAddCommand 'new cool command'
-  test::cat "commands.d/new-cool-command.sh"
+  test::exec extensionsAddLibrary 'new-cool-lib'
+  test::exec extensionsAddLibrary 'new-cool-lib'
+  test::cat "libraries.d/lib-new-cool-lib"
 
   popd &>/dev/null || test::fail "Unable to change directory"
 

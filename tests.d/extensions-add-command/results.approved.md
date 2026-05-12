@@ -1,25 +1,25 @@
-# Test suite self-add-command
+# Test suite extensions-add-command
 
-## Test script 00.self-add-command
+## Test script 00.extensions-add-command
 
-### ✅ Testing self add-command
+### ✅ Testing extensions add-command
 
-❯ `selfAddCommand new\ cool\ command`
+❯ `extensionsAddCommand new\ cool\ command`
 
 **Standard output**:
 
 ```text
-🙈 mocking interactive::confirm It does not look like the current directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-command/resources/gitignored⌝ is a valet extension, do you want to proceed anyway?
+🙈 mocking interactive::confirm It does not look like the current directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/extensions-add-command/resources/gitignored⌝ is a valet extension, do you want to proceed anyway?
 ```
 
 **Error output**:
 
 ```text
 WARNING  The current directory is not under the valet extensions directory ⌜/tmp/valet.valet.d⌝.
-SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-command/resources/gitignored/commands.d/new-cool-command.sh⌝.
+SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/extensions-add-command/resources/gitignored/commands.d/new-cool-command.sh⌝.
 ```
 
-❯ `selfAddCommand new\ cool\ command`
+❯ `extensionsAddCommand new\ cool\ command`
 
 **Standard output**:
 
@@ -30,8 +30,8 @@ SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$G
 **Error output**:
 
 ```text
-WARNING  The command file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-command/resources/gitignored/commands.d/new-cool-command.sh⌝ already exists.
-SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/self-add-command/resources/gitignored/commands.d/new-cool-command.sh⌝.
+WARNING  The command file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/extensions-add-command/resources/gitignored/commands.d/new-cool-command.sh⌝ already exists.
+SUCCESS  The command ⌜new cool command⌝ has been created with the file ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/extensions-add-command/resources/gitignored/commands.d/new-cool-command.sh⌝.
 ```
 
 > cat `commands.d/new-cool-command.sh`

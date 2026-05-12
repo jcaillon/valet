@@ -47,7 +47,7 @@ Run the following command to create a new command file named `my-command.sh` in 
  _Replace `my-command` with the name of your command._
 
 ```bash
-valet self add-command my-command
+valet extensions add-command my-command
 ```
 
 Alternatively, create the file manually.

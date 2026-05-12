@@ -32,7 +32,7 @@ description: |-
 
   A command is part of an extension, which is a collection of commands.
 
-  To get started, run the command ⌜valet self create-extension⌝.
+  To get started, run the command ⌜valet extensions create⌝.
 arguments:
 - name: commands?...
   description: |-

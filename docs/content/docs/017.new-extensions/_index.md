@@ -12,10 +12,10 @@ Extensions can be shared as git repositories and installed by others in a single
 
 ## ➕ Create an extension
 
-The core command `valet self extend` allows to create a new extension (here named `my-extension`):
+The core command `valet extensions create` allows to create a new extension (here named `my-extension`):
 
 ```bash
-valet self extend my-extension
+valet extensions create my-extension
 ```
 
 Move to the created directory (`cd` into it) and start creating your new [commands][new-commands] and [libraries][new-libraries].
@@ -73,20 +73,20 @@ Once your extension is created, you can start developing your commands, librarie
 
 To share your extension, make it a git repository with `git init`, then commit and push your files to a remote Git server such as [GitHub][github].
 
-Others can then install your extension with the `valet self extend` command.
+Others can then install your extension with the `valet extensions install` command.
 
 For instance, the following command will install the `valet-devops-toolbox` extension from GitHub:
 
 ```bash
-valet self extend https://github.com/jcaillon/valet-devops-toolbox.git
+valet extensions install https://github.com/jcaillon/valet-devops-toolbox.git
 ```
 
 > [!TIP]
-> By default, the `valet self extend` command will install the extension from the `latest` git reference.
+> By default, the `valet extensions install` command will install the extension from the `latest` git reference.
 >
 > As a best practice, you should version your extension and always push the latest version to the `latest` branch.
 >
-> You can also install a specific version of the extension by providing the git reference `--version my-ref`. See `valet self extend --help` for more options.
+> You can also install a specific version of the extension by providing the git reference `--version my-ref`. See `valet extensions install --help` for more options.
 
 ## 🚧 Install dependencies
 

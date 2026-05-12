@@ -7,7 +7,7 @@ function main() {
   export VALET_CONFIG_EXTENSIONS_DIRECTORY="${REPLY}"
 
   test::title "✅ Testing extensions create"
-  OSTYPE="msys"
+  OSTYPE="linux-gnu"
   test::exec extensionsCreate test1
 
   test::listPaths "${VALET_CONFIG_EXTENSIONS_DIRECTORY}/test1" recursive=true includeHidden=true
