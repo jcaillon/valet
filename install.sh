@@ -70,7 +70,7 @@ fi
 
 # The version of Valet downloaded by this install script.
 # This value is automatically updated by the `valet self release` command when a new release is published.
-VALET_RELEASED_VERSION="0.36.26"
+VALET_RELEASED_VERSION="0.37.1138"
 
 function main() {
   local \
