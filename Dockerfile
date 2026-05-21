@@ -22,7 +22,6 @@ ENV LANGUAGE=C.UTF-8
 # ✅ self config + build
 # ✅ add the valet binary to the path
 RUN \
-echo "LANG=C.UTF-8" >> /etc/locale.conf; \
 echo -e "#"'!'"/usr/bin/env bash"$'\n'"/opt/valet/valet \"\$@\"" > /usr/local/bin/valet; \
 chmod +x /opt/valet/valet; \
 chmod +x /opt/valet/commands.d/self-build.sh; \

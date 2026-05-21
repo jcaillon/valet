@@ -243,3 +243,5 @@ Returned code: `1`
 
 Returned code: `1`
 
+❯ `system::isDirectoryInPath xxxx`
+

@@ -1,0 +1,19 @@
+[tools]
+hugo-extended = "0.154.5"
+
+[env]
+HUGO_OPTIONS = "--printI18nWarnings --printPathWarnings --cleanDestinationDir --logLevel debug"
+
+[tasks]
+
+[tasks.build]
+description = "Build"
+run = "hugo build $HUGO_OPTIONS"
+
+[tasks.serve]
+description = "Serve the site locally"
+run = "hugo server --openBrowser $HUGO_OPTIONS"
+
+[tasks.draft]
+description = "Serve the site locally including drafts and future posts"
+run = "hugo server --openBrowser $HUGO_OPTIONS --buildDrafts --buildFuture"

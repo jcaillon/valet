@@ -46,6 +46,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - In benchmark, with debug mode on, we can compute the time spent on each line of a function. See extdebug shopt.
 - add snippets for the esc codes. Add snippets on the global variables.
 - Revamp self build:
+  - <https://usage.jdx.dev/spec/reference/>
   - an error in the user extensions should not prevent from building valet core commands so we don't fail an install
   - add more checks on command definition
   - Filter build command for `commands.d` directory
