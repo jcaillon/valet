@@ -570,14 +570,14 @@ function test::setTerminalInputs() {
 # - $1: **current value** _as int_:
 #       The current elapsed time in microseconds.
 # - ${increment} _as int_:
-#       The increment to add to the elapsed time at each call.
+#       The increment in microseconds to add to the elapsed time at each call.
 #       defaults to 1000000 (1 second).
 # - ${incrementIncrement} _as int_:
-#       The increment to add to the increment at each call.
+#       The increment in microseconds to add to the increment at each call.
 #       defaults to 0.
 #
 # ```bash
-# test::setProgramElapsedFunction currentValue=0 increment=1000000 incrementIncrement=1000000
+# test::setProgramElapsedFunction 0 increment=1000000 incrementIncrement=1000000
 # ```
 # shellcheck disable=SC2034
 function test::setProgramElapsedFunction() {
