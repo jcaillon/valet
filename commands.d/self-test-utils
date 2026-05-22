@@ -85,14 +85,14 @@ function selfTestUtils_setupValetForConsistency() {
   # shellcheck disable=SC2317
   function time::getProgramElapsedMicroseconds() {
     if [[ -z ${GLOBAL_FAKE_TIME:-} ]]; then
-      GLOBAL_FAKE_TIME=0
       GLOBAL_FAKE_TIME_INCREMENT=1000000
-      GLOBAL_FAKE_TIME_INCREMENT_INCREMENT=1000000
+      GLOBAL_FAKE_TIME_INCREMENT_INCREMENT=0
+      GLOBAL_FAKE_TIME=${GLOBAL_FAKE_TIME_INCREMENT}
       REPLY=0
       return 0
     fi
-    ((GLOBAL_FAKE_TIME += GLOBAL_FAKE_TIME_INCREMENT, GLOBAL_FAKE_TIME_INCREMENT += GLOBAL_FAKE_TIME_INCREMENT_INCREMENT))
     REPLY="${GLOBAL_FAKE_TIME}"
+    ((GLOBAL_FAKE_TIME += GLOBAL_FAKE_TIME_INCREMENT, GLOBAL_FAKE_TIME_INCREMENT += GLOBAL_FAKE_TIME_INCREMENT_INCREMENT))
   }
 
   # define it so we can check if it has elements when printing the reply values of a function

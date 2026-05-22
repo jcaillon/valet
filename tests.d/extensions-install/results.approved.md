@@ -82,7 +82,7 @@ TRACE    Git standard error stream:
    1 ░ mocking git clone --no-checkout https://git.ok/repo-error.git /tmp/valet.d/d1-2/xxxx
    2 ░ targetDirectory: /tmp/valet.d/d1-2/xxxx
    3 ░ Simulating an error in git clone.
-FAIL     The command git ended with exit code 1 in 11.000s.
+FAIL     The command git ended with exit code 1 in 1.000s.
 ```
 
 ### ✅ Testing extensions install error on checkout and unattended

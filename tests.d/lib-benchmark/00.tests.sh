@@ -10,6 +10,8 @@ function main() {
 function test_benchmark::run() {
   test::title "✅ Testing benchmark::run"
 
+  test::setProgramElapsedFunction 0 incrementIncrement=1000000
+
   test::exec declare -f test_function_1 test_function_2 test_function_3
   test::exec benchmark::run test_function_1 test_function_2 test_function_3 --- baselineTimeInSeconds=3 maxRun=5
 }

@@ -26,7 +26,7 @@ TRACE    Git standard error stream:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--git-stderr
    1 ░ mocking git -C /tmp/valet.d/d1-2/extension-error-fetch fetch -q
    2 ░ could not fetch!
-WARNING  The command git ended with exit code 1 in 15.000s.
+WARNING  The command git ended with exit code 1 in 1.000s.
 Failed to fetch for the repo ⌜/tmp/valet.d/d1-2/extension-error-fetch⌝.
    ╭─────────────────────────────────────────────────────────────────────────────────────────────────────╮
 ░──┤ A new version is available for the extension extension-to-update-with-fail-setup: old1234..new1234. 106│

@@ -61,7 +61,7 @@ TRACE    Fake standard error stream:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr
    1 ░ INFO: log line from fake mock to stderr
    2 ░ ERROR: returning error from fake
-FAIL     The command fake ended with exit code 1 in 3.000s.
+FAIL     The command fake ended with exit code 1 in 1.000s.
 ```
 
 Error, fails with message (exit):
@@ -80,7 +80,7 @@ TRACE    Fake standard error stream:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr
    1 ░ INFO: log line from fake mock to stderr
    2 ░ ERROR: returning error from fake
-FAIL     The command fake ended with exit code 1 in 3.000s.
+FAIL     The command fake ended with exit code 1 in 1.000s.
 Custom error message.
 ```
 
@@ -137,7 +137,7 @@ TRACE    Fake standard output stream:
 TRACE    Fake standard error stream:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr
    1 ░ INFO: log line from fake mock to stderr
-DEBUG    The command fake ended with exit code 0 in 7.000s.
+DEBUG    The command fake ended with exit code 0 in 1.000s.
 ```
 
 Returned variables:
@@ -283,7 +283,7 @@ TRACE    Fake standard error stream:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-stderr
    1 ░ INFO: log line from fake mock to stderr
    2 ░ ERROR: returning error from fake
-WARNING  The command fake ended with exit code 1 in 23.000s.
+WARNING  The command fake ended with exit code 1 in 1.000s.
 ```
 
 Returned variables:
@@ -315,7 +315,7 @@ TRACE    Fake-command standard output stream:
 /tmp/valet.valet.d/saved-files/1987-05-25T01-00-00+0000--PID_001234--fake-command-stdout
    1 ░ ok
 TRACE    Fake-command had no standard error stream.
-DEBUG    The command fake-command ended with exit code 0 in 25.000s.
+DEBUG    The command fake-command ended with exit code 0 in 1.000s.
 ```
 
 Returned variables:
