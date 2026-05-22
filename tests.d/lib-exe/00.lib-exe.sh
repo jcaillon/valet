@@ -66,7 +66,7 @@ function test_exe::invoke() {
   log::setLevel trace silent=true
   chmod +x "${PWD}/fake-command"
   export PATH="${PWD}:${PATH}"
-  test::func exe::invoke command fake-command --std-in --- noFail=true stdin="input_stream"
+  test::func exe::invoke command fake-command --std-in --- noFail=true stdin="input_stream" failMessage="custom message"
   log::setLevel info
 
   OSTYPE="msys"

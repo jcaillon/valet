@@ -299,7 +299,7 @@ ERROR: returning error from fake
 
 Starting with command:
 
-❯ `exe::invoke command fake-command --std-in --- noFail=true stdin=input_stream`
+❯ `exe::invoke command fake-command --std-in --- noFail=true stdin=input_stream failMessage=custom\ message`
 
 **Error output**:
 

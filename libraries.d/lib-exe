@@ -203,7 +203,7 @@ function exe::invoke() {
     exitCode=0
     log::trace "The error code ${exitCode} is acceptable and has been reset to 0."
   else
-    if [[ -n ${failMessage} ]]; then
+    if [[ ${exitCode} -ne 0 && -n ${failMessage} ]]; then
       debugMessage+=$'\n'"${failMessage}"
     fi
   fi
