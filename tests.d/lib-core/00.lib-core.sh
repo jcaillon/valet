@@ -2,6 +2,8 @@
 
 # shellcheck source=../../libraries.d/lib-fs
 source fs
+# shellcheck source=../../libraries.d/lib-terminal
+source terminal
 
 function main() {
   test_core::dump
@@ -65,7 +67,6 @@ function test_core::exit() {
   test::exit core::exit
   test::exit core::exit 255
   test::exit core::exit 1 silent=true
-
 
   test::title "✅ Test normal exit"
   test::exit exit

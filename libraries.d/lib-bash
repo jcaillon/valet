@@ -86,12 +86,10 @@ function bash::runInSubshell() {
 
   # ensure terminal settings are saved if needed because if that happens in the subshell
   # we would not be able to restore it in the main shell
-  if [[ -z ${GLOBAL_STTY_SAVED_CONFIG:-} ]]; then
-    if ! declare -F terminal::saveSettings &>/dev/null; then
-      include terminal
-    fi
-    terminal::saveSettings
+  if ! declare -F terminal::saveSettings >/dev/null 2>&1; then
+    include terminal
   fi
+  terminal::saveSettings
 
   # disable the ERR trap or we would catch the subshell failure with it and not restore
   # the errexit and the original trap (and we would display an error message that we do
@@ -116,6 +114,10 @@ function bash::runInSubshell() {
   set -o errexit
   # restore the original ERR trap
   trap trap::onErrorInternal ERR
+
+  # restore terminal settings (if they were changed in the subshell, they can't be restored in the subshell)
+  terminal::restoreSettings force=true
+
   if [[ ${exitOnFail} == "true" && ${subshellExitCode} -gt 0 ]]; then
     # shellcheck disable=SC2034
     core::exit "${subshellExitCode}" silent=true
