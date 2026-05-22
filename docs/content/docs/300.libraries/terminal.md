@@ -332,15 +332,14 @@ terminal::restoreLogs
 Restore the terminal options to their original state.
 Should be called after `terminal::setRawMode`.
 
-Example usage:
+Inputs:
 
-```bash
-terminal::restoreSettings
-```
+- `${force}` _as bool_:
 
-> Note that the bash read builtin will restore stty state as it was before entering.
-> So you want to call this after all read has been finished (particularly, you want to kill
-> any background process that is reading inputs before trying to restore these settings).
+  (optional) true to force restore settings even if not in raw mode.
+  By default, restore only if we previously called `terminal::setRawMode`.
+
+  (defaults to false)
 
 ## ⚡ terminal::saveSettings
 
@@ -491,4 +490,4 @@ terminal::waitForKeyPress -t 0.1
 >    and send a specific sequence of characters that you can bind in bash.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.38.142 (2026-05-22).
+> Documentation generated for the version 0.39.12 (2026-05-22).

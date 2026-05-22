@@ -1,5 +1,5 @@
 {
-// Documentation generated for the version 0.38.142 (2026-05-22).
+// Documentation generated for the version 0.39.12 (2026-05-22).
 
 "array::appendIfNotPresent": {
   "prefix": "array::appendIfNotPresent",
@@ -2245,14 +2245,14 @@
   "prefix": "terminal::restoreSettings",
   "description": "Restore the terminal options to their original state...",
   "scope": "",
-  "body": [ "terminal::restoreSettings$0" ]
+  "body": [ "terminal::restoreSettings force=${1:false}$0" ]
 },
 
 "terminal::restoreSettings#withdoc": {
   "prefix": "terminal::restoreSettings#withdoc",
   "description": "Restore the terminal options to their original state...",
   "scope": "",
-  "body": [ "# ## terminal::restoreSettings\n# \n# Restore the terminal options to their original state.\n# Should be called after `terminal::setRawMode`.\n# \n# ```bash\n# terminal::restoreSettings\n# ```\n# \n# > Note that the bash read builtin will restore stty state as it was before entering.\n# > So you want to call this after all read has been finished (particularly, you want to kill\n# > any background process that is reading inputs before trying to restore these settings).\n# \nterminal::restoreSettings$0" ]
+  "body": [ "# ## terminal::restoreSettings\n# \n# Restore the terminal options to their original state.\n# Should be called after `terminal::setRawMode`.\n# \n# - \\${force} _as bool_:\n#       (optional) true to force restore settings even if not in raw mode.\n#       By default, restore only if we previously called `terminal::setRawMode`.\n#       (defaults to false)\n# \nterminal::restoreSettings force=${1:false}$0" ]
 },
 
 "terminal::saveSettings": {
