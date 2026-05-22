@@ -708,4 +708,4 @@ echo "${REPLY}"
 > - It considers escape sequence for text formatting and does not count them as visible characters.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.37.1138 (2026-05-12).
+> Documentation generated for the version 0.38.142 (2026-05-22).

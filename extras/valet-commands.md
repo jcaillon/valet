@@ -1,6 +1,6 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.37.1138 (2026-05-12).
+> Documentation generated for the version 0.38.142 (2026-05-22).
 
 ## ▶️ valet bash bootstrap
 
@@ -236,6 +236,71 @@ valet bash links [options]
 - `valet bash links`
 
   Create symbolic links as defined in the links definition directory.
+
+## ▶️ valet extensions add-command
+
+### Synopsis
+
+Call this function in an extension directory to add a new command to the extension.
+
+This will create a file from a command template in the **commands.d** directory.
+
+
+### Usage
+
+```bash
+valet extensions add-command [options] [--] <command-name>
+```
+
+### Options
+
+- `-h, --help`
+
+  Display the help for this command.
+
+### Arguments
+
+- `command-name`
+
+  The name of the command to create.
+
+### Examples
+
+- `valet extensions add-command my-command`
+
+  Create a new command named **my-command** in the current extension under the **commands.d** directory.
+
+## ▶️ valet extensions add-library
+
+### Synopsis
+
+Call this function in an extension directory to add a new library to the extension.
+
+This will create a file from a library template in the **libraries.d** directory.
+
+### Usage
+
+```bash
+valet extensions add-library [options] [--] <library-name>
+```
+
+### Options
+
+- `-h, --help`
+
+  Display the help for this command.
+
+### Arguments
+
+- `library-name`
+
+  The name of the library to create.
+
+### Examples
+
+- `valet extensions add-library my-library`
+
+  Create a new library named **my-library** in the current extension under the **libraries.d** directory.
 
 ## ▶️ valet extensions create
 
@@ -971,7 +1036,7 @@ You can create your own commands and have them available in valet.
 
 A command is part of an extension, which is a collection of commands.
 
-To get started, run the command **valet self create-extension**.
+To get started, run the command **valet extensions create**.
 
 ### Usage
 
@@ -1089,6 +1154,14 @@ valet [options] [--] [commands...]
 
   Do nothing.
 
+- `extensions add-command`
+
+  Add a new command to the current extension.
+
+- `extensions add-library`
+
+  Add a new library to the current extension.
+
 - `extensions create`
 
   Create a new Valet extension.
@@ -1177,14 +1250,6 @@ valet [options] [--] [commands...]
 
   Sends a notification to the team.
 
-- `self add-command`
-
-  Add a new command to the current extension.
-
-- `self add-library`
-
-  Add a new library to the current extension.
-
 - `self build`
 
   Index all the commands and libraries present in the valet extensions directory and installation directory.
@@ -1196,10 +1261,6 @@ valet [options] [--] [commands...]
 - `self document`
 
   Generate the documentation and code snippets for all the library functions of Valet.
-
-- `self extend`
-
-  Extends Valet by creating or downloading a new extension in the user directory.
 
 - `self release`
 
@@ -1263,4 +1324,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.37.1138 (2026-05-12).
+> Documentation generated for the version 0.38.142 (2026-05-22).

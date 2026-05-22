@@ -173,4 +173,4 @@ echo "${MY_STRING}"
 > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.37.1138 (2026-05-12).
+> Documentation generated for the version 0.38.142 (2026-05-22).
