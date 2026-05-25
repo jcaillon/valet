@@ -4,17 +4,43 @@
 
 ### ✅ Testing time::isSpamming function
 
-❯ `time::isSpamming 1900000`
+❯ `time::isSpamming xxx`
 
-❯ `time::isSpamming 1900000`
+Exited with code: `1`
 
-❯ `time::isSpamming 1900000`
+**Error output**:
+
+```text
+FAIL     Invalid time format for time::isTimerElapsed: xxx (must be in s, ms, or us)
+```
+
+❯ `time::isSpamming 900us`
 
 Returned code: `1`
 
-### ✅ Testing time::isSpamming called from a different function
+❯ `time::isSpamming 1000000us`
 
-### ✅ Testing time::isSpamming using timerName
+❯ `time::isSpamming 900000us`
+
+Returned code: `1`
+
+❯ `time::isSpamming 1100ms`
+
+❯ `time::isSpamming 900ms`
+
+Returned code: `1`
+
+❯ `time::isSpamming 2s`
+
+❯ `time::isSpamming 1s`
+
+Returned code: `1`
+
+❯ `time::isSpamming 2s timerName=xxx`
+
+Returned code: `1`
+
+❯ `time::isSpamming 2s timerName=xxx`
 
 ### ✅ Testing time::getMicrosecondsFromSeconds function
 
@@ -102,23 +128,47 @@ REPLY='1234.567890'
 
 ### ✅ Testing time::startTimer function
 
-❯ `time::startTimer`
+❯ `time::isTimerElapsed 2s`
 
-❯ `time::getTimerMicroseconds`
-
-Returned variables:
-
-```text
-REPLY='1000000'
-```
-
-❯ `time::getTimerMicroseconds logElapsedTime=true`
+Exited with code: `1`
 
 **Error output**:
 
 ```text
-INFO     Elapsed time: 2.000s
+FAIL     The timer ⌜bash::runInSubshell⌝ does not exist. Please call time::startTimer with the same timerName before calling this function.
 ```
+
+❯ `time::getTimerMicroseconds`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+FAIL     The timer ⌜bash::runInSubshell⌝ does not exist. Please call time::startTimer with the same timerName before calling this function.
+```
+
+❯ `time::isTimerElapsed 23`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+FAIL     Invalid time format for time::isTimerElapsed: 23 (must be in s, ms, or us)
+```
+
+❯ `time::startTimer`
+
+❯ `time::logTimerElapsedTime`
+
+**Error output**:
+
+```text
+INFO     Elapsed time: 1.000s.
+```
+
+❯ `time::getTimerMicroseconds`
 
 Returned variables:
 
@@ -126,18 +176,44 @@ Returned variables:
 REPLY='2000000'
 ```
 
-❯ `time::getTimerMicroseconds format=%L logElapsedTime=true`
+❯ `time::logTimerElapsedTime format=%L`
 
 **Error output**:
 
 ```text
-INFO     Elapsed time: 3000
+INFO     Elapsed time: 3000.
 ```
+
+❯ `time::getTimerMicroseconds format=%L`
 
 Returned variables:
 
 ```text
-REPLY='3000000'
+REPLY='4000'
+```
+
+❯ `time::isTimerElapsed 2s`
+
+❯ `time::startTimer timerName=myTimer`
+
+❯ `time::isTimerElapsed 2s timerName=myTimer`
+
+Returned code: `1`
+
+❯ `time::getTimerMicroseconds timerName=myTimer`
+
+Returned variables:
+
+```text
+REPLY='2000000'
+```
+
+❯ `time::logTimerElapsedTime timerName=myTimer format=%L`
+
+**Error output**:
+
+```text
+INFO     Elapsed time: 3000.
 ```
 
 ### ✅ Testing time::getDate

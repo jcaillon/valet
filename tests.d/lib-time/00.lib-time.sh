@@ -4,8 +4,6 @@
 source time
 
 function main() {
-  test::setProgramElapsedFunction 0 increment=1000000 incrementIncrement=0
-
   test_time::isSpamming
   test_time::getMicrosecondsFromSeconds
   test_time::getSecondsFromMicroseconds
@@ -17,39 +15,31 @@ function main() {
 function test_time::isSpamming() {
   test::title "✅ Testing time::isSpamming function"
 
-  test::func time::isSpamming 1900000
-  test::func time::isSpamming 1900000
-  test::func time::isSpamming 1900000
+  test::setProgramElapsedFunction 0 increment=1000000 incrementIncrement=0
 
-  test::title "✅ Testing time::isSpamming called from a different function"
-  if ! time::isSpamming 1900000; then
-    test::fail "time::isSpamming bad returned value"
-  fi
-  if ! time::isSpamming 1900000; then
-    test::fail "time::isSpamming bad returned value"
-  fi
+  test::exit time::isSpamming xxx
+
+  test::func time::isSpamming 900us
+  test::func time::isSpamming 1000000us
+  test::func time::isSpamming 900000us
+  test::func time::isSpamming 1100ms
+  test::func time::isSpamming 900ms
+  test::func time::isSpamming 2s
+  test::func time::isSpamming 1s
+  test::func time::isSpamming 2s timerName=xxx
+  test::func time::isSpamming 2s timerName=xxx
+
   function test_time::isSpamming_sub() {
-    if ! time::isSpamming 1900000; then
+    if time::isSpamming 0s; then
+      test::fail "time::isSpamming bad returned value"
+    fi
+  }
+  function test_time::isSpamming_sub2() {
+    if time::isSpamming 900ms timerName=myTimerName; then
       test::fail "time::isSpamming bad returned value"
     fi
   }
   test_time::isSpamming_sub
-  if time::isSpamming 1900000; then
-    test::fail "time::isSpamming bad returned value"
-  fi
-
-  test::title "✅ Testing time::isSpamming using timerName"
-  if ! time::isSpamming 1900000 timerName=myTimerName; then
-    test::fail "time::isSpamming bad returned value"
-  fi
-  if ! time::isSpamming 1900000 timerName=myTimerName; then
-    test::fail "time::isSpamming bad returned value"
-  fi
-  function test_time::isSpamming_sub2() {
-    if time::isSpamming 1900000 timerName=myTimerName; then
-      test::fail "time::isSpamming bad returned value"
-    fi
-  }
   test_time::isSpamming_sub2
 }
 
@@ -76,10 +66,23 @@ function test_time::getSecondsFromMicroseconds() {
 function test_time::startTimer() {
   test::title "✅ Testing time::startTimer function"
 
-  test::exec time::startTimer
+  test::setProgramElapsedFunction 0 increment=1000000 incrementIncrement=0
+
+  test::exit time::isTimerElapsed 2s
+  test::exit time::getTimerMicroseconds
+  test::exit time::isTimerElapsed 23
+
+  test::func time::startTimer
+  test::func time::logTimerElapsedTime
   test::func time::getTimerMicroseconds
-  test::func time::getTimerMicroseconds logElapsedTime=true
-  test::func time::getTimerMicroseconds format=%L logElapsedTime=true
+  test::func time::logTimerElapsedTime format=%L
+  test::func time::getTimerMicroseconds format=%L
+  test::func time::isTimerElapsed 2s
+
+  test::func time::startTimer timerName=myTimer
+  test::func time::isTimerElapsed 2s timerName=myTimer
+  test::func time::getTimerMicroseconds timerName=myTimer
+  test::func time::logTimerElapsedTime timerName=myTimer format=%L
 }
 
 function test_time::getDate() {

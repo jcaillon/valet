@@ -125,28 +125,48 @@ function time::getHumanTimeFromMicroseconds() {
 
 # ## time::startTimer
 #
-# Start a timer. You can then call `time::getTimerMicroseconds` to get the elapsed time.
+# Start a new timer.
+# You can then call `time::getTimerMicroseconds` to get the elapsed time.
+# Or call `time::isTimerElapsed` to check if a given time has elapsed since the call of this function.
+#
+# # - ${timerName} _as string_:
+#       (optional) A variable name that will be used to store the start time of the timer.
+#       Defaults to the name of the calling function.
+#       Can be set to a fixed value if you call this function from different functions
+#       and want to share the same timer.
+#       (defaults to "${FUNCNAME[1]}")
 #
 # ```bash
-# time::startTimer
-# time::getTimerMicroseconds
+# time::startTimer myTimer
+# time::getTimerMicroseconds myTimer
 # ```
 function time::startTimer() {
+  local \
+    timerName="${FUNCNAME[1]:-main}" \
+    REPLY \
+    IFS=" "
+  eval "local a= ${*@Q}"
+
   time::getProgramElapsedMicroseconds
-  _TIME_TIMER_START="${REPLY}"
+  declare -g "_TIME_TIMER_${timerName//[^a-zA-Z0-9_]/_}=${REPLY}"
+
+  return 0
 }
 
 # ## time::getTimerMicroseconds
 #
 # Get the time elapsed since the call of `time::startTimer`.
+# By default, it returns an integer representing the elapsed time in microseconds,
+# but you can change the output format with the `format` option.
 #
-# - ${logElapsedTime} _as bool_:
-#       (optional) Wether or not to log the elapsed time.
-#       (defaults to false)
+# - ${timerName} _as string_:
+#       (optional) A variable name that will be used to fetch the start time of the timer.
+#       Must match the one used in the call of `time::startTimer`.
+#       (defaults to "${FUNCNAME[1]}")
 # - ${format} _as string_:
-#       (optional) The format to use if we log the elapsed time.
+#       (optional) The format with which to output the elapsed time.
 #       See `time::getHumanTimeFromMicroseconds` for the format.
-#       (defaults to "%S.%LLs").
+#       (defaults to "%U").
 #
 # Returns:
 #
@@ -154,25 +174,108 @@ function time::startTimer() {
 #
 # ```bash
 # time::startTimer
-# time::getTimerMicroseconds logElapsedTime=true
-# echo "Total microseconds: ${REPLY}"
+# time::getTimerMicroseconds format="%S.%LLs"
+# echo "Total elapsed time: ${REPLY}"
 # ```
 function time::getTimerMicroseconds() {
   local \
-    logElapsedTime=false \
-    format="%S.%LLs" \
+    timerName="${FUNCNAME[1]:-main}" \
+    format="%U" \
     IFS=" "
   eval "local a= ${*@Q}"
 
-  time::getProgramElapsedMicroseconds
-  local -i elapsed=$((REPLY - _TIME_TIMER_START))
-
-  if [[ ${logElapsedTime} == "true" ]]; then
-    time::getHumanTimeFromMicroseconds ${elapsed} format="${format}"
-    log::info "Elapsed time: ${REPLY}"
+  local -n lastTime="_TIME_TIMER_${timerName//[^a-zA-Z0-9_]/_}"
+  if [[ ! -v lastTime ]]; then
+    core::fail "The timer ⌜${timerName}⌝ does not exist. Please call time::startTimer with the same timerName before calling this function."
   fi
 
-  REPLY="${elapsed}"
+  time::getProgramElapsedMicroseconds
+
+  if [[ ${format} == "%U" ]]; then
+    REPLY="$((REPLY - lastTime))"
+  else
+    time::getHumanTimeFromMicroseconds $((REPLY - lastTime)) format="${format}"
+  fi
+}
+
+# ## time::isTimerElapsed
+#
+# Check if a given time has elapsed since the call of `time::startTimer`.
+#
+# - $1: **time** _as string_:
+#       The time to check. Must be an integer followed by a unit.
+#       Can be given in seconds (s), milliseconds (ms) or microseconds (us).
+# - ${timerName} _as string_:
+#       (optional) A variable name that will be used to fetch the start time of the timer.
+#       Must match the one used in the call of `time::startTimer`.
+#       (defaults to "${FUNCNAME[1]}")
+#
+# Returns:
+#
+# - $?: 0 if the time has elapsed, 1 if it has not.
+#
+# ```bash
+# time::startTimer
+# if time::isTimerElapsed 500ms; then
+#   echo "500ms has elapsed since the last call to time::startTimer"
+# fi
+# ```
+function time::isTimerElapsed() {
+  local \
+    time="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    timerName="${FUNCNAME[1]:-main}" \
+    REPLY \
+    IFS=" "
+  shift 1
+  eval "local a= ${*@Q}"
+
+  case "${time}" in
+  *us) time="${time%us}" ;;
+  *ms) time="${time%ms}000" ;;
+  *s) time="${time%s}000000" ;;
+  *) core::fail "Invalid time format for time::isTimerElapsed: ${time} (must be in s, ms, or us)" ;;
+  esac
+
+  local -n lastTime="_TIME_TIMER_${timerName//[^a-zA-Z0-9_]/_}"
+  if [[ ! -v lastTime ]]; then
+    core::fail "The timer ⌜${timerName}⌝ does not exist. Please call time::startTimer with the same timerName before calling this function."
+  fi
+
+  time::getProgramElapsedMicroseconds
+  if ((REPLY - lastTime >= time)); then
+    return 0
+  fi
+  return 1
+}
+
+# ## time::logTimerElapsedTime
+#
+# Log the time elapsed since the call of `time::startTimer`.
+#
+# - ${timerName} _as string_:
+#       (optional) A variable name that will be used to fetch the start time of the timer.
+#       Must match the one used in the call of `time::startTimer`.
+#       (defaults to "${FUNCNAME[1]}")
+# - ${format} _as string_:
+#       (optional) The format with which to output the elapsed time.
+#       See `time::getHumanTimeFromMicroseconds` for the format.
+#       (defaults to "%S.%LLs").
+#
+# ```bash
+# time::startTimer
+# # some code
+# time::logTimerElapsedTime
+# ```
+function time::logTimerElapsedTime() {
+  local \
+    timerName="${FUNCNAME[1]:-main}" \
+    format="%S.%LLs" \
+    REPLY \
+    IFS=" "
+  eval "local a= ${*@Q}"
+
+  time::getTimerMicroseconds timerName="${timerName}" format="${format}"
+  log::info "Elapsed time: ${REPLY}."
 }
 
 # ## time::getSecondsFromMicroseconds
@@ -243,15 +346,15 @@ function time::getMicrosecondsFromSeconds() {
 
 # ## time::isSpamming
 #
-# Check if a given time in microseconds has not been elapsed since the last call
-# to this function.
+# Check if it's been less than a given delay since the last call to this function.
 #
 # Can be used to check if a function is being called too often, for example a user
 # spamming a command or key.
 #
-# - $1: **microseconds** _as int_:
-#       the microseconds to check
-# - ${timerName} _as int_:
+# - $1: **time** _as string_:
+#       The time to check. Must be an integer followed by a unit.
+#       Can be given in seconds (s), milliseconds (ms) or microseconds (us).
+# - ${timerName} _as string_:
 #       A variable name that will be used to store the last time this function was called.
 #       Defaults to the name of the calling function.
 #       Can be set to a fixed value if you call this function from different functions
@@ -260,39 +363,44 @@ function time::getMicrosecondsFromSeconds() {
 #
 # Returns:
 #
-# - 0 if the time has not elapsed yet (spamming)
-# - 1 if the time has elapsed (not spamming)
+# - $?:
+#   - 0 if the time has not elapsed yet (spamming)
+#   - 1 if the time has elapsed (not spamming)
 #
 # ```bash
-# if time::isSpamming 500000; then
+# if time::isSpamming 500ms; then
 #   echo "500ms has elapsed since the last call to this function"
 # fi
 # ```
 function time::isSpamming() {
   local \
-    microseconds="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    time="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     timerName="${FUNCNAME[1]:-main}" \
+    REPLY \
     IFS=" "
   shift 1
   eval "local a= ${*@Q}"
 
-  timerName="${timerName//[^a-zA-Z0-9_]/_}"
+  case "${time}" in
+  *us) time="${time%us}" ;;
+  *ms) time="${time%ms}000" ;;
+  *s) time="${time%s}000000" ;;
+  *) core::fail "Invalid time format for time::isTimerElapsed: ${time} (must be in s, ms, or us)" ;;
+  esac
 
-  local REPLY
   time::getProgramElapsedMicroseconds
 
-  if [[ ! -v _TIME_IS_TIME_ELAPSED_${timerName} ]]; then
-    # initialize the variable to 0 if it does not exist
-    declare -g "_TIME_IS_TIME_ELAPSED_${timerName}=${REPLY}"
-    return 0
+  timerName="${timerName//[^a-zA-Z0-9_]/_}"
+  if [[ ! -v _TIME_SPAM_${timerName} ]]; then
+    # initialize the variable if it does not exist
+    declare -g "_TIME_SPAM_${timerName}=${REPLY}"
+    return 1
   fi
+  local -n lastTime="_TIME_SPAM_${timerName}"
 
-  local -n lastTime="_TIME_IS_TIME_ELAPSED_${timerName}"
-
-  if ((REPLY - lastTime >= microseconds)); then
+  if ((REPLY - lastTime > time)); then
+    # enough time has elapsed
     lastTime="${REPLY}"
     return 1
   fi
-
-  return 0
 }

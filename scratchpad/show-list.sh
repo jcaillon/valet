@@ -7,9 +7,8 @@ export VALET_CONFIG_LOG_PATTERN="<elapsedTime>{8s} [<pid>{04s}:<subshell>{1s}] <
 source "$(valet --source)"
 include list bash terminal
 
-
 # load the file
-mapfile -t MY_ARRAY < "scratchpad/words"
+mapfile -t MY_ARRAY <"scratchpad/words"
 
 MY_ARRAY=(
   "apple"$'\n'"(green)"
@@ -57,9 +56,7 @@ list::setItems MY_ARRAY
 list::draw
 # list::filter ""
 
-
-_OPTION_LOG_ELAPSED_TIME=true time::getTimerMicroseconds
-
+time::logTimerElapsedTime
 echo "${ESC__CURSOR_MOVE__}$((GLOBAL_CURSOR_LINE + 8));1${__ESC__TO}"
 
 bash::sleep 5

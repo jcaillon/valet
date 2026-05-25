@@ -8,7 +8,7 @@ source "$(valet --source)"
 include list bash terminal time
 
 # load the file
-mapfile -t MY_ARRAY < "scratchpad/words"
+mapfile -t MY_ARRAY <"scratchpad/words"
 
 TWO_LINES_ITEMS=(
   "apple"$'\n'"(green)"
@@ -93,4 +93,4 @@ done
 # for ((i=0; i<200; i++)); do
 #   draw 0 "" 9 "MY_ARRAY" "o" headerPattern="coucou| HI THERE |Items: <colorCount><firstItemNumber>-<lastItemNumber>/<totalItems><colorReset> <colorFrame>(filtered: <filteredItems>) <percentViewed><colorReset>"
 # done
-# time::getTimerMicroseconds logElapsedTime=true
+# time::logTimerElapsedTime
