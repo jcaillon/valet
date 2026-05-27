@@ -10,6 +10,8 @@ source system
 source exe
 # shellcheck source=../libraries.d/lib-bash
 source bash
+# shellcheck source=../libraries.d/lib-command
+source command
 
 #===============================================================
 # >>> command: self setup
@@ -176,6 +178,11 @@ function selfSetup_installShowcase() {
       exe::invoke command rm -Rf "${showcaseDirectory}" --- failMessage="Could not remove the existing showcase (command examples) in ⌜${extensionsDirectory}⌝."
     fi
     exe::invoke command cp -R "${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" "${extensionsDirectory}" --- failMessage="Could not copy the showcase (command examples) to ⌜${extensionsDirectory}⌝."
+
+    # rebuild the command cache
+    log::info "Rebuilding the command cache."
+    command::deleteCommandsIndex
+    command::reloadCommandsIndex
 
     log::success "The showcase (command examples) has been copied to your extensions directory ⌜${showcaseDirectory}⌝."
   fi

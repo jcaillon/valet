@@ -1394,14 +1394,14 @@ function command::sourceCommandFunction() {
     local -n fileToSource="CMD_FILETOSOURCE_${functionName}"
     if [[ -z "${fileToSource:-}" ]]; then
       core::fail "Could not find a command function named ⌜${functionName}⌝."
+    elif [[ -f "${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}" ]]; then
+      # shellcheck disable=SC1090
+      source "${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}"
+      log::debug "Loaded file ⌜${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}⌝ from installation directory."
     elif [[ -f "${fileToSource}" ]]; then
       # shellcheck disable=SC1090
       source "${fileToSource}"
       log::debug "Loaded file ⌜${fileToSource}⌝."
-    elif [[ -f "${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}" ]]; then
-      # shellcheck disable=SC1090
-      source "${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}"
-      log::debug "Loaded file ⌜${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}⌝."
     else
       core::fail "The source file ⌜${GLOBAL_INSTALLATION_DIRECTORY:-}/${fileToSource}⌝ referenced by the function ⌜${functionName}⌝ does not exist!"
     fi

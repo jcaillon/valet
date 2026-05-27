@@ -41,6 +41,9 @@ You can then run the command ⌜valet self setup⌝ again to set up the use of t
 [1F[0J[?25l [7m   (Y)ES   [0m      (N)O   [0m[1G[0K[9G╭──────╮[0m
 [9G│[0m Yes. [16G├──░[0m
 [9G╰──────╯[0m
+INFO     Rebuilding the command cache.
+INFO     The commands index does not exist ⌜/home/me/.local/share/valet/commands⌝.
+Now silently building it using ⌜valet self build⌝ command.
 SUCCESS  The showcase (command examples) has been copied to your extensions directory ⌜/home/me/.valet.d/showcase.d⌝.
    ╭────────────────────────────────────────────────────────────────────────────╮[0m
 ░──┤[0m Do you want to add Valet to your PATH by editing your shell startup files? [81G│[0m
@@ -175,6 +178,9 @@ You can download a nerd-font here: https://www.nerdfonts.com/font-downloads.
 [1F[0J[?25l [7m[95m   (Y)ES   [0m   [7m[90m   (N)O   [0m[1G[0K[9G[90m╭──────╮[0m
 [9G[90m│[0m Yes. [16G[90m├──░[0m
 [9G[90m╰──────╯[0m
+INFO     Rebuilding the command cache.
+INFO     The commands index does not exist ⌜/home/me/.local/share/valet/commands⌝.
+Now silently building it using ⌜valet self build⌝ command.
 SUCCESS  The showcase (command examples) has been copied to your extensions directory ⌜/home/me/.valet.d/showcase.d⌝.
    [90m╭──────────────────────────────────────────────────────────────────────────────────────╮[0m
 [90m░──┤[0m Do you want to create a shim script in ⌜/home/me/.local/bin⌝ to add it to your PATH? [91G[90m│[0m
@@ -219,6 +225,9 @@ VALET_CONFIG_ENABLE_NERDFONT_ICONS=true
 valet self setup --unattended --copy-showcase --create-shim --add-to-path --setup-for-windows --global-installation
 ================================================
 INFO     Now setting up Valet.
+INFO     Rebuilding the command cache.
+INFO     The commands index does not exist ⌜/home/me/.local/share/valet/commands⌝.
+Now silently building it using ⌜valet self build⌝ command.
 SUCCESS  The showcase (command examples) has been copied to your extensions directory ⌜/home/me/.valet.d/showcase.d⌝.
 INFO     Creating a shim ⌜/home/me/.local/bin/valet⌝ → ⌜/home/me/valet/valet⌝.
 SUCCESS  Shim created in ⌜/home/me/.local/bin/valet⌝.
@@ -276,6 +285,9 @@ You can then run the command ⌜valet self setup⌝ again to set up the use of t
 [1F[0J[?25l [7m   (Y)ES   [0m      (N)O   [0m[1G[0K[9G╭──────╮[0m
 [9G│[0m Yes. [16G├──░[0m
 [9G╰──────╯[0m
+INFO     Rebuilding the command cache.
+INFO     The commands index does not exist ⌜/root/.local/share/valet/commands⌝.
+Now silently building it using ⌜valet self build⌝ command.
 SUCCESS  The showcase (command examples) has been copied to your extensions directory ⌜/root/.valet.d/showcase.d⌝.
    ╭────────────────────────────────────────────────────────────────────────────╮[0m
 ░──┤[0m Do you want to add Valet to your PATH by editing your shell startup files? [81G│[0m

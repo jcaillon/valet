@@ -2,6 +2,58 @@
 # author: github.com/jcaillon
 # description: This script can be sourced by commands to provide convenient functions.
 
+# ## fs::getRealPath
+#
+# Get the real path of a path, following symlinks.
+# Returns the absolute path.
+#
+# - $1: **path** _as string_:
+#       The path to translate.
+#
+# Returns:
+#
+# - ${REPLY}: The real path of the path.
+#
+# ```bash
+# fs::getRealPath "myPath"
+# echo "${REPLY}"
+# ```
+#
+# > This is a pure bash alternative to `realpath` or `readlink` only for directories.
+# > To resolve files, it uses one of these two external tools.
+function fs::getRealPath() {
+  local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  if [[ -L ${path} ]]; then
+    if [[ -d ${path} ]] && builtin pushd "${path}" &>/dev/null; then
+      # case of a directory, we do not need an external tool
+      fs::getPwdRealPath
+      builtin popd &>/dev/null || core::fail "Failed to popd back to the previous directory."
+    else
+      # shellcheck source=./lib-exe
+      source exe
+      local REPLY_CODE=1 REPLY2
+      if command -v realpath &>/dev/null; then
+        exe::invoke command realpath "${path}" --- noFail=true
+        REPLY="${REPLY%$'\n'}"
+        if ((REPLY_CODE == 0)); then
+          return 0
+        fi
+      fi
+      if command -v readlink &>/dev/null; then
+        exe::invoke command readlink -f "${path}" --- noFail=true
+        REPLY="${REPLY%$'\n'}"
+        if ((REPLY_CODE == 0)); then
+          return 0
+        fi
+      fi
+      core::fail "Could not resolve the real path of ⌜${path}⌝, check your version of realpath and readlink."
+    fi
+  else
+    fs::getAbsolutePath "${path}"
+  fi
+}
+
 # ## fs::getAbsolutePath
 #
 # This function returns the absolute path of a path.
@@ -112,7 +164,7 @@ function fs::getAbsolutePath() {
 #
 # - ${REPLY}: The realpath for the current directory.
 #
-# > This is a pure bash alternative to `realpath` or `readlink`.
+# > This is a pure bash alternative to `realpath` or `readlink` for directories.
 function fs::getPwdRealPath() {
   local IFS=''
   pwd -P &>"${GLOBAL_TEMPORARY_STDOUT_FILE}"

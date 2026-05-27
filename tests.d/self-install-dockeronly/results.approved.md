@@ -87,6 +87,9 @@ INFO     You can download any font here: https://www.nerdfonts.com/font-download
 [1F[0J[?25l [7m   (Y)ES   [0m      (N)O   [0m[1G[0K[9G╭──────╮[0m
 [9G│[0m Yes. [16G├──░[0m
 [9G╰──────╯[0m
+INFO     Rebuilding the command cache.
+INFO     The commands index does not exist ⌜/home/me/.local/share/valet/commands⌝.
+         Now silently building it using ⌜valet self build⌝ command.
 SUCCESS  The showcase (command examples) has been copied to your extensions directory ⌜/home/me/.valet.d/showcase.d⌝.
    ╭────────────────────────────────────────────────────────────────────────────╮[0m
 ░──┤[0m Do you want to add Valet to your PATH by editing your shell startup files? [81G│[0m
