@@ -8,6 +8,57 @@
 # >>> Traps
 #===============================================================
 
+# ## trap::onCleanUp
+#
+# This function can be defined in a command script to execute some code when the program exits (in all cases, error or not).
+#
+# > This function is executed in the same shell that has been exited, as if we called this function
+# > at the line executed at the moment when the program exited.
+# > Note: The stdout/stderr might be redirected somewhere else if the program exited in a command &>/dev/null.
+
+# ## trap::onInterrupt
+#
+# This function can be defined in a command script to execute some code when the program is interrupted
+# by the end user:
+#
+# -  `CTRL+C` (SIGINT) normal interrupt
+# -  `CTRL+\` (SIGQUIT) interrupt with a coredump
+#
+# If the function returns 0, then the interrupt is cancelled and the program continues to run.
+#
+# > This function is executed in the same shell that has been interrupted, as if we called this function
+# > at the line executed at the moment when the interruption took place.
+
+# ## trap::onTerminate
+#
+# This function can be defined in a command script to execute some code when the program is terminated by the system (SIGHUP, SIGTERM).
+#
+# If the function returns 0, then the termination is cancelled and the program continues to run.
+# Otherwise, the program will exit.
+#
+# > This function is called from the main process.
+
+# ## trap::onResize
+#
+# This function can be defined in a command script to execute some code when terminal changes its size.
+#
+# You can immediately use the global variables `GLOBAL_COLUMNS` and `GLOBAL_LINES` to get the new terminal size.
+#
+# > This function will be called from the main process and it will not be triggered if the program is
+# > busy running an external command (e.g. sleep).
+# > Note that the builtin read command also blocks this trigger only it is finished.
+
+# ## trap::onSuspend
+#
+# This function can be defined in a command script to execute some code when the program is required to pause (CTRL+Z).
+#
+# If the function returns 0, then the suspend is cancelled and the program continues to run.
+
+# ## trap::onContinue
+#
+# This function can be defined in a command script to execute some code when the program is required to
+# resume its execution after a suspend (fg or bg).
+
 # ## trap::register (private)
 #
 # Register the traps for the program.
@@ -146,7 +197,7 @@ function trap::onInterruptInternal() {
     log::print "WARNING" "${ICON_STOPPED:-}" "STOPPED" "Program interrupted by the user."
   fi
 
-  if log::isDebugEnabled; then
+  if log::isDebugEnabled || [[ ${BASH_TRAPSIG:-} == "SIGQUIT" ]]; then
     log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:"
     log::printTrappedBashCommand
     log::printCallStack
@@ -217,6 +268,7 @@ function trap::onSuspendInternal() {
   if declare -F trap::onSuspend &>/dev/null && trap::onSuspend; then
     # if trap::onSuspend returns 0, then we cancel the suspend
     # (we execute it in a if statement to disable errexit and avoid exiting the program)
+    trap trap::onSuspendInternal SIGTSTP
     return 0
   fi
 

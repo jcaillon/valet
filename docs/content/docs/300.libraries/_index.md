@@ -120,6 +120,7 @@ You can also browse the list of available libraries and their functions here;
   {{< card link="terminal" icon="terminal" title="terminal" subtitle="Manipulate the terminal and its display." >}}
   {{< card link="test" icon="beaker" title="test" subtitle="Functions usable in your test scripts." >}}
   {{< card link="time" icon="clock" title="time" subtitle="Functions related to time." >}}
+  {{< card link="trap" icon="cube-transparent" title="trap" subtitle="Functions executed on trapped events." >}}
   <!-- {{< card link="tui" icon="view-boards" title="tui" subtitle="Functions to build a TUI application." >}} -->
   {{< card link="variable" icon="cube" title="variable" subtitle="Manipulate bash variables." >}}
   {{< card link="version" icon="calculator" title="version" subtitle="Compare and manipulate semantic versions." >}}
