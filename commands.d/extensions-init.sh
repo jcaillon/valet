@@ -114,7 +114,7 @@ function extensionsInit_registerExtension() {
     extensionsDirectory="${3}"
 
   # check if the symlink already exists
-  fs::getAbsolutePath "${extensionsDirectory}/${name}" realpath=true
+  fs::getRealPath "${extensionsDirectory}/${name}"
   if [[ ${REPLY} == "${directory}" ]]; then
     log::info "The current directory is already registered as an extension."
     REPLY_CODE=0

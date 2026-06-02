@@ -108,88 +108,6 @@ Returned variables:
 REPLY='24'
 ```
 
-### ✅ Testing fs::getAbsolutePath
-
-❯ `fs::getAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh`
-
-Returned variables:
-
-```text
-REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
-```
-
-❯ `fs::getAbsolutePath .`
-
-Returned variables:
-
-```text
-REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs'
-```
-
-❯ `fs::getAbsolutePath ..`
-
-Returned variables:
-
-```text
-REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d'
-```
-
-❯ `fs::getAbsolutePath 01.invoke.s`
-
-Returned variables:
-
-```text
-REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.s'
-```
-
-❯ `fs::getAbsolutePath ../1004-lib-system/00.tests.sh`
-
-Returned variables:
-
-```text
-REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/../1004-lib-system/00.tests.sh'
-```
-
-❯ `fs::getAbsolutePath resources`
-
-Returned variables:
-
-```text
-REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
-```
-
-❯ `fs::getAbsolutePath ./01.invoke.sh`
-
-Returned variables:
-
-```text
-REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh'
-```
-
-❯ `fs::getAbsolutePath ./resources`
-
-Returned variables:
-
-```text
-REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
-```
-
-❯ `fs::getAbsolutePath missing-file`
-
-Returned variables:
-
-```text
-REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/missing-file'
-```
-
-❯ `fs::getAbsolutePath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/01.invoke.sh realpath=true`
-
-Returned variables:
-
-```text
-REPLY='mocked pwd/01.invoke.sh'
-```
-
 ### ✅ Testing fs::readFile
 
 ❯ `fs::readFile resources/file-to-read maxCharacters=22`
@@ -569,6 +487,210 @@ REPLY_ARRAY=(
 [1]=''
 [2]='Just like veganism is the sustainable option when it comes to looking after our planet, plant-based living is also a more sustainable way of feeding the human family. A plant-based diet requires only one third of the land needed to support a meat and dairy diet. With rising global food and water insecurity due to a myriad of environmental and socio-economic problems, there'"'"'s never been a better time to adopt a more sustainable way of living. Avoiding animal products is not just one of the simplest ways an individual can reduce the strain on food as well as other resources, it'"'"'s the simplest way to take a stand against inefficient food systems which disproportionately affect the poorest people all over the world. Read more about how vegan diets can help people.'
 )
+```
+
+### ✅ Testing fs::getRealPath
+
+❯ `fs::getRealPath folder1`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/folder1'
+```
+
+❯ `fs::getRealPath file1`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/file1'
+```
+
+❯ `fs::getRealPath folder-link1`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/folder1'
+```
+
+❯ `fs::getRealPath folder-link1/subfolder1`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/folder1/subfolder1'
+```
+
+❯ `fs::getRealPath folder1/subfolder1/file2`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/folder1/subfolder1/file2'
+```
+
+❯ `fs::getRealPath folder-link1/subfolder1/file2`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/folder1/subfolder1/file2'
+```
+
+❯ `fs::getRealPath file-link1`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/file1'
+```
+
+❯ `fs::getRealPath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/folder-link1`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/folder1'
+```
+
+❯ `fs::getRealPath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/folder-link1/subfolder1`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/folder1/subfolder1'
+```
+
+❯ `fs::getRealPath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/folder1/subfolder1/file2`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/folder1/subfolder1/file2'
+```
+
+❯ `fs::getRealPath $GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/file-link1`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/file1'
+```
+
+❯ `fs::getRealPath ~/thing`
+
+Returned variables:
+
+```text
+REPLY='/home/user/thing'
+```
+
+❯ `fs::getRealPath file1`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/file1'
+```
+
+❯ `fs::getRealPath file1`
+
+Returned variables:
+
+```text
+REPLY='/current-dir/resources/gitignored/file1'
+```
+
+### ✅ Testing fs::getAbsolutePath
+
+❯ `fs::getAbsolutePath .`
+
+Returned variables:
+
+```text
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored'
+```
+
+❯ `fs::getAbsolutePath ..`
+
+Returned variables:
+
+```text
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources'
+```
+
+❯ `fs::getAbsolutePath ''`
+
+Returned variables:
+
+```text
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored'
+```
+
+❯ `fs::getAbsolutePath ~`
+
+Returned variables:
+
+```text
+REPLY='/home/user'
+```
+
+❯ `fs::getAbsolutePath myfile`
+
+Returned variables:
+
+```text
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/myfile'
+```
+
+❯ `fs::getAbsolutePath .//../myfile`
+
+Returned variables:
+
+```text
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/myfile'
+```
+
+❯ `fs::getAbsolutePath /.//../myfile`
+
+Returned variables:
+
+```text
+REPLY='/myfile'
+```
+
+❯ `fs::getAbsolutePath /././/../hello/there/not/../friend`
+
+Returned variables:
+
+```text
+REPLY='/hello/there/friend'
+```
+
+❯ `fs::getAbsolutePath ../test/file`
+
+Returned variables:
+
+```text
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/test/file'
+```
+
+❯ `fs::getAbsolutePath ./test/file`
+
+Returned variables:
+
+```text
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/test/file'
+```
+
+❯ `fs::getAbsolutePath resources/../resources/.///file-to-read`
+
+Returned variables:
+
+```text
+REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/resources/file-to-read'
 ```
 
 ## Test script 01.listPaths

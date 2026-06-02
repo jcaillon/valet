@@ -27,11 +27,11 @@ function test_system::isDirectoryInPath() {
   test::func system::isDirectoryInPath "/sbin"
 
   # shellcheck disable=SC2317
-  function fs::getAbsolutePath() {
+  function fs::getRealPath() {
     REPLY="/bin"
   }
   test::func system::isDirectoryInPath "xxxx"
-  unset -f fs::getAbsolutePath
+  unset -f fs::getRealPath
 }
 
 function test_system::isWindowsWithoutNativeSymlinks() {

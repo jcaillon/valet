@@ -24,33 +24,40 @@
 function fs::getRealPath() {
   local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  if [[ -L ${path} ]]; then
-    if [[ -d ${path} ]] && builtin pushd "${path}" &>/dev/null; then
-      # case of a directory, we do not need an external tool
-      fs::getPwdRealPath
-      builtin popd &>/dev/null || core::fail "Failed to popd back to the previous directory."
-    else
-      # shellcheck source=./lib-exe
-      source exe
-      local REPLY_CODE=1 REPLY2
-      if command -v realpath &>/dev/null; then
-        exe::invoke command realpath "${path}" --- noFail=true
-        REPLY="${REPLY%$'\n'}"
-        if ((REPLY_CODE == 0)); then
-          return 0
-        fi
+  if [[ -d ${path} ]] && builtin pushd "${path}" &>/dev/null; then
+    # case of a directory, we do not need an external tool
+    fs::getPwdRealPath
+    builtin popd &>/dev/null || core::fail "Failed to popd back to the previous directory."
+    return 0
+  elif [[ -L ${path} ]]; then
+    # shellcheck source=./lib-exe
+    source exe
+    local REPLY_CODE=1 REPLY2
+    if command -v realpath &>/dev/null; then
+      exe::invoke command realpath "${path}" --- noFail=true
+      REPLY="${REPLY%$'\n'}"
+      if ((REPLY_CODE == 0)); then
+        return 0
       fi
-      if command -v readlink &>/dev/null; then
-        exe::invoke command readlink -f "${path}" --- noFail=true
-        REPLY="${REPLY%$'\n'}"
-        if ((REPLY_CODE == 0)); then
-          return 0
-        fi
-      fi
-      core::fail "Could not resolve the real path of ⌜${path}⌝, check your version of realpath and readlink."
     fi
-  else
-    fs::getAbsolutePath "${path}"
+    if command -v readlink &>/dev/null; then
+      exe::invoke command readlink -f "${path}" --- noFail=true
+      REPLY="${REPLY%$'\n'}"
+      if ((REPLY_CODE == 0)); then
+        return 0
+      fi
+    fi
+    core::fail "Could not resolve the real path of ⌜${path}⌝, check your version of realpath and readlink."
+  fi
+
+  # case of a file which is not directly a link
+  fs::getAbsolutePath "${path}"
+  path="${REPLY}"
+  if builtin pushd "${path%/*}" &>/dev/null; then
+    fs::getPwdRealPath
+    REPLY="${REPLY}/${path##*/}"
+    builtin popd &>/dev/null || core::fail "Failed to popd back to the previous directory."
+    return 0
   fi
 }
 
@@ -58,14 +65,8 @@ function fs::getRealPath() {
 #
 # This function returns the absolute path of a path.
 #
-# If the path exists, it can be resolved to the real path, following symlinks,
-# using the option `realpath=true`.
-#
 # - $1: **path** _as string_:
 #       The path to translate to absolute path.
-# - ${realpath} _as bool_:
-#       (optional) true to resolve the path to the real path, following symlinks.
-#       (defaults to false)
 #
 # Returns:
 #
@@ -73,7 +74,6 @@ function fs::getRealPath() {
 #
 # ```bash
 # fs::getAbsolutePath "myPath"
-# fs::getAbsolutePath "myPath" realpath=true
 # echo "${REPLY}"
 # ```
 #
@@ -81,73 +81,61 @@ function fs::getRealPath() {
 # > The `..` will be processed before following any symlinks, by removing
 # > the immediate pathname component.
 function fs::getAbsolutePath() {
-  local \
-    path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
-    realpath="false" \
-    IFS=$' '
-  shift 1
-  eval "local a= ${*@Q}"
-
+  local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   path="${path%/}"
 
-  if [[ -L ${path} && ${realpath:-} == "true" ]] && command -v readlink &>/dev/null; then
-    # for links, we have to use an external program
-    local REPLY_CODE REPLY2
-    # shellcheck source=./lib-exe
-    source exe
-    # TODO: use realpath if available and fallback to readlink if not? (with or without -f ?)
-    exe::invoke command readlink "${path}"
-    REPLY="${REPLY%[[:space:]]}"
-    return 0
-  fi
-
-  # if path starts with ~, we replace it with the home directory
-  if [[ ${path} == "~"* ]]; then
+  if [[ ${path} == '~'* ]]; then
+    # if path starts with ~, we replace it with the home directory
     path="${HOME}${path:1}"
-  fi
-
-  # check if the path is an existing directory
-  if builtin cd "${path}" &>/dev/null; then
-    if [[ ${realpath:-} == "true" ]]; then
-      fs::getPwdRealPath
-    else
-      REPLY="${PWD}"
-    fi
-    builtin cd "${OLDPWD}" &>/dev/null || core::fail "Failed to cd back to the previous directory."
+  elif [[ ${path} == "." || ${path} == "" ]]; then
+    REPLY="${PWD}"
+    return 0
+  elif [[ ${path} == ".." ]] && builtin pushd "${PWD}/.." &>/dev/null; then
+    REPLY="${PWD}"
+    builtin popd &>/dev/null || core::fail "Failed to popd back to the previous directory."
+    return 0
+  elif [[ ${path} != *"/"* ]]; then
+    # case of a simple file name
+    REPLY="${PWD}/${path}"
     return 0
   fi
 
-  # check if the path is an existing file
-  if builtin cd "${path%/*}" &>/dev/null; then
-    if [[ ${realpath:-} == "true" ]]; then
-      fs::getPwdRealPath
-      REPLY="${REPLY}/${path##*/}"
-    else
-      REPLY="${PWD}/${path##*/}"
-    fi
-    builtin cd "${OLDPWD}" &>/dev/null || core::fail "Failed to cd back to the previous directory."
+  # store the base name
+  local baseName="${path##*/}"
+  path="${path%/*}"
+
+  # if not an absolute path, we prepend the current directory to the path
+  if [[ ${path} != "/"* ]]; then
+    path="${PWD}/${path}"
+  fi
+
+  # shortcut if the path exists
+  if builtin pushd "${path}" &>/dev/null; then
+    REPLY="${PWD%/}/${baseName}"
+    builtin popd &>/dev/null || core::fail "Failed to popd back to the previous directory."
     return 0
   fi
 
-  local currentDirectoryPath
-  if [[ ${realpath:-} == "true" ]]; then
-    fs::getPwdRealPath
-    currentDirectoryPath="${REPLY}"
-  else
-    currentDirectoryPath="${PWD}"
-  fi
+  # loop through each path part and build the absolute path
+  local -
+  set -o noglob
+  local part IFS=$'/'
+  REPLY=""
+  for part in ${path}; do
+    case "${part}" in
+    "" | ".")
+      continue
+      ;;
+    "..")
+      REPLY="${REPLY%/*}"
+      ;;
+    *)
+      REPLY="${REPLY}/${part}"
+      ;;
+    esac
+  done
 
-  # TODO: from this point and for non existing path, we could loop on the path components
-  # to resolve the real path starting from the left until we have a missing path component
-
-  # if the file is already an absolute path, we return it
-  if [[ ${path} == "/"* ]]; then
-    REPLY="${path}"
-    return 0
-  fi
-
-  # other cases of relative paths not handled
-  REPLY="${currentDirectoryPath}/${path#./}"
+  REPLY="${REPLY}/${baseName}"
 }
 
 # ## fs::getPwdRealPath
@@ -817,9 +805,9 @@ function fs::isValidLink() {
       elif [[ ${hardlink} == "false" && -L ${linkPath} ]]; then
         local REPLY
         # check if the link points to the correct file
-        fs::getAbsolutePath "${linkPath}" realpath=true
+        fs::getRealPath "${linkPath}"
         local linkRealPath="${REPLY}"
-        fs::getAbsolutePath "${linkedPath}"
+        fs::getRealPath "${linkedPath}"
         if [[ "${linkRealPath}" == "${REPLY}" ]]; then
           return 0
         fi

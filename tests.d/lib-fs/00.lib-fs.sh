@@ -11,7 +11,6 @@ function main() {
   test_fs::writeToFile
   test_fs::createTemp
   test_fs::getFileLineCount
-  test_fs::getAbsolutePath
   test_fs::readFile
   test_fs::createDirectoryIfNeeded
   test_fs::createFileIfNeeded
@@ -20,6 +19,80 @@ function main() {
   test_fs::Link
   test_fs::head
   test_fs::tail
+  test_fs::getRealPath
+  test_fs::getAbsolutePath
+}
+
+function test_fs::getAbsolutePath() {
+  test::title "✅ Testing fs::getAbsolutePath"
+
+  local HOME="/home/user"
+  test::func fs::getAbsolutePath .
+  test::func fs::getAbsolutePath ..
+  test::func fs::getAbsolutePath ""
+  test::func fs::getAbsolutePath '~'
+  test::func fs::getAbsolutePath myfile
+  test::func fs::getAbsolutePath .//../myfile
+  test::func fs::getAbsolutePath '/.//../myfile'
+  test::func fs::getAbsolutePath /././/../hello/there/not/../friend
+  test::func fs::getAbsolutePath ../test/file
+  test::func fs::getAbsolutePath ./test/file
+  test::func fs::getAbsolutePath resources/../resources/.///file-to-read
+}
+
+function test_fs::getRealPath() {
+  test::title "✅ Testing fs::getRealPath"
+
+  fs::getRealPath "${PWD}"
+  local currentDir="${REPLY}"
+  # shellcheck disable=SC2317
+  function test::scrubReplyVars() {
+    REPLY="${REPLY//"${currentDir}"/"/current-dir"}"
+  }
+
+  rm -Rf resources/gitignored
+  mkdir -p resources/gitignored
+
+  pushd resources/gitignored >/dev/null || test::fail "Failed to change directory to ⌜resources/gitignored⌝."
+
+  mkdir -p folder1/subfolder1
+  : >folder1/subfolder1/file2
+  : >file1
+  ln -s folder1 folder-link1
+  ln -s file1 file-link1
+
+  test::func fs::getRealPath "folder1"
+  test::func fs::getRealPath "file1"
+  test::func fs::getRealPath "folder-link1"
+  test::func fs::getRealPath "folder-link1/subfolder1"
+  test::func fs::getRealPath "folder1/subfolder1/file2"
+  test::func fs::getRealPath "folder-link1/subfolder1/file2"
+  test::func fs::getRealPath "file-link1"
+  test::func fs::getRealPath "${PWD}/folder-link1"
+  test::func fs::getRealPath "${PWD}/folder-link1/subfolder1"
+  test::func fs::getRealPath "${PWD}/folder1/subfolder1/file2"
+  test::func fs::getRealPath "${PWD}/file-link1"
+
+  local HOME="/home/user"
+  # shellcheck disable=SC2088
+  test::func fs::getRealPath '~/thing'
+
+  local commandFound=2
+  # mock command to not find "realpath" but find "readlink" so that we test the fallback logic in fs::getRealPath
+  # shellcheck disable=SC2317
+  function command() {
+    if [[ ${1} == "-v" ]]; then
+      commandFound=$((commandFound - 1))
+      return "${commandFound}"
+    fi
+    echo "${2} mocked-command-output"
+  }
+  test::func fs::getRealPath "file1"
+
+  commandFound=1
+  test::func fs::getRealPath "file1"
+
+  unset -f command test::scrubReplyVars
 }
 
 function test_fs::getCommandPath() {
@@ -85,24 +158,6 @@ function test_fs::getFileLineCount() {
   test::func fs::getFileLineCount 'resources/file-with-final-eol'
 
   test::func VALET_CONFIG_STRICT_PURE_BASH=true fs::getFileLineCount 'resources/file-to-read'
-}
-
-function test_fs::getAbsolutePath() {
-  test::title "✅ Testing fs::getAbsolutePath"
-
-  test::func fs::getAbsolutePath "${PWD}/01.invoke.sh"
-  test::func fs::getAbsolutePath .
-  test::func fs::getAbsolutePath ..
-  test::func fs::getAbsolutePath 01.invoke.s
-  test::func fs::getAbsolutePath ../1004-lib-system/00.tests.sh
-  test::func fs::getAbsolutePath resources
-  test::func fs::getAbsolutePath ./01.invoke.sh
-  test::func fs::getAbsolutePath ./resources
-  test::func fs::getAbsolutePath missing-file
-
-  function pwd() { echo "mocked pwd"; }
-  test::func fs::getAbsolutePath "${PWD}/01.invoke.sh" realpath=true
-  unset -f pwd
 }
 
 function test_fs::readFile() {

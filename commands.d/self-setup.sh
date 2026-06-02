@@ -262,12 +262,12 @@ function selfSetup_setupForWindows() {
     source fs
 
     local linuxInstallationPath="${GLOBAL_INSTALLATION_DIRECTORY}"
-    fs::getAbsolutePath "${linuxInstallationPath}" realpath=true
+    fs::getRealPath "${linuxInstallationPath}"
     windows::getWindowsPathFromUnixPath "${REPLY}"
     local windowsInstallationPath="${REPLY}"
 
     local linuxBashPath="${BASH}"
-    fs::getAbsolutePath "${linuxBashPath}" realpath=true
+    fs::getRealPath "${linuxBashPath}"
     windows::getWindowsPathFromUnixPath "${REPLY}"
     local windowsBashPath="${REPLY}"
 

@@ -268,7 +268,7 @@ function system::isDirectoryInPath() {
     return 0
   fi
   local REPLY
-  fs::getAbsolutePath "${directory}" realPath=true
+  fs::getRealPath "${directory}"
   if [[ ":${PATH}:" == *":${REPLY}:"* ]]; then
     return 0
   fi
