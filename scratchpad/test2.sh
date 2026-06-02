@@ -27,6 +27,12 @@ function fs::getAbsolutePath() {
   local baseName="${path##*/}"
   path="${path%/*}"
 
+  if [[ -z ${path} ]]; then
+    # if the path is empty, it means that the path was "/basename"
+    REPLY="/${baseName}"
+    return 0
+  fi
+
   # if not an absolute path, we prepend the current directory to the path
   if [[ ${path} != "/"* ]]; then
     path="${PWD}/${path}"
@@ -67,4 +73,4 @@ function test() {
   echo "Absolute path of ⌜${1}⌝: ${REPLY}"
 }
 
-test /.//../myfile
+test /app

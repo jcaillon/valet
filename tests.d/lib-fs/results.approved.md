@@ -693,6 +693,22 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored/resources/file-to-read'
 ```
 
+❯ `fs::getAbsolutePath /rootdir`
+
+Returned variables:
+
+```text
+REPLY='/rootdir'
+```
+
+❯ `fs::getAbsolutePath /rootdir/thing`
+
+Returned variables:
+
+```text
+REPLY='/rootdir/thing'
+```
+
 ## Test script 01.listPaths
 
 ### ✅ Testing fs::listPaths

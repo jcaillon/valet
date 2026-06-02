@@ -38,6 +38,8 @@ function test_fs::getAbsolutePath() {
   test::func fs::getAbsolutePath ../test/file
   test::func fs::getAbsolutePath ./test/file
   test::func fs::getAbsolutePath resources/../resources/.///file-to-read
+  test::func fs::getAbsolutePath /rootdir
+  test::func fs::getAbsolutePath /rootdir/thing
 }
 
 function test_fs::getRealPath() {
