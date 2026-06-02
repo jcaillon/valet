@@ -1067,7 +1067,7 @@ function list_asyncFilterJob() {
   local IFS
 
   # make all match case insensitive
-  shopt -s nocasematch
+  bash::setShellOption nocasematch
 
   if [[ -n ${_LIST_FILTER_USING_EXTERNAL_PROGRAM:-} ]]; then
 
@@ -1221,6 +1221,8 @@ function list_asyncFilterJob() {
   done
 
   echo "Async filtering job terminated" >>./tmp/f
+
+  bash::restoreShellOption nocasematch
 }
 
 function list_asyncFilterLoadFilteredItems() {

@@ -222,7 +222,9 @@ function command_runFunction() {
 # Usage:
 #  command_checkSudo
 function command_checkSudo() {
-  # sudo
+  # TODO: instead of this, we need to call `sudo bash /path/valet $args` and pass the correct variable so that the root user uses
+  # the user command cache (to have the current command) then exit this process.
+  # if sudo does not exist or if we are already root, do not do anything, run as usual
   if command -v sudo 1>/dev/null 2>&1; then
     log::info "This command requires sudo privileges."
     SUDO="sudo"
@@ -507,7 +509,7 @@ function command::fuzzyMatchCommandToFunctionNameOrFail() {
   fi
 
   # ignore case
-  shopt -s nocasematch
+  bash::setShellOption nocasematch
 
   command_getMaxPossibleCommandLevel "$@"
   local level="${REPLY}"
@@ -560,7 +562,7 @@ function command::fuzzyMatchCommandToFunctionNameOrFail() {
     core::fail "Could not find ${messageDetails} for ⌜${*:1:level}⌝, use ⌜--help⌝ to get a list of valid commands."
   fi
 
-  shopt -u nocasematch
+  bash::restoreShellOption nocasematch
 
   REPLY="${functionName:-}"
   REPLY2="${loopI}"
@@ -903,7 +905,7 @@ function command_fuzzyFindOption() {
   IFS=$'\n'
 
   # ignore case
-  shopt -s nocasematch
+  bash::setShellOption nocasematch
 
   # split to get one possible option per line
   array::fuzzyFilterSort _OPTIONS_TO_MATCH unknownOption
@@ -925,7 +927,7 @@ function command_fuzzyFindOption() {
     suggestedOption="Unknown option ⌜${unknownOption}⌝, valid options are:"$'\n'"$*"
   fi
 
-  shopt -u nocasematch
+  bash::restoreShellOption nocasematch
 
   unset _OPTIONS_TO_MATCH
 
@@ -952,7 +954,7 @@ function command_getDisplayableFilteredArray() {
   local -n array="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
   # ignore case
-  shopt -s nocasematch
+  bash::setShellOption nocasematch
 
   local line output=""
   local IFS=$'\n'
@@ -961,7 +963,7 @@ function command_getDisplayableFilteredArray() {
     output+="${REPLY}"$'\n'
   done
 
-  shopt -u nocasematch
+  bash::restoreShellOption nocasematch
 
   REPLY="${output}"
 }
@@ -1447,6 +1449,7 @@ function command::sourceCommandsIndex() {
   log::debug "Sourcing the user commands from ⌜${commandsFile}⌝."
 
   # source commands (use builtin to not use our custom source function)
+  # shellcheck disable=SC2034
   GLOBAL_ON_EXIT_MESSAGE="Error sourcing the commands file ⌜${commandsFile}⌝."$'\n'"Please rebuild it using the ⌜valet self build⌝ command."
   builtin source "${commandsFile}"
   unset -v GLOBAL_ON_EXIT_MESSAGE

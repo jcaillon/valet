@@ -20,9 +20,9 @@ Returned code: `1`
 
 ```text
 INFO     This is a test function.
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 41: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 84: ((: 0 / 0: division by 0 (error token is "0")
 INFO     This line will be executed since we catch errors.
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 43: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 86: ((: 0 / 0: division by 0 (error token is "0")
 INFO     Again.
 ```
 
@@ -71,7 +71,7 @@ REPLY_CODE='0'
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 64: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 107: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -89,7 +89,7 @@ REPLY_CODE='1'
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 64: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 107: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -109,7 +109,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 64: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-bash/00.lib-bash.sh: line 107: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -453,4 +453,38 @@ Exited with code: `1`
 ```text
 FAIL     Failed to change the current directory to ⌜still-not-existing⌝.
 ```
+
+### ✅ Testing bash::setShellOption and bash::restoreShellOption
+
+❯ `shopt -s nocasematch`
+
+❯ `bash::unsetShellOption nocasematch`
+
+nocasematch is unset
+
+❯ `bash::restoreShellOption nocasematch`
+
+nocasematch is set
+
+❯ `shopt -u nocasematch`
+
+❯ `bash::setShellOption nocasematch`
+
+nocasematch is set
+
+❯ `bash::restoreShellOption nocasematch`
+
+nocasematch is unset
+
+❯ `bash::restoreShellOption nocasematch`
+
+nocasematch is unset
+
+❯ `bash::unsetShellOption nocasematch`
+
+nocasematch is unset
+
+❯ `bash::restoreShellOption nocasematch`
+
+nocasematch is unset
 

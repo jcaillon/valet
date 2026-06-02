@@ -14,7 +14,7 @@ function test_list::getCurrentItemDisplayableString() {
   local FG_CYAN=$'\033[36m'
   local FG_RESET=$'\033[0m'
 
-  shopt -s nocasematch
+  bash::setShellOption nocasematch
 
   _LIST_STYLE_LETTER_HIGHLIGHT=">"
   _LIST_STYLE_LETTER_HIGHLIGHT_RESET="<"
@@ -31,7 +31,6 @@ function test_list::getCurrentItemDisplayableString() {
   test::printVars _LIST_ITEM_WIDTH _LIST_CURRENT_ITEM
   test::func list::getCurrentItemDisplayableString
   test::markdown "\`${_LIST_CURRENT_ITEM}\`"
-
 
   _LIST_CURRENT_ITEM="${FG_CYAN}HellO${FG_RESET} wOrld"
   _LIST_ITEM_WIDTH=10
@@ -57,7 +56,7 @@ function test_list::getCurrentItemDisplayableString() {
   test::func list::getCurrentItemDisplayableString
   test::markdown "\`${_LIST_CURRENT_ITEM}\`"
 
-  shopt -u nocasematch
+  bash::restoreShellOption nocasematch
 }
 
 function test_list_fuzzyFilterSortFileWithGrepAndGawk() {
@@ -66,11 +65,11 @@ function test_list_fuzzyFilterSortFileWithGrepAndGawk() {
   include array
 
   mapfile -t _MY_ARRAY <words
-  shopt -s nocasematch
+  bash::setShellOption nocasematch
   # shellcheck disable=SC2034
   local SEARCH_STRING=ea
   array::fuzzyFilterSort _MY_ARRAY SEARCH_STRING
-  shopt -u nocasematch
+  bash::restoreShellOption nocasematch
 
   test::prompt "SEARCH_STRING=ea array::fuzzyFilterSort _MY_ARRAY SEARCH_STRING"
   test::prompt "fs::head /out1 10"

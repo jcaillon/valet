@@ -449,7 +449,7 @@ function prompt_main_loop() {
   exec 3>&2
 
   # make all match case insensitive
-  shopt -s nocasematch
+  bash::setShellOption nocasematch
 
   if [[ ${_PROMPT_ITEMS_BOX_SHOWN} == "true" ]]; then
     prompt_showItemsBox
@@ -501,7 +501,7 @@ function prompt_main_loop() {
   terminal::restoreLogs
   terminal::restoreSettings
   terminal::restoreInterruptTrap
-  shopt -u nocasematch
+  bash::restoreShellOption nocasematch
 
   if [[ ${_PROMPT_CANCELLED:-} == "true" ]]; then
     return 1

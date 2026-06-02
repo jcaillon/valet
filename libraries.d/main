@@ -39,6 +39,7 @@ fi
 # Include core functions
 builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core"
 builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core-lib"
+builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core-log"
 builtin source "${GLOBAL_INSTALLATION_DIRECTORY}/libraries.d/core-traps"
 
 # set different options for the shell, to have consistent behavior on all machines

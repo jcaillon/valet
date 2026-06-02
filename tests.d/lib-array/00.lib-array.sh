@@ -131,7 +131,6 @@ function test_array::remove() {
   test::func MY_VALUE='holiday' array::remove MY_ARRAY MY_VALUE
   test::printVars MY_ARRAY
 
-
   # shellcheck disable=SC2034
   declare -A MY_ASSOCIATIVE_ARRAY
   MY_ASSOCIATIVE_ARRAY[breakdown]=1
@@ -178,10 +177,9 @@ function test_array::fuzzyFilterSort() {
   test::printVars MY_ARRAY
   test::func SEARCH_STRING=the array::fuzzyFilterSort MY_ARRAY SEARCH_STRING
 
-  test::prompt "shopt -s nocasematch"
-  shopt -s nocasematch
+  test::exec bash::setShellOption nocasematch
   test::func SEARCH_STRING=ELV array::fuzzyFilterSort MY_ARRAY SEARCH_STRING
-  shopt -u nocasematch
+  bash::restoreShellOption nocasematch
 }
 
 main

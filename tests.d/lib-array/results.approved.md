@@ -375,7 +375,7 @@ REPLY_ARRAY2=(
 )
 ```
 
-❯ `shopt -s nocasematch`
+❯ `bash::setShellOption nocasematch`
 
 ❯ `SEARCH_STRING=ELV array::fuzzyFilterSort MY_ARRAY SEARCH_STRING`
 

@@ -471,9 +471,9 @@ function fs::listPaths() {
 
   if [[ ${includeHidden} == "true" ]]; then
     log::trace "Activating the dotglob shell option to include hidden files."
-    shopt -s dotglob
+    bash::setShellOption dotglob
   else
-    shopt -u dotglob
+    bash::unsetShellOption dotglob
   fi
 
   REPLY_ARRAY=()
@@ -501,7 +501,7 @@ function fs::listPaths() {
     done
   done
 
-  shopt -u dotglob
+  bash::restoreShellOption dotglob
 }
 
 # ## fs::listFiles

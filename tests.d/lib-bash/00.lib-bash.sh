@@ -14,6 +14,49 @@ function main() {
   test_bash::isFunction
   test_bash::getBuiltinOutput
   test_bash::pushd
+  test_bash::xxxShellOption
+}
+
+function test_bash::xxxShellOption() {
+  test::title "✅ Testing bash::setShellOption and bash::restoreShellOption"
+
+  function testOptionUnset() {
+    if shopt -q nocasematch; then
+      test::fail "nocasematch should be unset"
+    else
+      test::markdown "nocasematch is unset"
+    fi
+  }
+  function testOptionSet() {
+    if shopt -q nocasematch; then
+      test::markdown "nocasematch is set"
+    else
+      test::fail "nocasematch should be set"
+    fi
+  }
+
+  test::exec shopt -s nocasematch
+  test::exec bash::unsetShellOption nocasematch
+  testOptionUnset
+
+  test::exec bash::restoreShellOption nocasematch
+  testOptionSet
+
+  test::exec shopt -u nocasematch
+  test::exec bash::setShellOption nocasematch
+  testOptionSet
+
+  test::exec bash::restoreShellOption nocasematch
+  testOptionUnset
+
+  test::exec bash::restoreShellOption nocasematch
+  testOptionUnset
+
+  test::exec bash::unsetShellOption nocasematch
+  testOptionUnset
+
+  test::exec bash::restoreShellOption nocasematch
+  testOptionUnset
 }
 
 function test_bash::pushd() {
