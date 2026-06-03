@@ -150,21 +150,24 @@ echo "${REPLY}"
 ## ⚡ time::getTimerMicroseconds
 
 Get the time elapsed since the call of `time::startTimer`.
+By default, it returns an integer representing the elapsed time in microseconds,
+but you can change the output format with the `format` option.
 
 Inputs:
 
-- `${logElapsedTime}` _as bool_:
+- `${timerName}` _as string_:
 
-  (optional) Wether or not to log the elapsed time.
+  (optional) A variable name that will be used to fetch the start time of the timer.
+  Must match the one used in the call of `time::startTimer`.
 
-  (defaults to false)
+  (defaults to "${FUNCNAME[1]}")
 
 - `${format}` _as string_:
 
-  (optional) The format to use if we log the elapsed time.
+  (optional) The format with which to output the elapsed time.
   See `time::getHumanTimeFromMicroseconds` for the format.
 
-  (defaults to "%S.%LLs").
+  (defaults to "%U").
 
 Returns:
 
@@ -174,25 +177,25 @@ Example usage:
 
 ```bash
 time::startTimer
-time::getTimerMicroseconds logElapsedTime=true
-echo "Total microseconds: ${REPLY}"
+time::getTimerMicroseconds format="%S.%LLs"
+echo "Total elapsed time: ${REPLY}"
 ```
 
 ## ⚡ time::isSpamming
 
-Check if a given time in microseconds has not been elapsed since the last call
-to this function.
+Check if it's been less than a given delay since the last call to this function.
 
 Can be used to check if a function is being called too often, for example a user
 spamming a command or key.
 
 Inputs:
 
-- `$1`: **microseconds** _as int_:
+- `$1`: **time** _as string_:
 
-  the microseconds to check
+  The time to check. Must be an integer followed by a unit.
+  Can be given in seconds (s), milliseconds (ms) or microseconds (us).
 
-- `${timerName}` _as int_:
+- `${timerName}` _as string_:
 
   A variable name that will be used to store the last time this function was called.
   Defaults to the name of the calling function.
@@ -203,27 +206,97 @@ Inputs:
 
 Returns:
 
-- 0 if the time has not elapsed yet (spamming)
-- 1 if the time has elapsed (not spamming)
+- `$?`:
+  - 0 if the time has not elapsed yet (spamming)
+  - 1 if the time has elapsed (not spamming)
 
 Example usage:
 
 ```bash
-if time::isSpamming 500000; then
+if time::isSpamming 500ms; then
   echo "500ms has elapsed since the last call to this function"
 fi
 ```
 
-## ⚡ time::startTimer
+## ⚡ time::isTimerElapsed
 
-Start a timer. You can then call `time::getTimerMicroseconds` to get the elapsed time.
+Check if a given time has elapsed since the call of `time::startTimer`.
+
+Inputs:
+
+- `$1`: **time** _as string_:
+
+  The time to check. Must be an integer followed by a unit.
+  Can be given in seconds (s), milliseconds (ms) or microseconds (us).
+
+- `${timerName}` _as string_:
+
+  (optional) A variable name that will be used to fetch the start time of the timer.
+  Must match the one used in the call of `time::startTimer`.
+
+  (defaults to "${FUNCNAME[1]}")
+
+Returns:
+
+- `$?`: 0 if the time has elapsed, 1 if it has not.
 
 Example usage:
 
 ```bash
 time::startTimer
-time::getTimerMicroseconds
+if time::isTimerElapsed 500ms; then
+  echo "500ms has elapsed since the last call to time::startTimer"
+fi
+```
+
+## ⚡ time::logTimerElapsedTime
+
+Log the time elapsed since the call of `time::startTimer`.
+
+Inputs:
+
+- `${timerName}` _as string_:
+
+  (optional) A variable name that will be used to fetch the start time of the timer.
+  Must match the one used in the call of `time::startTimer`.
+
+  (defaults to "${FUNCNAME[1]}")
+
+- `${format}` _as string_:
+
+  (optional) The format with which to output the elapsed time.
+  See `time::getHumanTimeFromMicroseconds` for the format.
+
+  (defaults to "%S.%LLs").
+
+Example usage:
+
+```bash
+time::startTimer
+# some code
+time::logTimerElapsedTime
+```
+
+## ⚡ time::startTimer
+
+Start a new timer.
+You can then call `time::getTimerMicroseconds` to get the elapsed time.
+Or call `time::isTimerElapsed` to check if a given time has elapsed since the call of this function.
+
+# - ${timerName} _as string_:
+  (optional) A variable name that will be used to store the start time of the timer.
+  Defaults to the name of the calling function.
+  Can be set to a fixed value if you call this function from different functions
+  and want to share the same timer.
+
+  (defaults to "${FUNCNAME[1]}")
+
+Example usage:
+
+```bash
+time::startTimer myTimer
+time::getTimerMicroseconds myTimer
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.39.12 (2026-05-22).
+> Documentation generated for the version 0.40.137 (2026-06-03).

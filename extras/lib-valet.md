@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.39.12 (2026-05-22).
+> Documentation generated for the version 0.40.137 (2026-06-03).
 
 ## ⚡ array::appendIfNotPresent
 
@@ -578,6 +578,22 @@ bash::readStdIn
 echo "${REPLY}"
 ```
 
+## ⚡ bash::restoreShellOption
+
+Restores the given shell option to its original state (see `bash::setShellOption` or `bash::unsetShellOption`).
+
+Inputs:
+
+- `$1`: **option name** _as string_:
+
+  The option to restore (e.g. `nocasematch`).
+
+Example usage:
+
+```bash
+bash::restoreShellOption nocasematch
+```
+
 ## ⚡ bash::runInSubshell
 
 This functions runs a command in a subshell.
@@ -619,6 +635,26 @@ _OPTION_EXIT_ON_FAIL=true bash::runInSubshell myFunction
 > see <https://www.gnu.org/software/bash/manual/bash.html#index-trap> and
 > <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.
 
+## ⚡ bash::setShellOption
+
+Sets the given shell optional behavior if it is not already set.
+Allows to later use `bash::restoreShellOption` to restore the original state of the given shell option.
+
+Inputs:
+
+- `$1`: **option name** _as string_:
+
+  The option to set (e.g. `nocasematch`).
+
+Example usage:
+
+```bash
+bash::setShellOption nocasematch
+```
+
+> To set shell options, simply use `local -; set -/+ optionName` in functions (`local -` makes it local).
+> The builtin shopt cannot be scoped to a function (it is always global), this is why this function exists.
+
 ## ⚡ bash::sleep
 
 Sleep for the given amount of time.
@@ -638,6 +674,26 @@ bash::sleep 1.5
 ```
 
 > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
+
+## ⚡ bash::unsetShellOption
+
+Unsets the given shell optional behavior if it is not already unset.
+Allows to later use `bash::restoreShellOption` to restore the original state of the given shell option.
+
+Inputs:
+
+- `$1`: **option name** _as string_:
+
+     The option to unset (e.g. `nocasematch`).
+
+Example usage:
+
+```bash
+bash::unsetShellOption nocasematch
+```
+
+> To unset shell options, simply use `local -; set -/+ optionName` in functions (`local -` makes it local).
+> The builtin shopt cannot be scoped to a function (it is always global), this is why this function exists.
 
 ## ⚡ benchmark::run
 
@@ -1769,20 +1825,11 @@ fs::createTempFile pathOnly=true
 
 This function returns the absolute path of a path.
 
-If the path exists, it can be resolved to the real path, following symlinks,
-using the option `realpath=true`.
-
 Inputs:
 
 - `$1`: **path** _as string_:
 
   The path to translate to absolute path.
-
-- `${realpath}` _as bool_:
-
-  (optional) true to resolve the path to the real path, following symlinks.
-
-  (defaults to false)
 
 Returns:
 
@@ -1792,7 +1839,6 @@ Example usage:
 
 ```bash
 fs::getAbsolutePath "myPath"
-fs::getAbsolutePath "myPath" realpath=true
 echo "${REPLY}"
 ```
 
@@ -1860,7 +1906,32 @@ Returns:
 
 - `${REPLY}`: The realpath for the current directory.
 
-> This is a pure bash alternative to `realpath` or `readlink`.
+> This is a pure bash alternative to `realpath` or `readlink` for directories.
+
+## ⚡ fs::getRealPath
+
+Get the real path of a path, following symlinks.
+Returns the absolute path.
+
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  The path to translate.
+
+Returns:
+
+- `${REPLY}`: The real path of the path.
+
+Example usage:
+
+```bash
+fs::getRealPath "myPath"
+echo "${REPLY}"
+```
+
+> This is a pure bash alternative to `realpath` or `readlink` only for directories.
+> To resolve files, it uses one of these two external tools.
 
 ## ⚡ fs::getScriptDirectory
 
@@ -4605,6 +4676,49 @@ terminal::waitForKeyPress -t 0.1
 >    For advanced key combinations, you will need to use a terminal that allows to remap such keys
 >    and send a specific sequence of characters that you can bind in bash.
 
+## ⚡ test::addOutputScrubber
+
+Add a scrubber function to modify the flushed text (both stdout and stderr) before adding it to the report.
+
+Scrubbers are required when we need to convert non-deterministic text to something stable so that
+tests are reproducible.
+
+The referenced function should modify text to transform stored in the global variable  `GLOBAL_TEST_OUTPUT_CONTENT`.
+You can also use `GLOBAL_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
+
+Inputs:
+
+- `$1`: **function name** _as string_:
+
+  The name of the function to add as a scrubber.
+
+Example usage:
+
+```bash
+test::addOutputScrubber myScrubberFunction
+```
+
+## ⚡ test::addReplyVarsScrubber
+
+Add a scrubber function to modify the REPLY variables before printing them in the report.
+
+Scrubbers are required when we need to convert non-deterministic text to something stable so that
+tests are reproducible.
+
+The referenced function should modify the REPLY variables (e.g. REPLY, REPLY2, REPLY_ARRAY...) directly.
+
+Inputs:
+
+- `$1`: **function name** _as string_:
+
+  The name of the function to add as a scrubber.
+
+Example usage:
+
+```bash
+test::addReplyVarsScrubber myScrubberFunction
+```
+
 ## ⚡ test::cat
 
 Print the content of a file in a consistent way for testing.
@@ -4620,6 +4734,26 @@ Example usage:
 
 ```bash
 test::cat "/path/to/file"
+```
+
+## ⚡ test::clearOutputScrubbers
+
+Clear the list of scrubbers to modify the flushed text (both stdout and stderr) before adding it to the report.
+
+Example usage:
+
+```bash
+test::clearOutputScrubbers
+```
+
+## ⚡ test::clearReplyVarsScrubbers
+
+Clear the list of scrubbers to modify the REPLY variables before printing them in the report.
+
+Example usage:
+
+```bash
+test::clearReplyVarsScrubbers
 ```
 
 ## ⚡ test::exec
@@ -4864,35 +4998,6 @@ Example usage:
 test::resetReplyVars
 ```
 
-## ⚡ test::scrubOutput
-
-This function can be defined to modify the flushed text (both stdout and stderr) before adding it to the report.
-
-Scrubbers are required when we need to convert non-deterministic text to something stable so that
-tests are reproducible.
-
-The text to transform is in the global variable `GLOBAL_TEST_OUTPUT_CONTENT`.
-You can also use `GLOBAL_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
-
-Returns:
-
-- `GLOBAL_TEST_OUTPUT_CONTENT`: The modified text.
-
-> You can define this function directly in the test script, or in a test hook if
-> you need it to be available for multiple tests.
-> Note however that this function can be called very often, so it should be optimized.
-
-## ⚡ test::scrubReplyVars
-
-This function can be defined to modify the REPLY variables before printing them in the report.
-
-Scrubbers are required when we need to convert non-deterministic text to something stable so that
-tests are reproducible.
-
-> You can define this function directly in the test script, or in a test hook if
-> you need it to be available for multiple tests.
-> Note however that this function can be called very often, so it should be optimized.
-
 ## ⚡ test::setTerminalInputs
 
 Replaces the functions `terminal::waitForChar` and `terminal::waitForKeyPress` by custom functions
@@ -5101,21 +5206,24 @@ echo "${REPLY}"
 ## ⚡ time::getTimerMicroseconds
 
 Get the time elapsed since the call of `time::startTimer`.
+By default, it returns an integer representing the elapsed time in microseconds,
+but you can change the output format with the `format` option.
 
 Inputs:
 
-- `${logElapsedTime}` _as bool_:
+- `${timerName}` _as string_:
 
-  (optional) Wether or not to log the elapsed time.
+  (optional) A variable name that will be used to fetch the start time of the timer.
+  Must match the one used in the call of `time::startTimer`.
 
-  (defaults to false)
+  (defaults to "${FUNCNAME[1]}")
 
 - `${format}` _as string_:
 
-  (optional) The format to use if we log the elapsed time.
+  (optional) The format with which to output the elapsed time.
   See `time::getHumanTimeFromMicroseconds` for the format.
 
-  (defaults to "%S.%LLs").
+  (defaults to "%U").
 
 Returns:
 
@@ -5125,25 +5233,25 @@ Example usage:
 
 ```bash
 time::startTimer
-time::getTimerMicroseconds logElapsedTime=true
-echo "Total microseconds: ${REPLY}"
+time::getTimerMicroseconds format="%S.%LLs"
+echo "Total elapsed time: ${REPLY}"
 ```
 
 ## ⚡ time::isSpamming
 
-Check if a given time in microseconds has not been elapsed since the last call
-to this function.
+Check if it's been less than a given delay since the last call to this function.
 
 Can be used to check if a function is being called too often, for example a user
 spamming a command or key.
 
 Inputs:
 
-- `$1`: **microseconds** _as int_:
+- `$1`: **time** _as string_:
 
-  the microseconds to check
+  The time to check. Must be an integer followed by a unit.
+  Can be given in seconds (s), milliseconds (ms) or microseconds (us).
 
-- `${timerName}` _as int_:
+- `${timerName}` _as string_:
 
   A variable name that will be used to store the last time this function was called.
   Defaults to the name of the calling function.
@@ -5154,26 +5262,143 @@ Inputs:
 
 Returns:
 
-- 0 if the time has not elapsed yet (spamming)
-- 1 if the time has elapsed (not spamming)
+- `$?`:
+  - 0 if the time has not elapsed yet (spamming)
+  - 1 if the time has elapsed (not spamming)
 
 Example usage:
 
 ```bash
-if time::isSpamming 500000; then
+if time::isSpamming 500ms; then
   echo "500ms has elapsed since the last call to this function"
 fi
 ```
 
-## ⚡ time::startTimer
+## ⚡ time::isTimerElapsed
 
-Start a timer. You can then call `time::getTimerMicroseconds` to get the elapsed time.
+Check if a given time has elapsed since the call of `time::startTimer`.
+
+Inputs:
+
+- `$1`: **time** _as string_:
+
+  The time to check. Must be an integer followed by a unit.
+  Can be given in seconds (s), milliseconds (ms) or microseconds (us).
+
+- `${timerName}` _as string_:
+
+  (optional) A variable name that will be used to fetch the start time of the timer.
+  Must match the one used in the call of `time::startTimer`.
+
+  (defaults to "${FUNCNAME[1]}")
+
+Returns:
+
+- `$?`: 0 if the time has elapsed, 1 if it has not.
 
 Example usage:
 
 ```bash
 time::startTimer
-time::getTimerMicroseconds
+if time::isTimerElapsed 500ms; then
+  echo "500ms has elapsed since the last call to time::startTimer"
+fi
+```
+
+## ⚡ time::logTimerElapsedTime
+
+Log the time elapsed since the call of `time::startTimer`.
+
+Inputs:
+
+- `${timerName}` _as string_:
+
+  (optional) A variable name that will be used to fetch the start time of the timer.
+  Must match the one used in the call of `time::startTimer`.
+
+  (defaults to "${FUNCNAME[1]}")
+
+- `${format}` _as string_:
+
+  (optional) The format with which to output the elapsed time.
+  See `time::getHumanTimeFromMicroseconds` for the format.
+
+  (defaults to "%S.%LLs").
+
+Example usage:
+
+```bash
+time::startTimer
+# some code
+time::logTimerElapsedTime
+```
+
+## ⚡ time::startTimer
+
+Start a new timer.
+You can then call `time::getTimerMicroseconds` to get the elapsed time.
+Or call `time::isTimerElapsed` to check if a given time has elapsed since the call of this function.
+
+# - ${timerName} _as string_:
+  (optional) A variable name that will be used to store the start time of the timer.
+  Defaults to the name of the calling function.
+  Can be set to a fixed value if you call this function from different functions
+  and want to share the same timer.
+
+  (defaults to "${FUNCNAME[1]}")
+
+Example usage:
+
+```bash
+time::startTimer myTimer
+time::getTimerMicroseconds myTimer
+```
+
+## ⚡ trap::register
+
+Register a given function to execute when a specific event happens (e.g. on-exit, on-interrupt, etc...).
+Only one function can be registered for each event, if you register a new one it will replace the previous one.
+
+Inputs:
+
+- `$1`: **function name** _as string_:
+
+  The name of the function to call when the event is emitted.
+  Can be blank to unregister a function for an event.
+
+- `$2`: **event name** _as string_:
+
+  The name of the event to register to among the following ones:
+
+  - `on-exit`: when the program exits (in all cases, error or not).
+               The function will be executed in the same shell that has been exited, as if we called this
+               function at the line executed at the moment when the program exited.
+               Note: The stdout/stderr might be redirected somewhere else if the program exited in a
+               ``command &>/dev/null` context.
+  - `on-interrupt`: when the program is interrupted by the user (SIGINT, SIGQUIT, e.g. CTRL+C or CTRL+\).
+               The function can return 1 to cancel the interrupt and continue running the program.
+               The function will be executed in the same shell that has been interrupted,
+               as if we called this function at the line executed at the moment when the interruption took place.
+  - `on-terminate`: when the program is terminated by the system (SIGHUP, SIGTERM).
+               The function can return 1 to cancel the termination and continue running the program.
+               The function will be called from the main process.
+  - `on-resize`: when the terminal changes its size.
+               You can immediately use the global variables `GLOBAL_COLUMNS` and `GLOBAL_LINES` to get the
+               new terminal size.
+               The function will be called from the main process and it will not be triggered if the program is
+               busy running an external command (e.g. sleep).
+               Note that the builtin read command also blocks this trigger until it is finished.
+  - `on-suspend`: when the program is required to pause (e.g. CTRL+Z).
+               The function can return 1 to cancel the suspend and continue running the program.
+               The function will be called from the main process.
+  - `on-continue`: when the program is required to resume its execution after a suspend (e.g. fg or bg).
+               The function will be called from the main process.
+
+Example usage:
+
+```bash
+trap::register myCleanUpFunction on-exit
+trap::register "" on-exit
 ```
 
 ## ⚡ variable::deserialize
@@ -5554,4 +5779,4 @@ windows::endPs1Batch
 
 
 
-> Documentation generated for the version 0.39.12 (2026-05-22).
+> Documentation generated for the version 0.40.137 (2026-06-03).

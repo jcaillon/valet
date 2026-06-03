@@ -179,20 +179,11 @@ fs::createTempFile pathOnly=true
 
 This function returns the absolute path of a path.
 
-If the path exists, it can be resolved to the real path, following symlinks,
-using the option `realpath=true`.
-
 Inputs:
 
 - `$1`: **path** _as string_:
 
   The path to translate to absolute path.
-
-- `${realpath}` _as bool_:
-
-  (optional) true to resolve the path to the real path, following symlinks.
-
-  (defaults to false)
 
 Returns:
 
@@ -202,7 +193,6 @@ Example usage:
 
 ```bash
 fs::getAbsolutePath "myPath"
-fs::getAbsolutePath "myPath" realpath=true
 echo "${REPLY}"
 ```
 
@@ -270,7 +260,32 @@ Returns:
 
 - `${REPLY}`: The realpath for the current directory.
 
-> This is a pure bash alternative to `realpath` or `readlink`.
+> This is a pure bash alternative to `realpath` or `readlink` for directories.
+
+## ⚡ fs::getRealPath
+
+Get the real path of a path, following symlinks.
+Returns the absolute path.
+
+Inputs:
+
+- `$1`: **path** _as string_:
+
+  The path to translate.
+
+Returns:
+
+- `${REPLY}`: The real path of the path.
+
+Example usage:
+
+```bash
+fs::getRealPath "myPath"
+echo "${REPLY}"
+```
+
+> This is a pure bash alternative to `realpath` or `readlink` only for directories.
+> To resolve files, it uses one of these two external tools.
 
 ## ⚡ fs::getScriptDirectory
 
@@ -604,4 +619,4 @@ fs::tail myFile 10
 > #TODO: use mapfile quantum to not have to read the whole file in a single go.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.39.12 (2026-05-22).
+> Documentation generated for the version 0.40.137 (2026-06-03).

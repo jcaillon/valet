@@ -1,5 +1,5 @@
 {
-// Documentation generated for the version 0.39.12 (2026-05-22).
+// Documentation generated for the version 0.40.137 (2026-06-03).
 
 "array::appendIfNotPresent": {
   "prefix": "array::appendIfNotPresent",
@@ -337,6 +337,20 @@
   "body": [ "# ## bash::readStdIn\n# \n# Read the content of the standard input.\n# Will immediately return if the standard input is empty.\n# \n# Returns:\n# \n# - \\${REPLY}: The content of the standard input.\n# \n# ```bash\n# bash::readStdIn\n# echo \"\\${REPLY}\"\n# ```\n# \nbash::readStdIn$0" ]
 },
 
+"bash::restoreShellOption": {
+  "prefix": "bash::restoreShellOption",
+  "description": "Restores the given shell option to its original state (see `bash::setShellOption` or `bash::unsetShellOption`)...",
+  "scope": "",
+  "body": [ "bash::restoreShellOption \"${1:option name}\"$0" ]
+},
+
+"bash::restoreShellOption#withdoc": {
+  "prefix": "bash::restoreShellOption#withdoc",
+  "description": "Restores the given shell option to its original state (see `bash::setShellOption` or `bash::unsetShellOption`)...",
+  "scope": "",
+  "body": [ "# ## bash::restoreShellOption\n# \n# Restores the given shell option to its original state (see `bash::setShellOption` or `bash::unsetShellOption`).\n# \n# - \\$1: **option name** _as string_:\n#       The option to restore (e.g. `nocasematch`).\n# \n# ```bash\n# bash::restoreShellOption nocasematch\n# ```\n# \nbash::restoreShellOption \"${1:option name}\"$0" ]
+},
+
 "bash::runInSubshell": {
   "prefix": "bash::runInSubshell",
   "description": "This functions runs a command in a subshell...",
@@ -351,6 +365,20 @@
   "body": [ "# ## bash::runInSubshell\n# \n# This functions runs a command in a subshell.\n# The command can fail and can trigger errors; it will be caught and this function will return\n# the exit code of the subshell.\n# This function can almost be considered as a try/catch block for bash as the execution will stop on error\n# but the error will be caught and stored for later processing instead of exiting the program.\n# \n# - \\$@: **command with args** _as string_:\n#       The command to run in the subshell.\n# - \\$_OPTION_EXIT_ON_FAIL _as bool_:\n#       (optional) If set to true, the main program will exit with code 1 if the command fails.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY_CODE}: the exit code of the subshell.\n# \n# ```bash\n# bash::runInSubshell myFunction\n# if (( REPLY_CODE != 0 )); then\n#   core::fail \"The subshell failed with code \\${REPLY_CODE}\"\n# fi\n# _OPTION_EXIT_ON_FAIL=true bash::runInSubshell myFunction\n# ```\n# \n# > This function exists because the behavior of bash subshells are not what you would expect.\n# > This function ensures that errors are properly handled and make the command list fail,\n# > it ensures that we run the exit trap and it gives you the correct exit code of the subshell.\n# > As a reminder, the error trap is not triggered for commands part of until while if ! || && tests,\n# > see <https://www.gnu.org/software/bash/manual/bash.html#index-trap> and\n# > <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.\n# \nbash::runInSubshell \"${1:command with args}\"$0" ]
 },
 
+"bash::setShellOption": {
+  "prefix": "bash::setShellOption",
+  "description": "Sets the given shell optional behavior if it is not already set...",
+  "scope": "",
+  "body": [ "bash::setShellOption \"${1:option name}\"$0" ]
+},
+
+"bash::setShellOption#withdoc": {
+  "prefix": "bash::setShellOption#withdoc",
+  "description": "Sets the given shell optional behavior if it is not already set...",
+  "scope": "",
+  "body": [ "# ## bash::setShellOption\n# \n# Sets the given shell optional behavior if it is not already set.\n# Allows to later use `bash::restoreShellOption` to restore the original state of the given shell option.\n# \n# - \\$1: **option name** _as string_:\n#       The option to set (e.g. `nocasematch`).\n# \n# ```bash\n# bash::setShellOption nocasematch\n# ```\n# \n# > To set shell options, simply use `local -; set -/+ optionName` in functions (`local -` makes it local).\n# > The builtin shopt cannot be scoped to a function (it is always global), this is why this function exists.\n# \nbash::setShellOption \"${1:option name}\"$0" ]
+},
+
 "bash::sleep": {
   "prefix": "bash::sleep",
   "description": "Sleep for the given amount of time...",
@@ -363,6 +391,20 @@
   "description": "Sleep for the given amount of time...",
   "scope": "",
   "body": [ "# ## bash::sleep\n# \n# Sleep for the given amount of time.\n# This is a pure bash replacement of sleep.\n# \n# - \\$1: **time** _as float_:\n#       the time to sleep in seconds (can be a float)\n#       If 0, waits indefinitely.\n# \n# ```bash\n# bash::sleep 1.5\n# ```\n# \n# > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.\n# \nbash::sleep \"${1:time}\"$0" ]
+},
+
+"bash::unsetShellOption": {
+  "prefix": "bash::unsetShellOption",
+  "description": "Unsets the given shell optional behavior if it is not already unset...",
+  "scope": "",
+  "body": [ "bash::unsetShellOption \"${1:option name}\"$0" ]
+},
+
+"bash::unsetShellOption#withdoc": {
+  "prefix": "bash::unsetShellOption#withdoc",
+  "description": "Unsets the given shell optional behavior if it is not already unset...",
+  "scope": "",
+  "body": [ "# ## bash::unsetShellOption\n# \n# Unsets the given shell optional behavior if it is not already unset.\n# Allows to later use `bash::restoreShellOption` to restore the original state of the given shell option.\n# \n# - \\$1: **option name** _as string_:\n#      The option to unset (e.g. `nocasematch`).\n# \n# ```bash\n# bash::unsetShellOption nocasematch\n# ```\n# \n# > To unset shell options, simply use `local -; set -/+ optionName` in functions (`local -` makes it local).\n# > The builtin shopt cannot be scoped to a function (it is always global), this is why this function exists.\n# \nbash::unsetShellOption \"${1:option name}\"$0" ]
 },
 
 "benchmark::run": {
@@ -873,14 +915,14 @@
   "prefix": "fs::getAbsolutePath",
   "description": "This function returns the absolute path of a path...",
   "scope": "",
-  "body": [ "fs::getAbsolutePath \"${1:path}\" realpath=${2:false}$0" ]
+  "body": [ "fs::getAbsolutePath \"${1:path}\"$0" ]
 },
 
 "fs::getAbsolutePath#withdoc": {
   "prefix": "fs::getAbsolutePath#withdoc",
   "description": "This function returns the absolute path of a path...",
   "scope": "",
-  "body": [ "# ## fs::getAbsolutePath\n# \n# This function returns the absolute path of a path.\n# \n# If the path exists, it can be resolved to the real path, following symlinks,\n# using the option `realpath=true`.\n# \n# - \\$1: **path** _as string_:\n#       The path to translate to absolute path.\n# - \\${realpath} _as bool_:\n#       (optional) true to resolve the path to the real path, following symlinks.\n#       (defaults to false)\n# \n# Returns:\n# \n# - \\${REPLY}: The absolute path of the path.\n# \n# ```bash\n# fs::getAbsolutePath \"myPath\"\n# fs::getAbsolutePath \"myPath\" realpath=true\n# echo \"\\${REPLY}\"\n# ```\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# > The `..` will be processed before following any symlinks, by removing\n# > the immediate pathname component.\n# \nfs::getAbsolutePath \"${1:path}\" realpath=${2:false}$0" ]
+  "body": [ "# ## fs::getAbsolutePath\n# \n# This function returns the absolute path of a path.\n# \n# - \\$1: **path** _as string_:\n#       The path to translate to absolute path.\n# \n# Returns:\n# \n# - \\${REPLY}: The absolute path of the path.\n# \n# ```bash\n# fs::getAbsolutePath \"myPath\"\n# echo \"\\${REPLY}\"\n# ```\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# > The `..` will be processed before following any symlinks, by removing\n# > the immediate pathname component.\n# \nfs::getAbsolutePath \"${1:path}\"$0" ]
 },
 
 "fs::getCommandPath": {
@@ -922,7 +964,21 @@
   "prefix": "fs::getPwdRealPath#withdoc",
   "description": "Get the real path of the current directory...",
   "scope": "",
-  "body": [ "# ## fs::getPwdRealPath\n# \n# Get the real path of the current directory.\n# By default, the `\\${PWD}` variable is the logical path, which may contain symlinks.\n# \n# ```bash\n# fs::getPwdRealPath\n# echo \"\\${REPLY}\"\n# ```\n# \n# Returns:\n# \n# - \\${REPLY}: The realpath for the current directory.\n# \n# > This is a pure bash alternative to `realpath` or `readlink`.\n# \nfs::getPwdRealPath$0" ]
+  "body": [ "# ## fs::getPwdRealPath\n# \n# Get the real path of the current directory.\n# By default, the `\\${PWD}` variable is the logical path, which may contain symlinks.\n# \n# ```bash\n# fs::getPwdRealPath\n# echo \"\\${REPLY}\"\n# ```\n# \n# Returns:\n# \n# - \\${REPLY}: The realpath for the current directory.\n# \n# > This is a pure bash alternative to `realpath` or `readlink` for directories.\n# \nfs::getPwdRealPath$0" ]
+},
+
+"fs::getRealPath": {
+  "prefix": "fs::getRealPath",
+  "description": "Get the real path of a path, following symlinks...",
+  "scope": "",
+  "body": [ "fs::getRealPath \"${1:path}\"$0" ]
+},
+
+"fs::getRealPath#withdoc": {
+  "prefix": "fs::getRealPath#withdoc",
+  "description": "Get the real path of a path, following symlinks...",
+  "scope": "",
+  "body": [ "# ## fs::getRealPath\n# \n# Get the real path of a path, following symlinks.\n# Returns the absolute path.\n# \n# - \\$1: **path** _as string_:\n#       The path to translate.\n# \n# Returns:\n# \n# - \\${REPLY}: The real path of the path.\n# \n# ```bash\n# fs::getRealPath \"myPath\"\n# echo \"\\${REPLY}\"\n# ```\n# \n# > This is a pure bash alternative to `realpath` or `readlink` only for directories.\n# > To resolve files, it uses one of these two external tools.\n# \nfs::getRealPath \"${1:path}\"$0" ]
 },
 
 "fs::getScriptDirectory": {
@@ -2353,6 +2409,34 @@
   "body": [ "# ## terminal::waitForKeyPress\n# \n# Wait for a key press (single key).\n# You can pass additional parameters to the read command (e.g. to wait for a set amount of time).\n# \n# It uses the read builtin command with the option `-e` to use readline behind the scene.\n# This means we can detect more key combinations but all keys needs to be bound first...\n# Special keys (CTRL+, ALT+, F1-F12, arrows, etc.) are intercepted using binding.\n# \n# You must call `terminal::rebindKeymap` and `terminal::setRawMode` before using this function.\n# You should use `tui::start` instead of using this function directly.\n# \n# - \\$@: read parameters _as any_:\n#       additional parameters to pass to the read command\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if a key was pressed\n#   - 1 otherwise\n# - `LAST_KEY_PRESSED`: the key pressed.\n# \n# ```bash\n# terminal::waitForKeyPress\n# terminal::waitForKeyPress -t 0.1\n# ```\n# \n# > There are issues when using readline in bash:\n# >\n# > 1. if the cursor is at the end of the screen, it will make the screen scroll\n# >    even when nothing is read... Make sure to not position the cursor at the end of the screen.\n# > 2. When read is done, it will print a new line in stderr. So we redirect stderr to null.\n# >    This means that if you print something to stderr in a readline bound function, you will see nothing\n# >    As a workaround, do this in your callback function: `exec 2>&\"\\${GLOBAL_FD_LOG}\"`\n# > 3. Not all key combinations can be bound, like SHIFT+ENTER. This is inherent to the way terminals work,\n# >    they send a sequence of characters when a key is pressed and this sequence is read by readline/bash.\n# >    For advanced key combinations, you will need to use a terminal that allows to remap such keys\n# >    and send a specific sequence of characters that you can bind in bash.\n# \nterminal::waitForKeyPress \"${1:read parameters}\"$0" ]
 },
 
+"test::addOutputScrubber": {
+  "prefix": "test::addOutputScrubber",
+  "description": "Add a scrubber function to modify the flushed text (both stdout and stderr) before adding it to the report...",
+  "scope": "",
+  "body": [ "test::addOutputScrubber \"${1:function name}\"$0" ]
+},
+
+"test::addOutputScrubber#withdoc": {
+  "prefix": "test::addOutputScrubber#withdoc",
+  "description": "Add a scrubber function to modify the flushed text (both stdout and stderr) before adding it to the report...",
+  "scope": "",
+  "body": [ "# ## test::addOutputScrubber\n# \n# Add a scrubber function to modify the flushed text (both stdout and stderr) before adding it to the report.\n# \n# Scrubbers are required when we need to convert non-deterministic text to something stable so that\n# tests are reproducible.\n# \n# The referenced function should modify text to transform stored in the global variable  `GLOBAL_TEST_OUTPUT_CONTENT`.\n# You can also use `GLOBAL_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).\n# \n# - \\$1: **function name** _as string_:\n#       The name of the function to add as a scrubber.\n# \n# ```bash\n# test::addOutputScrubber myScrubberFunction\n# ```\n# \ntest::addOutputScrubber \"${1:function name}\"$0" ]
+},
+
+"test::addReplyVarsScrubber": {
+  "prefix": "test::addReplyVarsScrubber",
+  "description": "Add a scrubber function to modify the REPLY variables before printing them in the report...",
+  "scope": "",
+  "body": [ "test::addReplyVarsScrubber \"${1:function name}\"$0" ]
+},
+
+"test::addReplyVarsScrubber#withdoc": {
+  "prefix": "test::addReplyVarsScrubber#withdoc",
+  "description": "Add a scrubber function to modify the REPLY variables before printing them in the report...",
+  "scope": "",
+  "body": [ "# ## test::addReplyVarsScrubber\n# \n# Add a scrubber function to modify the REPLY variables before printing them in the report.\n# \n# Scrubbers are required when we need to convert non-deterministic text to something stable so that\n# tests are reproducible.\n# \n# The referenced function should modify the REPLY variables (e.g. REPLY, REPLY2, REPLY_ARRAY...) directly.\n# \n# - \\$1: **function name** _as string_:\n#       The name of the function to add as a scrubber.\n# \n# ```bash\n# test::addReplyVarsScrubber myScrubberFunction\n# ```\n# \ntest::addReplyVarsScrubber \"${1:function name}\"$0" ]
+},
+
 "test::cat": {
   "prefix": "test::cat",
   "description": "Print the content of a file in a consistent way for testing...",
@@ -2365,6 +2449,34 @@
   "description": "Print the content of a file in a consistent way for testing...",
   "scope": "",
   "body": [ "# ## test::cat\n# \n# Print the content of a file in a consistent way for testing.\n# It will also print the file path before the content.\n# \n# - \\$1: **file** _as string_:\n#       The file to print.\n# \n# ```bash\n# test::cat \"/path/to/file\"\n# ```\n# \ntest::cat \"${1:file}\"$0" ]
+},
+
+"test::clearOutputScrubbers": {
+  "prefix": "test::clearOutputScrubbers",
+  "description": "Clear the list of scrubbers to modify the flushed text (both stdout and stderr) before adding it to the report...",
+  "scope": "",
+  "body": [ "test::clearOutputScrubbers$0" ]
+},
+
+"test::clearOutputScrubbers#withdoc": {
+  "prefix": "test::clearOutputScrubbers#withdoc",
+  "description": "Clear the list of scrubbers to modify the flushed text (both stdout and stderr) before adding it to the report...",
+  "scope": "",
+  "body": [ "# ## test::clearOutputScrubbers\n# \n# Clear the list of scrubbers to modify the flushed text (both stdout and stderr) before adding it to the report.\n# \n# ```bash\n# test::clearOutputScrubbers\n# ```\n# \ntest::clearOutputScrubbers$0" ]
+},
+
+"test::clearReplyVarsScrubbers": {
+  "prefix": "test::clearReplyVarsScrubbers",
+  "description": "Clear the list of scrubbers to modify the REPLY variables before printing them in the report...",
+  "scope": "",
+  "body": [ "test::clearReplyVarsScrubbers$0" ]
+},
+
+"test::clearReplyVarsScrubbers#withdoc": {
+  "prefix": "test::clearReplyVarsScrubbers#withdoc",
+  "description": "Clear the list of scrubbers to modify the REPLY variables before printing them in the report...",
+  "scope": "",
+  "body": [ "# ## test::clearReplyVarsScrubbers\n# \n# Clear the list of scrubbers to modify the REPLY variables before printing them in the report.\n# \n# ```bash\n# test::clearReplyVarsScrubbers\n# ```\n# \ntest::clearReplyVarsScrubbers$0" ]
 },
 
 "test::exec": {
@@ -2563,34 +2675,6 @@
   "body": [ "# ## test::resetReplyVars\n# \n# Resets the value of each REPLY variable.\n# \n# ```bash\n# test::resetReplyVars\n# ```\n# \ntest::resetReplyVars$0" ]
 },
 
-"test::scrubOutput": {
-  "prefix": "test::scrubOutput",
-  "description": "This function can be defined to modify the flushed text (both stdout and stderr) before adding it to the report...",
-  "scope": "",
-  "body": [ "test::scrubOutput$0" ]
-},
-
-"test::scrubOutput#withdoc": {
-  "prefix": "test::scrubOutput#withdoc",
-  "description": "This function can be defined to modify the flushed text (both stdout and stderr) before adding it to the report...",
-  "scope": "",
-  "body": [ "# ## test::scrubOutput\n# \n# This function can be defined to modify the flushed text (both stdout and stderr) before adding it to the report.\n# \n# Scrubbers are required when we need to convert non-deterministic text to something stable so that\n# tests are reproducible.\n# \n# The text to transform is in the global variable `GLOBAL_TEST_OUTPUT_CONTENT`.\n# You can also use `GLOBAL_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).\n# \n# Returns:\n# \n# - `GLOBAL_TEST_OUTPUT_CONTENT`: The modified text.\n# \n# > You can define this function directly in the test script, or in a test hook if\n# > you need it to be available for multiple tests.\n# > Note however that this function can be called very often, so it should be optimized.\n# \ntest::scrubOutput$0" ]
-},
-
-"test::scrubReplyVars": {
-  "prefix": "test::scrubReplyVars",
-  "description": "This function can be defined to modify the REPLY variables before printing them in the report...",
-  "scope": "",
-  "body": [ "test::scrubReplyVars$0" ]
-},
-
-"test::scrubReplyVars#withdoc": {
-  "prefix": "test::scrubReplyVars#withdoc",
-  "description": "This function can be defined to modify the REPLY variables before printing them in the report...",
-  "scope": "",
-  "body": [ "# ## test::scrubReplyVars\n# \n# This function can be defined to modify the REPLY variables before printing them in the report.\n# \n# Scrubbers are required when we need to convert non-deterministic text to something stable so that\n# tests are reproducible.\n# \n# > You can define this function directly in the test script, or in a test hook if\n# > you need it to be available for multiple tests.\n# > Note however that this function can be called very often, so it should be optimized.\n# \ntest::scrubReplyVars$0" ]
-},
-
 "test::setTerminalInputs": {
   "prefix": "test::setTerminalInputs",
   "description": "Replaces the functions `terminal::waitForChar` and `terminal::waitForKeyPress` by custom functions that return keys defined as an input of this function...",
@@ -2721,42 +2805,84 @@
   "prefix": "time::getTimerMicroseconds",
   "description": "Get the time elapsed since the call of `time::startTimer`...",
   "scope": "",
-  "body": [ "time::getTimerMicroseconds logElapsedTime=${1:false} format=${2:\"%S.%LLs\"}$0" ]
+  "body": [ "time::getTimerMicroseconds timerName=${1:\"\\${FUNCNAME[1]}\"} format=${2:\"%U\"}$0" ]
 },
 
 "time::getTimerMicroseconds#withdoc": {
   "prefix": "time::getTimerMicroseconds#withdoc",
   "description": "Get the time elapsed since the call of `time::startTimer`...",
   "scope": "",
-  "body": [ "# ## time::getTimerMicroseconds\n# \n# Get the time elapsed since the call of `time::startTimer`.\n# \n# - \\${logElapsedTime} _as bool_:\n#       (optional) Wether or not to log the elapsed time.\n#       (defaults to false)\n# - \\${format} _as string_:\n#       (optional) The format to use if we log the elapsed time.\n#       See `time::getHumanTimeFromMicroseconds` for the format.\n#       (defaults to \"%S.%LLs\").\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in microseconds.\n# \n# ```bash\n# time::startTimer\n# time::getTimerMicroseconds logElapsedTime=true\n# echo \"Total microseconds: \\${REPLY}\"\n# ```\n# \ntime::getTimerMicroseconds logElapsedTime=${1:false} format=${2:\"%S.%LLs\"}$0" ]
+  "body": [ "# ## time::getTimerMicroseconds\n# \n# Get the time elapsed since the call of `time::startTimer`.\n# By default, it returns an integer representing the elapsed time in microseconds,\n# but you can change the output format with the `format` option.\n# \n# - \\${timerName} _as string_:\n#       (optional) A variable name that will be used to fetch the start time of the timer.\n#       Must match the one used in the call of `time::startTimer`.\n#       (defaults to \"\\${FUNCNAME[1]}\")\n# - \\${format} _as string_:\n#       (optional) The format with which to output the elapsed time.\n#       See `time::getHumanTimeFromMicroseconds` for the format.\n#       (defaults to \"%U\").\n# \n# Returns:\n# \n# - \\${REPLY}: the elapsed time in microseconds.\n# \n# ```bash\n# time::startTimer\n# time::getTimerMicroseconds format=\"%S.%LLs\"\n# echo \"Total elapsed time: \\${REPLY}\"\n# ```\n# \ntime::getTimerMicroseconds timerName=${1:\"\\${FUNCNAME[1]}\"} format=${2:\"%U\"}$0" ]
 },
 
 "time::isSpamming": {
   "prefix": "time::isSpamming",
-  "description": "Check if a given time in microseconds has not been elapsed since the last call to this function...",
+  "description": "Check if it's been less than a given delay since the last call to this function...",
   "scope": "",
-  "body": [ "time::isSpamming \"${1:microseconds}\" timerName=${2:\"\\${FUNCNAME[1]}\"}$0" ]
+  "body": [ "time::isSpamming \"${1:time}\" timerName=${2:\"\\${FUNCNAME[1]}\"}$0" ]
 },
 
 "time::isSpamming#withdoc": {
   "prefix": "time::isSpamming#withdoc",
-  "description": "Check if a given time in microseconds has not been elapsed since the last call to this function...",
+  "description": "Check if it's been less than a given delay since the last call to this function...",
   "scope": "",
-  "body": [ "# ## time::isSpamming\n# \n# Check if a given time in microseconds has not been elapsed since the last call\n# to this function.\n# \n# Can be used to check if a function is being called too often, for example a user\n# spamming a command or key.\n# \n# - \\$1: **microseconds** _as int_:\n#       the microseconds to check\n# - \\${timerName} _as int_:\n#       A variable name that will be used to store the last time this function was called.\n#       Defaults to the name of the calling function.\n#       Can be set to a fixed value if you call this function from different functions\n#       and want to share the same timer.\n#       (defaults to \"\\${FUNCNAME[1]}\")\n# \n# Returns:\n# \n# - 0 if the time has not elapsed yet (spamming)\n# - 1 if the time has elapsed (not spamming)\n# \n# ```bash\n# if time::isSpamming 500000; then\n#   echo \"500ms has elapsed since the last call to this function\"\n# fi\n# ```\n# \ntime::isSpamming \"${1:microseconds}\" timerName=${2:\"\\${FUNCNAME[1]}\"}$0" ]
+  "body": [ "# ## time::isSpamming\n# \n# Check if it's been less than a given delay since the last call to this function.\n# \n# Can be used to check if a function is being called too often, for example a user\n# spamming a command or key.\n# \n# - \\$1: **time** _as string_:\n#       The time to check. Must be an integer followed by a unit.\n#       Can be given in seconds (s), milliseconds (ms) or microseconds (us).\n# - \\${timerName} _as string_:\n#       A variable name that will be used to store the last time this function was called.\n#       Defaults to the name of the calling function.\n#       Can be set to a fixed value if you call this function from different functions\n#       and want to share the same timer.\n#       (defaults to \"\\${FUNCNAME[1]}\")\n# \n# Returns:\n# \n# - \\$?:\n#   - 0 if the time has not elapsed yet (spamming)\n#   - 1 if the time has elapsed (not spamming)\n# \n# ```bash\n# if time::isSpamming 500ms; then\n#   echo \"500ms has elapsed since the last call to this function\"\n# fi\n# ```\n# \ntime::isSpamming \"${1:time}\" timerName=${2:\"\\${FUNCNAME[1]}\"}$0" ]
+},
+
+"time::isTimerElapsed": {
+  "prefix": "time::isTimerElapsed",
+  "description": "Check if a given time has elapsed since the call of `time::startTimer`...",
+  "scope": "",
+  "body": [ "time::isTimerElapsed \"${1:time}\" timerName=${2:\"\\${FUNCNAME[1]}\"}$0" ]
+},
+
+"time::isTimerElapsed#withdoc": {
+  "prefix": "time::isTimerElapsed#withdoc",
+  "description": "Check if a given time has elapsed since the call of `time::startTimer`...",
+  "scope": "",
+  "body": [ "# ## time::isTimerElapsed\n# \n# Check if a given time has elapsed since the call of `time::startTimer`.\n# \n# - \\$1: **time** _as string_:\n#       The time to check. Must be an integer followed by a unit.\n#       Can be given in seconds (s), milliseconds (ms) or microseconds (us).\n# - \\${timerName} _as string_:\n#       (optional) A variable name that will be used to fetch the start time of the timer.\n#       Must match the one used in the call of `time::startTimer`.\n#       (defaults to \"\\${FUNCNAME[1]}\")\n# \n# Returns:\n# \n# - \\$?: 0 if the time has elapsed, 1 if it has not.\n# \n# ```bash\n# time::startTimer\n# if time::isTimerElapsed 500ms; then\n#   echo \"500ms has elapsed since the last call to time::startTimer\"\n# fi\n# ```\n# \ntime::isTimerElapsed \"${1:time}\" timerName=${2:\"\\${FUNCNAME[1]}\"}$0" ]
+},
+
+"time::logTimerElapsedTime": {
+  "prefix": "time::logTimerElapsedTime",
+  "description": "Log the time elapsed since the call of `time::startTimer`...",
+  "scope": "",
+  "body": [ "time::logTimerElapsedTime timerName=${1:\"\\${FUNCNAME[1]}\"} format=${2:\"%S.%LLs\"}$0" ]
+},
+
+"time::logTimerElapsedTime#withdoc": {
+  "prefix": "time::logTimerElapsedTime#withdoc",
+  "description": "Log the time elapsed since the call of `time::startTimer`...",
+  "scope": "",
+  "body": [ "# ## time::logTimerElapsedTime\n# \n# Log the time elapsed since the call of `time::startTimer`.\n# \n# - \\${timerName} _as string_:\n#       (optional) A variable name that will be used to fetch the start time of the timer.\n#       Must match the one used in the call of `time::startTimer`.\n#       (defaults to \"\\${FUNCNAME[1]}\")\n# - \\${format} _as string_:\n#       (optional) The format with which to output the elapsed time.\n#       See `time::getHumanTimeFromMicroseconds` for the format.\n#       (defaults to \"%S.%LLs\").\n# \n# ```bash\n# time::startTimer\n# # some code\n# time::logTimerElapsedTime\n# ```\n# \ntime::logTimerElapsedTime timerName=${1:\"\\${FUNCNAME[1]}\"} format=${2:\"%S.%LLs\"}$0" ]
 },
 
 "time::startTimer": {
   "prefix": "time::startTimer",
-  "description": "Start a timer...",
+  "description": "Start a new timer...",
   "scope": "",
   "body": [ "time::startTimer$0" ]
 },
 
 "time::startTimer#withdoc": {
   "prefix": "time::startTimer#withdoc",
-  "description": "Start a timer...",
+  "description": "Start a new timer...",
   "scope": "",
-  "body": [ "# ## time::startTimer\n# \n# Start a timer. You can then call `time::getTimerMicroseconds` to get the elapsed time.\n# \n# ```bash\n# time::startTimer\n# time::getTimerMicroseconds\n# ```\n# \ntime::startTimer$0" ]
+  "body": [ "# ## time::startTimer\n# \n# Start a new timer.\n# You can then call `time::getTimerMicroseconds` to get the elapsed time.\n# Or call `time::isTimerElapsed` to check if a given time has elapsed since the call of this function.\n# \n# # - \\${timerName} _as string_:\n#       (optional) A variable name that will be used to store the start time of the timer.\n#       Defaults to the name of the calling function.\n#       Can be set to a fixed value if you call this function from different functions\n#       and want to share the same timer.\n#       (defaults to \"\\${FUNCNAME[1]}\")\n# \n# ```bash\n# time::startTimer myTimer\n# time::getTimerMicroseconds myTimer\n# ```\n# \ntime::startTimer$0" ]
+},
+
+"trap::register": {
+  "prefix": "trap::register",
+  "description": "Register a given function to execute when a specific event happens (e...",
+  "scope": "",
+  "body": [ "trap::register \"${1:function name}\" \"${2:event name}\"$0" ]
+},
+
+"trap::register#withdoc": {
+  "prefix": "trap::register#withdoc",
+  "description": "Register a given function to execute when a specific event happens (e...",
+  "scope": "",
+  "body": [ "# ## trap::register\n# \n# Register a given function to execute when a specific event happens (e.g. on-exit, on-interrupt, etc...).\n# Only one function can be registered for each event, if you register a new one it will replace the previous one.\n# \n# - \\$1: **function name** _as string_:\n#       The name of the function to call when the event is emitted.\n#       Can be blank to unregister a function for an event.\n# - \\$2: **event name** _as string_:\n#       The name of the event to register to among the following ones:\n# \n#       - `on-exit`: when the program exits (in all cases, error or not).\n#                    The function will be executed in the same shell that has been exited, as if we called this\n#                    function at the line executed at the moment when the program exited.\n#                    Note: The stdout/stderr might be redirected somewhere else if the program exited in a\n#                    ``command &>/dev/null` context.\n#       - `on-interrupt`: when the program is interrupted by the user (SIGINT, SIGQUIT, e.g. CTRL+C or CTRL+\\).\n#                    The function can return 1 to cancel the interrupt and continue running the program.\n#                    The function will be executed in the same shell that has been interrupted,\n#                    as if we called this function at the line executed at the moment when the interruption took place.\n#       - `on-terminate`: when the program is terminated by the system (SIGHUP, SIGTERM).\n#                    The function can return 1 to cancel the termination and continue running the program.\n#                    The function will be called from the main process.\n#       - `on-resize`: when the terminal changes its size.\n#                    You can immediately use the global variables `GLOBAL_COLUMNS` and `GLOBAL_LINES` to get the\n#                    new terminal size.\n#                    The function will be called from the main process and it will not be triggered if the program is\n#                    busy running an external command (e.g. sleep).\n#                    Note that the builtin read command also blocks this trigger until it is finished.\n#       - `on-suspend`: when the program is required to pause (e.g. CTRL+Z).\n#                    The function can return 1 to cancel the suspend and continue running the program.\n#                    The function will be called from the main process.\n#       - `on-continue`: when the program is required to resume its execution after a suspend (e.g. fg or bg).\n#                    The function will be called from the main process.\n# \n# ```bash\n# trap::register myCleanUpFunction on-exit\n# trap::register \"\" on-exit\n# ```\n# \ntrap::register \"${1:function name}\" \"${2:event name}\"$0" ]
 },
 
 "variable::deserialize": {

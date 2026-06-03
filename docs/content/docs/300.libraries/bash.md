@@ -273,6 +273,22 @@ bash::readStdIn
 echo "${REPLY}"
 ```
 
+## ⚡ bash::restoreShellOption
+
+Restores the given shell option to its original state (see `bash::setShellOption` or `bash::unsetShellOption`).
+
+Inputs:
+
+- `$1`: **option name** _as string_:
+
+  The option to restore (e.g. `nocasematch`).
+
+Example usage:
+
+```bash
+bash::restoreShellOption nocasematch
+```
+
 ## ⚡ bash::runInSubshell
 
 This functions runs a command in a subshell.
@@ -314,6 +330,26 @@ _OPTION_EXIT_ON_FAIL=true bash::runInSubshell myFunction
 > see <https://www.gnu.org/software/bash/manual/bash.html#index-trap> and
 > <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.
 
+## ⚡ bash::setShellOption
+
+Sets the given shell optional behavior if it is not already set.
+Allows to later use `bash::restoreShellOption` to restore the original state of the given shell option.
+
+Inputs:
+
+- `$1`: **option name** _as string_:
+
+  The option to set (e.g. `nocasematch`).
+
+Example usage:
+
+```bash
+bash::setShellOption nocasematch
+```
+
+> To set shell options, simply use `local -; set -/+ optionName` in functions (`local -` makes it local).
+> The builtin shopt cannot be scoped to a function (it is always global), this is why this function exists.
+
 ## ⚡ bash::sleep
 
 Sleep for the given amount of time.
@@ -334,5 +370,25 @@ bash::sleep 1.5
 
 > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 
+## ⚡ bash::unsetShellOption
+
+Unsets the given shell optional behavior if it is not already unset.
+Allows to later use `bash::restoreShellOption` to restore the original state of the given shell option.
+
+Inputs:
+
+- `$1`: **option name** _as string_:
+
+     The option to unset (e.g. `nocasematch`).
+
+Example usage:
+
+```bash
+bash::unsetShellOption nocasematch
+```
+
+> To unset shell options, simply use `local -; set -/+ optionName` in functions (`local -` makes it local).
+> The builtin shopt cannot be scoped to a function (it is always global), this is why this function exists.
+
 > [!IMPORTANT]
-> Documentation generated for the version 0.39.12 (2026-05-22).
+> Documentation generated for the version 0.40.137 (2026-06-03).

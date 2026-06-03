@@ -1,6 +1,6 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.39.12 (2026-05-22).
+> Documentation generated for the version 0.40.137 (2026-06-03).
 
 ## ▶️ valet bash bootstrap
 
@@ -1302,6 +1302,10 @@ valet [options] [--] [commands...]
 
   Init, validate, destroy, plan or apply a terraform configuration.
 
+- `tryout`
+
+  Try things out.
+
 - `wait-pods`
 
   DEPRECATED! Wait for the k8s pods to be ready.
@@ -1324,4 +1328,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.39.12 (2026-05-22).
+> Documentation generated for the version 0.40.137 (2026-06-03).

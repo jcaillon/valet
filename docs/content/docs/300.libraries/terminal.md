@@ -490,4 +490,4 @@ terminal::waitForKeyPress -t 0.1
 >    and send a specific sequence of characters that you can bind in bash.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.39.12 (2026-05-22).
+> Documentation generated for the version 0.40.137 (2026-06-03).

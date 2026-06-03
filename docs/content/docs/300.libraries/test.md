@@ -5,6 +5,49 @@ cascade:
 url: /docs/libraries/test
 ---
 
+## ⚡ test::addOutputScrubber
+
+Add a scrubber function to modify the flushed text (both stdout and stderr) before adding it to the report.
+
+Scrubbers are required when we need to convert non-deterministic text to something stable so that
+tests are reproducible.
+
+The referenced function should modify text to transform stored in the global variable  `GLOBAL_TEST_OUTPUT_CONTENT`.
+You can also use `GLOBAL_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
+
+Inputs:
+
+- `$1`: **function name** _as string_:
+
+  The name of the function to add as a scrubber.
+
+Example usage:
+
+```bash
+test::addOutputScrubber myScrubberFunction
+```
+
+## ⚡ test::addReplyVarsScrubber
+
+Add a scrubber function to modify the REPLY variables before printing them in the report.
+
+Scrubbers are required when we need to convert non-deterministic text to something stable so that
+tests are reproducible.
+
+The referenced function should modify the REPLY variables (e.g. REPLY, REPLY2, REPLY_ARRAY...) directly.
+
+Inputs:
+
+- `$1`: **function name** _as string_:
+
+  The name of the function to add as a scrubber.
+
+Example usage:
+
+```bash
+test::addReplyVarsScrubber myScrubberFunction
+```
+
 ## ⚡ test::cat
 
 Print the content of a file in a consistent way for testing.
@@ -20,6 +63,26 @@ Example usage:
 
 ```bash
 test::cat "/path/to/file"
+```
+
+## ⚡ test::clearOutputScrubbers
+
+Clear the list of scrubbers to modify the flushed text (both stdout and stderr) before adding it to the report.
+
+Example usage:
+
+```bash
+test::clearOutputScrubbers
+```
+
+## ⚡ test::clearReplyVarsScrubbers
+
+Clear the list of scrubbers to modify the REPLY variables before printing them in the report.
+
+Example usage:
+
+```bash
+test::clearReplyVarsScrubbers
 ```
 
 ## ⚡ test::exec
@@ -264,35 +327,6 @@ Example usage:
 test::resetReplyVars
 ```
 
-## ⚡ test::scrubOutput
-
-This function can be defined to modify the flushed text (both stdout and stderr) before adding it to the report.
-
-Scrubbers are required when we need to convert non-deterministic text to something stable so that
-tests are reproducible.
-
-The text to transform is in the global variable `GLOBAL_TEST_OUTPUT_CONTENT`.
-You can also use `GLOBAL_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
-
-Returns:
-
-- `GLOBAL_TEST_OUTPUT_CONTENT`: The modified text.
-
-> You can define this function directly in the test script, or in a test hook if
-> you need it to be available for multiple tests.
-> Note however that this function can be called very often, so it should be optimized.
-
-## ⚡ test::scrubReplyVars
-
-This function can be defined to modify the REPLY variables before printing them in the report.
-
-Scrubbers are required when we need to convert non-deterministic text to something stable so that
-tests are reproducible.
-
-> You can define this function directly in the test script, or in a test hook if
-> you need it to be available for multiple tests.
-> Note however that this function can be called very often, so it should be optimized.
-
 ## ⚡ test::setTerminalInputs
 
 Replaces the functions `terminal::waitForChar` and `terminal::waitForKeyPress` by custom functions
@@ -357,4 +391,4 @@ test::title "Testing something"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.39.12 (2026-05-22).
+> Documentation generated for the version 0.40.137 (2026-06-03).
