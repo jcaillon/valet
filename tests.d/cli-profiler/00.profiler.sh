@@ -29,7 +29,7 @@ function main() {
   test::exec fs::head "${VALET_CONFIG_STARTUP_PROFILING_FILE}" 1
 }
 
-function test::scrubOutput() {
+function scrubProfilerOutput() {
   local -
   set -o noglob
   local line text=""
@@ -40,4 +40,6 @@ function test::scrubOutput() {
   GLOBAL_TEST_OUTPUT_CONTENT="${text%$'\n'}"
 }
 
+test::addOutputScrubber scrubProfilerOutput
 main
+test::clearOutputScrubbers

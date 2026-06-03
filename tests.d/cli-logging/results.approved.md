@@ -164,14 +164,10 @@ WARNING This is a warning message.
 With a second line.
 ```
 
-❯ `fs::listFiles /tmp/valet.d/d1-2`
-
-Returned variables:
+Listing of `/tmp/valet.d/d1-2`:
 
 ```text
-REPLY_ARRAY=(
-[0]='/tmp/valet.d/d1-2/log-2025-02-12T21-57-29+0000.log'
-)
+F log-2025-02-12T21-57-29+0000.log
 ```
 
 ### ✅ Testing that we can output the logs to a specific file name additionally to console

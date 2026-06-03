@@ -618,7 +618,7 @@ function command_parseFunctionArguments() {
   local -
   set -o noglob
 
-  local functionName
+  local functionName REPLY2 REPLY_ARRAY REPLY_ARRAY2
   functionName="${1}"
   shift
 

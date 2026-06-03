@@ -29,8 +29,14 @@ function exe::invoke() {
   if [[ ${1} == "git" ]]; then
     while [[ $# -gt 0 ]]; do
       case "${1}" in
-      tag) REPLY="${LAST_GIT_TAG}"; return 0;;
-      log) REPLY="✨ feature"$'\n'"🐞 fix"; return 0;;
+      tag)
+        REPLY="${LAST_GIT_TAG}"
+        return 0
+        ;;
+      log)
+        REPLY="✨ feature"$'\n'"🐞 fix"
+        return 0
+        ;;
       *) ;;
       esac
       shift
@@ -56,7 +62,6 @@ function curl::request() {
   REPLY3=200
 }
 
-
 # shellcheck disable=SC2034
 function curl::download() {
   echo "🙈 mocked curl::download ${*}" 1>&2
@@ -81,8 +86,10 @@ function fs::writeToFile() {
 }
 
 # shellcheck disable=SC2317
-function test::scrubOutput() {
+function scrubFunctionsCount() {
   GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT// [0-9][0-9][0-9] functions/ xxx functions}"
 }
 
+test::addOutputScrubber scrubFunctionsCount
 main
+test::clearOutputScrubbers

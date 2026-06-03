@@ -47,10 +47,7 @@ function test_fs::getRealPath() {
 
   fs::getRealPath "${PWD}"
   local currentDir="${REPLY}"
-  # shellcheck disable=SC2317
-  function test::scrubReplyVars() {
-    REPLY="${REPLY//"${currentDir}"/"/current-dir"}"
-  }
+  test::addReplyVarsScrubber scrubCurrentDir
 
   rm -Rf resources/gitignored
   mkdir -p resources/gitignored
@@ -94,7 +91,11 @@ function test_fs::getRealPath() {
   commandFound=1
   test::func fs::getRealPath "file1"
 
-  unset -f command test::scrubReplyVars
+  test::clearReplyVarsScrubbers
+}
+
+function scrubCurrentDir() {
+  REPLY="${REPLY//"${currentDir}"/"/current-dir"}"
 }
 
 function test_fs::getCommandPath() {
@@ -174,16 +175,10 @@ function test_fs::createDirectoryIfNeeded() {
 
   test::func fs::createDirectoryIfNeeded resources/dir/subdir
 
-  # on certain versions of bash, you get a different quote character
-  function test::scrubOutput() {
-    GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//'‘'/"'"}"
-    GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//'’'/"'"}"
-  }
-
+  test::addOutputScrubber scrubQuotes
   test::markdown "This next command will fail because the directory already exists (it is a file)."
   test::exit fs::createDirectoryIfNeeded resources/dir/subdir/file1
-
-  unset -f test::scrubOutput
+  test::clearOutputScrubbers
 
   test::func fs::createDirectoryIfNeeded resources/gitignored/derp
   if [[ -d resources/gitignored/derp ]]; then
@@ -234,6 +229,12 @@ function test_fs::tail() {
   test::exec fs::tail 'resources/file-to-read' 99
 
   test::func fs::tail 'resources/file-to-read' 3 toArray=true
+}
+
+function scrubQuotes() {
+  # on certain versions of bash, you get a different quote character
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//'‘'/"'"}"
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//'’'/"'"}"
 }
 
 main

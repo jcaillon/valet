@@ -56,10 +56,7 @@ function test_log::printCallStack() {
 function test_log::init() {
   test::title "✅ Testing log::init"
 
-  # shellcheck disable=SC2317
-  function test::scrubOutput() {
-    GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//" 1>&"[0-9][0-9]/" 1>&11"}"
-  }
+  test::addOutputScrubber scrubRedirects
 
   # test bad descriptors
   exec 5>&-
@@ -88,7 +85,11 @@ function test_log::init() {
   test::exec VALET_CONFIG_LOG_FD="${GLOBAL_TEST_TEMP_FILE}" VALET_CONFIG_LOG_TO_DIRECTORY=true VALET_CONFIG_LOG_FILENAME_PATTERN="logFile=a" log::reload
   test::printVars GLOBAL_LOG_PRINT_STATEMENT_FORMATTED_LOG GLOBAL_LOG_PRINT_STATEMENT_STANDARD GLOBAL_LOG_WRAP_PADDING
 
-  unset -f test::scrubOutput
+  test::clearOutputScrubbers
+}
+
+function scrubRedirects() {
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//" 1>&"[0-9][0-9]/" 1>&11"}"
 }
 
 function test_log::parseLogPattern() {
@@ -105,10 +106,9 @@ function test_log::parseLogPattern() {
   test::func VALET_CONFIG_ENABLE_NERDFONT_ICONS=true log::parseLogPattern "<icon> <message>"
   test::func VALET_CONFIG_ENABLE_NERDFONT_ICONS=false log::parseLogPattern "<icon> <message>"
 
-  # shellcheck disable=SC2317
-  function test::scrubOutput() { GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT/${GLOBAL_PROGRAM_MAIN_PID}/1234}"; }
+  test::addOutputScrubber scrubPid
   test::func log::parseLogPattern "<colorFaded>{9s} <time>{(%FT%H:%M:%S%z)T} <levelColor>{9s} <level>{9s} <icon>{9s} <varCOLOR_DEBUG>{9s} <processName>{-5s} <pid>{9s} <subshell>{9s} <function>{9s} <source>{9s} <line>{9s}"
-  unset -f test::scrubOutput
+  test::clearOutputScrubbers
 
   test::func log::parseLogPattern "<levelColor><level><colorDefault> <message>
 <wrapPadding><colorFaded>[<elapsedTime>] [<elapsedTimeSinceLastLog>] in [<sourceFile>]<colorDefault>"
@@ -127,6 +127,10 @@ function test_log::parseLogPattern() {
   <elapsedTime>{-5s}
   <elapsedTimeSinceLastLog>{-5s}
   "
+}
+
+function scrubPid() {
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT/${GLOBAL_PROGRAM_MAIN_PID}/1234}"
 }
 
 # shellcheck disable=SC2034

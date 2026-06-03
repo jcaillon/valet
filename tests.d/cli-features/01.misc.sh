@@ -48,15 +48,13 @@ function main() {
 }
 
 # shellcheck disable=SC2317
-function test::scrubOutput() {
-  local -
-  set -o noglob
-  local line text=""
-  local IFS=$'\n'
-  for line in ${GLOBAL_TEST_OUTPUT_CONTENT}; do
-    text+="${line//:[0-9]*/:xxx}"$'\n'
-  done
-  GLOBAL_TEST_OUTPUT_CONTENT="${text%$'\n'}"
+function scrubLineNumbers() {
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//:[0-9][0-9][0-9][0-9]/":xxx"}"
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//:[0-9][0-9][0-9]/":xxx"}"
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//:[0-9][0-9]/":xxx"}"
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//:[0-9]/":xxx"}"
 }
 
+test::addOutputScrubber scrubLineNumbers
 main
+test::clearOutputScrubbers

@@ -20,9 +20,11 @@ function main() {
   test::flush
 }
 
-function test::scrubOutput() {
+function scrubExtensionsOutput() {
   GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//Found [[:digit:]][[:digit:]][[:digit:]]/Found XXX}"
   GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//Found [[:digit:]][[:digit:]]/Found XX}"
 }
 
+test::addOutputScrubber scrubExtensionsOutput
 main
+test::clearOutputScrubbers

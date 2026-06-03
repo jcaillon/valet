@@ -165,9 +165,7 @@ function test_exec() {
   compoundCommand="${params[*]}"
 
   local GLOBAL_TEST_OUTPUT_CONTENT="${compoundCommand}"
-  if declare -F test::scrubOutput &>/dev/null; then
-    test::scrubOutput
-  fi
+  test_applyOutputScrubbers
 
   # shellcheck disable=SC2016
   printf '❯ `%s`\n\n' "${GLOBAL_TEST_OUTPUT_CONTENT}" >>"${GLOBAL_TEST_REPORT_FILE}"
@@ -223,10 +221,15 @@ function test_exec() {
 # test::printReplyVars
 # ```
 function test::printReplyVars() {
-  if declare -F test::scrubReplyVars &>/dev/null; then
-    test::scrubReplyVars
-  fi
-  local IFS=$'\n' key varName GLOBAL_TEST_OUTPUT_CONTENT=""
+  local IFS=',' functionName
+  for functionName in ${_TEST_REPLY_VARS_SCRUBBERS:-}; do
+    if [[ -n ${functionName} ]]; then
+      "${functionName}"
+    fi
+  done
+
+  IFS=$'\n'
+  local key varName GLOBAL_TEST_OUTPUT_CONTENT=""
   for varName in REPLY_CODE REPLY REPLY2 REPLY3 REPLY4; do
     if [[ -v ${varName} ]]; then
       GLOBAL_TEST_OUTPUT_CONTENT+="${varName}='${!varName//\'/\'\"\'\"\'}'"$'\n'
@@ -250,9 +253,8 @@ function test::printReplyVars() {
     GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
   fi
   if [[ -n ${GLOBAL_TEST_OUTPUT_CONTENT} ]]; then
-    if declare -F test::scrubOutput &>/dev/null; then
-      test::scrubOutput
-    fi
+    test_applyOutputScrubbers
+
     # shellcheck disable=SC2016
     printf 'Returned variables:\n\n```text\n%s\n```\n\n' "${GLOBAL_TEST_OUTPUT_CONTENT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
   fi
@@ -318,9 +320,8 @@ function test::printVars() {
       test::fail "Could not parse variable declaration: ⌜${chunk}⌝."
     fi
   done
-  if declare -F test::scrubOutput &>/dev/null; then
-    test::scrubOutput
-  fi
+  test_applyOutputScrubbers
+
   # shellcheck disable=SC2016
   printf '```text\n%s\n```\n\n' "${GLOBAL_TEST_OUTPUT_CONTENT%$'\n'}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
@@ -354,9 +355,7 @@ function test_flushFdToCodeBlock() {
   local IFS=''
   read -rd '' GLOBAL_TEST_OUTPUT_CONTENT <"${file}" || :
 
-  if declare -F test::scrubOutput &>/dev/null; then
-    test::scrubOutput
-  fi
+  test_applyOutputScrubbers
 
   if [[ -n ${blockTitle} ]]; then
     # shellcheck disable=SC2016
@@ -393,35 +392,6 @@ function test::fixStdErrFileDescriptors() {
   # shellcheck disable=SC2034
   GLOBAL_FD_TUI="${GLOBAL_FD_ORIGINAL_STDERR}"
 }
-
-# ## test::scrubOutput
-#
-# This function can be defined to modify the flushed text (both stdout and stderr) before adding it to the report.
-#
-# Scrubbers are required when we need to convert non-deterministic text to something stable so that
-# tests are reproducible.
-#
-# The text to transform is in the global variable `GLOBAL_TEST_OUTPUT_CONTENT`.
-# You can also use `GLOBAL_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
-#
-# Returns:
-#
-# - `GLOBAL_TEST_OUTPUT_CONTENT`: The modified text.
-#
-# > You can define this function directly in the test script, or in a test hook if
-# > you need it to be available for multiple tests.
-# > Note however that this function can be called very often, so it should be optimized.
-
-# ## test::scrubReplyVars
-#
-# This function can be defined to modify the REPLY variables before printing them in the report.
-#
-# Scrubbers are required when we need to convert non-deterministic text to something stable so that
-# tests are reproducible.
-#
-# > You can define this function directly in the test script, or in a test hook if
-# > you need it to be available for multiple tests.
-# > Note however that this function can be called very often, so it should be optimized.
 
 # ## test::flush
 #
@@ -695,7 +665,7 @@ function test::listPaths() {
   fs::listPaths "${directory}" recursive="${recursive}" includeHidden="${includeHidden}"
   array::sort REPLY_ARRAY
 
-  local output="" path type
+  local GLOBAL_TEST_OUTPUT_CONTENT="" path type
   for path in "${REPLY_ARRAY[@]}"; do
     type="?"
     if [[ -L "${path}" ]]; then
@@ -705,7 +675,7 @@ function test::listPaths() {
     elif [[ -f "${path}" ]]; then
       type="F"
     fi
-    output+="${type} ${path#"${directory}/"}"$'\n'
+    GLOBAL_TEST_OUTPUT_CONTENT+="${type} ${path#"${directory}/"}"$'\n'
   done
 
   local mode=""
@@ -716,8 +686,10 @@ function test::listPaths() {
     mode+=" (including hidden)"
   fi
 
+  test_applyOutputScrubbers
+
   # shellcheck disable=SC2016
-  printf 'Listing of `%s`%s:\n\n```text\n%s```\n\n' "${directory}" "${mode}" "${output}" >>"${GLOBAL_TEST_REPORT_FILE}"
+  printf 'Listing of `%s`%s:\n\n```text\n%s```\n\n' "${directory}" "${mode}" "${GLOBAL_TEST_OUTPUT_CONTENT}" >>"${GLOBAL_TEST_REPORT_FILE}"
 }
 
 # ## test::cat
@@ -745,11 +717,89 @@ function test::cat() {
   local -n GLOBAL_TEST_OUTPUT_CONTENT=REPLY
   fs::readFile "${file}"
 
-  if declare -F test::scrubOutput &>/dev/null; then
-    test::scrubOutput
-  fi
+  test_applyOutputScrubbers
 
   # shellcheck disable=SC2016
   printf '> cat `%s`\n\n```text\n%s\n```\n\n' "${file}" "${GLOBAL_TEST_OUTPUT_CONTENT}" >>"${GLOBAL_TEST_REPORT_FILE}"
+}
 
+# ## test::addOutputScrubber
+#
+# Add a scrubber function to modify the flushed text (both stdout and stderr) before adding it to the report.
+#
+# Scrubbers are required when we need to convert non-deterministic text to something stable so that
+# tests are reproducible.
+#
+# The referenced function should modify text to transform stored in the global variable  `GLOBAL_TEST_OUTPUT_CONTENT`.
+# You can also use `GLOBAL_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
+#
+# - $1: **function name** _as string_:
+#       The name of the function to add as a scrubber.
+#
+# ```bash
+# test::addOutputScrubber myScrubberFunction
+# ```
+function test::addOutputScrubber() {
+  local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if ! declare -F "${functionName}" &>/dev/null; then
+    test::fail "The function ⌜${functionName}⌝ does not exist, could not add the scrubber."
+  fi
+  _TEST_OUTPUT_SCRUBBERS+="${functionName},"
+}
+
+# ## test::addReplyVarsScrubber
+#
+# Add a scrubber function to modify the REPLY variables before printing them in the report.
+#
+# Scrubbers are required when we need to convert non-deterministic text to something stable so that
+# tests are reproducible.
+#
+# The referenced function should modify the REPLY variables (e.g. REPLY, REPLY2, REPLY_ARRAY...) directly.
+#
+# - $1: **function name** _as string_:
+#       The name of the function to add as a scrubber.
+#
+# ```bash
+# test::addReplyVarsScrubber myScrubberFunction
+# ```
+function test::addReplyVarsScrubber() {
+  local functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  if ! declare -F "${functionName}" &>/dev/null; then
+    test::fail "The function ⌜${functionName}⌝ does not exist, could not add the scrubber."
+  fi
+  _TEST_REPLY_VARS_SCRUBBERS+="${functionName},"
+}
+
+# ## test::clearOutputScrubbers
+#
+# Clear the list of scrubbers to modify the flushed text (both stdout and stderr) before adding it to the report.
+#
+# ```bash
+# test::clearOutputScrubbers
+# ```
+function test::clearOutputScrubbers() {
+  _TEST_OUTPUT_SCRUBBERS=""
+}
+
+# ## test::clearReplyVarsScrubbers
+#
+# Clear the list of scrubbers to modify the REPLY variables before printing them in the report.
+#
+# ```bash
+# test::clearReplyVarsScrubbers
+# ```
+function test::clearReplyVarsScrubbers() {
+  _TEST_REPLY_VARS_SCRUBBERS=""
+}
+
+# ## test_applyOutputScrubbers (private)
+#
+# This function is used to apply the scrubbers to the flushed text (both stdout and stderr) before adding it to the report.
+function test_applyOutputScrubbers() {
+  local IFS=',' functionName
+  for functionName in ${_TEST_OUTPUT_SCRUBBERS:-}; do
+    if [[ -n ${functionName} ]]; then
+      "${functionName}"
+    fi
+  done
 }

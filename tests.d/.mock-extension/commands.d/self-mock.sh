@@ -2,11 +2,11 @@
 # author: github.com/jcaillon
 # description: this script is a valet command
 
-# shellcheck source=../../libraries.d/lib-fs
+# shellcheck source=../../../libraries.d/lib-fs
 source fs
-# shellcheck source=../../libraries.d/lib-bash
+# shellcheck source=../../../libraries.d/lib-bash
 source bash
-# shellcheck source=../../libraries.d/lib-command
+# shellcheck source=../../../libraries.d/lib-command
 source command
 
 #===============================================================

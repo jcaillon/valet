@@ -137,6 +137,7 @@ Now silently building it using ⌜valet self build⌝ command.
 WARNING  Entering interactive mode for the function ⌜selfMock1⌝. But this is not yet implemented.
 FAIL     Expecting ⌜1⌝ argument(s) but got ⌜0⌝.
 Use ⌜valet self mock1 --help⌝ to get help.
+
 Usage:
 valet [global options] self mock1 [options] [--] <action>
 ```
@@ -165,11 +166,11 @@ Returned code: `1`
 WARNING  This is for testing valet core functions, the next statement will return 1 and create an error.
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ return 1
-├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh:51
-├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
-├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh:xxx
+├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
+├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
 ├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:100
+╰─ in main() at valet:xxx
 ```
 
 ### ✅ Testing exit code (exit 5) and custom exit function
@@ -183,11 +184,11 @@ Returned code: `5`
 ```text
 WARNING  This is for testing valet core functions, exiting with code 5.
 EXIT     Explicit exit with code 5, stack:
-├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh:62
-├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
-├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh:xxx
+├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
+├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
 ├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:100
+╰─ in main() at valet:xxx
 WARNING  This is a custom on exit function.
 ```
 
@@ -227,18 +228,18 @@ Returned code: `1`
 WARNING  This is for testing valet core functions, the next statement will call a non existing command, causing a call to command_not_found_handle.
 CMDMISS  Command not found: ⌜thisIsAnUnknownCommandForTesting⌝.
 Please check your ⌜PATH⌝ variable.
-├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh:66
-├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
-├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh:xxx
+├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
+├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
 ├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:100
+╰─ in main() at valet:xxx
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ thisIsAnUnknownCommandForTesting
-├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh:66
-├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:209
-├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:61
+├─ in selfMock1() at $GLOBAL_INSTALLATION_DIRECTORY/tests.d/.mock-extension/commands.d/self-mock.sh:xxx
+├─ in command_runFunction() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
+├─ in command::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/lib-command:xxx
 ├─ in main::parseProgramArguments() at $GLOBAL_INSTALLATION_DIRECTORY/libraries.d/main:xxx
-╰─ in main() at valet:100
+╰─ in main() at valet:xxx
 ```
 
 ### ✅ Testing custom exit function and ok

@@ -68,7 +68,7 @@ function test_selfDocument::convertFunctionDocumentationToSnippetBody() {
 
   test::func selfDocument::convertFunctionDocumentationToSnippetBody exe::invoke _DOCUMENTATION
 
-    # shellcheck disable=SC2016
+  # shellcheck disable=SC2016
   _DOCUMENTATION2='## exe::invoke
 
 This function call an executable with its optional arguments.
@@ -83,7 +83,7 @@ This function call an executable with its optional arguments.
   test::printVars _DOCUMENTATION2
   test::func selfDocument::convertFunctionDocumentationToSnippetBody exe::invoke _DOCUMENTATION2
 
-    # shellcheck disable=SC2016
+  # shellcheck disable=SC2016
   _DOCUMENTATION3='## exe::invoke
 
 This function call an executable with its optional arguments.
@@ -99,18 +99,17 @@ function test_selfDocument() {
   fs::createTempDirectory
   TEST_DIRECTORY="${REPLY}"
 
-  # shellcheck disable=SC2317
-  function test::scrubOutput() {
-    GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT// [0-9][0-9][0-9] functions/ xxx functions}"
-  }
-
+  test::addOutputScrubber scrubFunctionsCount
   test::exec selfDocument --output "\"\${TEST_DIRECTORY}\"" --core-only
-
-  unset -f test::scrubOutput
+  test::clearOutputScrubbers
 
   test::exec fs::head "${TEST_DIRECTORY}/lib-valet.md" 10
   test::exec fs::head "${TEST_DIRECTORY}/lib-valet" 10
   test::exec fs::head "${TEST_DIRECTORY}/valet.code-snippets" 10
+}
+
+function scrubFunctionsCount() {
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT// [0-9][0-9][0-9] functions/ xxx functions}"
 }
 
 function core::getVersion() {

@@ -6,17 +6,17 @@ source command
 source string
 
 function main() {
+  test::addOutputScrubber limitToHead10
   test_helpCommand
+  test::clearOutputScrubbers
 }
 
 function test_helpCommand() {
   test::title "✅ Get help for self mock3 using fuzzy matching"
   test::exec command::parseProgramArguments hel sel mo3
 
-
   test::title "✅ Testing help with columns 48"
   test::exec command::parseProgramArguments help --columns 48 help
-
 
   test::title "✅ Testing that no arguments show the valet help"
   test::exec command::parseProgramArguments help
@@ -29,7 +29,7 @@ function test_helpCommand() {
 }
 
 # shellcheck disable=SC2317
-function test::scrubOutput() {
+function limitToHead10() {
   if [[ ${GLOBAL_TEST_OUTPUT_CONTENT} != *$'\n'* ]]; then
     return 0
   fi

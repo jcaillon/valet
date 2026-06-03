@@ -316,8 +316,9 @@ You can use scrubbers to remove dynamic content from the test report.
 
 Scrubbers are required when we need to convert non-deterministic text to something stable so that tests are reproducible.
 
-- define a function called `test::scrubOutput` in your test script to modify the content of stdout and stderr before it gets flushed into the report. The text to transform is in the global variable `GLOBAL_TEST_OUTPUT_CONTENT` and you can use `_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr).
-- define a function called `test::scrubReplyVars` in your test script to modify the REPLY variables before they get printed in the report.
+- You can define a scrubber function in your test script that modifies the content of stdout and stderr before it gets flushed into the report. The text to transform is in the global variable `GLOBAL_TEST_OUTPUT_CONTENT` and you can use `_TEST_FD_NUMBER` to know which file descriptor is being flushed (1 for stdout, 2 for stderr). Then call `test::addOutputScrubber functionName` where `functionName` is the name of your scrubber function.
+
+- You can also define a scrubber function that modifies the REPLY variables before they get printed in the report (using `test::func` or `test::printReplyVars`). Then call `test::addReplyVarsScrubber functionName` where `functionName` is the name of your scrubber function.
 
 ### ❌ Throw an error to fail a test
 

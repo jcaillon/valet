@@ -19,13 +19,15 @@ function main() {
     noyacode/valet-tests-slimdeb:latest \
     -c "source /home/me/test-script 2>&1"
 
-  # shellcheck disable=SC2317
-  function test::scrubOutput() {
-    local version="${GLOBAL_TEST_OUTPUT_CONTENT##*"is ⌜"}"
-    version="${version%%⌝*}"
-    GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//"${version}"/"X.Y.Z"}"
-  }
+  test::addOutputScrubber scrubVersion
   test::flush
+  test::clearOutputScrubbers
+}
+
+function scrubVersion() {
+  local version="${GLOBAL_TEST_OUTPUT_CONTENT##*"is ⌜"}"
+  version="${version%%⌝*}"
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//"${version}"/"X.Y.Z"}"
 }
 
 main

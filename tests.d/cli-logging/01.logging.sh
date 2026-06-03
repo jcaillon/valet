@@ -16,18 +16,7 @@ function test_logLevelOptions() {
   test::title "✅ Logging level with --log-level option"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" --log-level warning self mock1 logging-level
 
-  # shellcheck disable=SC2317
-  function test::scrubOutput() {
-    local -
-    set -o noglob
-    local line text=""
-    local IFS=$'\n'
-    for line in ${GLOBAL_TEST_OUTPUT_CONTENT}; do
-      line="${line//after ?s/after 0s}"$'\n'
-      text+="${line//"Starting profiler, writing in "*/"Starting profiler, writing in file..."}"$'\n'
-    done
-    GLOBAL_TEST_OUTPUT_CONTENT="${text%$'\n'}"
-  }
+  test::addOutputScrubber scrubTimeElapsed
 
   test::title "✅ Logging level with --verbose option"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" -v self mock1 logging-level
@@ -35,7 +24,7 @@ function test_logLevelOptions() {
   test::title "✅ Logging level with DEBUG set (also activates profiling)"
   test::exec DEBUG=1 "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
 
-  unset -f test::scrubOutput
+  test::clearOutputScrubbers
 }
 
 function test_logDisplayOptions() {
@@ -51,10 +40,10 @@ function test_logOutputOptions() {
 
   test::title "✅ Testing that we can output the logs to a directory additionally to console"
   test::exec VALET_CONFIG_LOG_TO_DIRECTORY="${logDir}" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
-  # shellcheck disable=SC2317
-  function test::scrubOutput() { GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//????-??-??T??-??-??+????--PID_??????.log/2025-02-12T21-57-29+0000.log}"; }
-  test::func fs::listFiles "${logDir}"
-  unset -f test::scrubOutput
+
+  test::addOutputScrubber scrubFileName
+  test::listPaths "${logDir}"
+  test::clearOutputScrubbers
 
   test::title "✅ Testing that we can output the logs to a specific file name additionally to console"
   test::exec VALET_CONFIG_LOG_FILENAME_PATTERN='logFile=test.log' VALET_CONFIG_LOG_TO_DIRECTORY="true" "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
@@ -71,6 +60,22 @@ function test_logOutputOptions() {
   test::prompt export VALET_CONFIG_LOG_FD=11
   VALET_CONFIG_LOG_FD="${myFd}" test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 logging-level
   test::cat "${logDir}/test3.log"
+}
+
+function scrubTimeElapsed() {
+  local -
+  set -o noglob
+  local line text=""
+  local IFS=$'\n'
+  for line in ${GLOBAL_TEST_OUTPUT_CONTENT}; do
+    line="${line//after ?s/after 0s}"$'\n'
+    text+="${line//"Starting profiler, writing in "*/"Starting profiler, writing in file..."}"$'\n'
+  done
+  GLOBAL_TEST_OUTPUT_CONTENT="${text%$'\n'}"
+}
+
+function scrubFileName() {
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//????-??-??T??-??-??+????--PID_??????.log/2025-02-12T21-57-29+0000.log}"
 }
 
 main
