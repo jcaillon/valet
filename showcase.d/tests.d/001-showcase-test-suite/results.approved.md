@@ -42,11 +42,11 @@ INFO     More: more1 more2.
 INFO     Extracted text is: ⌜My bold text⌝
 ```
 
-❯ `trap::onCleanUp`
+❯ `cleanUp`
 
 **Standard output**:
 
 ```text
-trap::onCleanUp is working
+cleanUp is working
 ```
 

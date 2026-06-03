@@ -6,7 +6,7 @@ function main() {
   command::sourceFunction "showcaseCommand1" 2>/dev/null
 
   test_showcaseCommand1
-  test_trap::onCleanUp
+  test_cleanUp
 }
 
 # Another example that reminds you that you can override existing functions
@@ -21,12 +21,12 @@ function test_showcaseCommand1() {
 }
 
 # This demonstrates a custom test where we output what we want in the test results file
-function test_trap::onCleanUp() {
-  test::prompt "trap::onCleanUp"
-  if trap::onCleanUp; then
-    echo "trap::onCleanUp is working"
+function test_cleanUp() {
+  test::prompt "cleanUp"
+  if cleanUp; then
+    echo "cleanUp is working"
   else
-    echo "trap::onCleanUp is not working"
+    echo "cleanUp is not working"
   fi
   test::flush
 }

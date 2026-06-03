@@ -501,7 +501,7 @@ function core::initSubshell() {
     GLOBAL_PROGRAM_STARTED_AT_SECOND="${EPOCHREALTIME%%[.,]*}" \
     GLOBAL_PROGRAM_STARTED_AT_MICROSECOND="${EPOCHREALTIME##*[.,]}"
 
-  trap::registerSubshell
+  trap::setupSubshell
   fs::setupSubshellTempFileGlobalVariable
 }
 

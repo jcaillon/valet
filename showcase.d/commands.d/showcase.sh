@@ -37,8 +37,12 @@ examples:
 COMMAND_YAML
 function showcaseCommand1() {
   local -a more
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
+
+  # always call "cleanUp" on exit to do some custom clean up
+  trap::register cleanUp on-exit
 
   log::info "First argument: ${firstArg:-}."
   log::info "Option 1: ${option1:-}."
@@ -57,32 +61,6 @@ function showcaseCommand1() {
   echo "That's it!"
 }
 
-
-#===============================================================
-# >>> Optional hook functions
-#===============================================================
-
-# This function is always called before the program ends and allows
-# you to do some custom clean up.
-# It does not have to be defined.
-function trap::onCleanUp() {
+function cleanUp() {
   log::debug "Cleaning up stuff in the showcase commands."
-}
-
-# This function should return 0 to cancel the interruption
-# or any other code to continue interrupting the program.
-# It is called on signal SIGINT and SIGQUIT.
-# It does not have to be defined.
-# shellcheck disable=SC2317
-function trap::onInterrupt() {
-  return 0
-}
-
-# This function should return 0 to cancel the termination
-# or any other code to interrupt the program.
-# It is called on signal SIGHUP and SIGTERM.
-# It does not have to be defined.
-# shellcheck disable=SC2317
-function trap::onTerminate() {
-  return 0
 }

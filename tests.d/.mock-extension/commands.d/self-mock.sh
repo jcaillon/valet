@@ -38,10 +38,14 @@ arguments:
     - show-help
 COMMAND_YAML
 function selfMock1() {
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   case "${action:-}" in
+  ok)
+    trap::register cleanUp on-exit
+    ;;
   error)
     log::warning "This is for testing valet core functions, the next statement will return 1 and create an error."
     returnOne
@@ -53,10 +57,7 @@ function selfMock1() {
     core::fail "This is for testing valet core functions, failing now with exit code 255." exitCode=255
     ;;
   exit)
-    # shellcheck disable=SC2317
-    function trap::onCleanUp() {
-      log::warning "This is a custom on exit function."
-    }
+    trap::register cleanUp on-exit
     log::warning "This is for testing valet core functions, exiting with code 5."
     exit 5
     ;;
@@ -66,14 +67,10 @@ function selfMock1() {
     ;;
   divide-by-zero)
     log::warning "This is for testing valet core functions, the next statement will call a bash error."
-    ((10/0))
+    ((10 / 0))
     log::warning "This line should not be reached, the previous command should have failed."
     ;;
   create-temp-files)
-    # shellcheck disable=SC2317
-    function trap::onCleanUp() {
-      log::warning "This is a custom clean up function."
-    }
     local tmp1 tmp2 tmp3 tmp4
     fs::createTempFile
     tmp1="${REPLY}"
@@ -104,10 +101,6 @@ function selfMock1() {
       log::printString "The trace mode is activated!"
     fi
     ;;
-  wait-indefinitely)
-    log::info "This is for testing valet core functions, waiting indefinitely."
-    bash::sleep 999
-    ;;
   show-help)
     command::showHelp
     ;;
@@ -122,7 +115,9 @@ function selfMock1() {
 
 function returnOne() { return 1; }
 
-
+function cleanUp() {
+  log::warning "This is a custom on exit function."
+}
 
 #===============================================================
 # >>> command: self mock2
@@ -169,7 +164,8 @@ examples:
 COMMAND_YAML
 function selfMock2() {
   local -a more
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   log::info "Option 1 (option1): ${option1:-}."
@@ -189,7 +185,6 @@ function aSubFunctionInselfMock2() {
   log::debug "This is a sub function."
 }
 
-
 #===============================================================
 # >>> command: self mock3
 #===============================================================
@@ -205,8 +200,80 @@ description: |-
   If so, it will require the user to enter the sudo password and use sudo inside the command
 COMMAND_YAML
 function selfMock3() {
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   ${SUDO} whoami
+}
+
+#===============================================================
+# >>> command: self mock4
+#===============================================================
+: <<"COMMAND_YAML"
+command: self mock4
+hideInMenu: true
+function: selfMock4
+shortDescription: A command that only for testing valet core functions.
+description: |-
+  Wait.
+arguments:
+- name: path
+  description: |-
+    The path to write to when we start waiting indefinitely.
+options:
+- name: --cancel
+  description: |-
+    If present, cancel events.
+COMMAND_YAML
+function selfMock4() {
+  command::parseArguments "$@"
+  eval "${REPLY}"
+  command::checkParsedResults
+
+  if [[ ${cancel:-} == "true" ]]; then
+    EVENT_CODE=1
+  fi
+
+  trap::register onInterrupt on-interrupt
+  trap::register onTerminate on-terminate
+  trap::register onResize on-resize
+  trap::register onSuspend on-suspend
+  trap::register onContinue on-continue
+
+  log::info "This is for testing valet core functions, waiting indefinitely."
+
+  : >"${path:-}"
+
+  while true; do
+    bash::sleep 0.1
+  done
+}
+
+function onInterrupt() {
+  log::warning "Terminal interrupted."
+  : >"${path:-}"
+  return "${EVENT_CODE:-0}"
+}
+
+function onTerminate() {
+  log::warning "Terminal terminated."
+  : >"${path:-}"
+  return "${EVENT_CODE:-0}"
+}
+
+function onResize() {
+  log::info "Terminal resized: ${GLOBAL_COLUMNS} columns, ${GLOBAL_LINES} lines."
+  : >"${path:-}"
+}
+
+function onSuspend() {
+  log::info "Terminal suspended."
+  : >"${path:-}"
+  return "${EVENT_CODE:-0}"
+}
+
+function onContinue() {
+  log::info "Terminal continued."
+  : >"${path:-}"
 }

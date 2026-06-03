@@ -29,7 +29,7 @@ function test_command_parseFunctionArguments() {
   test::func command_parseFunctionArguments selfMock2 --this-is-option2 --option1 arg more1
 
   test::markdown "ok only args"
-  test::func command_parseFunctionArguments selfMock4 arg1 arg2
+  test::func command_parseFunctionArguments selfMockX arg1 arg2
 
   test::markdown "ok with -- to separate options from args"
   test::func command_parseFunctionArguments selfMock2 -- --arg1-- --arg2--

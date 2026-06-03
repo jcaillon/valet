@@ -280,7 +280,7 @@ function selfTestUtils_prepareModifiedTrapFunctions() {
   _TEST_TRAP_FUNCTIONS_ORIGINAL+=$'\n'"${REPLY2}"
 
   # shellcheck disable=SC2016
-  bash::injectCodeInFunction trap::registerSubshell 'eval "${_TEST_TRAP_FUNCTIONS_ORIGINAL}"'
+  bash::injectCodeInFunction trap::setupSubshell 'eval "${_TEST_TRAP_FUNCTIONS_ORIGINAL}"'
   _TEST_TRAP_FUNCTIONS_MODIFIED+=$'\n'"${REPLY}"
   _TEST_TRAP_FUNCTIONS_ORIGINAL+=$'\n'"${REPLY2}"
 }

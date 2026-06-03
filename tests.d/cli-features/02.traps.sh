@@ -20,15 +20,41 @@ function test_traps() {
   test::title "✅ Testing the unknown command handler"
   test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 unknown-command
 
-  # test::title "✅ Testing the kill signal handler"
-  # echo "valet self mock1 wait-indefinitely &"
-  # echo "kill \$!"
-  # test::flushStdout
-  # "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 wait-indefinitely &
-  # local processId=$!
-  # kill -9 ${processId}
-  # wait -f ${processId} || :
-  # test::flush
+  test::title "✅ Testing custom exit function and ok"
+  test::exec "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock1 ok
+
+  test_trappedSignals "term"
+  test_trappedSignals "hup" --cancel
+
+  test_trappedSignals "tstp"
+  test_trappedSignals "tstp" --cancel
+  test_trappedSignals "cont"
+
+  # can't test winch/interrupt because they are not sent to background processes
+}
+
+function test_trappedSignals() {
+  local signal="${1}"
+  shift 1
+  test::title "✅ Testing the ${signal} signal handler"
+
+  test::prompt "valet self mock4 &"
+  test::prompt "kill -${signal^^} \$!"
+
+  rm -f "${GLOBAL_TEST_TEMP_FILE}"
+  "${GLOBAL_INSTALLATION_DIRECTORY}/valet" self mock4 "${GLOBAL_TEST_TEMP_FILE}" "${@}" &
+  local processId=$!
+  while [[ ! -f "${GLOBAL_TEST_TEMP_FILE}" ]]; do
+    bash::sleep 0.01
+  done
+  rm -f "${GLOBAL_TEST_TEMP_FILE}"
+  kill "-${signal^^}" "${processId}"
+  while [[ ! -f "${GLOBAL_TEST_TEMP_FILE}" ]]; do
+    bash::sleep 0.01
+  done
+  kill -KILL "${processId}" &>/dev/null || :
+  wait -n ${processId} &>/dev/null || :
+  test::flush
 }
 
 # shellcheck disable=SC2317

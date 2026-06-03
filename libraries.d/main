@@ -84,7 +84,7 @@ exec {GLOBAL_FD_ORIGINAL_STDERR}>&2
 GLOBAL_FD_TUI="${GLOBAL_FD_ORIGINAL_STDERR}"
 
 # set the signal traps
-trap::register
+trap::setup
 
 # init the array containing background processes IDs
 declare -g -A GLOBAL_BACKGROUND_PROCESSES=() GLOBAL_BACKGROUND_PROCESSES_LOGS=()

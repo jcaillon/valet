@@ -8,61 +8,91 @@
 # >>> Traps
 #===============================================================
 
-# ## trap::onCleanUp
+# ## trap::register
 #
-# This function can be defined in a command script to execute some code when the program exits (in all cases, error or not).
+# Register a given function to execute when a specific event happens (e.g. on-exit, on-interrupt, etc...).
+# Only one function can be registered for each event, if you register a new one it will replace the previous one.
 #
-# > This function is executed in the same shell that has been exited, as if we called this function
-# > at the line executed at the moment when the program exited.
-# > Note: The stdout/stderr might be redirected somewhere else if the program exited in a command &>/dev/null.
+# - $1: **function name** _as string_:
+#       The name of the function to call when the event is emitted.
+#       Can be blank to unregister a function for an event.
+# - $2: **event name** _as string_:
+#       The name of the event to register to among the following ones:
+#
+#       - `on-exit`: when the program exits (in all cases, error or not).
+#                    The function will be executed in the same shell that has been exited, as if we called this
+#                    function at the line executed at the moment when the program exited.
+#                    Note: The stdout/stderr might be redirected somewhere else if the program exited in a
+#                    ``command &>/dev/null` context.
+#       - `on-interrupt`: when the program is interrupted by the user (SIGINT, SIGQUIT, e.g. CTRL+C or CTRL+\).
+#                    The function can return 1 to cancel the interrupt and continue running the program.
+#                    The function will be executed in the same shell that has been interrupted,
+#                    as if we called this function at the line executed at the moment when the interruption took place.
+#       - `on-terminate`: when the program is terminated by the system (SIGHUP, SIGTERM).
+#                    The function can return 1 to cancel the termination and continue running the program.
+#                    The function will be called from the main process.
+#       - `on-resize`: when the terminal changes its size.
+#                    You can immediately use the global variables `GLOBAL_COLUMNS` and `GLOBAL_LINES` to get the
+#                    new terminal size.
+#                    The function will be called from the main process and it will not be triggered if the program is
+#                    busy running an external command (e.g. sleep).
+#                    Note that the builtin read command also blocks this trigger until it is finished.
+#       - `on-suspend`: when the program is required to pause (e.g. CTRL+Z).
+#                    The function can return 1 to cancel the suspend and continue running the program.
+#                    The function will be called from the main process.
+#       - `on-continue`: when the program is required to resume its execution after a suspend (e.g. fg or bg).
+#                    The function will be called from the main process.
+#
+# ```bash
+# trap::register myCleanUpFunction on-exit
+# trap::register "" on-exit
+# ```
+function trap::register() {
+  local \
+    functionName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    eventName="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-# ## trap::onInterrupt
-#
-# This function can be defined in a command script to execute some code when the program is interrupted
-# by the end user:
-#
-# -  `CTRL+C` (SIGINT) normal interrupt
-# -  `CTRL+\` (SIGQUIT) interrupt with a coredump
-#
-# If the function returns 0, then the interrupt is cancelled and the program continues to run.
-#
-# > This function is executed in the same shell that has been interrupted, as if we called this function
-# > at the line executed at the moment when the interruption took place.
+  if [[ ! ${eventName} =~ ^(on-exit|on-interrupt|on-terminate|on-resize|on-suspend|on-continue)$ ]]; then
+    core::fail "Invalid event name ⌜${eventName}⌝, please check the function documentation."
+  elif [[ -n ${functionName} ]] && ! declare -F "${functionName}" &>/dev/null; then
+    core::fail "The function to register ⌜${functionName}⌝ does not exist, please check the function name."
+  fi
 
-# ## trap::onTerminate
-#
-# This function can be defined in a command script to execute some code when the program is terminated by the system (SIGHUP, SIGTERM).
-#
-# If the function returns 0, then the termination is cancelled and the program continues to run.
-# Otherwise, the program will exit.
-#
-# > This function is called from the main process.
+  eval "_TRAP_REGISTERED_${eventName//-/_}=${functionName}"
+}
 
-# ## trap::onResize
+# ## trap::triggerEvent (private)
 #
-# This function can be defined in a command script to execute some code when terminal changes its size.
+# Trigger a specific event, which will execute the function registered for this event if any.
 #
-# You can immediately use the global variables `GLOBAL_COLUMNS` and `GLOBAL_LINES` to get the new terminal size.
+# - $1: **event name** _as string_:
+#       The name of the event to trigger (see `trap::register` for the list of available events).
 #
-# > This function will be called from the main process and it will not be triggered if the program is
-# > busy running an external command (e.g. sleep).
-# > Note that the builtin read command also blocks this trigger only it is finished.
+# Returns:
+#
+# - ${REPLY_CODE}: 1 to cancel the event (for events that support this), 0 otherwise.
+#
+# ```bash
+# trap::triggerEvent on-exit
+# ```
+function trap::triggerEvent() {
+  local eventName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  local -n functionToCall="_TRAP_REGISTERED_${eventName//-/_}"
+  if [[ -n ${functionToCall:-} ]] && declare -F "${functionToCall}" &>/dev/null; then
+    # (we execute it in a if statement to disable errexit and avoid exiting the program in case of an error)
+    if ! ${functionToCall}; then
+      # if the function returns 1, then we "cancel" the event
+      REPLY_CODE=1
+      return 0
+    fi
+  fi
+  REPLY_CODE=0
+}
 
-# ## trap::onSuspend
-#
-# This function can be defined in a command script to execute some code when the program is required to pause (CTRL+Z).
-#
-# If the function returns 0, then the suspend is cancelled and the program continues to run.
-
-# ## trap::onContinue
-#
-# This function can be defined in a command script to execute some code when the program is required to
-# resume its execution after a suspend (fg or bg).
-
-# ## trap::register (private)
+# ## trap::setup (private)
 #
 # Register the traps for the program.
-function trap::register() {
+function trap::setup() {
   trap trap::onErrorInternal ERR
   trap trap::onExitInternal EXIT
   # Register CTRL+C SIGINT (interrupt) and CTRL+\ SIGQUIT (interrupt with a coredump) event handler
@@ -175,9 +205,9 @@ function trap::onExitInternal() {
 # It is executed in the same shell that has been interrupted, as if we called this function
 # at the line executed at the moment when the interruption took place.
 function trap::onInterruptInternal() {
-  if declare -F trap::onInterrupt &>/dev/null && trap::onInterrupt; then
-    # if trap::onInterrupt returns 0, then we cancel the interrupt
-    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+  trap::triggerEvent on-interrupt
+  if ((REPLY_CODE == 1)); then
+    # if the event was cancelled, we just return and continue the program
     return 0
   fi
 
@@ -198,6 +228,7 @@ function trap::onInterruptInternal() {
   fi
 
   if log::isDebugEnabled || [[ ${BASH_TRAPSIG:-} == "SIGQUIT" ]]; then
+    # BASH_TRAPSIG is a bash 5.3+ feature we do not count on it
     log::debug "Is your command stuck? Consider using the ⌜-x⌝ option to activate the profiler and identify what's wrong. Here is the current stack:"
     log::printTrappedBashCommand
     log::printCallStack
@@ -209,10 +240,9 @@ function trap::onInterruptInternal() {
 # This function is called when the program is terminated by the system (SIGHUP, SIGTERM).
 # It is called from the main process.
 function trap::onTerminateInternal() {
-  # check if the function exists
-  if declare -F trap::onTerminate &>/dev/null && trap::onTerminate; then
-    # if trap::onTerminate returns 0, then we cancel the termination
-    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+  trap::triggerEvent on-terminate
+  if ((REPLY_CODE == 1)); then
+    # if the event was cancelled, we just return and continue the program
     return 0
   fi
 
@@ -251,10 +281,8 @@ function trap::onResizeInternal() {
   if declare -F progress::onResize &>/dev/null; then
     progress::onResize
   fi
-  if declare -F trap::onResize &>/dev/null && trap::onResize; then
-    # (we execute it in a if statement to disable errexit and avoid exiting the program)
-    :
-  fi
+
+  trap::triggerEvent on-resize
 }
 
 # This function is called when the program is required to pause (stop/suspend).
@@ -264,10 +292,9 @@ function trap::onSuspendInternal() {
   # shellcheck disable=SC2034
   trap SIGTSTP
 
-  # check if the function exists
-  if declare -F trap::onSuspend &>/dev/null && trap::onSuspend; then
-    # if trap::onSuspend returns 0, then we cancel the suspend
-    # (we execute it in a if statement to disable errexit and avoid exiting the program)
+  trap::triggerEvent on-suspend
+  if ((REPLY_CODE == 1)); then
+    # if the event was cancelled, we just return and continue the program
     trap trap::onSuspendInternal SIGTSTP
     return 0
   fi
@@ -275,8 +302,8 @@ function trap::onSuspendInternal() {
   # save these value to restore them on continue
   # shellcheck disable=SC2034
   declare -g \
-    GLOBAL_LOG_REROUTED_TO_FILE_ENABLED_SAVED="${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-}" \
-    GLOBAL_TERMINAL_RAW_MODE_ENABLED_SAVED="${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-}"
+    _TRAP_LOG_REROUTED_TO_FILE_ENABLED_SAVED="${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-}" \
+    _TRAP_TERMINAL_RAW_MODE_ENABLED_SAVED="${GLOBAL_TERMINAL_RAW_MODE_ENABLED:-}"
 
   # if we were in interactive mode, we need to restore the logs
   if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED:-} == "true" ]]; then
@@ -300,12 +327,6 @@ function trap::onContinueInternal() {
   # we reregister the TSTP trap that removed on halt
   trap trap::onSuspendInternal SIGTSTP
 
-  # check if the function exists
-  if declare -F trap::onContinue &>/dev/null && trap::onContinue; then
-    # (we execute it in a if statement to disable errexit and avoid exiting the program)
-    :
-  fi
-
   # if we are in interactive mode, we need to hide the cursor
   if [[ -t ${GLOBAL_FD_TUI} ]]; then
     terminal::getTerminalSize
@@ -316,17 +337,19 @@ function trap::onContinueInternal() {
   fi
 
   # restore tty settings if needed
-  if [[ ${GLOBAL_TERMINAL_RAW_MODE_ENABLED_SAVED:-} == "true" ]]; then
+  if [[ ${_TRAP_TERMINAL_RAW_MODE_ENABLED_SAVED:-} == "true" ]]; then
     terminal::setRawMode
   fi
 
   # if we were in interactive mode, we need to restore the logs
-  if [[ ${GLOBAL_LOG_REROUTED_TO_FILE_ENABLED_SAVED:-} == "true" ]]; then
+  if [[ ${_TRAP_LOG_REROUTED_TO_FILE_ENABLED_SAVED:-} == "true" ]]; then
     terminal::rerouteLogs
   fi
 
   # shellcheck disable=SC2034
   GLOBAL_SCREEN_REDRAW_REQUIRED=true
+
+  trap::triggerEvent on-continue
 }
 
 # Function to handle commands not found, so we can display a better message.
@@ -420,11 +443,7 @@ function trap::onCleanUpInternal() {
   # restore the terminal as it was before running this program
   trap::restoreTerminal
 
-  # call the clean up functions if they exist
-  if declare -F trap::onCleanUp &>/dev/null && trap::onCleanUp; then
-    # (we execute it in a if statement to disable errexit and avoid exiting the program)
-    :
-  fi
+  trap::triggerEvent on-exit
 
   # disable the profiler if still on
   if [[ ${GLOBAL_PROFILER_ENABLED:-} == "true" ]]; then
@@ -530,7 +549,7 @@ function trap::killBackgroundProcesses() {
 # >>> Traps for subshells
 #===============================================================
 
-# ## trap::registerForSubshell (private)
+# ## trap::setupForSubshell (private)
 #
 # Register the traps for a subshell.
 #
@@ -541,7 +560,7 @@ function trap::killBackgroundProcesses() {
 # >   note that coproc do not respond to interrupt signals (CTRL+C does not work).
 # > - coproc and jobs will not get SIGHUP when the main process ends and they will continue to execute
 # >   until killed or until they check that the main process is dead.
-function trap::registerSubshell() {
+function trap::setupSubshell() {
   trap '_TRAP_SUBSHELL_EXIT_REASON=ERROR trap::onErrorInternal' ERR
   trap trap::onSubshellExitInternal EXIT
   # Register CTRL+C SIGINT (interrupt) and CTRL+\ QUIT (interrupt with a coredump) event handler

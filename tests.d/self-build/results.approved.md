@@ -54,11 +54,12 @@ INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/.moc
 INFO                              ├── ⌜self mock1⌝.
 INFO                              ├── ⌜self mock2⌝.
 INFO                              ├── ⌜self mock3⌝.
+INFO                              ├── ⌜self mock4⌝.
 INFO     == Summary of the commands ==
 
-- Number of variables declared: ⌜382⌝.
-- Number of functions: ⌜23⌝.
-- Number of commands: ⌜22⌝.
+- Number of variables declared: ⌜400⌝.
+- Number of functions: ⌜24⌝.
+- Number of commands: ⌜23⌝.
 - Number of user library directories found: ⌜0⌝.
 - Maximum sub command level: ⌜1⌝.
 
@@ -69,6 +70,7 @@ bash links                Create symbolic links as defined in the links definiti
 self mock1                A command that only for testing valet core functions.
 self mock2                A command that only for testing valet core functions.
 self mock3                A command that only for testing valet core functions.
+self mock4                A command that only for testing valet core functions.
 self release              Release a new version of valet.
 self setup                The command run after the installation of Valet to setup the tool.
 self source               Returns a string that can be evaluated to source Valet functions in bash.

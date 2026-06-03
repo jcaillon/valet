@@ -181,7 +181,7 @@ more1
 
 ok only args
 
-❯ `command_parseFunctionArguments selfMock4 arg1 arg2`
+❯ `command_parseFunctionArguments selfMockX arg1 arg2`
 
 Returned variables:
 
@@ -538,6 +538,7 @@ FAIL     Found multiple matches for the command ⌜sf⌝, please be more specifi
 [95ms[0mel[95mf[0m mock1
 [95ms[0mel[95mf[0m mock2
 [95ms[0mel[95mf[0m mock3
+[95ms[0mel[95mf[0m mock4
 [95ms[0mel[95mf[0m release
 [95ms[0mel[95mf[0m setup
 [95ms[0mel[95mf[0m source
