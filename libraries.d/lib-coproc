@@ -19,12 +19,12 @@
 #       - $1 the coproc index
 #       - $2 the coproc exit code
 #       - $3 the percentage of coprocs already completed
-#       - $4 the path of the file containing the accumulated logs of the coproc
+#       - $4 the path of the file containing the accumulated logs of the coproc (if redirectLogs is true)
 #       If the function sets REPLY to 1, the script will exit early. Otherwise it should set REPLY to 0.
 #       Set to an empty string to not call any callback function.
 #       (defaults to "")
 # - ${redirectLogs} _as bool_:
-#       (optional) Redirect the logs of the coproc instead of printing them in the current file descriptor.
+#       (optional) Redirect the logs of the coproc instead of printing them in the current log file descriptor.
 #       The accumulated logs of the coproc will be available in the completed callback function.
 #       (defaults to false)
 # - ${printRedirectedLogs} _as bool_:
@@ -53,7 +53,6 @@
 # declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
 # coproc::runInParallel jobCommands maxParallelCoprocs=2
 # ```
-# TODO: implement unit tests for this function
 function coproc::runInParallel() {
   local -n jobCommands_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
@@ -131,7 +130,7 @@ function coproc::runInParallel() {
       log::debug "The parallel coproc ${endedCoprocIndex} with PID ${endedCoprocPid} is completed with code ${endedCoprocExitStatus}."
 
       # remove the coproc from the list of running pids
-      coproc_cleanBackgroundProcess "${coprocName}"
+      coproc_cleanBackgroundProcessVars "${coprocName}"
       local pidIndex
       for pidIndex in "${!runningPids[@]}"; do
         if [[ ${runningPids[pidIndex]} == "${endedCoprocPid}" ]]; then
@@ -567,7 +566,7 @@ function coproc::wait() {
     break
   done
 
-  coproc_cleanBackgroundProcess "${coprocVarName}"
+  coproc_cleanBackgroundProcessVars "${coprocVarName}"
   # shellcheck disable=SC2034
   REPLY_CODE="${exitStatus}"
 }
@@ -595,11 +594,11 @@ function coproc::kill() {
   kill -INT "${pid}" &>/dev/null || :
   kill -HUP "${pid}" &>/dev/null || :
 
-  coproc_cleanBackgroundProcess "${coprocVarName}"
+  coproc_cleanBackgroundProcessVars "${coprocVarName}"
 }
 
 # Remove the coproc from GLOBAL_BACKGROUND_PROCESSES
-function coproc_cleanBackgroundProcess() {
+function coproc_cleanBackgroundProcessVars() {
   local coprocVarName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   unset -v "GLOBAL_BACKGROUND_PROCESSES[${coprocVarName}]" \
     "GLOBAL_BACKGROUND_PROCESSES_LOGS[${coprocVarName}]" \

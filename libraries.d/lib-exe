@@ -17,7 +17,7 @@ source system
 # This makes the executes silent unless the executable fails.
 # By default, it will exit (core::fail) if the executable returns a non-zero exit code.
 # By default, on windows, it will remove carriage return characters (\r) from the outputs
-# to make them more consistent with other OSes.
+# to make them more consistent with other OS.
 #
 # This function should be used as a wrapper around any external program as it allows to easily
 # mock the program during tests and facilitates debugging with trace level log.

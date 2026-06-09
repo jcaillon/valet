@@ -114,7 +114,7 @@ INFO     Stopping the coproc (_COPROC_9).
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 155: ((: 0 / 0: division by 0 (error token is "0")
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 204: ((: 0 / 0: division by 0 (error token is "0")
 CMDERR   Error code ⌜1⌝ for the command:
 ╭ ((0 / 0))
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -137,11 +137,78 @@ FAIL     The coproc ⌜_COPROC_21⌝ did not start correctly.
 > cat `/tmp/valet-temp`
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 175: 1: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-coproc/00.lib-coproc.sh: line 224: 1: unbound variable
 ERROR    Exiting subshell depth 4 with code 1, stack:
 ╭ local a="${1}"
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
 ╰─ in myCmd::function() at /path/to/function.sh:300
 
+```
+
+### ✅ Testing coproc::runInParallel simulating a sequential run with all ok commands
+
+❯ `coproc::runInParallel coprocNames simulateSequentialRun=true`
+
+**Error output**:
+
+```text
+INFO     Running simple command coproc1.
+INFO     Running simple command coproc2.
+INFO     Running simple command coproc3.
+INFO     Running simple command coproc4.
+```
+
+### ✅ Testing coproc::runInParallel with max 1 in parallel and some failing commands
+
+❯ `coproc::runInParallel coprocNames maxInParallel=1 coprocNamePrefix=_COPROC_PARALLEL_TEST_`
+
+**Error output**:
+
+```text
+INFO     Running simple command coproc1.
+INFO     Running simple command coproc2.
+FAIL     failed
+INFO     Running simple command coproc3.
+INFO     Running simple command coproc4.
+FAIL     failed
+```
+
+### ✅ Testing coproc::runInParallel simulating a sequential run with some failing commands
+
+❯ `coproc::runInParallel coprocNames simulateSequentialRun=true`
+
+Exited with code: `1`
+
+**Error output**:
+
+```text
+INFO     Running simple command coproc2.
+FAIL     failed
+```
+
+### ✅ Testing coproc::runInParallel with a completed callback and redirecting logs
+
+❯ `coproc::runInParallel coprocNames completedCallback=callback redirectLogs=true`
+
+```text
+callbackLines=(
+[0]='coproc index 0 finished with status 0 (progress is 25%, logs: /tmp/valet.d/f5-2)'
+[1]='coproc index 1 finished with status 1 (progress is 50%, logs: /tmp/valet.d/f6-2)'
+[2]='coproc index 2 finished with status 0 (progress is 75%, logs: /tmp/valet.d/f7-2)'
+[3]='coproc index 3 finished with status 2 (progress is 100%, logs: /tmp/valet.d/f8-2)'
+)
+```
+
+### ✅ Testing coproc::runInParallel with print redirected logs
+
+❯ `coproc::runInParallel coprocNames printRedirectedLogs=true`
+
+**Error output**:
+
+```text
+INFO     Running simple command.
+INFO     Running simple command.
+INFO     Running simple command.
+INFO     Running simple command.
 ```
 

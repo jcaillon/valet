@@ -1,12 +1,61 @@
 #!/usr/bin/env bash
 
-include coproc bash fs
+include coproc bash fs array
 
 function main() {
   test_coproc::run_simpleTests
   test_coproc::run_completeTest false
   test_coproc::run_completeTest true
   test_coproc::run_testError
+  test_coproc::runInParallel
+}
+
+function test_coproc::runInParallel() {
+  test::title "✅ Testing coproc::runInParallel simulating a sequential run with all ok commands"
+  # shellcheck disable=SC2317
+  function simpleCommand() {
+    log::info "Running simple command ${1}."
+    if ((${2:-0} > 0)); then
+      core::fail "failed" exitCode="${2:-0}"
+    fi
+  }
+  local -a coprocNames=(
+    'simpleCommand coproc1'
+    'simpleCommand coproc2'
+    'simpleCommand coproc3'
+    'simpleCommand coproc4'
+  )
+  test::exec coproc::runInParallel coprocNames simulateSequentialRun=true
+
+  test::title "✅ Testing coproc::runInParallel with max 1 in parallel and some failing commands"
+  coprocNames=(
+    'simpleCommand coproc1'
+    'simpleCommand coproc2 1'
+    'simpleCommand coproc3'
+    'simpleCommand coproc4 2'
+  )
+  test::exec coproc::runInParallel coprocNames maxInParallel=1 coprocNamePrefix=_COPROC_PARALLEL_TEST_
+
+  test::title "✅ Testing coproc::runInParallel simulating a sequential run with some failing commands"
+  test::exit coproc::runInParallel coprocNames simulateSequentialRun=true
+
+  test::title "✅ Testing coproc::runInParallel with a completed callback and redirecting logs"
+  # shellcheck disable=SC2317
+  function callback() {
+    callbackLines+=("coproc index ${1} finished with status ${2} (progress is ${3}%, logs: ${4})")
+  }
+  local -a callbackLines=()
+  test::exec coproc::runInParallel coprocNames completedCallback=callback redirectLogs=true
+
+  array::sort callbackLines
+  test::printVars callbackLines
+
+  test::title "✅ Testing coproc::runInParallel with print redirected logs"
+  # shellcheck disable=SC2317
+  function simpleCommand() {
+    log::info "Running simple command."
+  }
+  test::exec coproc::runInParallel coprocNames printRedirectedLogs=true
 }
 
 function test_coproc::run_simpleTests() {

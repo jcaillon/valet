@@ -33,7 +33,7 @@ function test_string::expandVariables() {
 
   local VAR1="value1" VAR2="value2" VAR3="" VAR4=""
   test::funcWithInPlaceString string::expandVariables 'This is a ${VAR1} and ${VAR2:-thing} and ${VAR3:-${NONEXISTING-${ANOTHER_NON_EXISTING:-default}}} and empty${VAR4-default}${VAR5:-}, more emptine${VAR6}${VAR7-ss}'
-  test::funcWithInPlaceString string::expandVariables 'This is a ${VAR1} and ${VAR2:-thing} and ${VAR3:-${NONEXISTING-${ANOTHER_NON_EXISTING:-default}}} and empty${VAR4-default}${VAR5:-}, more emptine${VAR6}${VAR7-ss}' recursive=false
+  test::funcWithInPlaceString string::expandVariables 'This is a ${VAR1} and ${VAR2:-thing} and ${VAR3:-${NONEXISTING-${ANOTHER_NON_EXISTING:-default}}} and empty${VAR4-default}${VAR5:-}, more emptine${VAR6}${VAR7-ss}' nonRecursive=true
 }
 
 function test_string::join() {

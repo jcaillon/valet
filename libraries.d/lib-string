@@ -852,9 +852,9 @@ function string::join() {
 #
 # - $1: **string variable name** _as string_:
 #       The variable name that contains the string in which to expand variables.
-# - ${recursive} _as boolean_:
-#       (Optional) Whether to recursively expand nested variables, e.g. `${VAR1:-${VAR2-default}}`.
-#       (defaults to true)
+# - ${nonRecursive} _as boolean_:
+#       (Optional) Disable recursive expansion of nested variables, e.g. `${VAR1:-${VAR2-default}}`.
+#       (defaults to false)
 #
 # ```bash
 # MY_STRING="Hello ${USER}, today is ${DAY}."
@@ -864,7 +864,7 @@ function string::join() {
 function string::expandVariables() {
   local -n inputString_NameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
-    recursive=true \
+    nonRecursive=false \
     IFS=$' '
   shift 1
   eval "local a= ${*@Q}"
@@ -901,10 +901,10 @@ function string::expandVariables() {
     fi
   done
 
-  while [[ ${recursive} == true && ${output} == *\$\{* ]]; do
+  while [[ ${nonRecursive} != "true" && ${output} == *\$\{* ]]; do
     # handle nested default values
     local outputToExpand="${output}"
-    string::expandVariables outputToExpand recursive=false
+    string::expandVariables outputToExpand nonRecursive=true
     output="${outputToExpand}"
   done
 

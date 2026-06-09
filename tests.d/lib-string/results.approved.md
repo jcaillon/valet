@@ -1267,3 +1267,25 @@ Line: '2'
 Line: '3'
 ```
 
+### ✅ Testing string::expandVariables
+
+```text
+MY_STRING='This is a ${VAR1} and ${VAR2:-thing} and ${VAR3:-${NONEXISTING-${ANOTHER_NON_EXISTING:-default}}} and empty${VAR4-default}${VAR5:-}, more emptine${VAR6}${VAR7-ss}'
+```
+
+❯ `string::expandVariables MY_STRING`
+
+```text
+MY_STRING='This is a value1 and value2 and default and empty, more emptiness'
+```
+
+```text
+MY_STRING='This is a ${VAR1} and ${VAR2:-thing} and ${VAR3:-${NONEXISTING-${ANOTHER_NON_EXISTING:-default}}} and empty${VAR4-default}${VAR5:-}, more emptine${VAR6}${VAR7-ss}'
+```
+
+❯ `string::expandVariables MY_STRING nonRecursive=true`
+
+```text
+MY_STRING='This is a value1 and value2 and ${NONEXISTING-${ANOTHER_NON_EXISTING:-default}} and empty, more emptiness'
+```
+
