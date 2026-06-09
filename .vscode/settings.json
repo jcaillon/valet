@@ -3,6 +3,6 @@
   "bashIde.globPattern": "{libraries.d/*,commands.d/*}",
   "bashIde.includeAllWorkspaceSymbols": true,
   "terminal.integrated.wordSeparators": " ()[]{}',\"`─‘’“”|⌜⌝",
-  "cSpell.words": ["nocasematch", "Pids", "sfzf"],
+  "cSpell.words": ["hardlinks", "nocasematch", "Pids", "sfzf"],
   "editor.wordSeparators": "`~!@#$%^&*()-=+[{]}\\|;:'\",.<>/?"
 }

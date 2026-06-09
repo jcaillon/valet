@@ -25,6 +25,15 @@ function main() {
   test_string::highlight
   test_string::head
   test_string::doForEachLine
+  test_string::expandVariables
+}
+
+function test_string::expandVariables() {
+  test::title "✅ Testing string::expandVariables"
+
+  local VAR1="value1" VAR2="value2" VAR3="" VAR4=""
+  test::funcWithInPlaceString string::expandVariables 'This is a ${VAR1} and ${VAR2:-thing} and ${VAR3:-${NONEXISTING-${ANOTHER_NON_EXISTING:-default}}} and empty${VAR4-default}${VAR5:-}, more emptine${VAR6}${VAR7-ss}'
+  test::funcWithInPlaceString string::expandVariables 'This is a ${VAR1} and ${VAR2:-thing} and ${VAR3:-${NONEXISTING-${ANOTHER_NON_EXISTING:-default}}} and empty${VAR4-default}${VAR5:-}, more emptine${VAR6}${VAR7-ss}' recursive=false
 }
 
 function test_string::join() {

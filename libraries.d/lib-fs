@@ -64,6 +64,8 @@ function fs::getRealPath() {
 # ## fs::getAbsolutePath
 #
 # This function returns the absolute path of a path.
+# Also normalizes the path (removing `..` and `.`),
+# but does not resolve symlinks (see `fs::getRealPath` for that).
 #
 # - $1: **path** _as string_:
 #       The path to translate to absolute path.

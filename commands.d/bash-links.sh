@@ -118,7 +118,7 @@ function bashLinks() {
 
       line="${line//'~'/"${HOME}"}"
 
-      if [[ ${line} == *"$"* ]]; then
+      if [[ ${line} == *\$\{* ]]; then
         log::warning "The line ⌜${line}⌝ contains a variable, replacing it by its value."
         string::expandVariables line
         line="${REPLY}"
