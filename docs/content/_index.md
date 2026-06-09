@@ -117,15 +117,16 @@ sidebar:
   >}}
 {{< /hextra/feature-grid >}}
 
----
-
-Valet in a gist:
+**Valet in a gist:**
 
 - In Valet, you can create new **commands** that you can invoke with `valet my-command`.
 - Each command has properties that describe it (a description, a list of arguments and options, and so on...).
 - Each command has an associated bash function that is called when the command is invoked and which contains your logic.
 - You define commands and their functions in `.sh` files under your valet extensions directory and Valet takes care of indexing your commands; which allows you to quickly find them, parse options, arguments, print their help...
 - Commands are packaged in **extensions** that can easily be shared and downloaded by other Valet users.
+- In commands, you have access to hundreds of utility functions written in pure bash.
+
+---
 
 ## 🖥️ An interactive menu
 

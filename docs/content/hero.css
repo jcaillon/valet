@@ -22,18 +22,6 @@ hr:is(html[class~="dark"] *) {
   background: linear-gradient(90deg, #fbb3ff 0%, #ee66bf 100%);
 }
 
-.hero-valet-can-do {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  background: linear-gradient(90deg, #017c1b 0%, #03a810 100%);
-  background-clip: border-box;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  font-weight: 700;
-  font-size: 2rem;
-}
-
 .hero-valet-can-do:is(html[class~="dark"] *) {
   background: linear-gradient(90deg, #fbb3ff 0%, #ee66bf 100%);
   background-clip: border-box;
@@ -53,9 +41,8 @@ hr:is(html[class~="dark"] *) {
 }
 
 .valet-hero-bg:is(html[class~="dark"] *) {
-  background: rgb(17 17 17 / var(--tw-bg-opacity)) radial-gradient(125% 125% at 50% 100%, rgb(17 17 17 / var(--tw-bg-opacity)) 40%, rgb(53, 1, 54) 100%) 0% 0% / 100% 100%;
+  background: radial-gradient(125% 125% at 50% 90%, var(--hx-color-dark) 40%, #350136 100%);
 }
-
 
 .valet-hero {
   position: relative;
@@ -199,62 +186,6 @@ hr:is(html[class~="dark"] *) {
 .theme-toggle[data-theme="dark"] .theme-show-light {
   display: none;
 }
-
-.valet-pain-points-section {
-  margin-bottom: 3rem;
-}
-.valet-pain-points {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.valet-pain-point {
-  background: linear-gradient(135deg, #fee2e2 60%, #ffb4b4ff 100%);
-  border-radius: 1.25rem;
-
-  padding: 0.5rem 1rem 1rem 1rem;
-  max-width: 340px;
-  min-width: 260px;
-  flex: 1 1 260px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  position: relative;
-  border: 2px solid #d6baba;
-  overflow: hidden;
-}
-.valet-pain-point:hover {
-  transform: translateY(-4px) scale(1.03);
-}
-.valet-pain-point-icon {
-  font-size: 2.2rem;
-  margin-bottom: 0.5rem;
-  color: #b91c1c;
-  filter: drop-shadow(0 0 8px #f87171);
-  z-index: 1;
-}
-.valet-pain-point-title {
-  font-weight: 700;
-  font-size: 1.15rem;
-  margin-bottom: 0.5rem;
-  color: #991b1b;
-  z-index: 1;
-}
-.valet-pain-point-desc {
-  font-size: 1rem;
-  color: #7f1d1d;
-  z-index: 1;
-}
-.valet-pain-point:is(html[class~="dark"] *) {
-  background: linear-gradient(135deg, #7f1d1d 60%, #b91c1c 100%);
-  color: #fee2e2;
-  border: 2px solid #f87171;
-}
-.valet-pain-point-title:is(html[class~="dark"] *) { color: #fff; }
-.valet-pain-point-desc:is(html[class~="dark"] *) { color: #fee2e2; }
-.valet-pain-point-icon:is(html[class~="dark"] *) { color: #f87171; }
-
 
 .hero-container {
   max-width: 90rem;
