@@ -348,12 +348,12 @@
 			"REPLY_ARRAY3$0"
 		]
 	},
-	"REPLY_ASSOCIATIVE_ARRAY": {
-		"prefix": "REPLY_ASSOCIATIVE_ARRAY",
+	"REPLY_MAP": {
+		"prefix": "REPLY_MAP",
 		"description": "",
 		"scope": "",
 		"body": [
-			"REPLY_ASSOCIATIVE_ARRAY$0"
+			"REPLY_MAP$0"
 		]
 	},
 	"IFS": {
@@ -484,12 +484,12 @@
 			"\\${REPLY_ARRAY3}$0"
 		]
 	},
-	"$REPLY_ASSOCIATIVE_ARRAY": {
-		"prefix": "$REPLY_ASSOCIATIVE_ARRAY",
+	"$REPLY_MAP": {
+		"prefix": "$REPLY_MAP",
 		"description": "",
 		"scope": "",
 		"body": [
-			"\\${REPLY_ASSOCIATIVE_ARRAY}$0"
+			"\\${REPLY_MAP}$0"
 		]
 	},
 	"$BASHOPTS": {

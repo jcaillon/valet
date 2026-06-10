@@ -45,6 +45,7 @@ source tui
 source variable
 source version
 source windows
+source yaml
 
 ```
 

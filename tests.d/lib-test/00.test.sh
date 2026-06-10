@@ -148,7 +148,7 @@ function functionWithReturnedVariables() {
   echo "LOG: ${2}" 1>&2
   REPLY="This is the returned value"
   REPLY_ARRAY=("This" "is" "the" "returned" "array")
-  REPLY_ASSOCIATIVE_ARRAY=([key1]="This" [key2]="is" [key3]="the" [key4]="returned" [key5]="associative" [key6]="array")
+  REPLY_MAP=([key1]="This" [key2]="is" [key3]="the" [key4]="returned" [key5]="associative" [key6]="array")
 }
 
 main

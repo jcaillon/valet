@@ -43,7 +43,7 @@ Functions return values using global variables (see [performance tips](../perfor
 - `${REPLY3}`
 - `${REPLY_ARRAY[@]}`
 - `${REPLY_ARRAY2[@]}`
-- `${REPLY_ASSOCIATIVE_ARRAY[@]}`
+- `${REPLY_MAP[@]}`
 
 This ensures consistency across all functions. The trade off is that you must pay attention to how you use these variables. Calling two functions that are using the same `REPLY` will overwrite the value of the first function, so you will want to assign it to another variable because calling the second function.
 
@@ -125,6 +125,7 @@ You can also browse the list of available libraries and their functions here;
   {{< card link="variable" icon="cube" title="variable" subtitle="Manipulate bash variables." >}}
   {{< card link="version" icon="calculator" title="version" subtitle="Compare and manipulate semantic versions." >}}
   {{< card link="windows" icon="view-grid" title="windows" subtitle="Functions specific to windows systems." >}}
+  {{< card link="yaml" icon="document-text" title="yaml" subtitle="Functions to manipulate YAML." >}}
 {{< /cards >}}
 
 {{< main-section-end >}}

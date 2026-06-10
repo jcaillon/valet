@@ -184,7 +184,7 @@ function test_exec() {
   if [[ ${printReturnedValues} == "true" ]]; then
     local REPLY_CODE REPLY REPLY2 REPLY3 REPLY4
     local -a REPLY_ARRAY REPLY_ARRAY2
-    local -A REPLY_ASSOCIATIVE_ARRAY
+    local -A REPLY_MAP
   fi
 
   # reset IFS to ensure consistent behavior
@@ -252,10 +252,10 @@ function test::printReplyVars() {
       GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
     fi
   done
-  if [[ -n "${!REPLY_ASSOCIATIVE_ARRAY[*]}" ]]; then
-    GLOBAL_TEST_OUTPUT_CONTENT+="REPLY_ASSOCIATIVE_ARRAY=("$'\n'
-    for key in "${!REPLY_ASSOCIATIVE_ARRAY[@]}"; do
-      GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${REPLY_ASSOCIATIVE_ARRAY[${key}]//\'/\'\"\'\"\'}'"$'\n'
+  if [[ -n "${!REPLY_MAP[*]}" ]]; then
+    GLOBAL_TEST_OUTPUT_CONTENT+="REPLY_MAP=("$'\n'
+    for key in "${!REPLY_MAP[@]}"; do
+      GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${REPLY_MAP[${key}]//\'/\'\"\'\"\'}'"$'\n'
     done
     GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
   fi

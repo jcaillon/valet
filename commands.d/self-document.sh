@@ -104,7 +104,7 @@ function selfDocument::getFooter() {
 #
 # Returns:
 #
-# - ${REPLY_ASSOCIATIVE_ARRAY}: an associative array of all the function names and their documentation.
+# - ${REPLY_MAP}: an associative array of all the function names and their documentation.
 #
 # ```bash
 # selfDocument::getAllFunctionsDocumentation
@@ -140,8 +140,8 @@ function selfDocument::getAllFunctionsDocumentation() {
     done
   fi
 
-  unset -v REPLY_ASSOCIATIVE_ARRAY SORTED_FUNCTION_NAMES
-  declare -g -A REPLY_ASSOCIATIVE_ARRAY=()
+  unset -v REPLY_MAP SORTED_FUNCTION_NAMES
+  declare -g -A REPLY_MAP=()
 
   # for each file to analyze
   local file
@@ -168,7 +168,7 @@ function selfDocument::getAllFunctionsDocumentation() {
         string::trimEdges functionName
         log::trace "Found function: ⌜${functionName}⌝"
         functionDocumentation="${functionDocumentation%%"shellcheck disable="*}"
-        REPLY_ASSOCIATIVE_ARRAY["${functionName}"]="${functionDocumentation}"
+        REPLY_MAP["${functionName}"]="${functionDocumentation}"
         functionDocumentation=""
       else
         if [[ ${line} == "#" ]]; then
@@ -180,20 +180,20 @@ function selfDocument::getAllFunctionsDocumentation() {
     done <"${file}"
   done
 
-  log::info "Found ${#REPLY_ASSOCIATIVE_ARRAY[@]} functions with documentation."
+  log::info "Found ${#REPLY_MAP[@]} functions with documentation."
 
   if log::isTraceEnabled; then
     log::trace "The functions with their documentation are:"
     local key
-    for key in "${!REPLY_ASSOCIATIVE_ARRAY[@]}"; do
+    for key in "${!REPLY_MAP[@]}"; do
       log::trace "Function: ⌜${key}⌝"
-      local _documentationString="${REPLY_ASSOCIATIVE_ARRAY[${key}]}"
+      local _documentationString="${REPLY_MAP[${key}]}"
       log::printFileString _documentationString
     done
   fi
 
   # sort the functions by name
-  declare -g -a SORTED_FUNCTION_NAMES=("${!REPLY_ASSOCIATIVE_ARRAY[@]}")
+  declare -g -a SORTED_FUNCTION_NAMES=("${!REPLY_MAP[@]}")
   array::sort SORTED_FUNCTION_NAMES
 }
 
@@ -258,7 +258,7 @@ function selfDocument_writeAllFunctionsToMarkdown() {
   # append each function documentation to the file
   local IFS=$'\n' key documentationVar
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
-    selfDocument::convertFunctionDocumentationToMarkdown "REPLY_ASSOCIATIVE_ARRAY[${key}]"
+    selfDocument::convertFunctionDocumentationToMarkdown "REPLY_MAP[${key}]"
     content+="${REPLY}"$'\n'
   done
 
@@ -287,7 +287,7 @@ function selfDocument_writeAllFunctionsToPrototypeScript() {
   local key functionName documentation line
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     functionName="${key}"
-    documentation="REPLY_ASSOCIATIVE_ARRAY[${key}]"
+    documentation="REPLY_MAP[${key}]"
     # add # to each line of the documentation
 
     local IFS
@@ -359,7 +359,7 @@ function selfDocument_writeAllFunctionsToCodeSnippets() {
   local key functionName documentationVar commentedDocumentation
   for key in "${SORTED_FUNCTION_NAMES[@]}"; do
     functionName="${key}"
-    documentationVar="REPLY_ASSOCIATIVE_ARRAY[${key}]"
+    documentationVar="REPLY_MAP[${key}]"
 
     local description="${!documentationVar}"
 

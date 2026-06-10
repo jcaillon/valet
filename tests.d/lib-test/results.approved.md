@@ -209,7 +209,7 @@ REPLY_ARRAY=(
 [3]='returned'
 [4]='array'
 )
-REPLY_ASSOCIATIVE_ARRAY=(
+REPLY_MAP=(
 [key6]='array'
 [key4]='returned'
 [key5]='associative'

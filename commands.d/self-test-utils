@@ -96,7 +96,7 @@ function selfTestUtils_setupValetForConsistency() {
   }
 
   # define it so we can check if it has elements when printing the reply values of a function
-  declare -g -A REPLY_ASSOCIATIVE_ARRAY=()
+  declare -g -A REPLY_MAP=()
 }
 
 function selfTestUtils_runHookScript() {

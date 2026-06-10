@@ -428,7 +428,7 @@ url: /docs/libraries/${packageName}
 "
     fi
 
-    selfDocument::convertFunctionDocumentationToMarkdown "REPLY_ASSOCIATIVE_ARRAY[${key}]"
+    selfDocument::convertFunctionDocumentationToMarkdown "REPLY_MAP[${key}]"
     documentationPageContent["${path}"]+="${REPLY}"$'\n'
   done
 

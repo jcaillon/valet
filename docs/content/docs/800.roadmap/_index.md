@@ -19,7 +19,7 @@ This page lists the features that I would like to implement in Valet. They come 
   - Allow options to be inherited from parent commands. We can check the existence of the base options in the command::parse function (for verbose, log level, progress bars). For source and version, mark them as `inherited: false` as we only want to handle them in the main parsing loop, at valet level.
   - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
 - test the "sudo" feature: it runs the command by forking. We could add an option to instead rerun valet with sudo.
-- add a yaml library for basic parsing. Same for json. The parse method can optionally output .keys and .length variable allowing to easily loop over keys or arrays (e.g. REPLY_ASSOCIATIVE_ARRAY["thing.stuff.length"])
+- add a yaml library for basic parsing. Same for json. The parse method can optionally output .keys and .length variable allowing to easily loop over keys or arrays (e.g. REPLY_MAP["thing.stuff.length"])
 - Add tooltip in interactive functions (Enter shows help, Tab autocompletes, etc...)
 - document debugging with strace
 - Check error handling inside ifs and evals.
