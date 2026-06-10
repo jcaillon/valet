@@ -4,7 +4,7 @@
 
 ### ✅ Testing self document command
 
-❯ `selfDocument --output "${TEST_DIRECTORY}" --core-only`
+❯ `selfDocument --output /tmp/valet.d/d1-2 --core-only`
 
 **Error output**:
 

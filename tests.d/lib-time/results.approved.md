@@ -226,7 +226,7 @@ Returned variables:
 REPLY='1987-05-25_01h00m00s'
 ```
 
-❯ `time::getDate format='%(%H:%M:%S)T'`
+❯ `time::getDate 'format=%(%H:%M:%S)T'`
 
 Returned variables:
 
@@ -255,7 +255,7 @@ Total milliseconds: %L
 Total microseconds: %U'
 ```
 
-❯ `time::getHumanTimeFromMicroseconds 18243002234 format="${format}"`
+❯ `time::getHumanTimeFromMicroseconds 18243002234 "format=${format}"`
 
 Returned variables:
 

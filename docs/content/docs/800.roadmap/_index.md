@@ -12,6 +12,7 @@ This page lists the features that I would like to implement in Valet. They come 
 - Fix: A spinner or progress bar is already running.
 - Improve bash::sleep to have a progress bar in interactive mode
 - make version a command instead of an option, and add a `valet version` command that shows the current version and the latest release. Also show the extension versions ?
+- add a self debug command to test waitForKeyPress / waitForChar.
 - validate execution of .env or .envrc
 - Arguments parser:
   - Make the program parser catch all global options and verify in the build command that we do not reuse the same global option in different commands.

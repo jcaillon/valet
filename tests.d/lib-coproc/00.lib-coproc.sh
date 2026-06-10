@@ -27,6 +27,13 @@ function test_coproc::runInParallel() {
   )
   test::exec coproc::runInParallel coprocNames simulateSequentialRun=true
 
+  test::title "✅ Testing coproc::runInParallel simulating a sequential run with some failing commands"
+  coprocNames=(
+    'simpleCommand coproc1'
+    'simpleCommand coproc2 1'
+  )
+  test::exit coproc::runInParallel coprocNames simulateSequentialRun=true
+
   test::title "✅ Testing coproc::runInParallel with max 1 in parallel and some failing commands"
   coprocNames=(
     'simpleCommand coproc1'
@@ -36,16 +43,13 @@ function test_coproc::runInParallel() {
   )
   test::exec coproc::runInParallel coprocNames maxInParallel=1 coprocNamePrefix=_COPROC_PARALLEL_TEST_
 
-  test::title "✅ Testing coproc::runInParallel simulating a sequential run with some failing commands"
-  test::exit coproc::runInParallel coprocNames simulateSequentialRun=true
-
   test::title "✅ Testing coproc::runInParallel with a completed callback and redirecting logs"
   # shellcheck disable=SC2317
   function callback() {
     callbackLines+=("coproc index ${1} finished with status ${2} (progress is ${3}%, logs: ${4})")
   }
   local -a callbackLines=()
-  test::exec coproc::runInParallel coprocNames completedCallback=callback redirectLogs=true
+  test::exec coproc::runInParallel coprocNames maxInParallel=1 completedCallback=callback redirectLogs=true
 
   array::sort callbackLines
   test::printVars callbackLines

@@ -579,7 +579,7 @@ Returned variables:
 REPLY='/current-dir/resources/gitignored/file1'
 ```
 
-❯ `fs::getRealPath ~/thing`
+❯ `fs::getRealPath \~/thing`
 
 Returned variables:
 
@@ -629,7 +629,7 @@ Returned variables:
 REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/gitignored'
 ```
 
-❯ `fs::getAbsolutePath ~`
+❯ `fs::getAbsolutePath \~`
 
 Returned variables:
 

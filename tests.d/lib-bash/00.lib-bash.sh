@@ -211,7 +211,8 @@ function test_bash::countArgs() {
   test::title "✅ Testing bash::countArgs"
 
   test::func bash::countArgs 'arg1' 'arg2' 'arg3'
-  test::func bash::countArgs "\${PWD}/resources/*"
+  # shellcheck disable=SC2016
+  test::func bash::countArgs '"${PWD}/resources/*"'
 }
 
 function test_bash::isMissingCommands() {

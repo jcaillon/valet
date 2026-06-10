@@ -113,8 +113,7 @@ function test_log::parseLogPattern() {
   test::func log::parseLogPattern "<levelColor><level><colorDefault> <message>
 <wrapPadding><colorFaded>[<elapsedTime>] [<elapsedTimeSinceLastLog>] in [<sourceFile>]<colorDefault>"
 
-  local pat='{"level": "<level>{s}", "message": "<message>{s}", "source": "<source>{s}", "line": "<line>{s}"}'
-  test::func log::parseLogPattern '"${pat}"'
+  test::func log::parseLogPattern "'"'{"level": "<level>{s}", "message": "<message>{s}", "source": "<source>{s}", "line": "<line>{s}"}'"'"
 
   test::func log::parseLogPattern "<level>{-2s}
   <varSTUFF>{-5s}

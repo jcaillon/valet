@@ -320,7 +320,7 @@ Returned variables:
 REPLY='3'
 ```
 
-❯ `bash::countArgs ${PWD}/resources/*`
+❯ `bash::countArgs "${PWD}/resources/*"`
 
 Returned variables:
 

@@ -943,7 +943,7 @@ MY_STRING='A message.
 A new line'
 ```
 
-❯ `string::wrapWords MY_STRING width=13 newLinePadString=[36m░░░[0m firstLineWidth=10`
+❯ `string::wrapWords MY_STRING width=13 $'newLinePadString=\E[36m░░░\E[0m' firstLineWidth=10`
 
 Returned variables:
 
@@ -1109,7 +1109,7 @@ MY_STRING='A message.
 A new line'
 ```
 
-❯ `string::wrapCharacters MY_STRING width=13 newLinePadString=[36m░░░[0m firstLineWidth=10`
+❯ `string::wrapCharacters MY_STRING width=13 $'newLinePadString=\E[36m░░░\E[0m' firstLineWidth=10`
 
 Returned variables:
 
@@ -1167,7 +1167,7 @@ Returned variables:
 REPLY='[95mT[0mhis is a [95mT[0mex[95mt[0m [95mt[0mo highligh[95mt[0m.'
 ```
 
-❯ `MY_STRING=This\ is\ a\ texT\ to\ highlight. MY_CHARS=TTTTT string::highlight MY_STRING MY_CHARS highlightCode='>' resetCode='<'`
+❯ `MY_STRING=This\ is\ a\ texT\ to\ highlight. MY_CHARS=TTTTT string::highlight MY_STRING MY_CHARS highlightCode=\> resetCode=\<`
 
 Returned variables:
 

@@ -100,7 +100,7 @@ function test_selfDocument() {
   TEST_DIRECTORY="${REPLY}"
 
   test::addOutputScrubber scrubFunctionsCount
-  test::exec selfDocument --output "\"\${TEST_DIRECTORY}\"" --core-only
+  test::exec selfDocument --output "${TEST_DIRECTORY}" --core-only
   test::clearOutputScrubbers
 
   test::exec fs::head "${TEST_DIRECTORY}/lib-valet.md" 10

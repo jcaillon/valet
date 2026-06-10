@@ -73,11 +73,15 @@ function test::prompt() {
 # It will write the command and its output to the report file.
 # It will also print the REPLY values.
 #
-# - $@: **command** _as string_:
-#       The command to execute (function and its arguments).
+# - $@: **args** _as string_:
+#       The function to execute and its arguments.
+#       Note: these arguments will converted to a string, display as a `❯ prompt` in the report file,
+#       and then evaluated with bash `eval`. You can double quote arguments to prevent processing
+#       on an argument and escape special characters.
 #
 # ```bash
 # test::func myFunction
+# test::func myFunction "'string arguments with special < characters >'" '"${MY_VAR}"'
 # ```
 function test::func() {
   test_exec false true "$@"
@@ -91,9 +95,13 @@ function test::func() {
 #
 # - $@: **command** _as string_:
 #       The command to execute.
+#       Note: these arguments will converted to a string, display as a `❯ prompt` in the report file,
+#       and then evaluated with bash `eval`. You can double quote arguments to prevent processing
+#       on an argument and escape special characters.
 #
 # ```bash
 # test::exec echo "Hello, world!"
+# test::exec command "'string arguments with special < characters >'" '"${MY_VAR}"'
 # ```
 function test::exec() {
   test_exec false false "$@"
@@ -106,9 +114,13 @@ function test::exec() {
 #
 # - $@: **command** _as string_:
 #       The command to execute.
+#       Note: these arguments will converted to a string, display as a `❯ prompt` in the report file,
+#       and then evaluated with bash `eval`. You can double quote arguments to prevent processing
+#       on an argument and escape special characters.
 #
 # ```bash
 # test::exit exit 3
+# test::exit core::fail "'string arguments with special < characters >'" '"${MY_VAR}"'
 # ```
 function test::exit() {
   test_exec true false "$@"
@@ -133,15 +145,11 @@ function test::exit() {
 # shellcheck disable=SC2034
 function test_exec() {
   local \
-    canExit="${1}" \
-    printReturnedValues="${2}"
+    canExit="${1?"No command provided to ⌜${FUNCNAME:-?}⌝ in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝"}" \
+    printReturnedValues="${2?"No command provided to ⌜${FUNCNAME:-?}⌝ in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝"}"
   shift 2
 
-  if (($# == 0)); then
-    test::fail "No command provided to ⌜${FUNCNAME[1]:-}⌝ in ⌜${BASH_SOURCE[2]:-}:${BASH_LINENO[1]:-}⌝."
-  fi
-
-  local IFS=' ' compoundCommand param
+  local IFS=' ' param
 
   # compute the command to run, escaping special characters
   local -a params=("${@}")
@@ -156,15 +164,14 @@ function test_exec() {
       # the argument was quoted by the user, leave it as is
       continue
     fi
-    if [[ ${param} == *[\ \\$'\t'$'\n']* ]]; then
+    if [[ ${param} == *[\ \\$'\t'$'\n'\<\>\&\|\~\`\*\?\!\#\[\]\{\}\(\)]* ]]; then
       # the argument contains any problematic character, quote it
       printf -v param '%q' "${param}"
       params[index]="${param}"
     fi
   done
-  compoundCommand="${params[*]}"
 
-  local GLOBAL_TEST_OUTPUT_CONTENT="${compoundCommand}"
+  local GLOBAL_TEST_OUTPUT_CONTENT="${params[*]}"
   test_applyOutputScrubbers
 
   # shellcheck disable=SC2016
@@ -186,10 +193,10 @@ function test_exec() {
   # execute the command
   local -i exitCode=0
   if [[ ${canExit} == "true" ]]; then
-    bash::runInSubshell eval "${compoundCommand}"
+    bash::runInSubshell eval "${params[@]}"
     exitCode=${REPLY_CODE}
   else
-    bash::catchErrors eval "${compoundCommand}"
+    bash::catchErrors eval "${params[@]}"
     exitCode="${GLOBAL_ERROR_TRAP_LAST_ERROR_CODE}"
   fi
 

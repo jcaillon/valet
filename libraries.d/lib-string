@@ -805,7 +805,7 @@ function string::truncateWithEllipsis() {
 # - $1: **array variable name** _as string_:
 #       The variable name that contains the array to join.
 # - ${separator} _as string_:
-#       (Optional) The separator character to use.
+#       (optional) The separator character to use.
 #       (defaults to $'\n')
 #
 # Returns:
@@ -853,7 +853,7 @@ function string::join() {
 # - $1: **string variable name** _as string_:
 #       The variable name that contains the string in which to expand variables.
 # - ${nonRecursive} _as boolean_:
-#       (Optional) Disable recursive expansion of nested variables, e.g. `${VAR1:-${VAR2-default}}`.
+#       (optional) Disable recursive expansion of nested variables, e.g. `${VAR1:-${VAR2-default}}`.
 #       (defaults to false)
 #
 # ```bash

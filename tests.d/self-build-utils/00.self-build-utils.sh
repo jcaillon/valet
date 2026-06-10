@@ -10,7 +10,6 @@ function main() {
   test_selfBuild_commandVariables
 }
 
-
 function test_selfBuild_extractCommandYamls() {
   test::title "✅ Testing selfBuild_extractCommandYamls"
 
@@ -28,7 +27,7 @@ function test_selfBuild_commandVariables() {
 
   test::printVars _VALID_YAML
 
-  test::exec selfBuild_extractCommandDefinitionToVariables "\"\${_VALID_YAML}\""
+  test::exec selfBuild_extractCommandDefinitionToVariables '"${_VALID_YAML}"'
 
   # shellcheck disable=SC2086
   test::printVars ${!TEMP_CMD_BUILD_*}

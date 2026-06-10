@@ -664,7 +664,7 @@ local sourceFile="${BASH_SOURCE[1]:-shell}"
 sourceFile="${sourceFile##*/}"'
 ```
 
-❯ `log::parseLogPattern "${pat}"`
+❯ `log::parseLogPattern '{"level": "<level>{s}", "message": "<message>{s}", "source": "<source>{s}", "line": "<line>{s}"}'`
 
 Returned variables:
 

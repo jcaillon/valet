@@ -89,7 +89,7 @@ function test_time::getDate() {
   test::title "✅ Testing time::getDate"
 
   test::func time::getDate
-  test::func time::getDate format="'%(%H:%M:%S)T'"
+  test::func time::getDate "'format=%(%H:%M:%S)T'"
 }
 
 function test_time::getHumanTimeFromMicroseconds() {
@@ -113,9 +113,9 @@ Total seconds: %S
 Total milliseconds: %L
 Total microseconds: %U"
   test::printVars format
-  test::func time::getHumanTimeFromMicroseconds ${ms} format="\"\${format}\""
+  test::func time::getHumanTimeFromMicroseconds ${ms} '"format=${format}"'
   test::func time::getHumanTimeFromMicroseconds ${ms}
-  test::func time::getHumanTimeFromMicroseconds ${ms} format='%U'
+  test::func time::getHumanTimeFromMicroseconds ${ms} 'format=%U'
 }
 
 main

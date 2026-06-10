@@ -6,13 +6,13 @@
 
 You can add logs during tests using `test::log` for debugging purposes. These log will only appear if the test fails.
 
-❯ `test::log Logged!`
+❯ `test::log Logged\!`
 
 ### ✅ test::markdown
 
 You can insert markdown in the test report using `test::markdown`.
 
-❯ `test::markdown **Added.**`
+❯ `test::markdown \*\*Added.\*\*`
 
 **Added.**
 

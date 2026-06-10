@@ -306,7 +306,7 @@ function test_string::highlight() {
   test::title "✅ Testing string::highlight"
 
   test::func MY_STRING='This is a Text to highlight.' MY_CHARS='ttttt' string::highlight MY_STRING MY_CHARS
-  test::func MY_STRING='This is a texT to highlight.' MY_CHARS='TTTTT' string::highlight MY_STRING MY_CHARS highlightCode="'>'" resetCode="'<'"
+  test::func MY_STRING='This is a texT to highlight.' MY_CHARS='TTTTT' string::highlight MY_STRING MY_CHARS highlightCode='>' resetCode='<'
   test::func MY_STRING='' MY_CHARS='ttttt' string::highlight MY_STRING MY_CHARS
   test::func MY_STRING='This is a text to highlight.' MY_CHARS='' string::highlight MY_STRING MY_CHARS
 }
