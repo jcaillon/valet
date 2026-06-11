@@ -27,8 +27,8 @@ source system
 # - $@: **arguments** _as any_:
 #       the arguments to pass to the executable
 # - ${noFail} _as bool_:
-#       (optional) A boolean to indicate if the function should call core::fail (exit) in case the execution fails.
-#       If true and the execution fails, the script will exit.
+#       (optional) A boolean to indicate wether or not the function should call core::fail (exit)
+#       in case the execution fails. By default, if the execution fails, the script will exit.
 #       (defaults to false)
 # - ${replyPathOnly} _as bool_:
 #       (optional) If set to true, the function will return the file path of the stdout and stderr files

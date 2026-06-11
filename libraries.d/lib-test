@@ -254,8 +254,11 @@ function test::printReplyVars() {
   done
   if [[ -n "${!REPLY_MAP[*]}" ]]; then
     GLOBAL_TEST_OUTPUT_CONTENT+="REPLY_MAP=("$'\n'
-    for key in "${!REPLY_MAP[@]}"; do
-      GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${REPLY_MAP[${key}]//\'/\'\"\'\"\'}'"$'\n'
+    local -a keys=("${!REPLY_MAP[@]}")
+    include array
+    array::sort keys
+    for key in "${keys[@]}"; do
+      GLOBAL_TEST_OUTPUT_CONTENT+="['${key}']='${REPLY_MAP[${key}]//\'/\'\"\'\"\'}'"$'\n'
     done
     GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
   fi
@@ -310,14 +313,23 @@ function test::printVars() {
     chunk="${REPLY%%$'\n'*}"
     REPLY="${REPLY:${#chunk}+1}"
 
-    if [[ ${chunk} =~ "declare -"[aA][ilnrtux]*" "([^=]+)"=" ]]; then
+    if [[ ${chunk} =~ "declare -"([aA])[ilnrtux]*" "([^=]+)"=" ]]; then
       # we print an array
-      varName="${BASH_REMATCH[1]}"
+      varName="${BASH_REMATCH[2]}"
       local -n array_nameRef="${varName}"
       GLOBAL_TEST_OUTPUT_CONTENT+="${varName}=("$'\n'
-      for key in "${!array_nameRef[@]}"; do
-        GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${array_nameRef[${key}]//\'/\'\"\'\"\'}'"$'\n'
-      done
+      if [[ ${BASH_REMATCH[1]} == "A" ]]; then
+        local -a keys=("${!array_nameRef[@]}")
+        include array
+        array::sort keys
+        for key in "${keys[@]}"; do
+          GLOBAL_TEST_OUTPUT_CONTENT+="['${key}']='${array_nameRef[${key}]//\'/\'\"\'\"\'}'"$'\n'
+        done
+      else
+        for key in "${!array_nameRef[@]}"; do
+          GLOBAL_TEST_OUTPUT_CONTENT+="[${key}]='${array_nameRef[${key}]//\'/\'\"\'\"\'}'"$'\n'
+        done
+      fi
       GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
     elif [[ ${chunk} =~ "declare -"[^[:space:]]+" "([^=]+)"=" ]]; then
       # we print a simple variable

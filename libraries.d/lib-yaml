@@ -1,0 +1,313 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+# description: This script can be sourced by commands to provide convenient functions.
+
+# shellcheck source=lib-fs
+source fs
+# shellcheck source=lib-string
+source string
+
+# ## yaml::parseFile
+#
+# Parses a YAML file and outputs a bash associative array with the content of the YAML
+# accessible with dot notation.
+#
+# For example, if the YAML file contains:
+#
+# ```yaml
+# key: test
+# array:
+#   - item1
+#   - item2
+# nested:
+#   key: value
+# ```
+#
+# The resulting associative array will have the following content:
+#
+# ```sh
+# REPLY_MAP['key']="test"
+# REPLY_MAP['array.length']=2
+# REPLY_MAP['array[0]']="item1"
+# REPLY_MAP['array[1]']="item2"
+# REPLY_MAP['nested.key']="value"
+# ```
+#
+# The length of each array is stored in the associative array with the key `(array).length` to allow
+# iterating over the array items.
+#
+# - $1: **file path** _as string_:
+#       The path to the YAML file to parse.
+# - ${noFail} _as bool_:
+#       (optional) A boolean to indicate wether or not the function should call core::fail (exit)
+#       in case the parsing fails. By default, if the parsing fails, the script will exit.
+#       (defaults to false)
+#
+# Returns:
+#
+# - ${REPLY_MAP}: an associative array containing the content of the YAML file in dot notation.
+# - ${REPLY_CODE}: (requires noFail=true)
+#     - 0 if the file was parsed successfully,
+#     - 1 if the file is not a valid YAML file.
+# - ${REPLY}: (requires noFail=true) the errors encountered during the parsing if any.
+#
+# ```bash
+# yaml::parseFile "file.yaml" noFail=true
+# declare -p REPLY_MAP
+# ```
+#
+# > /!\ this does not support all YAML features yet, working in progress...
+# > TODO: complete the implementation to support more YAML features, and add more tests.
+function yaml::parseFile() {
+  local \
+    path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    noFail=false
+  IFS=" "
+  shift 1
+  eval "local a= ${*@Q}"
+
+  REPLY_MAP=()
+  REPLY_CODE=0
+  REPLY=""
+
+  local line indent keyName fullKey value \
+    isMultilineValue=false isArrayItemStart=false multilineSeparator='' multilineFinalSeparator='' \
+    errorPrefix="Error parsing YAML file ⌜${path}⌝"
+  local -i indentLevel=0 arrayIndex lineNumber=0
+
+  # keyPaths keeps track of the current path in the YAML file.
+  # arrayIndexes keeps track of the current array index for each key.
+  # The length of both arrays is equal to (the current indent level - 1).
+  #
+  # #                  | keyPaths                                 | arrayIndexes
+  # # -----------------|------------------------------------------|----------------------
+  # nested:           # (nested)                                  | (-1)
+  #   arr:            # (nested arr)                              | (-1 -1)
+  #   - key: thing    # (nested arr [0].key)                      | (-1 0 -1)
+  #   arr2:           # (nested arr2)                             | (-1 -1)
+  #     - name: obj1  # (nested arr2 "" [0].name)                 | (-1 0 -9 -1)
+  #       array:      # (nested arr2 "" [0].array)                | (-1 0 -9 -1)
+  #       - thing     # (nested arr2 "" [0].array [0])            | (-1 0 -9 0 -1)
+  #       - arr:      # (nested arr2 "" [0].array [1].arr)        | (-1 0 -9 1 -1)
+  #         - here    # (nested arr2 "" [0].array [1].arr [0])    | (-1 0 -9 1 0 -1)
+  #     - name: obj2  # (nested arr2 "" [1].name)                 | (-1 1 -9 -1)
+  # thing: value      # (thing)                                   | (-1)
+  local -a keyPaths=() arrayIndexes=()
+
+  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
+    lineNumber+=1
+    if [[ ${line/# /} == \#* ]]; then
+      continue
+    fi
+
+    # get indent indent, indent level and trim it from the line
+    indent="${line%%[![:space:]]*}"
+    indentLevel=$((${#indent} / 2))
+    line="${line:${#indent}}"
+
+    # handle multiline continuation
+    if [[ ${isMultilineValue} == "true" ]]; then
+      if ((indentLevel >= ${#keyPaths[@]})); then
+        value+="${indent:0:(indentLevel - ${#keyPaths[@]})*2}${line}${multilineSeparator}"
+        continue
+      elif [[ -z ${line// /} ]]; then
+        value="${value%"${multilineSeparator}"}"$'\n'
+        continue
+      fi
+      isMultilineValue=false
+      # trim all ending separators
+      value="${value%"${multilineSeparator}"}"
+      value="${value%"${value##*[^$'\n']}"}${multilineFinalSeparator}"
+      REPLY_MAP["${fullKey}"]="${value}"
+    fi
+
+    if [[ ${line} == "- "* ]]; then
+      # case of an array
+      line="${line:2}"
+      indentLevel+=1
+      isArrayItemStart=true
+    else
+      isArrayItemStart=false
+    fi
+
+    if ((indentLevel > ${#keyPaths[@]} + 1)); then
+      # invalid line
+      REPLY_CODE=1
+      REPLY+="${errorPrefix} at line ${lineNumber}: too much indentation, we expected at most $((${#keyPaths[@]} + 1))."
+      if [[ ${noFail} != "true" ]]; then
+        core::fail "${REPLY}"
+      fi
+      continue
+    fi
+
+    # log::info "line: ⌜${line}⌝"
+
+    # extract the key name and value, there can be only a value with no key name
+    # in case of an array with a scalar
+    if [[ ${line:0:1} == [\'\"] ]]; then
+      keyName="${line:1}"
+      keyName="${line:0:1}${keyName%%"${line:0:1}"*}${line:0:1}"
+      if [[ ${line:${#keyName}:1} != ":" ]]; then
+        line="${keyName}"
+        keyName=""
+      else
+        line="${line:${#keyName}}"
+      fi
+    elif [[ ${line} == *: ]]; then
+      keyName="${line%%:*}"
+      line="${line:${#keyName}}"
+    else
+      keyName="${line%%: *}"
+      # log::info "${line:${#keyName}:1} ${line@Q} at ${#keyName}"
+      if [[ ${line:${#keyName}:1} != ":" ]]; then
+        line="${keyName}"
+        keyName=""
+      else
+        line="${line:${#keyName}}"
+      fi
+    fi
+
+    # unquote keyname and re quote it if needed
+    if [[ ${keyName:0:1} == \" && ${keyName: -1} == \" ]]; then
+      keyName="${keyName:1:-1}"
+    elif [[ ${keyName:0:1} == \' && ${keyName: -1} == \' ]]; then
+      keyName="${keyName:1:-1}"
+    fi
+    if [[ ${keyName} == *[![:word:]]* ]]; then
+      keyName="\"${keyName}\""
+    fi
+
+    # remove comment and handle quoted values
+    value="${line#:}"
+    value="${value#"${value%%[^ ]*}"}"
+    if [[ ${value:0:1} == \' ]]; then
+      value="${value:1}"
+      value="${value//\'\'/$'\a'}"
+      value="${value%%\'*}"
+      value="${value//$'\a'/\'}"
+    elif [[ ${value:0:1} == \" ]]; then
+      value="${value:1}"
+      value="${value//\\\"/$'\a'}"
+      value="${value%%\"*}"
+      value="${value//$'\a'/\"}"
+      # in a double quoted value, we also want to convert \n, \t, \uXXXX... to their actual value
+      eval "value=$'${value//\'/\\\'}'"
+    else
+      value="${value%% \#*}"
+      if [[ ${value:0:1} == \# ]]; then
+        value=""
+      else
+        # trim ending spaces
+        value="${value%"${value##*[^[:space:]]}"}"
+      fi
+    fi
+
+    if [[ -z ${keyName} && -z ${value} ]]; then
+      # empty line
+      continue
+    fi
+
+    # log::info "level: ${indentLevel}, key: ⌜${keyName}⌝, value: ⌜${value}⌝"
+
+    # prepend the keyName with the current array index if we are in an array
+    if [[ ${isArrayItemStart} == "true" ]]; then
+      arrayIndex=$((indentLevel - 1))
+      if ((indentLevel == ${#keyPaths[@]} + 1)); then
+        # case of a new array item that is indented +1 from the previous key,
+        # take into account this indentation level to keep (${#keyPaths[@]} - 1)
+        # equals to the indent level of the current key
+        keyPaths=("${keyPaths[@]:0:indentLevel-1}" "")
+        arrayIndexes=("${arrayIndexes[@]:0:indentLevel-1}" -9)
+        arrayIndex=$((arrayIndex - 1))
+      fi
+      if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] == -9)); then
+        # case of a new key inside an object inside an array, where the array items are at indent +1
+        arrayIndex=$((arrayIndex - 1))
+      fi
+      # increment current array index
+      arrayIndexes[arrayIndex]=$((arrayIndexes[arrayIndex] + 1))
+      # store the array length in the associative array with key (array).length
+      IFS='.'
+      fullKey="${keyPaths[*]:0:arrayIndex+1}.length"
+      fullKey="${fullKey//'..'/'.'}"
+      fullKey="${fullKey//'.['/'['}"
+      REPLY_MAP["${fullKey}"]="$((arrayIndexes[arrayIndex] + 1))"
+
+      keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
+      keyName="${keyName%.}"
+    else
+      arrayIndex=$((indentLevel - 1))
+      if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] == -9)); then
+        # case of a new key inside an object inside an array, where the array items are at indent +1
+        arrayIndex=$((arrayIndex - 1))
+      fi
+      if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] >= 0)); then
+        # case of a new key inside an object inside an array
+        keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
+        keyName="${keyName%.}"
+      fi
+    fi
+
+    # determine what the current line represents
+    if [[ ${line:0:3} == ': '[\>\|] ]]; then
+      # new multiline value
+      isMultilineValue=true
+      if [[ ${line:2:1} == '|' ]]; then
+        multilineSeparator=$'\n'
+      else
+        multilineSeparator=' '
+      fi
+      if [[ ${line:3:1} == '-' ]]; then
+        multilineFinalSeparator=''
+      else
+        multilineFinalSeparator=$'\n'
+      fi
+      value=""
+
+    elif [[ ${line:0:2} == ': ' && (-n ${value} || ${line:0:4} == ': '[\"\'][\"\']) ]]; then
+      # a scalar value
+      :
+
+    elif [[ ${line:0:1} == ':' && -z ${value} ]]; then
+      # start of an object or array
+      :
+
+    elif [[ ${isArrayItemStart} == "true" && ${keyName: -1:1} == ']' && -n ${value} ]]; then
+      # case of a scalar array item with no key name
+      :
+
+    else
+      # invalid line
+      REPLY_CODE=1
+      IFS=' '
+      REPLY+="${errorPrefix} at line ${lineNumber}: not a valid YAML line. level: ${indentLevel}, line: ⌜${line}⌝, keyName: ⌜${keyName}⌝, value: ⌜${value}⌝, keyPaths: ⌜${keyPaths[*]}⌝, isArrayItemStart: ${isArrayItemStart}, arrayIndexes: ⌜${arrayIndexes[*]}⌝."
+      if [[ ${noFail} != "true" ]]; then
+        core::fail "${REPLY}"
+      fi
+      continue
+    fi
+
+    keyPaths=("${keyPaths[@]:0:indentLevel}" "${keyName}")
+    arrayIndexes=("${arrayIndexes[@]:0:indentLevel}" -1)
+
+    IFS='.'
+    fullKey="${keyPaths[*]}"
+    fullKey="${fullKey//'..'/'.'}"
+    fullKey="${fullKey//'.['/'['}"
+    if [[ -n ${value} ]]; then
+      REPLY_MAP["${fullKey}"]="${value}"
+    fi
+
+    # IFS=' '
+    # printf "%2s | %50s | %20s | %s\n" "${indentLevel}" "${keyPaths[*]}" "${arrayIndexes[*]}" "${value}"
+
+  done <"${path}"
+
+  # close a multiline value if we reached the end of the file
+  if [[ ${isMultilineValue} == "true" ]]; then
+    value="${value%"${multilineSeparator}"}"
+    value="${value%"${value##*[^$'\n']}"}${multilineFinalSeparator}"
+    # shellcheck disable=SC2034
+    REPLY_MAP["${fullKey}"]="${value}"
+  fi
+}

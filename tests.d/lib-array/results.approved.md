@@ -266,9 +266,9 @@ MY_ARRAY=(
 
 ```text
 MY_ASSOCIATIVE_ARRAY=(
-[deliver]='2'
-[breakdown]='1'
-[economics]='3'
+['breakdown']='1'
+['deliver']='2'
+['economics']='3'
 )
 ```
 
@@ -282,8 +282,8 @@ REPLY_CODE='0'
 
 ```text
 MY_ASSOCIATIVE_ARRAY=(
-[deliver]='2'
-[economics]='3'
+['deliver']='2'
+['economics']='3'
 )
 ```
 

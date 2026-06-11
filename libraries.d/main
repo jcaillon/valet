@@ -89,6 +89,9 @@ trap::setup
 # init the array containing background processes IDs
 declare -g -A GLOBAL_BACKGROUND_PROCESSES=() GLOBAL_BACKGROUND_PROCESSES_LOGS=()
 
+# init associative arrays
+declare -g -A REPLY_MAP=()
+
 # Source the valet configuration from the user config dir
 if [[ -f ${GLOBAL_CONFIG_FILE} ]]; then
   GLOBAL_ON_EXIT_MESSAGE="Error sourcing the configuration file ⌜${GLOBAL_CONFIG_FILE}⌝."$'\n'"Check the file for error and try again, or delete the file to discard your config."

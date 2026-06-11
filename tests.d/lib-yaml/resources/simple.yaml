@@ -1,0 +1,67 @@
+# comment
+# Keys with special characters
+"key with spaces": value
+"key:with:colons": value
+num[0].key: 1
+
+arr:
+- thing
+- stuff:with:colons
+
+nested:
+  arr:
+    - name: obj1
+      value: 123
+      array:
+      - thing
+      - arr:
+        - 1
+        - 2
+    - name: obj2
+      value: 456
+      properties:
+        - 1
+        - 2
+    - "coucou text"
+    - nom mais allo
+  thing: true
+
+key: https://example.com #:
+
+num:
+  - key: 2
+
+
+strings: #comment
+  "plain": hello world #comment
+  single_quoted:   'hello ''world'' #notacomment' #comment #zefzef
+  with_single_quote:   "C'est \"quoi" #comment
+  double_quoted: "line1\nline2\tunicode:\u2764" #comment
+  empty: ""
+  empty2:
+  multiline_literal: | #comment
+    line one
+    line two
+      indented
+
+  multiline_folded: >
+    a
+
+
+    this text
+    is folded
+    into a single line
+  content: |-
+    Or we
+    can auto
+    convert line breaks
+    to save space
+  folded: >-
+    a
+    word please
+    ?
+
+
+endingMultiline: |
+  first line
+  second line

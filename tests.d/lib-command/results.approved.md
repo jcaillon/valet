@@ -696,12 +696,12 @@ REPLY='Valid single letter options are: ⌜a⌝, ⌜b⌝, ⌜c⌝.'
 
 ```text
 ARRAY=(
-[0]='banana'
-[1]='apple'
-[2]='orange'
-[3]='grape'
-[4]='ananas'
-[5]='lemon'
+['0']='banana'
+['1']='apple'
+['2']='orange'
+['3']='grape'
+['4']='ananas'
+['5']='lemon'
 )
 ```
 

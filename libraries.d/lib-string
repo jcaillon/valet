@@ -52,8 +52,8 @@ function string::trimEdges() {
   shift 1
   eval "local a= ${*@Q}"
 
-  inputString_NameRef="${inputString_NameRef#"${inputString_NameRef%%[^"${2:-${charsToTrim}}"]*}"}"
-  inputString_NameRef="${inputString_NameRef%"${inputString_NameRef##*[^"${2:-${charsToTrim}}"]}"}"
+  inputString_NameRef="${inputString_NameRef#"${inputString_NameRef%%[^"${charsToTrim}"]*}"}"
+  inputString_NameRef="${inputString_NameRef%"${inputString_NameRef##*[^"${charsToTrim}"]}"}"
 }
 
 # ## string::getKebabCase

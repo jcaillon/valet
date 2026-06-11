@@ -210,12 +210,12 @@ REPLY_ARRAY=(
 [4]='array'
 )
 REPLY_MAP=(
-[key6]='array'
-[key4]='returned'
-[key5]='associative'
-[key2]='is'
-[key3]='the'
-[key1]='This'
+['key1']='This'
+['key2']='is'
+['key3']='the'
+['key4']='returned'
+['key5']='associative'
+['key6']='array'
 )
 ```
 
@@ -262,9 +262,9 @@ MY_VAR2=(
 [7]='array'
 )
 MY_VAR3=(
-[key2]='2'
-[key3]='3'
-[key1]='1'
+['key1']='1'
+['key2']='2'
+['key3']='3'
 )
 ```
 

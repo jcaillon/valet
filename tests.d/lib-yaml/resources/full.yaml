@@ -1,0 +1,101 @@
+# Scalars
+strings:
+  plain: hello world
+  single_quoted: 'hello ''world'''
+  with_single_quote: "C'est \"quoi"
+  double_quoted: "line1\nline2\tunicode:\u2764"
+  empty: ""
+  multiline_literal: |
+    line one
+    line two
+      indented
+
+  multiline_folded: >
+    a
+    this text
+    is folded
+    into a single line
+content: |-
+  Or we
+  can auto
+  convert line breaks
+  to save spac
+
+num[0].zzef: 1
+num:
+  - zzef: 2
+
+# Keys with special characters
+"key with spaces": value
+"key:with:colons": value
+
+arr:
+  - name: obj1
+    value: 123
+  - name: obj2
+    value: 456
+    properties:
+      - 1
+      - 2
+
+numbers:
+  integer: 42
+  negative: -17
+  zero: 0
+  float: 3.14159
+  exponent: 1.23e+10
+
+other:
+  bool: true
+
+special_strings:
+  looks_like_bool: "true"
+  looks_like_number: "123"
+  colon: "a:b"
+  hash: "# not a comment"
+
+# Sequences
+sequence:
+  - item1
+  - item2
+  - 123
+  - true
+  - null
+  - [1, 2, 3]
+  - {a: 1, b: 2}
+
+# Mixed nesting
+nested:
+  users:
+    - id: 1
+      name: Alice
+      roles: [admin, user]
+    - id: 2
+      name: Bob
+      roles:
+        - user
+
+# Anchors and aliases
+defaults: &defaults
+  host: localhost
+  port: 8080
+  ssl: false
+
+server1:
+  <<: *defaults
+  port: 8081
+
+server2:
+  <<: *defaults
+
+# Anchors on sequences
+colors: &colors
+  - red
+  - green
+  - blue
+
+favorite_colors: *colors
+
+# Empty collections
+empty_sequence: []
+empty_mapping: {}

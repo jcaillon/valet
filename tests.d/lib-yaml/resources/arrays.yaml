@@ -1,0 +1,17 @@
+#                  | keyPaths                                 | arrayIndexes
+# -----------------|------------------------------------------|----------------------
+nested:           # (nested)                                  | (-1)
+  arr:            # (nested arr)                              | (-1 -1)
+  - key: thing    # (nested arr [0].key)                      | (-1 0 -1)
+  arr2:           # (nested arr2)                             | (-1 -1)
+    - name: obj1  # (nested arr2 "" [0].name)                 | (-1 0 -9 -1)
+      array:      # (nested arr2 "" [0].array)                | (-1 0 -9 -1)
+      - thing     # (nested arr2 "" [0].array [0])            | (-1 0 -9 0 -1)
+      - stuff     # (nested arr2 "" [0].array [1])            | (-1 0 -9 0 -1)
+      - arr:      # (nested arr2 "" [0].array [2].arr)        | (-1 0 -9 1 -1)
+        - here    # (nested arr2 "" [0].array [2].arr [0])    | (-1 0 -9 1 0 -1)
+    - name: obj2  # (nested arr2 "" [1].name)                 | (-1 1 -9 -1)
+thing: |-         # (thing)                                   | (-1)
+  first line
+    second line with indent
+last: value       # (last)                                    | (-1)
