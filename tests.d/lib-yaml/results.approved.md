@@ -85,3 +85,32 @@ line two
 )
 ```
 
+❯ `yaml::parseFile resources/root-array.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['.length']='3'
+['[0].source.name']='argo-cd'
+['[0].source.repo']='https://argoproj.github.io/argo-helm'
+['[0].source.version']='9.5.15'
+['[0].targets.length']='1'
+['[0].targets[0]']='oci://srescloud.azurecr.io/helm'
+['[1].source.name']='cert-manager'
+['[1].source.repo']='https://charts.jetstack.io'
+['[1].source.version']='v1.14.5'
+['[1].targets.length']='3'
+['[1].targets[0]']='oci://srescloud.azurecr.io/helm'
+['[1].targets[1]']='oci://secondtarget.azurecr.io/helm'
+['[1].targets[2]']='oci://thirdtarget.azurecr.io/helm'
+['[2].source.name']='cilium'
+['[2].source.repo']='https://helm.cilium.io/'
+['[2].source.version']='1.19.4'
+['[2].targets.length']='1'
+['[2].targets[0]']='oci://thing.azurecr.io/helm'
+)
+```
+

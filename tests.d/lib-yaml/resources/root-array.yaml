@@ -1,0 +1,20 @@
+- source:
+    name: argo-cd
+    repo: https://argoproj.github.io/argo-helm
+    version: 9.5.15
+  targets:
+    - oci://srescloud.azurecr.io/helm
+- source:
+    name: cert-manager
+    repo: https://charts.jetstack.io
+    version: v1.14.5
+  targets:
+    - oci://srescloud.azurecr.io/helm
+    - oci://secondtarget.azurecr.io/helm
+    - oci://thirdtarget.azurecr.io/helm
+- source:
+    name: cilium
+    repo: https://helm.cilium.io/
+    version: 1.19.4
+  targets:
+    - oci://thing.azurecr.io/helm

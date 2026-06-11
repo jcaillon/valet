@@ -212,7 +212,11 @@ function yaml::parseFile() {
     # prepend the keyName with the current array index if we are in an array
     if [[ ${isArrayItemStart} == "true" ]]; then
       arrayIndex=$((indentLevel - 1))
-      if ((indentLevel == ${#keyPaths[@]} + 1)); then
+      if ((indentLevel == 1 && ${#keyPaths[@]} == 0)); then
+        # case of a "root" array
+        keyPaths=("")
+        arrayIndexes=("${arrayIndexes[@]:0:indentLevel-1}" -1)
+      elif ((indentLevel == ${#keyPaths[@]} + 1)); then
         # case of a new array item that is indented +1 from the previous key,
         # take into account this indentation level to keep (${#keyPaths[@]} - 1)
         # equals to the indent level of the current key
