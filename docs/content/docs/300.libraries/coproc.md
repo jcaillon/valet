@@ -218,7 +218,7 @@ Inputs:
   - $1 the coproc index
   - $2 the coproc exit code
   - $3 the percentage of coprocs already completed
-  - $4 the path of the file containing the accumulated logs of the coproc
+  - $4 the path of the file containing the accumulated logs of the coproc (if redirectLogs is true)
   If the function sets REPLY to 1, the script will exit early. Otherwise it should set REPLY to 0.
   Set to an empty string to not call any callback function.
 
@@ -226,7 +226,7 @@ Inputs:
 
 - `${redirectLogs}` _as bool_:
 
-  (optional) Redirect the logs of the coproc instead of printing them in the current file descriptor.
+  (optional) Redirect the logs of the coproc instead of printing them in the current log file descriptor.
   The accumulated logs of the coproc will be available in the completed callback function.
 
   (defaults to false)
@@ -267,7 +267,6 @@ Example usage:
 declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
 coproc::runInParallel jobCommands maxParallelCoprocs=2
 ```
-TODO: implement unit tests for this function
 
 ## ⚡ coproc::sendMessage
 
@@ -319,4 +318,4 @@ coproc::wait "myCoproc"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.40.137 (2026-06-03).
+> Documentation generated for the version 0.41.182 (2026-06-11).

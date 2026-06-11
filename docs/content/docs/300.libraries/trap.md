@@ -10,6 +10,10 @@ url: /docs/libraries/trap
 Register a given function to execute when a specific event happens (e.g. on-exit, on-interrupt, etc...).
 Only one function can be registered for each event, if you register a new one it will replace the previous one.
 
+Because this function will be executed during a critical moment, an error in the function must not prevent
+the execution from continuing. This is why the function is executed in a "if" statement to disable the "errexit"
+shell option and avoid exiting the program in case of an error.
+
 Inputs:
 
 - `$1`: **function name** _as string_:
@@ -53,4 +57,4 @@ trap::register "" on-exit
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.40.137 (2026-06-03).
+> Documentation generated for the version 0.41.182 (2026-06-11).

@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.40.137 (2026-06-03).
+> Documentation generated for the version 0.41.182 (2026-06-11).
 
 ## ⚡ array::appendIfNotPresent
 
@@ -1025,7 +1025,7 @@ Inputs:
   - $1 the coproc index
   - $2 the coproc exit code
   - $3 the percentage of coprocs already completed
-  - $4 the path of the file containing the accumulated logs of the coproc
+  - $4 the path of the file containing the accumulated logs of the coproc (if redirectLogs is true)
   If the function sets REPLY to 1, the script will exit early. Otherwise it should set REPLY to 0.
   Set to an empty string to not call any callback function.
 
@@ -1033,7 +1033,7 @@ Inputs:
 
 - `${redirectLogs}` _as bool_:
 
-  (optional) Redirect the logs of the coproc instead of printing them in the current file descriptor.
+  (optional) Redirect the logs of the coproc instead of printing them in the current log file descriptor.
   The accumulated logs of the coproc will be available in the completed callback function.
 
   (defaults to false)
@@ -1074,7 +1074,6 @@ Example usage:
 declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
 coproc::runInParallel jobCommands maxParallelCoprocs=2
 ```
-TODO: implement unit tests for this function
 
 ## ⚡ coproc::sendMessage
 
@@ -1515,7 +1514,7 @@ By default it redirects the stdout and stderr and captures them to output variab
 This makes the executes silent unless the executable fails.
 By default, it will exit (core::fail) if the executable returns a non-zero exit code.
 By default, on windows, it will remove carriage return characters (\r) from the outputs
-to make them more consistent with other OSes.
+to make them more consistent with other OS.
 
 This function should be used as a wrapper around any external program as it allows to easily
 mock the program during tests and facilitates debugging with trace level log.
@@ -1532,8 +1531,8 @@ Inputs:
 
 - `${noFail}` _as bool_:
 
-  (optional) A boolean to indicate if the function should call core::fail (exit) in case the execution fails.
-  If true and the execution fails, the script will exit.
+  (optional) A boolean to indicate wether or not the function should call core::fail (exit)
+  in case the execution fails. By default, if the execution fails, the script will exit.
 
   (defaults to false)
 
@@ -1824,6 +1823,8 @@ fs::createTempFile pathOnly=true
 ## ⚡ fs::getAbsolutePath
 
 This function returns the absolute path of a path.
+Also normalizes the path (removing `..` and `.`),
+but does not resolve symlinks (see `fs::getRealPath` for that).
 
 Inputs:
 
@@ -3403,7 +3404,11 @@ string::doForEachLine myString myCallback
 ## ⚡ string::expandVariables
 
 Expand variables in a string.
+The replacement is done in place, for the given variable.
+
 If a variable is not defined, it will be replaced by an empty string.
+A default value can be specified for non defined variables using the form `${VAR-default}`.
+A default value can be specified for non defined/null/empty variables using the form `${VAR:-default}`.
 
 Inputs:
 
@@ -3411,15 +3416,18 @@ Inputs:
 
   The variable name that contains the string in which to expand variables.
 
-Returns:
-- `${REPLY}`: the string with expanded variables
+- `${nonRecursive}` _as boolean_:
+
+  (optional) Disable recursive expansion of nested variables, e.g. `${VAR1:-${VAR2-default}}`.
+
+  (defaults to false)
 
 Example usage:
 
 ```bash
-MY_STRING="Hello $USER, today is $DAY"
+MY_STRING="Hello ${USER}, today is ${DAY}."
 string::expandVariables MY_STRING
-echo "${REPLY}"
+echo "${MY_STRING}"
 ```
 
 ## ⚡ string::extractBetween
@@ -3775,7 +3783,7 @@ Inputs:
 
 - `${separator}` _as string_:
 
-  The separator character to use.
+  (optional) The separator character to use.
 
   (defaults to $'\n')
 
@@ -4767,11 +4775,15 @@ Inputs:
 - `$@`: **command** _as string_:
 
   The command to execute.
+  Note: these arguments will converted to a string, display as a `❯ prompt` in the report file,
+  and then evaluated with bash `eval`. You can double quote arguments to prevent processing
+  on an argument and escape special characters.
 
 Example usage:
 
 ```bash
 test::exec echo "Hello, world!"
+test::exec command "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
 ## ⚡ test::exit
@@ -4784,11 +4796,15 @@ Inputs:
 - `$@`: **command** _as string_:
 
   The command to execute.
+  Note: these arguments will converted to a string, display as a `❯ prompt` in the report file,
+  and then evaluated with bash `eval`. You can double quote arguments to prevent processing
+  on an argument and escape special characters.
 
 Example usage:
 
 ```bash
 test::exit exit 3
+test::exit core::fail "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
 ## ⚡ test::fail
@@ -4870,14 +4886,18 @@ It will also print the REPLY values.
 
 Inputs:
 
-- `$@`: **command** _as string_:
+- `$@`: **args** _as string_:
 
-  The command to execute (function and its arguments).
+  The function to execute and its arguments.
+  Note: these arguments will converted to a string, display as a `❯ prompt` in the report file,
+  and then evaluated with bash `eval`. You can double quote arguments to prevent processing
+  on an argument and escape special characters.
 
 Example usage:
 
 ```bash
 test::func myFunction
+test::func myFunction "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
 ## ⚡ test::listPaths
@@ -5359,6 +5379,10 @@ time::getTimerMicroseconds myTimer
 Register a given function to execute when a specific event happens (e.g. on-exit, on-interrupt, etc...).
 Only one function can be registered for each event, if you register a new one it will replace the previous one.
 
+Because this function will be executed during a critical moment, an error in the function must not prevent
+the execution from continuing. This is why the function is executed in a "if" statement to disable the "errexit"
+shell option and avoid exiting the program in case of an error.
+
 Inputs:
 
 - `$1`: **function name** _as string_:
@@ -5777,6 +5801,66 @@ windows::runPs1 "Write-Host \"World\""
 windows::endPs1Batch
 ```
 
+## ⚡ yaml::parseFile
+
+Parses a YAML file and outputs a bash associative array with the content of the YAML
+accessible with dot notation.
+
+For example, if the YAML file contains:
+
+```yaml
+key: test
+array:
+  - item1
+  - item2
+nested:
+  key: value
+```
+
+The resulting associative array will have the following content:
+
+```sh
+REPLY_MAP['key']="test"
+REPLY_MAP['array.length']=2
+REPLY_MAP['array[0]']="item1"
+REPLY_MAP['array[1]']="item2"
+REPLY_MAP['nested.key']="value"
+```
+
+The length of each array is stored in the associative array with the key `(array).length` to allow
+iterating over the array items.
+
+Inputs:
+
+- `$1`: **file path** _as string_:
+
+  The path to the YAML file to parse.
+
+- `${noFail}` _as bool_:
+
+  (optional) A boolean to indicate wether or not the function should call core::fail (exit)
+  in case the parsing fails. By default, if the parsing fails, the script will exit.
+
+  (defaults to false)
+
+Returns:
+
+- `${REPLY_MAP}`: an associative array containing the content of the YAML file in dot notation.
+- `${REPLY_CODE}`: (requires noFail=true)
+    - 0 if the file was parsed successfully,
+    - 1 if the file is not a valid YAML file.
+- `${REPLY}`: (requires noFail=true) the errors encountered during the parsing if any.
+
+Example usage:
+
+```bash
+yaml::parseFile "file.yaml" noFail=true
+declare -p REPLY_MAP
+```
+
+> /!\ this does not support all YAML features yet, working in progress...
+> TODO: complete the implementation to support more YAML features, and add more tests.
 
 
-> Documentation generated for the version 0.40.137 (2026-06-03).
+
+> Documentation generated for the version 0.41.182 (2026-06-11).

@@ -96,11 +96,15 @@ Inputs:
 - `$@`: **command** _as string_:
 
   The command to execute.
+  Note: these arguments will converted to a string, display as a `❯ prompt` in the report file,
+  and then evaluated with bash `eval`. You can double quote arguments to prevent processing
+  on an argument and escape special characters.
 
 Example usage:
 
 ```bash
 test::exec echo "Hello, world!"
+test::exec command "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
 ## ⚡ test::exit
@@ -113,11 +117,15 @@ Inputs:
 - `$@`: **command** _as string_:
 
   The command to execute.
+  Note: these arguments will converted to a string, display as a `❯ prompt` in the report file,
+  and then evaluated with bash `eval`. You can double quote arguments to prevent processing
+  on an argument and escape special characters.
 
 Example usage:
 
 ```bash
 test::exit exit 3
+test::exit core::fail "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
 ## ⚡ test::fail
@@ -199,14 +207,18 @@ It will also print the REPLY values.
 
 Inputs:
 
-- `$@`: **command** _as string_:
+- `$@`: **args** _as string_:
 
-  The command to execute (function and its arguments).
+  The function to execute and its arguments.
+  Note: these arguments will converted to a string, display as a `❯ prompt` in the report file,
+  and then evaluated with bash `eval`. You can double quote arguments to prevent processing
+  on an argument and escape special characters.
 
 Example usage:
 
 ```bash
 test::func myFunction
+test::func myFunction "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
 ## ⚡ test::listPaths
@@ -391,4 +403,4 @@ test::title "Testing something"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.40.137 (2026-06-03).
+> Documentation generated for the version 0.41.182 (2026-06-11).

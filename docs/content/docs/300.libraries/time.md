@@ -299,4 +299,4 @@ time::getTimerMicroseconds myTimer
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.40.137 (2026-06-03).
+> Documentation generated for the version 0.41.182 (2026-06-11).

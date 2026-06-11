@@ -1,6 +1,6 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.40.137 (2026-06-03).
+> Documentation generated for the version 0.41.182 (2026-06-11).
 
 ## ▶️ valet bash bootstrap
 
@@ -1198,6 +1198,10 @@ valet [options] [--] [commands...]
 
   Test the validity of the gitops repository.
 
+- `helm-reupload`
+
+  Reupload helm charts from a classic helm repository or an OCI registry to another OCI registry.
+
 - `help`
 
   Show the help of this program or of a specific command.
@@ -1328,4 +1332,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.40.137 (2026-06-03).
+> Documentation generated for the version 0.41.182 (2026-06-11).

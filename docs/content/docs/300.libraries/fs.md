@@ -178,6 +178,8 @@ fs::createTempFile pathOnly=true
 ## ⚡ fs::getAbsolutePath
 
 This function returns the absolute path of a path.
+Also normalizes the path (removing `..` and `.`),
+but does not resolve symlinks (see `fs::getRealPath` for that).
 
 Inputs:
 
@@ -619,4 +621,4 @@ fs::tail myFile 10
 > #TODO: use mapfile quantum to not have to read the whole file in a single go.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.40.137 (2026-06-03).
+> Documentation generated for the version 0.41.182 (2026-06-11).

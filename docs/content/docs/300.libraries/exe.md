@@ -13,7 +13,7 @@ By default it redirects the stdout and stderr and captures them to output variab
 This makes the executes silent unless the executable fails.
 By default, it will exit (core::fail) if the executable returns a non-zero exit code.
 By default, on windows, it will remove carriage return characters (\r) from the outputs
-to make them more consistent with other OSes.
+to make them more consistent with other OS.
 
 This function should be used as a wrapper around any external program as it allows to easily
 mock the program during tests and facilitates debugging with trace level log.
@@ -30,8 +30,8 @@ Inputs:
 
 - `${noFail}` _as bool_:
 
-  (optional) A boolean to indicate if the function should call core::fail (exit) in case the execution fails.
-  If true and the execution fails, the script will exit.
+  (optional) A boolean to indicate wether or not the function should call core::fail (exit)
+  in case the execution fails. By default, if the execution fails, the script will exit.
 
   (defaults to false)
 
@@ -150,4 +150,4 @@ exe::invoke cat --- stdin="Hello World"
 > - On linux, you can use a tmpfs directory for massive gains over subshells.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.40.137 (2026-06-03).
+> Documentation generated for the version 0.41.182 (2026-06-11).

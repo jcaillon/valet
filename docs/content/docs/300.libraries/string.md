@@ -75,7 +75,11 @@ string::doForEachLine myString myCallback
 ## ⚡ string::expandVariables
 
 Expand variables in a string.
+The replacement is done in place, for the given variable.
+
 If a variable is not defined, it will be replaced by an empty string.
+A default value can be specified for non defined variables using the form `${VAR-default}`.
+A default value can be specified for non defined/null/empty variables using the form `${VAR:-default}`.
 
 Inputs:
 
@@ -83,15 +87,18 @@ Inputs:
 
   The variable name that contains the string in which to expand variables.
 
-Returns:
-- `${REPLY}`: the string with expanded variables
+- `${nonRecursive}` _as boolean_:
+
+  (optional) Disable recursive expansion of nested variables, e.g. `${VAR1:-${VAR2-default}}`.
+
+  (defaults to false)
 
 Example usage:
 
 ```bash
-MY_STRING="Hello $USER, today is $DAY"
+MY_STRING="Hello ${USER}, today is ${DAY}."
 string::expandVariables MY_STRING
-echo "${REPLY}"
+echo "${MY_STRING}"
 ```
 
 ## ⚡ string::extractBetween
@@ -447,7 +454,7 @@ Inputs:
 
 - `${separator}` _as string_:
 
-  The separator character to use.
+  (optional) The separator character to use.
 
   (defaults to $'\n')
 
@@ -708,4 +715,4 @@ echo "${REPLY}"
 > - It considers escape sequence for text formatting and does not count them as visible characters.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.40.137 (2026-06-03).
+> Documentation generated for the version 0.41.182 (2026-06-11).
