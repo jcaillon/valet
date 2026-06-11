@@ -42,4 +42,4 @@ An interesting read: https://sw.kovidgoyal.net/kitty/keyboard-protocol/
 > it would also be slower to execute (function overhead + multiple printf calls).
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.41.182 (2026-06-11).
+> Documentation generated for the version 0.42.13 (2026-06-11).

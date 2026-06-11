@@ -70,4 +70,4 @@ local comparison="${REPLY}"
 > The prerelease and build are ignored in the comparison.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.41.182 (2026-06-11).
+> Documentation generated for the version 0.42.13 (2026-06-11).

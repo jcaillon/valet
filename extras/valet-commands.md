@@ -1,6 +1,6 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.41.182 (2026-06-11).
+> Documentation generated for the version 0.42.13 (2026-06-11).
 
 ## ▶️ valet bash bootstrap
 
@@ -1332,4 +1332,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.41.182 (2026-06-11).
+> Documentation generated for the version 0.42.13 (2026-06-11).
