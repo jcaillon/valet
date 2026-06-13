@@ -70,8 +70,8 @@ function yaml::parseFile() {
   REPLY_CODE=0
   REPLY=""
 
-  local line indent keyName fullKey value \
-    isMultilineValue=false isArrayItemStart=false multilineSeparator='' multilineFinalSeparator='' \
+  local line indent keyName fullKey value isArrayItemStart=false \
+    isMultilineValue=false multilineTrimEnd=true multiLinesCumulatedLf multilineSeparator='' multilineFinalSeparator='' \
     errorPrefix="Error parsing YAML file ⌜${path}⌝"
   local -i indentLevel=0 arrayIndex lineNumber=0
 
@@ -108,16 +108,30 @@ function yaml::parseFile() {
     # handle multiline continuation
     if [[ ${isMultilineValue} == "true" ]]; then
       if ((indentLevel >= ${#keyPaths[@]})); then
-        value+="${indent:0:(indentLevel - ${#keyPaths[@]})*2}${line}${multilineSeparator}"
+        if [[ ${multilineSeparator} == '$\n' ]]; then
+          value+="${multiLinesCumulatedLf}"$'\n'
+        else
+          if [[ ${indentLevel} -gt ${#keyPaths[@]} || -n ${multiLinesCumulatedLf} ]]; then
+            if [[ -n ${value} ]]; then
+              value+=$'\n'
+            fi
+            value+="${multiLinesCumulatedLf}"
+          elif [[ -n ${value} ]]; then
+            value+="${multilineSeparator}"
+          fi
+        fi
+        value+="${indent:0:(indentLevel - ${#keyPaths[@]})*2}${line}"
+        multiLinesCumulatedLf=""
         continue
       elif [[ -z ${line// /} ]]; then
-        value="${value%"${multilineSeparator}"}"$'\n'
+        multiLinesCumulatedLf+=$'\n'
         continue
       fi
       isMultilineValue=false
-      # trim all ending separators
-      value="${value%"${multilineSeparator}"}"
-      value="${value%"${value##*[^$'\n']}"}${multilineFinalSeparator}"
+      value+="${multilineFinalSeparator}"
+      if [[ ${multilineTrimEnd} != "true" ]]; then
+        value+="${multiLinesCumulatedLf}"
+      fi
       REPLY_MAP["${fullKey}"]="${value}"
     fi
 
@@ -156,6 +170,8 @@ function yaml::parseFile() {
     elif [[ ${line} == *: ]]; then
       keyName="${line%%:*}"
       line="${line:${#keyName}}"
+      # trim end spaces
+      keyName="${keyName%"${keyName##*[^[:space:]]}"}"
     else
       keyName="${line%%: *}"
       # log::info "${line:${#keyName}:1} ${line@Q} at ${#keyName}"
@@ -164,6 +180,8 @@ function yaml::parseFile() {
         keyName=""
       else
         line="${line:${#keyName}}"
+        # trim end spaces
+        keyName="${keyName%"${keyName##*[^[:space:]]}"}"
       fi
     fi
 
@@ -233,6 +251,7 @@ function yaml::parseFile() {
       # store the array length in the associative array with key (array).length
       IFS='.'
       fullKey="${keyPaths[*]:0:arrayIndex+1}.length"
+      fullKey="${fullKey#.}"
       fullKey="${fullKey//'..'/'.'}"
       fullKey="${fullKey//'.['/'['}"
       REPLY_MAP["${fullKey}"]="$((arrayIndexes[arrayIndex] + 1))"
@@ -256,6 +275,7 @@ function yaml::parseFile() {
     if [[ ${line:0:3} == ': '[\>\|] ]]; then
       # new multiline value
       isMultilineValue=true
+      multiLinesCumulatedLf=""
       if [[ ${line:2:1} == '|' ]]; then
         multilineSeparator=$'\n'
       else
@@ -265,6 +285,11 @@ function yaml::parseFile() {
         multilineFinalSeparator=''
       else
         multilineFinalSeparator=$'\n'
+      fi
+      if [[ ${line:3:1} == '+' ]]; then
+        multilineTrimEnd=false
+      else
+        multilineTrimEnd=true
       fi
       value=""
 
@@ -309,8 +334,10 @@ function yaml::parseFile() {
 
   # close a multiline value if we reached the end of the file
   if [[ ${isMultilineValue} == "true" ]]; then
-    value="${value%"${multilineSeparator}"}"
-    value="${value%"${value##*[^$'\n']}"}${multilineFinalSeparator}"
+    value+="${multilineFinalSeparator}"
+    if [[ ${multilineTrimEnd} != "true" ]]; then
+      value+="${multiLinesCumulatedLf}"
+    fi
     # shellcheck disable=SC2034
     REPLY_MAP["${fullKey}"]="${value}"
   fi

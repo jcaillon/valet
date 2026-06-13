@@ -1,0 +1,30 @@
+# https://ktomk.github.io/writing/yaml-anchor-alias-and-merge-key.html
+hr:
+- Mark McGwire
+# Following node labeled SS
+- &SS Sammy Sosa
+rbi:
+- *SS # Subsequent occurrence
+- Ken Griffey
+First occurrence: &anchor Foo
+Second occurrence: *anchor
+Override anchor: &anchor Bar
+Reuse anchor: *anchor
+
+# Source - https://stackoverflow.com/q/64224811
+# Posted by gavenkoa, modified by community. See post 'Timeline' for change history
+# Retrieved 2026-06-13, License - CC BY-SA 4.0
+
+defs:
+- map1: &map1-ref
+    key1: val1
+- map2: &map2-ref
+    key2: val2
+
+config:
+  database:
+    << : [ *map1-ref, *map2-ref ]
+    key3: val3
+  simple:
+    <<: *map1-ref
+    key4: val4

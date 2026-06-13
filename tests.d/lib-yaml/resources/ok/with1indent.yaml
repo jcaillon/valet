@@ -1,0 +1,27 @@
+normal:
+  - item    : Super Hoop
+    quantity: 1
+  - >
+   Sammy Sosa completed another
+   fine season with great stats.
+
+     63 Home Runs
+     0.288 Batting Average
+
+   What a year!
+  -
+    name: Mark McGwire
+    hr:   65
+    avg:  0.278
+  - |1
+    explicit
+  - |
+    explicit
+key:
+ 1indent:
+   now2:
+    and1again: ok
+    arr:
+      - 1
+      - 2
+      - 3

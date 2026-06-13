@@ -4,7 +4,7 @@
 
 ### ✅ Testing yaml::parseFile function
 
-❯ `yaml::parseFile resources/arrays.yaml`
+❯ `yaml::parseFile resources/ok/arrays.yaml`
 
 Returned variables:
 
@@ -28,7 +28,7 @@ REPLY_MAP=(
 )
 ```
 
-❯ `yaml::parseFile resources/simple.yaml`
+❯ `yaml::parseFile resources/ok/simple.yaml`
 
 Returned variables:
 
@@ -42,7 +42,9 @@ REPLY_MAP=(
 ['arr.length']='2'
 ['arr[0]']='thing'
 ['arr[1]']='stuff:with:colons'
-['endingMultiline']='first line
+['endingMultiline']='
+
+first line
 second line
 '
 ['key']='https://example.com'
@@ -65,13 +67,32 @@ second line
 ['num.length']='1'
 ['num[0].key']='2'
 ['strings.content']='Or we
+
+
 can auto
 convert line breaks
+
+
+
 to save space'
 ['strings.double_quoted']='line1
 line2	unicode:❤'
-['strings.folded']='a word please ?'
+['strings.folded']='
+a
+
+word please ?'
+['strings.foldedWithIndentation']='Sammy Sosa completed another fine season with great stats.
+
+  63 Home Runs
+  0.288 Batting Average
+
+What a year!'
+['strings.keepEol']='this will keep the trailing lines
+
+
+'
 ['strings.multiline_folded']='a
+
 
 this text is folded into a single line
 '
@@ -85,7 +106,7 @@ line two
 )
 ```
 
-❯ `yaml::parseFile resources/root-array.yaml`
+❯ `yaml::parseFile resources/ok/root-array.yaml`
 
 Returned variables:
 
@@ -93,7 +114,6 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['.length']='3'
 ['[0].source.name']='argo-cd'
 ['[0].source.repo']='https://argoproj.github.io/argo-helm'
 ['[0].source.version']='9.5.15'
@@ -111,6 +131,7 @@ REPLY_MAP=(
 ['[2].source.version']='1.19.4'
 ['[2].targets.length']='1'
 ['[2].targets[0]']='oci://thing.azurecr.io/helm'
+['length']='3'
 )
 ```
 

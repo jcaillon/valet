@@ -1,0 +1,11 @@
+
+complex:
+  - [name        , hr, avg  ]
+  - [Mark McGwire, 65, 0.278]
+  - [Sammy Sosa  , 63, 0.288]
+stuff:
+  Mark McGwire: {hr: 65, avg: 0.278}
+  Sammy Sosa: {
+      hr: 63,
+      avg: 0.288,
+   }

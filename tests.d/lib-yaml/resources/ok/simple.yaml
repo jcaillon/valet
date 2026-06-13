@@ -31,10 +31,9 @@ key: https://example.com #:
 num:
   - key: 2
 
-
 strings: #comment
   "plain": hello world #comment
-  single_quoted:   'hello ''world'' #notacomment' #comment #zefzef
+  single_quoted    :   'hello ''world'' #notacomment' #comment #zefzef
   with_single_quote:   "C'est \"quoi" #comment
   double_quoted: "line1\nline2\tunicode:\u2764" #comment
   empty: ""
@@ -53,15 +52,34 @@ strings: #comment
     into a single line
   content: |-
     Or we
+
+
     can auto
     convert line breaks
+
+
+
     to save space
+  foldedWithIndentation: >-
+    Sammy Sosa completed another
+    fine season with great stats.
+
+      63 Home Runs
+      0.288 Batting Average
+
+    What a year!
+  keepEol: |+
+    this will keep the trailing lines
+
+
   folded: >-
+
     a
+
     word please
     ?
-
-
 endingMultiline: |
+
+
   first line
   second line

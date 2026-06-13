@@ -10,9 +10,9 @@ function main() {
 function test_yaml::parseFile() {
   test::title "✅ Testing yaml::parseFile function"
 
-  test::func yaml::parseFile resources/arrays.yaml
-  test::func yaml::parseFile resources/simple.yaml
-  test::func yaml::parseFile resources/root-array.yaml
+  test::func yaml::parseFile resources/ok/arrays.yaml
+  test::func yaml::parseFile resources/ok/simple.yaml
+  test::func yaml::parseFile resources/ok/root-array.yaml
 }
 
 main
