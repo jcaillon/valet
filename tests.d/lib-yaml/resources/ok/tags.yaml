@@ -1,3 +1,6 @@
+%YAML 1.2
+%TAG !e! tag:example.com,2000:app/
+---
 types:
   - !!str "123"
   - !!int "123"
@@ -23,7 +26,7 @@ picture: !!binary |
  Pz7Y6OjuDg4J+fn5OTk6enp
  56enmleECcgggoBADs=
 
-application specific tag: !something |
+application specific tag: !e!tag |
  The semantics of the tag
  above may be different for
  different documents.

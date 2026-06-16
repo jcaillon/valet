@@ -70,7 +70,7 @@ function yaml::parseFile() {
   REPLY_CODE=0
   REPLY=""
 
-  local line indent keyName fullKey value isArrayItemStart=false \
+  local line indent keyName fullKey value firstChar isArrayItemStart=false \
     isMultilineValue=false multilineTrimEnd=true multiLinesCumulatedLf multilineSeparator='' multilineFinalSeparator='' \
     errorPrefix="Error parsing YAML file ⌜${path}⌝"
   local -i indentLevel=0 arrayIndex lineNumber=0
@@ -96,14 +96,19 @@ function yaml::parseFile() {
 
   while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
     lineNumber+=1
-    if [[ ${line/# /} == \#* ]]; then
+    # shellcheck disable=SC1001
+    if [[ ${line:0:1} == [\#\%] ]]; then
       continue
     fi
+    line="${line%$'\r'}"
 
-    # get indent indent, indent level and trim it from the line
-    indent="${line%%[![:space:]]*}"
-    indentLevel=$((${#indent} / 2))
+    # get indent, indent level and trim it from the line
+    indent="${line%%[^[:space:]]*}"
     line="${line:${#indent}}"
+    indent="${indent%%$'\t'*}"
+    indentLevel=$((${#indent} / 2))
+
+    # log::info "indent: ⌜${indent}⌝, level: ${indentLevel}, line: ⌜${line}⌝"
 
     # handle multiline continuation
     if [[ ${isMultilineValue} == "true" ]]; then
@@ -127,12 +132,19 @@ function yaml::parseFile() {
         multiLinesCumulatedLf+=$'\n'
         continue
       fi
+
+      # end of a multiline value
       isMultilineValue=false
       value+="${multilineFinalSeparator}"
       if [[ ${multilineTrimEnd} != "true" ]]; then
         value+="${multiLinesCumulatedLf}"
       fi
       REPLY_MAP["${fullKey}"]="${value}"
+    fi
+
+    if [[ ${line} == "? "* ]]; then
+      # case of an explicit key
+      line="${line:2}"
     fi
 
     if [[ ${line} == "- "* ]]; then
@@ -144,23 +156,14 @@ function yaml::parseFile() {
       isArrayItemStart=false
     fi
 
-    if ((indentLevel > ${#keyPaths[@]} + 1)); then
-      # invalid line
-      REPLY_CODE=1
-      REPLY+="${errorPrefix} at line ${lineNumber}: too much indentation, we expected at most $((${#keyPaths[@]} + 1))."
-      if [[ ${noFail} != "true" ]]; then
-        core::fail "${REPLY}"
-      fi
-      continue
-    fi
-
     # log::info "line: ⌜${line}⌝"
 
     # extract the key name and value, there can be only a value with no key name
     # in case of an array with a scalar
-    if [[ ${line:0:1} == [\'\"] ]]; then
+    firstChar="${line:0:1}"
+    if [[ ${firstChar} == [\'\"] ]]; then
       keyName="${line:1}"
-      keyName="${line:0:1}${keyName%%"${line:0:1}"*}${line:0:1}"
+      keyName="${firstChar}${keyName%%"${firstChar}"*}${firstChar}"
       if [[ ${line:${#keyName}:1} != ":" ]]; then
         line="${keyName}"
         keyName=""
@@ -197,7 +200,7 @@ function yaml::parseFile() {
 
     # remove comment and handle quoted values
     value="${line#:}"
-    value="${value#"${value%%[^ ]*}"}"
+    value="${value#"${value%%[^[:space:]]*}"}"
     if [[ ${value:0:1} == \' ]]; then
       value="${value:1}"
       value="${value//\'\'/$'\a'}"
@@ -272,7 +275,7 @@ function yaml::parseFile() {
     fi
 
     # determine what the current line represents
-    if [[ ${line:0:3} == ': '[\>\|] ]]; then
+    if [[ ${line} == ': '[\>\|]* ]]; then
       # new multiline value
       isMultilineValue=true
       multiLinesCumulatedLf=""
@@ -293,11 +296,11 @@ function yaml::parseFile() {
       fi
       value=""
 
-    elif [[ ${line:0:2} == ': ' && (-n ${value} || ${line:0:4} == ': '[\"\'][\"\']) ]]; then
+    elif [[ ${line} == ': '* && (-n ${value} || ${line} == ': '[\"\'][\"\']*) ]]; then
       # a scalar value
       :
 
-    elif [[ ${line:0:1} == ':' && -z ${value} ]]; then
+    elif [[ ${line} == ':'* && -z ${value} ]]; then
       # start of an object or array
       :
 

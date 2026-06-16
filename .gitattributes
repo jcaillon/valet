@@ -37,6 +37,7 @@ VERSION text
 # Windows text files that should be normalized to crlf
 *.cmd text eol=crlf
 *.bat text eol=crlf
+*.cryaml text eol=crlf
 
 # Binary files that should not be normalized or diffed
 *.png binary

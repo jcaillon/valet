@@ -5,7 +5,7 @@ include yaml test
 
 REPLY=""
 
-yaml::parseFile tests.d/lib-yaml/resources/simple.yaml
+yaml::parseFile tests.d/lib-yaml/resources/ok/arrays.yaml
 
 echo "${REPLY}"
 
