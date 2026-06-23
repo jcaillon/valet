@@ -42,6 +42,10 @@ source string
 #       (optional) A boolean to indicate wether or not the function should call core::fail (exit)
 #       in case the parsing fails. By default, if the parsing fails, the script will exit.
 #       (defaults to false)
+# - ${prefixFirstDoc} _as bool_:
+#       (optional) A boolean to indicate wether or not to prefix the keys of the first document
+#       with "@[0]".
+#       (defaults to false)
 #
 # Returns:
 #
@@ -61,8 +65,9 @@ source string
 function yaml::parseFile() {
   local \
     path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
-    noFail=false
-  IFS=" "
+    noFail=false \
+    prefixFirstDoc=false \
+    IFS=" "
   shift 1
   eval "local a= ${*@Q}"
 
@@ -70,10 +75,9 @@ function yaml::parseFile() {
   REPLY_CODE=0
   REPLY=""
 
-  local line indent keyName fullKey value firstChar isArrayItemStart=false keyIndentLevelsFlatten \
-    isMultilineValue=false multilineTrimEnd=true multiLinesCumulatedLf multilineSeparator='' multilineFinalSeparator='' \
-    errorPrefix="Error parsing YAML file ⌜${path}⌝"
-  local -i indentLevel=0 indentLevelIndex arrayIndex lineNumber=0 lastIndentLevel=0 arrayExtraIndentLevel multiLineIndentLevel=-1
+  # variables that carry over each loop iteration
+  local isMultilineValue=false
+  local -i arrayExtraIndentLevelResetValue=0
 
   # keyPaths keeps track of the current path in the YAML file.
   # keyIndentLevels keeps track of the indent level for each key.
@@ -95,6 +99,16 @@ function yaml::parseFile() {
   # thing: value      # (thing)                             | (0)               | (-1)
   local -a keyPaths=() keyIndentLevels=() arrayIndexes=()
 
+  local line indent keyName fullKey value firstChar isArrayItemStart=false keyIndentLevelsFlatten \
+    multilineTrimEnd=true multiLinesCumulatedLf multilineSeparator='' multilineFinalSeparator='' \
+    errorPrefix="Error parsing YAML file ⌜${path}⌝" docPrefix=""
+  local -i indentLevel=0 indentLevelIndex arrayIndex lineNumber=0 lastIndentLevel=0 arrayExtraIndentLevel \
+    multiLineIndentLevel=-1 docNumber=0
+
+  if [[ ${prefixFirstDoc} == "true" ]]; then
+    docPrefix="@[0]."
+  fi
+
   while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
     lineNumber+=1
     # shellcheck disable=SC1001
@@ -113,7 +127,7 @@ function yaml::parseFile() {
 
     # handle multiline continuation
     if [[ ${isMultilineValue} == "true" ]]; then
-      if ((indentLevel > ${keyIndentLevels[-1]})); then
+      if ((indentLevel > ${keyIndentLevels[-1]} - arrayExtraIndentLevel)); then
         if ((multiLineIndentLevel == 0)); then
           # the first line of a multiline value, determine the indent level of the multiline value
           multiLineIndentLevel=${indentLevel}
@@ -155,19 +169,26 @@ function yaml::parseFile() {
       continue
     fi
 
-    if [[ ${line} == "? "* ]]; then
-      # case of an explicit key
-      line="${line:2}"
+    # new doc
+    if [[ ${line} == "---"* ]]; then
+      docNumber+=1
+      keyPaths=()
+      keyIndentLevels=()
+      arrayIndexes=()
+      arrayExtraIndentLevelResetValue=0
+      docPrefix="@[${docNumber}]."
+      continue
     fi
 
-    if [[ ${line} == "- "* ]]; then
+    if [[ ${line} == "-"* ]]; then
       # case of an array
       line="${line:2}"
       indentLevel+=2
       arrayExtraIndentLevel=2
       isArrayItemStart=true
     else
-      arrayExtraIndentLevel=0
+      arrayExtraIndentLevel=${arrayExtraIndentLevelResetValue}
+      arrayExtraIndentLevelResetValue=0
       isArrayItemStart=false
     fi
 
@@ -236,10 +257,10 @@ function yaml::parseFile() {
       fi
     fi
 
-    # log::info "level: ${indentLevel}, key: ⌜${keyName}⌝, value: ⌜${value}⌝"
-    if [[ -z ${keyName} && -z ${value} ]]; then
+    log::debug "line: ${lineNumber}, key: ⌜${keyName}⌝, value: ⌜${value}⌝, line ⌜${line}⌝"
+
+    if [[ ${isArrayItemStart} != "true" && -z ${keyName} && -z ${value} ]]; then
       # empty line
-      # FIXME: does not work if we just start a new array -
       continue
     fi
 
@@ -252,7 +273,7 @@ function yaml::parseFile() {
     elif ((indentLevel == lastIndentLevel)); then
       # case of a new key at the same level as the previous key
       indentLevelIndex=$((${#keyIndentLevels[@]} - 1))
-    elif ((indentLevel > lastIndentLevel)); then
+    elif ((indentLevel > lastIndentLevel - arrayExtraIndentLevel)); then
       # case of a new key at a deeper level than the previous key
       if ((indentLevel > lastIndentLevel + 4 + arrayExtraIndentLevel)); then
         REPLY_CODE=1
@@ -270,7 +291,7 @@ function yaml::parseFile() {
       if [[ ${keyIndentLevelsFlatten} != *".${indentLevel}."* ]]; then
         REPLY_CODE=1
         IFS=","
-        REPLY+="${errorPrefix} at line ${lineNumber}: invalid indentation (expected one of: ${keyIndentLevels[*]})."
+        REPLY+="${errorPrefix} at line ${lineNumber}: invalid indentation (expected one of (${keyIndentLevels[*]}) but got ${indentLevel})."
         if [[ ${noFail} != "true" ]]; then
           core::fail "${REPLY}"
         fi
@@ -297,14 +318,36 @@ function yaml::parseFile() {
       arrayIndex=$((indentLevelIndex - 1))
       # increment current array index
       arrayIndexes[arrayIndex]=$((arrayIndexes[arrayIndex] + 1))
+
       # store the array length in the associative array with key (array).length
       fullKey="${keyPaths[*]:0:arrayIndex+1}.length"
-      fullKey="${fullKey#.}"
+      fullKey="${docPrefix}${fullKey#.}"
       fullKey="${fullKey//'.['/'['}"
       REPLY_MAP["${fullKey}"]="$((arrayIndexes[arrayIndex] + 1))"
 
       keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
       keyName="${keyName%.}"
+
+      while [[ ${line#"${line%%[^[:space:]]*}"} == "- "* ]]; do
+        # case of an array within an array (e.g. `- - item1`)
+        indent="${line%%"- "*}"
+        keyPaths=("${keyPaths[@]:0:indentLevelIndex}" "${keyName}")
+        arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" 0)
+        keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
+        indentLevel+=$((${#indent} + 2))
+        indentLevelIndex+=1
+        keyName="[0]"
+
+        # store the array length in the associative array with key (array).length
+        fullKey="${keyPaths[*]}.length"
+        fullKey="${docPrefix}${fullKey#.}"
+        fullKey="${fullKey//'.['/'['}"
+        REPLY_MAP["${fullKey}"]="1"
+
+        line="${line#"${indent}- "}"
+        value="${value#"${value%%[^[:space:]]*}"}"
+        value="${value#- }"
+      done
     else
       arrayIndex=$((indentLevelIndex - 1))
       if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] >= 0)); then
@@ -314,65 +357,31 @@ function yaml::parseFile() {
       fi
     fi
 
-    # if [[ ${isArrayItemStart} == "true" ]]; then
-    #   if ((${#keyIndentLevels[@]} == 0)); then
-    #     # case of a "root" array
-    #     keyPaths=("")
-    #     keyIndentLevels=(0)
-    #     arrayIndexes=(-1)
-    #   elif ((indentLevel == ${#keyPaths[@]} + 1)); then
-    #     # case of a new array item that is indented +1 from the previous key,
-    #     # take into account this indentation level to keep (${#keyPaths[@]} - 1)
-    #     # equals to the indent level of the current key
-    #     keyPaths=("${keyPaths[@]:0:indentLevelIndex-1}" "")
-    #     arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex-1}" -9)
-    #     keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex-1}" "${indentLevel}")
-    #     arrayIndex=$((arrayIndex - 1))
-    #   fi
-    #   if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] == -9)); then
-    #     # case of a new key inside an object inside an array, where the array items are at indent +1
-    #     arrayIndex=$((arrayIndex - 1))
-    #   fi
-    #   # increment current array index
-    #   arrayIndexes[arrayIndex]=$((arrayIndexes[arrayIndex] + 1))
-    #   # store the array length in the associative array with key (array).length
-    #   fullKey="${keyPaths[*]:0:arrayIndex+1}.length"
-    #   fullKey="${fullKey#.}"
-    #   fullKey="${fullKey//'.['/'['}"
-    #   REPLY_MAP["${fullKey}"]="$((arrayIndexes[arrayIndex] + 1))"
-
-    #   keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
-    #   keyName="${keyName%.}"
-    # else
-    #   arrayIndex=$((indentLevel - 1))
-    #   if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] == -9)); then
-    #     # case of a new key inside an object inside an array, where the array items are at indent +1
-    #     arrayIndex=$((arrayIndex - 1))
-    #   fi
-    #   if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] >= 0)); then
-    #     # case of a new key inside an object inside an array
-    #     keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
-    #     keyName="${keyName%.}"
-    #   fi
-    # fi
+    log::debug "line: ${lineNumber}, key: ⌜${keyName}⌝, value: ⌜${value}⌝, line ⌜${line}⌝"
 
     # determine what the current line represents
-    if [[ ${line} == ': '[\>\|]* ]]; then
+    if [[ ${value} == [\>\|]* ]]; then
       # new multiline value
       isMultilineValue=true
-      multiLineIndentLevel=0
       multiLinesCumulatedLf=""
-      if [[ ${line:2:1} == '|' ]]; then
+      if [[ ${value} == '|'* ]]; then
         multilineSeparator=$'\n'
       else
         multilineSeparator=' '
       fi
-      if [[ ${line:3:1} == '-' ]]; then
+      value="${value:1}"
+      if [[ ${value} == [0-4]* ]]; then
+        multiLineIndentLevel=$((indentLevel - arrayExtraIndentLevel + ${value:0:1}))
+        value="${value:1}"
+      else
+        multiLineIndentLevel=0
+      fi
+      if [[ ${value} == '-'* ]]; then
         multilineFinalSeparator=''
       else
         multilineFinalSeparator=$'\n'
       fi
-      if [[ ${line:3:1} == '+' ]]; then
+      if [[ ${value} == '+'* ]]; then
         multilineTrimEnd=false
       else
         multilineTrimEnd=true
@@ -387,9 +396,19 @@ function yaml::parseFile() {
       # start of an object or array
       :
 
-    elif [[ ${isArrayItemStart} == "true" && ${keyName: -1:1} == ']' && -n ${value} ]]; then
+    elif [[ ${isArrayItemStart} == "true" && ${keyName} == *']' && -n ${value} ]]; then
       # case of a scalar array item with no key name
       :
+
+    elif [[ ${isArrayItemStart} == "true" && ${keyName} == *']' ]]; then
+      # case of the start of an array (line contains only "-")
+      arrayExtraIndentLevelResetValue=2
+
+    elif [[ -z ${keyName} && -n ${value} && ${#keyPaths[@]} -eq 0 ]]; then
+      # a simple scalar value
+      fullKey="${docPrefix%.}"
+      REPLY_MAP["${fullKey:-"@[${docNumber}]"}"]="${value}"
+      continue
 
     else
       # invalid line
@@ -406,11 +425,12 @@ function yaml::parseFile() {
     arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" -1)
     keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
 
-    # printf "%2s: %50s | %20s | %20s | %s\n" "${lineNumber}" "${keyPaths[*]}" "${keyIndentLevels[*]}" "${arrayIndexes[*]}" "${arrayIndentLevels[*]}"
-    # printf "%2s: %-50s | %20s | %s\n" "${lineNumber}" "${keyPaths[*]}" "${keyIndentLevels[*]}" "${arrayIndexes[*]}"
+    if log::isDebugEnabled; then
+      printf "%2s: %50s | %20s | %s\n" "${lineNumber}" "${keyPaths[*]}" "${keyIndentLevels[*]}" "${arrayIndexes[*]}"
+    fi
 
-    IFS='.'
     fullKey="${keyPaths[*]}"
+    fullKey="${docPrefix}${fullKey#.}"
     fullKey="${fullKey//'.['/'['}"
     if [[ -n ${value} ]]; then
       REPLY_MAP["${fullKey}"]="${value}"
@@ -425,6 +445,9 @@ function yaml::parseFile() {
       value+="${multiLinesCumulatedLf}"
     fi
     # shellcheck disable=SC2034
-    REPLY_MAP["${fullKey}"]="${value}"
+    REPLY_MAP["${fullKey:-"@[${docNumber}]"}"]="${value}"
   fi
+
+  # shellcheck disable=SC2034
+  REPLY_MAP["@.length"]="${docNumber}"
 }

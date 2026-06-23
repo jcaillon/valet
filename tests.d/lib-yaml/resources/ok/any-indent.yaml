@@ -10,17 +10,22 @@ normal:
 
    What a year!
   -
-    name: Mark McGwire
-    hr:   65
-    avg:  0.278
+      name: Mark McGwire
+      hr:   65
+      avg:  0.278
   - |1
     explicit
   - |
     explicit
+  - >4
+        explicit
+  -   # commm
+   key: 1
 key:
  1indent:
    now2:
-    and1again: ok
+    and1again:
+        now4: v
     arr:
       - 1
       - 2

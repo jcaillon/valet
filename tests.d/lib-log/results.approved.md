@@ -607,7 +607,7 @@ REPLY3='67'
 REPLY4='
 local functionName="${FUNCNAME[1]:-}"
 local sourcePath="${BASH_SOURCE[1]:-shell}"
-local lineNumber="${BASH_LINENO[1]:-0}"'
+local lineNumber="${BASH_LINENO[0]:-0}"'
 ```
 
 ❯ `VALET_CONFIG_ENABLE_NERDFONT_ICONS=true log::parseLogPattern \<icon\>\ \<message\>`
@@ -645,7 +645,7 @@ local variableToPrintInLog="${COLOR_DEBUG:-}"
 local processName=${GLOBAL_PID_TO_PNAME[${BASHPID}]:-}; if [[ -z ${processName} ]]; then if [[ ${BASHPID} == "1234" ]]; then GLOBAL_PID_TO_PNAME[${BASHPID}]="main"; else string::numberToUniqueId "${BASHPID}"; GLOBAL_PID_TO_PNAME[${BASHPID}]="${REPLY}"; fi; processName=${GLOBAL_PID_TO_PNAME[${BASHPID}]}; fi
 local functionName="${FUNCNAME[1]:-}"
 local sourcePath="${BASH_SOURCE[1]:-shell}"
-local lineNumber="${BASH_LINENO[1]:-0}"'
+local lineNumber="${BASH_LINENO[0]:-0}"'
 ```
 
 ❯ `log::parseLogPattern $'<levelColor><level><colorDefault> <message>\n<wrapPadding><colorFaded>[<elapsedTime>] [<elapsedTimeSinceLastLog>] in [<sourceFile>]<colorDefault>'`
@@ -674,7 +674,7 @@ REPLY2='"{\"level\": \"" "${level}" "\", \"message\": \"" "${messageToPrintInLog
 REPLY3='26'
 REPLY4='
 local sourcePath="${BASH_SOURCE[1]:-shell}"
-local lineNumber="${BASH_LINENO[1]:-0}"'
+local lineNumber="${BASH_LINENO[0]:-0}"'
 ```
 
 ❯ `log::parseLogPattern $'<level>{-2s}\n  <varSTUFF>{-5s}\n  <pid>{-04d}\n  <subshell>{-1s}\n  <function>{-5s}\n  <line>{-03d}\n  <source>{-5s}\n  <sourceFile>{-5s}\n  <elapsedTime>{-5s}\n  <elapsedTimeSinceLastLog>{-5s}\n  '`
@@ -698,7 +698,7 @@ REPLY3='0'
 REPLY4='
 local variableToPrintInLog="${STUFF:-}"
 local functionName="${FUNCNAME[1]:-}"
-local lineNumber="${BASH_LINENO[1]:-0}"
+local lineNumber="${BASH_LINENO[0]:-0}"
 local sourcePath="${BASH_SOURCE[1]:-shell}"
 local sourceFile="${BASH_SOURCE[1]:-shell}"
 sourceFile="${sourceFile##*/}"

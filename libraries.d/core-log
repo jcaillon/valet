@@ -853,7 +853,7 @@ function log::parseLogPattern() {
       ;;
     line)
       printfFormat="%${formatSpecifier:-"-4s"}"
-      REPLY4+=$'\n'"local lineNumber=\"\${BASH_LINENO[1]:-0}\""
+      REPLY4+=$'\n'"local lineNumber=\"\${BASH_LINENO[0]:-0}\""
       log_setPrintfArgumentFromFormat "lineNumber"
       ;;
     source)

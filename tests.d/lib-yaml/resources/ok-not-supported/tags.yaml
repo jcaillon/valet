@@ -2,10 +2,10 @@
 %TAG !e! tag:example.com,2000:app/
 ---
 types:
-  - !!str "123"
+  - !!str    "123"
   - !!int "123"
   - !!float "123.45"
-  - !!bool "true"
+  -    !!bool   "true"
   - !!null ""
 types2:
   canonical: 12345

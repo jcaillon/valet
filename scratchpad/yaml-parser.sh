@@ -5,8 +5,10 @@ include yaml test
 
 REPLY=""
 
-# yaml::parseFile tests.d/lib-yaml/resources/ok/test.yaml
-yaml::parseFile tests.d/lib-yaml/resources/ok/arrays.yaml
+log::setLevel debug silent=true
+
+yaml::parseFile tests.d/lib-yaml/resources/ok-not-supported/test.yaml
+# yaml::parseFile tests.d/lib-yaml/resources/ok/root-array.yaml
 # yaml::parseFile tests.d/lib-yaml/resources/ok/any-indent.yaml
 
 echo "${REPLY}"
