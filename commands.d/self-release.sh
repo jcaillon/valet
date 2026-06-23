@@ -151,7 +151,7 @@ function selfRelease::createRelease() {
     exe::invoke git update-index --really-refresh --- noFail=true
     exe::invoke git diff-index --quiet HEAD --- noFail=true
     if [[ REPLY_CODE -ne 0 ]]; then
-      core::fail "The workarea is not clean, please commit your changes before releasing a new version."
+      core::fail "The workarea is not clean, please commit ycdour changes before releasing a new version."
     fi
   fi
 

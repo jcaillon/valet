@@ -1,0 +1,32 @@
+# #                  | keyPaths                           |  keyIndentLevels  | arrayIndexes   | indent
+# # -----------------|------------------------------------|-------------------|----------------|--------------------
+# - 1                   # ("" [0])                            | (0 2)             | (0 -1)        |
+# - 2                   # ("" [1])                            | (0 2)             | (1 -1)        |
+nested:
+  arr:
+  - key: thing
+  arr2:
+    - name: obj1
+      array:
+      - thing
+      - stuff
+      - arr:
+        - here
+    - name: obj2
+    - 42
+last: value
+
+  # #                  | keyPaths                           |  keyIndentLevels  | arrayIndexes 
+  # # -----------------|------------------------------------|-------------------|--------------
+  # nested:           # (nested)                            | (0)               | (-1)
+  #   arr:            # (nested arr)                        | (0 2)             | (-1 -1)
+  #   - key: thing    # (nested arr [0].key)                | (0 2 4)           | (-1 -1 0)
+  #   - key: thing    # (nested arr [0].key)                | (0 2 4)           | (-1 -1 1)
+  #   arr2:           # (nested arr2)                       | (0 2)             | (-1 -1)
+  #     - name: obj1  # (nested arr2 [0].name)              | (0 2 6)           | (-1 0 -1)
+  #       array:      # (nested arr2 [0].array)             | (0 2 6)           | (-1 0 -1)
+  #       - thing     # (nested arr2 [0].array [0])         | (0 2 6 8)         | (-1 0 0 -1)
+  #       - arr:      # (nested arr2 [0].array [1].arr)     | (0 2 6 8)         | (-1 0 1 -1)
+  #         - here    # (nested arr2 [0].array [1].arr [0]) | (0 2 6 8 10)      | (-1 0 1 0 -1)
+  #     - name: obj2  # (nested arr2 [1].name)              | (0 2 6)           | (-1 1 -1)
+  # thing: value      # (thing)                             | (0)               | (-1)
