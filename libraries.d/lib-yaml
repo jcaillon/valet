@@ -177,7 +177,8 @@ function yaml::parseFile() {
       arrayIndexes=()
       arrayExtraIndentLevelResetValue=0
       docPrefix="@[${docNumber}]."
-      continue
+      line="${line#---}"
+      line="${line#"${line%%[^[:space:]]*}"}"
     fi
 
     if [[ ${line} == "-"* ]]; then

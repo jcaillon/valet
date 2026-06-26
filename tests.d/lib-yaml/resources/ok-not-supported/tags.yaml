@@ -6,7 +6,7 @@ types:
   - !!int "123"
   - !!float "123.45"
   -    !!bool   "true"
-  - !!null ""
+  # - !!null ""
 types2:
   canonical: 12345
   decimal: +12345

@@ -460,6 +460,25 @@ line2
 )
 ```
 
+> cat `resources/ok/single-scalar4.yaml`
+
+```text
+--- text
+```
+
+❯ `yaml::parseFile resources/ok/single-scalar4.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['@.length']='1'
+['@[1]']='text'
+)
+```
+
 ### ✅ Testing KO yaml::parseFile function
 
 > cat `resources/ko/mix-array-key.yaml`

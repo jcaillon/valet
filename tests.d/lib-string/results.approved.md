@@ -445,7 +445,7 @@ _myString='My text with some text formatting and some more textunreadable stuff.
 ❯ `string::removeTextFormatting _myString`
 
 ```text
-_myString='wo[107mrd wo[107mrd!'
+_myString='word word!'
 ```
 
 ### ✅ Testing string::getHexRepresentation

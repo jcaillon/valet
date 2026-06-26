@@ -247,9 +247,9 @@ function array::appendIfNotPresent() {
 
   # add value to array if not present, check in a loop
   local -i present=0
-  local item
-  for item in "${array_nameRef[@]}"; do
-    if [[ ${item} == "${valueToAdd_nameRef}" ]]; then
+  local item_strVal
+  for item_strVal in "${array_nameRef[@]}"; do
+    if [[ ${item_strVal} == "${valueToAdd_nameRef}" ]]; then
       present=1
       break
     fi
@@ -287,10 +287,10 @@ function array::remove() {
   local -n \
     arrayInWhichToRemove_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     valueToRemove_nameRef="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  local key
-  for key in "${!arrayInWhichToRemove_nameRef[@]}"; do
-    if [[ ${arrayInWhichToRemove_nameRef[${key}]} == "${valueToRemove_nameRef}" ]]; then
-      unset -v "arrayInWhichToRemove_nameRef[${key}]"
+  local key_strVal
+  for key_strVal in "${!arrayInWhichToRemove_nameRef[@]}"; do
+    if [[ ${arrayInWhichToRemove_nameRef[${key_strVal}]} == "${valueToRemove_nameRef}" ]]; then
+      unset -v "arrayInWhichToRemove_nameRef[${key_strVal}]"
       REPLY_CODE=0
       return 0
     fi
@@ -324,9 +324,9 @@ function array::contains() {
     arrayInWhichToCheck_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
     valueToCheck_nameRef="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  local item
-  for item in "${arrayInWhichToCheck_nameRef[@]}"; do
-    if [[ ${item} == "${valueToCheck_nameRef}" ]]; then
+  local item_strVal
+  for item_strVal in "${arrayInWhichToCheck_nameRef[@]}"; do
+    if [[ ${item_strVal} == "${valueToCheck_nameRef}" ]]; then
       return 0
     fi
   done
@@ -386,11 +386,11 @@ function array::makeArraysSameSize() {
 function array::reverse() {
   local -n arrayToReverse_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
 
-  local -a reversedArray=()
+  local -a reversedArray_arr=()
   local -i index
   for ((index = ${#arrayToReverse_nameRef[@]} - 1; index >= 0; index--)); do
-    reversedArray+=("${arrayToReverse_nameRef[index]}")
+    reversedArray_arr+=("${arrayToReverse_nameRef[index]}")
   done
 
-  arrayToReverse_nameRef=("${reversedArray[@]}")
+  arrayToReverse_nameRef=("${reversedArray_arr[@]}")
 }
