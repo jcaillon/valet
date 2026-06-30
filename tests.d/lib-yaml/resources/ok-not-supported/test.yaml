@@ -1,6 +1,16 @@
----
-key: thing
----
-key: thing2
----
-key: thing3
+key  with colons   :::
+key with spaces    :    ok
+"":
+"empty": ""
+k: "word1
+ word2\"
+ word3"
+k2: "line1
+
+   line2"
+nested:
+  k3: 'v
+a
+  l''
+ u
+e'

@@ -159,6 +159,30 @@ REPLY_MAP=(
 )
 ```
 
+> cat `resources/ok/nulls.yaml`
+
+```text
+null   key   :
+k:
+   null:
+nullkeyattheend:
+```
+
+❯ `yaml::parseFile resources/ok/nulls.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['@.length']='0'
+['k.null']='null'
+['null   key']='null'
+['nullkeyattheend']='null'
+)
+```
+
 > cat `resources/ok/root-array.yaml`
 
 ```text
@@ -312,8 +336,6 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['"key with spaces"']='value'
-['"key:with:colons"']='value'
 ['"num[0].key"']='1'
 ['@.length']='0'
 ['arr.length']='2'
@@ -325,6 +347,8 @@ first line
 second line
 '
 ['key']='https://example.com'
+['key with spaces']='value'
+['key:with:colons']='value'
 ['nested.arr.length']='4'
 ['nested.arr[0].array.length']='2'
 ['nested.arr[0].array[0]']='thing'
@@ -354,6 +378,8 @@ convert line breaks
 to save space'
 ['strings.double_quoted']='line1
 line2	unicode:❤'
+['strings.empty']=''
+['strings.empty2']='null'
 ['strings.folded']='
 a
 
@@ -496,7 +522,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-FAIL     Error parsing YAML file ⌜resources/ko/mix-array-key.yaml⌝ at line 3: invalid indentation (expected one of (0,3) but got 1).
+FAIL     Error parsing YAML file ⌜resources/ko/mix-array-key.yaml⌝ at line 3: invalid indentation (expected one of (0.3) but got 1)..
 ```
 
 ### ✅ Testing yaml::parseFile with options

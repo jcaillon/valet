@@ -26,6 +26,7 @@ source string
 # The resulting associative array will have the following content:
 #
 # ```sh
+# REPLY_MAP['$.length']="0"
 # REPLY_MAP['key']="test"
 # REPLY_MAP['array.length']=2
 # REPLY_MAP['array[0]']="item1"
@@ -33,8 +34,10 @@ source string
 # REPLY_MAP['nested.key']="value"
 # ```
 #
-# The length of each array is stored in the associative array with the key `(array).length` to allow
-# iterating over the array items.
+# - The length of each array is stored in the associative array with the key `(array).length` to allow
+#   iterating over the array items.
+# - The number of documents in the YAML file is stored in the associative array with the key `@.length`.
+# - If a key contains a dot or square brackets, it will be quoted in the resulting associative array.
 #
 # - $1: **file path** _as string_:
 #       The path to the YAML file to parse.
@@ -60,8 +63,9 @@ source string
 # declare -p REPLY_MAP
 # ```
 #
-# > /!\ this does not support all YAML features yet, working in progress...
-# > TODO: complete the implementation to support more YAML features, and add more tests.
+# > /!\ This does not support some uncommon YAML features yet such as:
+# > - explicit keys (e.g. `? {myobject: key}`)
+# > - extraction of tag definitions (e.g. %TAG !e! tag:example.com,2000:app/)
 function yaml::parseFile() {
   local \
     path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
@@ -72,11 +76,12 @@ function yaml::parseFile() {
   eval "local a= ${*@Q}"
 
   REPLY_MAP=()
-  REPLY_CODE=0
-  REPLY=""
+
+  local replyCode=0 \
+    errors=""
 
   # variables that carry over each loop iteration
-  local isMultilineValue=false
+  local isMultilineValue=false isQuoteOpen=false
   local -i arrayExtraIndentLevelResetValue=0
 
   # keyPaths keeps track of the current path in the YAML file.
@@ -101,6 +106,7 @@ function yaml::parseFile() {
 
   local line indent keyName fullKey value firstChar isArrayItemStart=false keyIndentLevelsFlatten \
     multilineTrimEnd=true multiLinesCumulatedLf multilineSeparator='' multilineFinalSeparator='' \
+    isKeyWithoutValue=false \
     errorPrefix="Error parsing YAML file ⌜${path}⌝" docPrefix=""
   local -i indentLevel=0 indentLevelIndex arrayIndex lineNumber=0 lastIndentLevel=0 arrayExtraIndentLevel \
     multiLineIndentLevel=-1 docNumber=0
@@ -161,6 +167,7 @@ function yaml::parseFile() {
         value+="${multiLinesCumulatedLf}"
       fi
       REPLY_MAP["${fullKey}"]="${value}"
+      isKeyWithoutValue=false
     fi
 
     # shellcheck disable=SC1001
@@ -195,70 +202,95 @@ function yaml::parseFile() {
 
     # extract the key name and value, there can be only a value with no key name
     # in case of an array with a scalar
+    isQuoteOpen=false
     firstChar="${line:0:1}"
     if [[ ${firstChar} == [\'\"] ]]; then
-      keyName="${line:1}"
-      keyName="${firstChar}${keyName%%"${firstChar}"*}${firstChar}"
-      if [[ ${line:${#keyName}:1} != ":" ]]; then
-        line="${keyName}"
-        keyName=""
+      yaml_extractFirstQuotedTextFromLine
+      log::debug "line after extraction: ${line@Q}, REPLY: ${REPLY@Q}"
+      if [[ ${line} == "${firstChar}"* ]]; then
+        # the quote is closed
+        log::debug "quote closed"
+        isQuoteOpen=false
+        line="${line:1}"
       else
-        line="${line:${#keyName}}"
+        # unclosed quote
+        log::debug "quote is not closed!"
+        isQuoteOpen=true
       fi
+    elif [[ ${line} == *": "* ]]; then
+      REPLY="${line%%: *}"
+      line="${line:${#REPLY}}"
     elif [[ ${line} == *: ]]; then
-      keyName="${line%%:*}"
-      line="${line:${#keyName}}"
-      # trim end spaces
-      keyName="${keyName%"${keyName##*[^[:space:]]}"}"
+      REPLY="${line%:}"
+      line=":"
     else
-      keyName="${line%%: *}"
-      # log::info "${line:${#keyName}:1} ${line@Q} at ${#keyName}"
-      if [[ ${line:${#keyName}:1} != ":" ]]; then
-        line="${keyName}"
-        keyName=""
-      else
-        line="${line:${#keyName}}"
-        # trim end spaces
-        keyName="${keyName%"${keyName##*[^[:space:]]}"}"
+      REPLY="${line}"
+      line=""
+    fi
+    log::debug "line after 1st round: ${line@Q}, REPLY: ${REPLY@Q}"
+
+    # FIXME: ACT on quote open
+
+    # trim end spaces
+    keyName="${REPLY%"${REPLY##*[^[:space:]]}"}"
+
+    if [[ ${line} == ":"* ]]; then
+      # register keyname
+      if [[ (${firstChar} == [\'\"] && -z ${keyName}) || ${keyName} == *[\.\[]* ]]; then
+        # key was quoted and need to be re-quoted
+        keyName="\"${keyName}\""
+      elif [[ -z ${keyName} ]]; then
+        yaml_addParsingError "bad indentation of a mapping entry ${line@Q} (contains a ': ' but no key name)"
       fi
-    fi
 
-    # unquote keyname and re quote it if needed
-    if [[ ${keyName:0:1} == \" && ${keyName: -1} == \" ]]; then
-      keyName="${keyName:1:-1}"
-    elif [[ ${keyName:0:1} == \' && ${keyName: -1} == \' ]]; then
-      keyName="${keyName:1:-1}"
-    fi
-    if [[ ${keyName} == *[![:word:]]* ]]; then
-      keyName="\"${keyName}\""
-    fi
+      line="${line#:}"
+      # trim beginning spaces
+      line="${line#"${line%%[^[:space:]]*}"}"
 
-    # remove comment and handle quoted values
-    value="${line#:}"
-    value="${value#"${value%%[^[:space:]]*}"}"
-    if [[ ${value:0:1} == \' ]]; then
-      value="${value:1}"
-      value="${value//\'\'/$'\a'}"
-      value="${value%%\'*}"
-      value="${value//$'\a'/\'}"
-    elif [[ ${value:0:1} == \" ]]; then
-      value="${value:1}"
-      value="${value//\\\"/$'\a'}"
-      value="${value%%\"*}"
-      value="${value//$'\a'/\"}"
-      # in a double quoted value, we also want to convert \n, \t, \uXXXX... to their actual value
-      eval "value=$'${value//\'/\\\'}'"
+      firstChar="${line:0:1}"
+      if [[ ${firstChar} == [\'\"] ]]; then
+        yaml_extractFirstQuotedTextFromLine
+        log::debug "line after extraction of value: ${line@Q}, REPLY: ${REPLY@Q}"
+        if [[ ${line} == "${firstChar}"* ]]; then
+          # the quote is closed
+          log::debug "quote closed"
+          isQuoteOpen=false
+          line="${line:1}"
+        else
+          # unclosed quote
+          log::debug "quote is not closed!"
+          isQuoteOpen=true
+        fi
+        value="${REPLY}"
+      else
+        value="${line}"
+      fi
     else
-      value="${value%% \#*}"
-      if [[ ${value:0:1} == \# ]]; then
+      firstChar=""
+      value="${keyName}"
+      keyName=""
+    fi
+
+    # FIXME: ACT on quote open
+
+    if [[ ${firstChar} == [\'\"] ]]; then
+      # check that the remaining line after the ending quote is empty or a comment, otherwise it's a syntax error
+      line="${line#"${line%%[^[:space:]]*}"}"
+      if [[ -n ${line} && ${line} != \#* ]]; then
+        yaml_addParsingError "syntax error for ${line@Q}"
+      fi
+    else
+      # remove trailing comments and spaces
+      if [[ ${value} == \#* ]]; then
         value=""
       else
+        value="${value%% \#*}"
         # trim ending spaces
         value="${value%"${value##*[^[:space:]]}"}"
       fi
     fi
 
-    log::debug "line: ${lineNumber}, key: ⌜${keyName}⌝, value: ⌜${value}⌝, line ⌜${line}⌝"
+    log::debug "line: ${lineNumber}, key: ${keyName@Q}, value: ${value@Q}, line ${line@Q}"
 
     if [[ ${isArrayItemStart} != "true" && -z ${keyName} && -z ${value} ]]; then
       # empty line
@@ -270,18 +302,20 @@ function yaml::parseFile() {
       lastIndentLevel=${keyIndentLevels[-1]}
     fi
     if ((${#keyIndentLevels[@]} == 0 && indentLevel <= 4 + arrayExtraIndentLevel)); then
+      # case of a new key at the root level
       indentLevelIndex=0
     elif ((indentLevel == lastIndentLevel)); then
       # case of a new key at the same level as the previous key
       indentLevelIndex=$((${#keyIndentLevels[@]} - 1))
+      if [[ ${isKeyWithoutValue} == "true" ]]; then
+        # the previous key add a null value
+        REPLY_MAP["${fullKey}"]="null"
+        isKeyWithoutValue=false
+      fi
     elif ((indentLevel > lastIndentLevel - arrayExtraIndentLevel)); then
       # case of a new key at a deeper level than the previous key
       if ((indentLevel > lastIndentLevel + 4 + arrayExtraIndentLevel)); then
-        REPLY_CODE=1
-        REPLY+="${errorPrefix} at line ${lineNumber}: too much indentation (expected at most $((lastIndentLevel + 4)))."
-        if [[ ${noFail} != "true" ]]; then
-          core::fail "${REPLY}"
-        fi
+        yaml_addParsingError "too much indentation (expected at most $((lastIndentLevel + 4)))."
         continue
       fi
       indentLevelIndex=${#keyIndentLevels[@]}
@@ -290,12 +324,7 @@ function yaml::parseFile() {
       # the current indent level must be in the keyIndentLevels array, otherwise it's an invalid YAML file
       keyIndentLevelsFlatten=".${keyIndentLevels[*]}."
       if [[ ${keyIndentLevelsFlatten} != *".${indentLevel}."* ]]; then
-        REPLY_CODE=1
-        IFS=","
-        REPLY+="${errorPrefix} at line ${lineNumber}: invalid indentation (expected one of (${keyIndentLevels[*]}) but got ${indentLevel})."
-        if [[ ${noFail} != "true" ]]; then
-          core::fail "${REPLY}"
-        fi
+        yaml_addParsingError "invalid indentation (expected one of (${keyIndentLevels[*]}) but got ${indentLevel})."
         continue
       fi
       keyIndentLevelsFlatten="${keyIndentLevelsFlatten%".${indentLevel}."*}"
@@ -303,9 +332,16 @@ function yaml::parseFile() {
       indentLevelIndex=${#keyIndentLevelsFlatten}
       keyIndentLevelsFlatten="${keyIndentLevelsFlatten//"."/}"
       indentLevelIndex=$((indentLevelIndex - ${#keyIndentLevelsFlatten}))
+      if [[ ${isKeyWithoutValue} == "true" ]]; then
+        # the previous key add a null value
+        REPLY_MAP["${fullKey}"]="null"
+        isKeyWithoutValue=false
+      fi
     fi
 
-    # printf "%2s: indentLevel %2s indentLevelIndex %2s | %-20s | %-20s | %s\n" "${lineNumber}" "${indentLevel}" "${indentLevelIndex}" "${keyIndentLevels[*]}" "${keyName}" "${value}"
+    if log::isDebugEnabled; then
+      printf "%2s: indentLevel %2s indentLevelIndex %2s | %-20s | %-20s | %s\n" "${lineNumber}" "${indentLevel}" "${indentLevelIndex}" "${keyIndentLevels[*]}" "${keyName}" "${value}"
+    fi
 
     # prepend the keyName with the current array index if we are in an array
     if [[ ${isArrayItemStart} == "true" ]]; then
@@ -329,9 +365,11 @@ function yaml::parseFile() {
       keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
       keyName="${keyName%.}"
 
-      while [[ ${line#"${line%%[^[:space:]]*}"} == "- "* ]]; do
+      log::debug "array start: keyName: ${keyName@Q}, keyPaths: ${keyPaths[*]@Q}, arrayIndexes: ${arrayIndexes[*]@Q}, indentLevelIndex: ${indentLevelIndex}, arrayIndex: ${arrayIndex}"
+
+      while [[ ${value#"${value%%[^[:space:]]*}"} == "- "* ]]; do
         # case of an array within an array (e.g. `- - item1`)
-        indent="${line%%"- "*}"
+        indent="${value%%"- "*}"
         keyPaths=("${keyPaths[@]:0:indentLevelIndex}" "${keyName}")
         arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" 0)
         keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
@@ -345,9 +383,9 @@ function yaml::parseFile() {
         fullKey="${fullKey//'.['/'['}"
         REPLY_MAP["${fullKey}"]="1"
 
-        line="${line#"${indent}- "}"
-        value="${value#"${value%%[^[:space:]]*}"}"
-        value="${value#- }"
+        value="${value#"${indent}- "}"
+
+        log::debug "array within array: keyName: ${keyName@Q}, keyPaths: ${keyPaths[*]@Q}, arrayIndexes: ${arrayIndexes[*]@Q}, indentLevelIndex: ${indentLevelIndex}, arrayIndex: ${arrayIndex}"
       done
     else
       arrayIndex=$((indentLevelIndex - 1))
@@ -358,7 +396,7 @@ function yaml::parseFile() {
       fi
     fi
 
-    log::debug "line: ${lineNumber}, key: ⌜${keyName}⌝, value: ⌜${value}⌝, line ⌜${line}⌝"
+    log::debug "value: ${value@Q}, keyName: ${keyName@Q}, isArrayItemStart: ${isArrayItemStart}, firstChar: ${firstChar@Q}"
 
     # determine what the current line represents
     if [[ ${value} == [\>\|]* ]]; then
@@ -389,12 +427,8 @@ function yaml::parseFile() {
       fi
       value=""
 
-    elif [[ ${line} == ': '* && (-n ${value} || ${line} == ': '[\"\'][\"\']*) ]]; then
+    elif [[ -n ${keyName} && (-n ${value} || ${firstChar} == [\'\"]) ]]; then
       # a scalar value
-      :
-
-    elif [[ ${line} == ':'* && -z ${value} ]]; then
-      # start of an object or array
       :
 
     elif [[ ${isArrayItemStart} == "true" && ${keyName} == *']' && -n ${value} ]]; then
@@ -405,20 +439,19 @@ function yaml::parseFile() {
       # case of the start of an array (line contains only "-")
       arrayExtraIndentLevelResetValue=2
 
+    elif [[ -n ${keyName} && -z ${value} ]]; then
+      # start of an object or array
+      :
+
     elif [[ -z ${keyName} && -n ${value} && ${#keyPaths[@]} -eq 0 ]]; then
-      # a simple scalar value
+      # the doc contains only a simple scalar value
       fullKey="${docPrefix%.}"
       REPLY_MAP["${fullKey:-"@[${docNumber}]"}"]="${value}"
       continue
 
     else
       # invalid line
-      REPLY_CODE=1
-      IFS=' '
-      REPLY+="${errorPrefix} at line ${lineNumber}: not a valid YAML line. level: ${indentLevel}, line: ⌜${line}⌝, keyName: ⌜${keyName}⌝, value: ⌜${value}⌝, keyPaths: ⌜${keyPaths[*]}⌝, isArrayItemStart: ${isArrayItemStart}, arrayIndexes: ⌜${arrayIndexes[*]}⌝."
-      if [[ ${noFail} != "true" ]]; then
-        core::fail "${REPLY}"
-      fi
+      yaml_addParsingError "invalid line ${line@Q}, level ${indentLevel}, keyName: ${keyName@Q}, value: ${value@Q}, keyPaths: ${keyPaths[*]@Q}, isArrayItemStart: ${isArrayItemStart}, arrayIndexes: ${arrayIndexes[*]@Q}"
       continue
     fi
 
@@ -427,14 +460,17 @@ function yaml::parseFile() {
     keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
 
     if log::isDebugEnabled; then
-      printf "%2s: %50s | %20s | %s\n" "${lineNumber}" "${keyPaths[*]}" "${keyIndentLevels[*]}" "${arrayIndexes[*]}"
+      printf "%2s: %50s | %20s | %s\n\n" "${lineNumber}" "${keyPaths[*]}" "${keyIndentLevels[*]}" "${arrayIndexes[*]}"
     fi
 
     fullKey="${keyPaths[*]}"
     fullKey="${docPrefix}${fullKey#.}"
     fullKey="${fullKey//'.['/'['}"
-    if [[ -n ${value} ]]; then
+    if [[ -n ${value} || ${firstChar} == [\'\"] ]]; then
       REPLY_MAP["${fullKey}"]="${value}"
+      isKeyWithoutValue=false
+    else
+      isKeyWithoutValue=true
     fi
 
   done <"${path}"
@@ -447,8 +483,40 @@ function yaml::parseFile() {
     fi
     # shellcheck disable=SC2034
     REPLY_MAP["${fullKey:-"@[${docNumber}]"}"]="${value}"
+  elif [[ ${isKeyWithoutValue} == "true" ]]; then
+    # the previous key add a null value
+    REPLY_MAP["${fullKey:-"@[${docNumber}]"}"]="null"
   fi
 
   # shellcheck disable=SC2034
   REPLY_MAP["@.length"]="${docNumber}"
+
+  REPLY_CODE=${replyCode}
+  REPLY="${errors}"
+}
+
+function yaml_extractFirstQuotedTextFromLine() {
+  if [[ ${line} == \'* ]]; then
+    line="${line:1}"
+    line="${line//\'\'/$'\a'}"
+    REPLY="${line%%\'*}"
+    REPLY="${REPLY//$'\a'/\'}"
+    line="${line:${#REPLY}}"
+  else
+    line="${line:1}"
+    line="${line//\\\"/$'\a'}"
+    REPLY="${line%%\"*}"
+    REPLY="${REPLY//$'\a'/\"}"
+    line="${line:${#REPLY}}"
+    # in a double quoted value, we also want to convert \n, \t, \uXXXX... to their actual value
+    eval "REPLY=$'${REPLY//\'/\\\'}'"
+  fi
+}
+
+function yaml_addParsingError() {
+  replyCode=1
+  errors+="${errorPrefix} at line ${lineNumber}: ${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}."
+  if [[ ${noFail} != "true" ]]; then
+    core::fail "${errors}"
+  fi
 }
