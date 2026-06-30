@@ -300,7 +300,6 @@ function yaml::parseFile() {
           value="${line}"
         fi
       else
-        firstChar=""
         value="${keyName}"
         keyName=""
       fi
@@ -406,33 +405,44 @@ function yaml::parseFile() {
 
       log::debug "array start: keyName: ${keyName@Q}, keyPaths: ${keyPaths[*]@Q}, arrayIndexes: ${arrayIndexes[*]@Q}, indentLevelIndex: ${indentLevelIndex}, arrayIndex: ${arrayIndex}"
 
-      while [[ ${value#"${value%%[^[:space:]]*}"} == "- "* ]]; do
-        # case of an array within an array (e.g. `- - item1`)
-        indent="${value%%"- "*}"
-        keyPaths=("${keyPaths[@]:0:indentLevelIndex}" "${keyName}")
-        arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" 0)
-        keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
-        indentLevel+=$((${#indent} + 2))
-        indentLevelIndex+=1
-        keyName="[0]"
+      if [[ ${firstChar} != [\'\"] ]]; then
+        if [[ ${value} == *"-" ]]; then
+          value+=" "
+        fi
 
-        # store the array length in the associative array with key (array).length
-        fullKey="${keyPaths[*]}.length"
-        fullKey="${docPrefix}${fullKey#.}"
-        fullKey="${fullKey//'.['/'['}"
-        REPLY_MAP["${fullKey}"]="1"
+        while [[ ${value#"${value%%[^[:space:]]*}"} == "- "* ]]; do
+          # case of an array within an array (e.g. `- - item1`)
+          indent="${value%%"- "*}"
+          keyPaths=("${keyPaths[@]:0:indentLevelIndex}" "${keyName}")
+          arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" 0)
+          keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
+          indentLevel+=$((${#indent} + 2))
+          indentLevelIndex+=1
+          keyName="[0]"
 
-        value="${value#"${indent}- "}"
+          # store the array length in the associative array with key (array).length
+          fullKey="${keyPaths[*]}.length"
+          fullKey="${docPrefix}${fullKey#.}"
+          fullKey="${fullKey//'.['/'['}"
+          REPLY_MAP["${fullKey}"]="1"
 
-        log::debug "array within array: keyName: ${keyName@Q}, keyPaths: ${keyPaths[*]@Q}, arrayIndexes: ${arrayIndexes[*]@Q}, indentLevelIndex: ${indentLevelIndex}, arrayIndex: ${arrayIndex}"
-      done
+          value="${value#"${indent}- "}"
+          if [[ ${value} == *"-" ]]; then
+            value+=" "
+          fi
+
+          log::debug "array within array: keyName: ${keyName@Q}, keyPaths: ${keyPaths[*]@Q}, arrayIndexes: ${arrayIndexes[*]@Q}, indentLevelIndex: ${indentLevelIndex}, arrayIndex: ${arrayIndex}"
+        done
+      fi
     else
       arrayIndex=$((indentLevelIndex - 1))
+      log::debug "arrayIndex: ${arrayIndex}, arrayIndexes: ${arrayIndexes[*]@Q}, keyName: ${keyName@Q}"
       if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] >= 0)); then
         # case of a new key inside an object inside an array
         keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
         keyName="${keyName%.}"
       fi
+      log::debug "keyName after arrayIndex: ${keyName@Q}"
     fi
 
     log::debug "value: ${value@Q}, keyName: ${keyName@Q}, isArrayItemStart: ${isArrayItemStart}, firstChar: ${firstChar@Q}"
@@ -498,15 +508,25 @@ function yaml::parseFile() {
       REPLY_MAP["${fullKey:-"@[${docNumber}]"}"]="${value}"
       continue
 
+    elif [[ -z ${keyName} && ${isKeyWithoutValue} == "true" && -n ${value} ]]; then
+      # case of a key without value followed by a scalar value on the next line
+      :
+
     else
       # invalid line
       yaml_addParsingError "invalid line ${line@Q}, level ${indentLevel}, keyName: ${keyName@Q}, value: ${value@Q}, keyPaths: ${keyPaths[*]@Q}, isArrayItemStart: ${isArrayItemStart}, arrayIndexes: ${arrayIndexes[*]@Q}"
       continue
     fi
 
-    keyPaths=("${keyPaths[@]:0:indentLevelIndex}" "${keyName}")
-    arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" -1)
-    keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
+    if [[ -z ${keyName} && ${isKeyWithoutValue} == "true" ]]; then
+      keyPaths=("${keyPaths[@]:0:indentLevelIndex}")
+      arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}")
+      keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}")
+    else
+      keyPaths=("${keyPaths[@]:0:indentLevelIndex}" "${keyName}")
+      arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" -1)
+      keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
+    fi
 
     if log::isDebugEnabled; then
       printf "%2s: %50s | %20s | %s\n\n" "${lineNumber}" "${keyPaths[*]}" "${keyIndentLevels[*]}" "${arrayIndexes[*]}"

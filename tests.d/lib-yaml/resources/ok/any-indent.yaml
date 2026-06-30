@@ -1,6 +1,7 @@
 normal:
   - item    : Super Hoop
-    quantity: 1
+    quantity:
+     1
   - >
    Sammy Sosa completed another
    fine season with great stats.
@@ -29,7 +30,8 @@ key:
     arr:
       - 1
       - 2
-      - 3
+      -
+         3
     arr2:
      - 1
      - 2

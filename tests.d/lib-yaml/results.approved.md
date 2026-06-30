@@ -9,7 +9,8 @@
 ```text
 normal:
   - item    : Super Hoop
-    quantity: 1
+    quantity:
+     1
   - >
    Sammy Sosa completed another
    fine season with great stats.
@@ -38,7 +39,8 @@ key:
     arr:
       - 1
       - 2
-      - 3
+      -
+         3
     arr2:
      - 1
      - 2
@@ -481,8 +483,13 @@ line two
   - k: v
   -        - a
            - b
+  -   -
+       key: ok
+  - -
+       1
   - 2
 - 1
+- "- not an array"
 ```
 
 ❯ `yaml::parseFile resources/ok/single-line-nested-arrays.yaml`
@@ -494,15 +501,20 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['@.length']='0'
-['[0].length']='4'
+['[0].length']='6'
 ['[0][0]']='baz'
 ['[0][1].k']='v'
 ['[0][2].length']='2'
 ['[0][2][0]']='a'
 ['[0][2][1]']='b'
-['[0][3]']='2'
+['[0][3].length']='1'
+['[0][3][0].key']='ok'
+['[0][4].length']='1'
+['[0][4][0]']='1'
+['[0][5]']='2'
 ['[1]']='1'
-['length']='2'
+['[2]']='- not an array'
+['length']='3'
 )
 ```
 
@@ -622,15 +634,20 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['@.length']='0'
-['@[0].length']='2'
-['@[0][0].length']='4'
+['@[0].length']='3'
+['@[0][0].length']='6'
 ['@[0][0][0]']='baz'
 ['@[0][0][1].k']='v'
 ['@[0][0][2].length']='2'
 ['@[0][0][2][0]']='a'
 ['@[0][0][2][1]']='b'
-['@[0][0][3]']='2'
+['@[0][0][3].length']='1'
+['@[0][0][3][0].key']='ok'
+['@[0][0][4].length']='1'
+['@[0][0][4][0]']='1'
+['@[0][0][5]']='2'
 ['@[0][1]']='1'
+['@[0][2]']='- not an array'
 )
 ```
 

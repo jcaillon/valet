@@ -2,5 +2,10 @@
   - k: v
   -        - a
            - b
+  -   -
+       key: ok
+  - -
+       1
   - 2
 - 1
+- "- not an array"
