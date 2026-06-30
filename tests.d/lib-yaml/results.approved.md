@@ -60,14 +60,21 @@ REPLY_MAP=(
 ['key.1indent.now2.arr.length']='3'
 ['key.1indent.now2.arr2.length']='3'
 ['key.1indent.now2.arr2[0]']='1'
+['key.1indent.now2.arr2[0].tag']='!!int'
 ['key.1indent.now2.arr2[1]']='2'
+['key.1indent.now2.arr2[1].tag']='!!int'
 ['key.1indent.now2.arr2[2]']='3'
+['key.1indent.now2.arr2[2].tag']='!!int'
 ['key.1indent.now2.arr[0]']='1'
+['key.1indent.now2.arr[0].tag']='!!int'
 ['key.1indent.now2.arr[1]']='2'
+['key.1indent.now2.arr[1].tag']='!!int'
 ['key.1indent.now2.arr[2]']='3'
+['key.1indent.now2.arr[2].tag']='!!int'
 ['normal.length']='7'
 ['normal[0].item']='Super Hoop'
 ['normal[0].quantity']='1'
+['normal[0].quantity.tag']='!!int'
 ['normal[1]']='Sammy Sosa completed another fine season with great stats.
 
   63 Home Runs
@@ -76,7 +83,9 @@ REPLY_MAP=(
 What a year!
 '
 ['normal[2].avg']='0.278'
+['normal[2].avg.tag']='!!float'
 ['normal[2].hr']='65'
+['normal[2].hr.tag']='!!int'
 ['normal[2].name']='Mark McGwire'
 ['normal[3]']=' explicit
 '
@@ -85,6 +94,7 @@ What a year!
 ['normal[5]']='  explicit
 '
 ['normal[6].key']='1'
+['normal[6].key.tag']='!!int'
 )
 ```
 
@@ -167,6 +177,8 @@ REPLY_MAP=(
 null   key   :
 k:
    null:
+nullkeybeforenewdoc:
+---
 nullkeyattheend:
 ```
 
@@ -178,10 +190,15 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
+['@.length']='2'
+['@[1].nullkeyattheend']='null'
+['@[1].nullkeyattheend.tag']='!!null'
 ['k.null']='null'
+['k.null.tag']='!!null'
 ['null   key']='null'
-['nullkeyattheend']='null'
+['null   key.tag']='!!null'
+['nullkeybeforenewdoc']='null'
+['nullkeybeforenewdoc.tag']='!!null'
 )
 ```
 
@@ -231,12 +248,14 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['""']='null'
+['"".tag']='!!null'
 ['@.length']='1'
 ['empty']=''
 ['k']='word1 word2" word3'
 ['k2']='line1
 line2'
 ['key  with colons   ::']='null'
+['key  with colons   ::.tag']='!!null'
 ['key with spaces']='ok'
 ['nested.arr.length']='2'
 ['nested.arr[0]']='
@@ -405,6 +424,7 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['"num[0].key"']='1'
+['"num[0].key".tag']='!!int'
 ['@.length']='1'
 ['arr.length']='2'
 ['arr[0]']='thing'
@@ -422,19 +442,27 @@ second line
 ['nested.arr[0].array[0]']='thing'
 ['nested.arr[0].array[1].arr.length']='2'
 ['nested.arr[0].array[1].arr[0]']='1'
+['nested.arr[0].array[1].arr[0].tag']='!!int'
 ['nested.arr[0].array[1].arr[1]']='2'
+['nested.arr[0].array[1].arr[1].tag']='!!int'
 ['nested.arr[0].name']='obj1'
 ['nested.arr[0].value']='123'
+['nested.arr[0].value.tag']='!!int'
 ['nested.arr[1].name']='obj2'
 ['nested.arr[1].properties.length']='2'
 ['nested.arr[1].properties[0]']='1'
+['nested.arr[1].properties[0].tag']='!!int'
 ['nested.arr[1].properties[1]']='2'
+['nested.arr[1].properties[1].tag']='!!int'
 ['nested.arr[1].value']='456'
+['nested.arr[1].value.tag']='!!int'
 ['nested.arr[2]']='coucou text'
 ['nested.arr[3]']='nom mais allo'
 ['nested.thing']='true'
+['nested.thing.tag']='!!bool'
 ['num.length']='1'
 ['num[0].key']='2'
+['num[0].key.tag']='!!int'
 ['strings.content']='Or we
 
 
@@ -448,6 +476,7 @@ to save space'
 line2	unicode:❤'
 ['strings.empty']=''
 ['strings.empty2']='null'
+['strings.empty2.tag']='!!null'
 ['strings.folded']='
 a
 
@@ -512,8 +541,11 @@ REPLY_MAP=(
 ['[0][3][0].key']='ok'
 ['[0][4].length']='1'
 ['[0][4][0]']='1'
+['[0][4][0].tag']='!!int'
 ['[0][5]']='2'
+['[0][5].tag']='!!int'
 ['[1]']='1'
+['[1].tag']='!!int'
 ['[2]']='- not an array'
 ['length']='3'
 )
@@ -604,6 +636,116 @@ REPLY_MAP=(
 )
 ```
 
+> cat `resources/ok/tags.yaml`
+
+```text
+%YAML 1.2
+%TAG !e! tag:example.com,2000:app/
+# https://perlpunk.github.io/yaml-test-schema/schemas.html
+---
+bool: # !!bool
+  b: false # true | True | TRUE | false | False | FALSE
+custom:
+  application specific tag:      !e!tag     |
+    The semantics of the tag
+    above may be different for
+    different documents.
+  picture:   !!binary    xxxx
+explicitTypes:
+  - ! 123
+  - !!str    "123"
+  - !!int "123"
+  -
+    !!float
+    "123.45"
+  -    !!bool   "true"
+  - !!null
+float: # !!float
+  scientific: 1.23015e+3
+  exponential: 12.3015e+02
+  fixed: 1230.15 # [-+]? ( \. [0-9]+ | [0-9]+ ( \. [0-9]* )? ) ( [eE] [-+]? [0-9]+ )?
+  negative infinity: -.inf # [-+]? \. ( inf | Inf | INF )
+  not a number: .nan # \. ( nan | NaN |NAN )
+int: # !!int
+  octal: 0o14 # 0o [0-7]+
+  signed: +12345 # [-+]? [0-9]+
+  signed2: -9
+  baseten: 78
+  hexadecimal: 0xC # 0x [0-9a-fA-F]+
+null: # !!null
+  null:
+  null2: null # null | Null | NULL | ~
+  null3: ~
+string: # !!str
+  anythingElse: ergezrg
+  notFloat: 123.456.345
+  s:
+    !
+    example
+
+```
+
+❯ `yaml::parseFile resources/ok/tags.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['@.length']='1'
+['bool.b']='false'
+['bool.b.tag']='!!bool'
+['custom.application specific tag']='The semantics of the tag
+above may be different for
+different documents.
+'
+['custom.application specific tag.tag']='!e!tag'
+['custom.picture']='xxxx'
+['custom.picture.tag']='!!binary'
+['explicitTypes.length']='6'
+['explicitTypes[0]']='123'
+['explicitTypes[1]']='123'
+['explicitTypes[2]']='123'
+['explicitTypes[2].tag']='!!int'
+['explicitTypes[3]']='123.45'
+['explicitTypes[3].tag']='!!float'
+['explicitTypes[4]']='true'
+['explicitTypes[4].tag']='!!bool'
+['explicitTypes[5]']='null'
+['explicitTypes[5].tag']='!!null'
+['float.exponential']='12.3015e+02'
+['float.exponential.tag']='!!float'
+['float.fixed']='1230.15'
+['float.fixed.tag']='!!float'
+['float.negative infinity']='-.inf'
+['float.negative infinity.tag']='!!float'
+['float.not a number']='.nan'
+['float.not a number.tag']='!!float'
+['float.scientific']='1.23015e+3'
+['float.scientific.tag']='!!float'
+['int.baseten']='78'
+['int.baseten.tag']='!!int'
+['int.hexadecimal']='0xC'
+['int.hexadecimal.tag']='!!int'
+['int.octal']='0o14'
+['int.octal.tag']='!!int'
+['int.signed']='+12345'
+['int.signed.tag']='!!int'
+['int.signed2']='-9'
+['int.signed2.tag']='!!int'
+['null.null']='null'
+['null.null.tag']='!!null'
+['null.null2']='null'
+['null.null2.tag']='!!null'
+['null.null3']='~'
+['null.null3.tag']='!!null'
+['string.anythingElse']='ergezrg'
+['string.notFloat']='123.456.345'
+['string.s']='example'
+)
+```
+
 > cat `resources/ok/tricky.yaml`
 
 ```text
@@ -676,8 +818,11 @@ REPLY_MAP=(
 ['@[0][0][3][0].key']='ok'
 ['@[0][0][4].length']='1'
 ['@[0][0][4][0]']='1'
+['@[0][0][4][0].tag']='!!int'
 ['@[0][0][5]']='2'
+['@[0][0][5].tag']='!!int'
 ['@[0][1]']='1'
+['@[0][1].tag']='!!int'
 ['@[0][2]']='- not an array'
 )
 ```
@@ -695,14 +840,21 @@ REPLY_MAP=(
 ['@[0].key.1indent.now2.arr.length']='3'
 ['@[0].key.1indent.now2.arr2.length']='3'
 ['@[0].key.1indent.now2.arr2[0]']='1'
+['@[0].key.1indent.now2.arr2[0].tag']='!!int'
 ['@[0].key.1indent.now2.arr2[1]']='2'
+['@[0].key.1indent.now2.arr2[1].tag']='!!int'
 ['@[0].key.1indent.now2.arr2[2]']='3'
+['@[0].key.1indent.now2.arr2[2].tag']='!!int'
 ['@[0].key.1indent.now2.arr[0]']='1'
+['@[0].key.1indent.now2.arr[0].tag']='!!int'
 ['@[0].key.1indent.now2.arr[1]']='2'
+['@[0].key.1indent.now2.arr[1].tag']='!!int'
 ['@[0].key.1indent.now2.arr[2]']='3'
+['@[0].key.1indent.now2.arr[2].tag']='!!int'
 ['@[0].normal.length']='7'
 ['@[0].normal[0].item']='Super Hoop'
 ['@[0].normal[0].quantity']='1'
+['@[0].normal[0].quantity.tag']='!!int'
 ['@[0].normal[1]']='Sammy Sosa completed another fine season with great stats.
 
   63 Home Runs
@@ -711,7 +863,9 @@ REPLY_MAP=(
 What a year!
 '
 ['@[0].normal[2].avg']='0.278'
+['@[0].normal[2].avg.tag']='!!float'
 ['@[0].normal[2].hr']='65'
+['@[0].normal[2].hr.tag']='!!int'
 ['@[0].normal[2].name']='Mark McGwire'
 ['@[0].normal[3]']=' explicit
 '
@@ -720,6 +874,7 @@ What a year!
 ['@[0].normal[5]']='  explicit
 '
 ['@[0].normal[6].key']='1'
+['@[0].normal[6].key.tag']='!!int'
 )
 ```
 

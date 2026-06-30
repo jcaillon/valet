@@ -6,6 +6,8 @@
 source fs
 # shellcheck source=lib-string
 source string
+# shellcheck source=lib-bash
+source bash
 
 # ## yaml::parseFile
 #
@@ -75,13 +77,16 @@ function yaml::parseFile() {
   shift 1
   eval "local a= ${*@Q}"
 
+  # ignore case
+  bash::setShellOption nocasematch
+
   REPLY_MAP=()
 
   local replyCode=0 \
     errors=""
 
   # variables that carry over each loop iteration
-  local isMultilineValue=false isQuoteOpen=false
+  local isMultilineValue=false isQuoteOpen=false valueTag=""
   local -i arrayExtraIndentLevelResetValue=0
 
   # keyPaths keeps track of the current path in the YAML file.
@@ -155,7 +160,7 @@ function yaml::parseFile() {
         log::debug "quote closed"
         isQuoteOpen=false
 
-        REPLY_MAP["${fullKey}"]="${value}"
+        yaml_saveValue
         isKeyWithoutValue=false
       fi
       continue
@@ -196,7 +201,7 @@ function yaml::parseFile() {
       if [[ ${multilineTrimEnd} != "true" ]]; then
         value+="${multiLinesCumulatedLf}"
       fi
-      REPLY_MAP["${fullKey}"]="${value}"
+      yaml_saveValue
       isKeyWithoutValue=false
     fi
 
@@ -208,6 +213,11 @@ function yaml::parseFile() {
 
     # new doc
     if [[ ${line} == "---"* ]]; then
+      if [[ ${isKeyWithoutValue} == "true" ]]; then
+        # the previous key add a null value
+        yaml_saveNullValue
+        isKeyWithoutValue=false
+      fi
       if ((${#keyPaths[@]} > 0)); then
         docNumber+=1
       fi
@@ -215,6 +225,7 @@ function yaml::parseFile() {
       keyIndentLevels=()
       arrayIndexes=()
       arrayExtraIndentLevelResetValue=0
+      valueTag=""
       if [[ ${prefixFirstDoc} == "true" || ${docNumber} -gt 0 ]]; then
         docPrefix="@[${docNumber}]."
       fi
@@ -232,6 +243,18 @@ function yaml::parseFile() {
       arrayExtraIndentLevel=${arrayExtraIndentLevelResetValue}
       arrayExtraIndentLevelResetValue=0
       isArrayItemStart=false
+    fi
+
+    # handle tags
+    if [[ ${line#"${line%%[^[:space:]]*}"} == "!"* ]]; then
+      # begins with an explicit tag !
+      line="${line#"${line%%[^[:space:]]*}"}"
+
+      valueTag="${line%%[[:space:]]*}"
+      line="${line:${#valueTag}}"
+      line="${line#"${line%%[^[:space:]]*}"}"
+    elif [[ ${isKeyWithoutValue} != true ]]; then
+      valueTag=""
     fi
 
     # extract the key name and value, there can be only a value with no key name
@@ -285,6 +308,16 @@ function yaml::parseFile() {
         # trim beginning spaces
         line="${line#"${line%%[^[:space:]]*}"}"
 
+        # handle tags
+        if [[ ${line} == "!"* ]]; then
+          # explicit tag
+          valueTag="${line%%[[:space:]]*}"
+          line="${line:${#valueTag}}"
+          line="${line#"${line%%[^[:space:]]*}"}"
+        else
+          valueTag=""
+        fi
+
         firstChar="${line:0:1}"
         if [[ ${firstChar} == [\'\"] ]]; then
           yaml_extractFirstQuotedTextFromLine
@@ -328,9 +361,13 @@ function yaml::parseFile() {
             # trim ending spaces
             value="${value%"${value##*[^[:space:]]}"}"
           fi
+          # not a quoted value, we possibly need to compute a tag
+          if [[ -z ${valueTag} ]]; then
+            yaml_computeValueTag
+          fi
         fi
 
-        log::debug "line: ${lineNumber}, key: ${keyName@Q}, value: ${value@Q}, line ${line@Q}"
+        log::debug "line: ${lineNumber}, key: ${keyName@Q}, tag: ${valueTag@Q}, value: ${value@Q}, line ${line@Q}"
 
         if [[ ${isArrayItemStart} != "true" && -z ${keyName} && -z ${value} ]]; then
           # empty line
@@ -349,10 +386,11 @@ function yaml::parseFile() {
     elif ((indentLevel == lastIndentLevel)); then
       # case of a new key at the same level as the previous key
       indentLevelIndex=$((${#keyIndentLevels[@]} - 1))
-      if [[ ${isKeyWithoutValue} == "true" ]]; then
+      if [[ ${isKeyWithoutValue} == "true" && -n ${keyName} ]]; then
         # the previous key add a null value
-        REPLY_MAP["${fullKey}"]="null"
+        yaml_saveNullValue
         isKeyWithoutValue=false
+        log::debug "valueTag changed1"
       fi
     elif ((indentLevel > lastIndentLevel - arrayExtraIndentLevel)); then
       # case of a new key at a deeper level than the previous key
@@ -374,9 +412,9 @@ function yaml::parseFile() {
       indentLevelIndex=${#keyIndentLevelsFlatten}
       keyIndentLevelsFlatten="${keyIndentLevelsFlatten//"."/}"
       indentLevelIndex=$((indentLevelIndex - ${#keyIndentLevelsFlatten}))
-      if [[ ${isKeyWithoutValue} == "true" ]]; then
+      if [[ ${isKeyWithoutValue} == "true" && -n ${keyName} ]]; then
         # the previous key add a null value
-        REPLY_MAP["${fullKey}"]="null"
+        yaml_saveNullValue
         isKeyWithoutValue=false
       fi
     fi
@@ -509,7 +547,8 @@ function yaml::parseFile() {
     elif [[ -z ${keyName} && -n ${value} && ${#keyPaths[@]} -eq 0 ]]; then
       # the doc contains only a simple scalar value
       fullKey="${docPrefix%.}"
-      REPLY_MAP["${fullKey:-"@[${docNumber}]"}"]="${value}"
+      fullKey="${fullKey:-"@[${docNumber}]"}"
+      yaml_saveValue
       continue
 
     elif [[ -z ${keyName} && ${isKeyWithoutValue} == "true" && -n ${value} ]]; then
@@ -540,7 +579,7 @@ function yaml::parseFile() {
     fullKey="${docPrefix}${fullKey#.}"
     fullKey="${fullKey//'.['/'['}"
     if [[ -n ${value} || ${firstChar} == [\'\"] ]]; then
-      REPLY_MAP["${fullKey}"]="${value}"
+      yaml_saveValue
       isKeyWithoutValue=false
     else
       isKeyWithoutValue=true
@@ -554,18 +593,33 @@ function yaml::parseFile() {
     if [[ ${multilineTrimEnd} != "true" ]]; then
       value+="${multiLinesCumulatedLf}"
     fi
-    # shellcheck disable=SC2034
-    REPLY_MAP["${fullKey:-"@[${docNumber}]"}"]="${value}"
+    fullKey="${fullKey:-"@[${docNumber}]"}"
+    yaml_saveValue
   elif [[ ${isKeyWithoutValue} == "true" ]]; then
     # the previous key add a null value
-    REPLY_MAP["${fullKey:-"@[${docNumber}]"}"]="null"
+    fullKey="${fullKey:-"@[${docNumber}]"}"
+    yaml_saveNullValue
   fi
+
+  bash::restoreShellOption nocasematch
 
   # shellcheck disable=SC2034
   REPLY_MAP["@.length"]="$((docNumber + 1))"
 
   REPLY_CODE=${replyCode}
   REPLY="${errors}"
+}
+
+function yaml_saveValue() {
+  REPLY_MAP["${fullKey}"]="${value}"
+  if [[ -n ${valueTag} && ${valueTag} != "!!str" && ${valueTag} != "!" ]]; then
+    REPLY_MAP["${fullKey}.tag"]="${valueTag}"
+  fi
+}
+
+function yaml_saveNullValue() {
+  REPLY_MAP["${fullKey}"]="null"
+  REPLY_MAP["${fullKey}.tag"]="!!null"
 }
 
 function yaml_extractFirstQuotedTextFromLine() {
@@ -591,5 +645,29 @@ function yaml_addParsingError() {
   errors+="${errorPrefix} at line ${lineNumber}: ${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}."
   if [[ ${noFail} != "true" ]]; then
     core::fail "${errors}"
+  fi
+}
+
+function yaml_computeValueTag() {
+  if [[ ${value} == null || ${value} == '~' ]]; then
+    valueTag="!!null"
+  elif [[ ${value} == true || ${value} == false ]]; then
+    valueTag="!!bool"
+  elif [[ ${value} == [0-9+-.]* ]]; then
+    if [[ ${value} != *[!0-9]* ]]; then
+      valueTag="!!int"
+    elif [[ ${value} == [+-]* && ${value:1} != *[!0-9]* ]]; then
+      valueTag="!!int"
+    elif [[ ${value} == 0o* && ${value:2} != *[!0-7]* ]]; then
+      valueTag="!!int"
+    elif [[ ${value} == 0x* && ${value:2} != *[!0-9a-fA-F]* ]]; then
+      valueTag="!!int"
+    elif [[ ${value} == ".nan" || ${value} == ".inf" ]]; then
+      valueTag="!!float"
+    elif [[ ${value} == [+-]* && ${value:1} == ".inf" ]]; then
+      valueTag="!!float"
+    elif [[ ${value} =~ ^[-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?$ ]]; then
+      valueTag="!!float"
+    fi
   fi
 }

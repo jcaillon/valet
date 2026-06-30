@@ -1,0 +1,43 @@
+%YAML 1.2
+%TAG !e! tag:example.com,2000:app/
+# https://perlpunk.github.io/yaml-test-schema/schemas.html
+---
+bool: # !!bool
+  b: false # true | True | TRUE | false | False | FALSE
+custom:
+  application specific tag:      !e!tag     |
+    The semantics of the tag
+    above may be different for
+    different documents.
+  picture:   !!binary    xxxx
+explicitTypes:
+  - ! 123
+  - !!str    "123"
+  - !!int "123"
+  -
+    !!float
+    "123.45"
+  -    !!bool   "true"
+  - !!null
+float: # !!float
+  scientific: 1.23015e+3
+  exponential: 12.3015e+02
+  fixed: 1230.15 # [-+]? ( \. [0-9]+ | [0-9]+ ( \. [0-9]* )? ) ( [eE] [-+]? [0-9]+ )?
+  negative infinity: -.inf # [-+]? \. ( inf | Inf | INF )
+  not a number: .nan # \. ( nan | NaN |NAN )
+int: # !!int
+  octal: 0o14 # 0o [0-7]+
+  signed: +12345 # [-+]? [0-9]+
+  signed2: -9
+  baseten: 78
+  hexadecimal: 0xC # 0x [0-9a-fA-F]+
+null: # !!null
+  null:
+  null2: null # null | Null | NULL | ~
+  null3: ~
+string: # !!str
+  anythingElse: ergezrg
+  notFloat: 123.456.345
+  s:
+    !
+    example
