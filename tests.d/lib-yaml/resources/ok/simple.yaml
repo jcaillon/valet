@@ -1,5 +1,6 @@
 # comment
 # Keys with special characters
+---
 "key with spaces": value
 "key:with:colons": value
 num[0].key: 1

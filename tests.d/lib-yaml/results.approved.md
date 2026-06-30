@@ -55,7 +55,7 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='0'
+['@.length']='1'
 ['key.1indent.now2.and1again.now4']='v'
 ['key.1indent.now2.arr.length']='3'
 ['key.1indent.now2.arr2.length']='3'
@@ -118,7 +118,7 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='0'
+['@.length']='1'
 ['last']='value'
 ['nested.arr.length']='1'
 ['nested.arr2.length']='2'
@@ -155,9 +155,9 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['@.length']='3'
-['@[1].key']='thing'
-['@[2].key']='thing2'
-['@[3].key']='thing3'
+['@[1].key']='thing2'
+['@[2].key']='thing3'
+['key']='thing'
 )
 ```
 
@@ -178,7 +178,7 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='0'
+['@.length']='1'
 ['k.null']='null'
 ['null   key']='null'
 ['nullkeyattheend']='null'
@@ -231,7 +231,7 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['""']='null'
-['@.length']='0'
+['@.length']='1'
 ['empty']=''
 ['k']='word1 word2" word3'
 ['k2']='line1
@@ -283,7 +283,7 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='0'
+['@.length']='1'
 ['[0].source.name']='argo-cd'
 ['[0].source.repo']='https://argoproj.github.io/argo-helm'
 ['[0].source.version']='9.5.15'
@@ -310,6 +310,7 @@ REPLY_MAP=(
 ```text
 # comment
 # Keys with special characters
+---
 "key with spaces": value
 "key:with:colons": value
 num[0].key: 1
@@ -404,7 +405,7 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['"num[0].key"']='1'
-['@.length']='0'
+['@.length']='1'
 ['arr.length']='2'
 ['arr[0]']='thing'
 ['arr[1]']='stuff:with:colons'
@@ -500,7 +501,7 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='0'
+['@.length']='1'
 ['[0].length']='6'
 ['[0][0]']='baz'
 ['[0][1].k']='v'
@@ -532,7 +533,7 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='0'
+['@.length']='1'
 ['@[0]']='my text'
 )
 ```
@@ -555,7 +556,7 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='0'
+['@.length']='1'
 ['@[0]']='line1
 line2
 
@@ -579,7 +580,7 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='0'
+['@.length']='1'
 ['@[0]']='word1 word2 word3'
 )
 ```
@@ -599,7 +600,37 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['@.length']='1'
-['@[1]']='text'
+['@[0]']='text'
+)
+```
+
+> cat `resources/ok/tricky.yaml`
+
+```text
+k1: "trap: not value" # trap: not value
+k2: 'trap: not value' # trap: not value
+k3: # trap: not value
+  - "- - not an array" # - - not arrays
+  - '- - not an array' # - - not arrays
+  - # - - not arrays
+    "- - not an array"
+```
+
+❯ `yaml::parseFile resources/ok/tricky.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['@.length']='1'
+['k1']='trap: not value'
+['k2']='trap: not value'
+['k3.length']='3'
+['k3[0]']='- - not an array'
+['k3[1]']='- - not an array'
+['k3[2]']='- - not an array'
 )
 ```
 
@@ -633,7 +664,7 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='0'
+['@.length']='1'
 ['@[0].length']='3'
 ['@[0][0].length']='6'
 ['@[0][0][0]']='baz'
@@ -659,7 +690,7 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='0'
+['@.length']='1'
 ['@[0].key.1indent.now2.and1again.now4']='v'
 ['@[0].key.1indent.now2.arr.length']='3'
 ['@[0].key.1indent.now2.arr2.length']='3'

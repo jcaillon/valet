@@ -208,12 +208,16 @@ function yaml::parseFile() {
 
     # new doc
     if [[ ${line} == "---"* ]]; then
-      docNumber+=1
+      if ((${#keyPaths[@]} > 0)); then
+        docNumber+=1
+      fi
       keyPaths=()
       keyIndentLevels=()
       arrayIndexes=()
       arrayExtraIndentLevelResetValue=0
-      docPrefix="@[${docNumber}]."
+      if [[ ${prefixFirstDoc} == "true" || ${docNumber} -gt 0 ]]; then
+        docPrefix="@[${docNumber}]."
+      fi
       line="${line#---}"
       line="${line#"${line%%[^[:space:]]*}"}"
     fi
@@ -558,7 +562,7 @@ function yaml::parseFile() {
   fi
 
   # shellcheck disable=SC2034
-  REPLY_MAP["@.length"]="${docNumber}"
+  REPLY_MAP["@.length"]="$((docNumber + 1))"
 
   REPLY_CODE=${replyCode}
   REPLY="${errors}"

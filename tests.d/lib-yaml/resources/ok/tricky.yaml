@@ -1,0 +1,7 @@
+k1: "trap: not value" # trap: not value
+k2: 'trap: not value' # trap: not value
+k3: # trap: not value
+  - "- - not an array" # - - not arrays
+  - '- - not an array' # - - not arrays
+  - # - - not arrays
+    "- - not an array"
