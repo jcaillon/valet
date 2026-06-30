@@ -183,6 +183,71 @@ REPLY_MAP=(
 )
 ```
 
+> cat `resources/ok/quoted-multiline-value.yaml`
+
+```text
+key  with colons   :::
+key with spaces    :    ok
+"":
+"empty": ""
+
+k: "word1
+ word2\"
+ word3"
+k2: "line1
+
+   line2"
+nested:
+  arr:
+    - '
+
+
+line1
+   line2
+
+'
+    - "
+word1
+
+
+word2\"
+ word3
+    "
+  k3: 'v
+a
+  l''
+ u
+e'
+```
+
+❯ `yaml::parseFile resources/ok/quoted-multiline-value.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['""']='null'
+['@.length']='0'
+['empty']=''
+['k']='word1 word2" word3'
+['k2']='line1
+line2'
+['key  with colons   ::']='null'
+['key with spaces']='ok'
+['nested.arr.length']='2'
+['nested.arr[0]']='
+
+line1 line2
+'
+['nested.arr[1]']='word1
+
+word2" word3 '
+['nested.k3']='v a l'"'"' u e'
+)
+```
+
 > cat `resources/ok/root-array.yaml`
 
 ```text
@@ -483,6 +548,27 @@ REPLY_MAP=(
 line2
 
 '
+)
+```
+
+> cat `resources/ok/single-scalar3.yaml`
+
+```text
+"word1
+  word2
+word3"
+```
+
+❯ `yaml::parseFile resources/ok/single-scalar3.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['@.length']='0'
+['@[0]']='word1 word2 word3'
 )
 ```
 

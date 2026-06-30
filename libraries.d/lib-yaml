@@ -131,6 +131,36 @@ function yaml::parseFile() {
     indent="${indent%%$'\t'*}"
     indentLevel=${#indent}
 
+    # handle multiline quoted values
+    if [[ ${isQuoteOpen} == "true" ]]; then
+      log::debug "line inside a quote: ${line@Q}, REPLY: ${REPLY@Q}"
+      if [[ -z ${line// /} ]]; then
+        multiLinesCumulatedLf+=$'\n'
+        continue
+      fi
+
+      if [[ -n ${multiLinesCumulatedLf} ]]; then
+        value+="${multiLinesCumulatedLf}"
+      elif [[ -n ${value} ]]; then
+        value+=' '
+      fi
+      multiLinesCumulatedLf=""
+
+      line="${firstChar}${line}"
+      yaml_extractFirstQuotedTextFromLine
+      log::debug "line inside a quote: ${line@Q}, REPLY: ${REPLY@Q}"
+      value+="${REPLY%"${REPLY##*[^[:space:]]}"}"
+      if [[ ${line} == "${firstChar}"* ]]; then
+        # the quote is closed
+        log::debug "quote closed"
+        isQuoteOpen=false
+
+        REPLY_MAP["${fullKey}"]="${value}"
+        isKeyWithoutValue=false
+      fi
+      continue
+    fi
+
     # handle multiline continuation
     if [[ ${isMultilineValue} == "true" ]]; then
       if ((indentLevel > ${keyIndentLevels[-1]} - arrayExtraIndentLevel)); then
@@ -229,72 +259,81 @@ function yaml::parseFile() {
     fi
     log::debug "line after 1st round: ${line@Q}, REPLY: ${REPLY@Q}"
 
-    # FIXME: ACT on quote open
-
-    # trim end spaces
-    keyName="${REPLY%"${REPLY##*[^[:space:]]}"}"
-
-    if [[ ${line} == ":"* ]]; then
-      # register keyname
-      if [[ (${firstChar} == [\'\"] && -z ${keyName}) || ${keyName} == *[\.\[]* ]]; then
-        # key was quoted and need to be re-quoted
-        keyName="\"${keyName}\""
-      elif [[ -z ${keyName} ]]; then
-        yaml_addParsingError "bad indentation of a mapping entry ${line@Q} (contains a ': ' but no key name)"
-      fi
-
-      line="${line#:}"
-      # trim beginning spaces
-      line="${line#"${line%%[^[:space:]]*}"}"
-
-      firstChar="${line:0:1}"
-      if [[ ${firstChar} == [\'\"] ]]; then
-        yaml_extractFirstQuotedTextFromLine
-        log::debug "line after extraction of value: ${line@Q}, REPLY: ${REPLY@Q}"
-        if [[ ${line} == "${firstChar}"* ]]; then
-          # the quote is closed
-          log::debug "quote closed"
-          isQuoteOpen=false
-          line="${line:1}"
-        else
-          # unclosed quote
-          log::debug "quote is not closed!"
-          isQuoteOpen=true
-        fi
-        value="${REPLY}"
-      else
-        value="${line}"
-      fi
-    else
-      firstChar=""
-      value="${keyName}"
+    # act on open quote or not
+    if [[ ${isQuoteOpen} == "true" ]]; then
       keyName=""
-    fi
-
-    # FIXME: ACT on quote open
-
-    if [[ ${firstChar} == [\'\"] ]]; then
-      # check that the remaining line after the ending quote is empty or a comment, otherwise it's a syntax error
-      line="${line#"${line%%[^[:space:]]*}"}"
-      if [[ -n ${line} && ${line} != \#* ]]; then
-        yaml_addParsingError "syntax error for ${line@Q}"
-      fi
+      # trim end spaces
+      value="${REPLY%"${REPLY##*[^[:space:]]}"}"
     else
-      # remove trailing comments and spaces
-      if [[ ${value} == \#* ]]; then
-        value=""
+      # trim end spaces
+      keyName="${REPLY%"${REPLY##*[^[:space:]]}"}"
+
+      if [[ ${line} == ":"* ]]; then
+        # register keyname
+        if [[ (${firstChar} == [\'\"] && -z ${keyName}) || ${keyName} == *[\.\[]* ]]; then
+          # key was quoted and need to be re-quoted
+          keyName="\"${keyName}\""
+        elif [[ -z ${keyName} ]]; then
+          yaml_addParsingError "bad indentation of a mapping entry ${line@Q} (contains a ': ' but no key name)"
+        fi
+
+        line="${line#:}"
+        # trim beginning spaces
+        line="${line#"${line%%[^[:space:]]*}"}"
+
+        firstChar="${line:0:1}"
+        if [[ ${firstChar} == [\'\"] ]]; then
+          yaml_extractFirstQuotedTextFromLine
+          log::debug "line after extraction of value: ${line@Q}, REPLY: ${REPLY@Q}"
+          if [[ ${line} == "${firstChar}"* ]]; then
+            # the quote is closed
+            log::debug "quote closed"
+            isQuoteOpen=false
+            line="${line:1}"
+          else
+            # unclosed quote
+            log::debug "quote is not closed!"
+            isQuoteOpen=true
+          fi
+          value="${REPLY}"
+        else
+          value="${line}"
+        fi
       else
-        value="${value%% \#*}"
+        firstChar=""
+        value="${keyName}"
+        keyName=""
+      fi
+
+      # act on open quote or not
+      if [[ ${isQuoteOpen} == "true" ]]; then
         # trim ending spaces
         value="${value%"${value##*[^[:space:]]}"}"
+      else
+        if [[ ${firstChar} == [\'\"] ]]; then
+          # check that the remaining line after the ending quote is empty or a comment, otherwise it's a syntax error
+          line="${line#"${line%%[^[:space:]]*}"}"
+          if [[ -n ${line} && ${line} != \#* ]]; then
+            yaml_addParsingError "syntax error for ${line@Q}"
+          fi
+        else
+          # remove trailing comments and spaces
+          if [[ ${value} == \#* ]]; then
+            value=""
+          else
+            value="${value%% \#*}"
+            # trim ending spaces
+            value="${value%"${value##*[^[:space:]]}"}"
+          fi
+        fi
+
+        log::debug "line: ${lineNumber}, key: ${keyName@Q}, value: ${value@Q}, line ${line@Q}"
+
+        if [[ ${isArrayItemStart} != "true" && -z ${keyName} && -z ${value} ]]; then
+          # empty line
+          continue
+        fi
       fi
-    fi
-
-    log::debug "line: ${lineNumber}, key: ${keyName@Q}, value: ${value@Q}, line ${line@Q}"
-
-    if [[ ${isArrayItemStart} != "true" && -z ${keyName} && -z ${value} ]]; then
-      # empty line
-      continue
     fi
 
     # check for indent level. if valid, get the index of the indent level in the keyIndentLevels array
@@ -399,7 +438,17 @@ function yaml::parseFile() {
     log::debug "value: ${value@Q}, keyName: ${keyName@Q}, isArrayItemStart: ${isArrayItemStart}, firstChar: ${firstChar@Q}"
 
     # determine what the current line represents
-    if [[ ${value} == [\>\|]* ]]; then
+    if [[ ${isQuoteOpen} == "true" ]]; then
+      # case of an unclosed quote, we will continue to read the next lines until we find the closing quote
+      multiLinesCumulatedLf=""
+      if [[ -z ${keyName} && ${#keyPaths[@]} -eq 0 ]]; then
+        # the doc contains only a simple scalar value
+        fullKey="${docPrefix%.}"
+        fullKey="${fullKey:-"@[${docNumber}]"}"
+        continue
+      fi
+
+    elif [[ ${value} == [\>\|]* ]]; then
       # new multiline value
       isMultilineValue=true
       multiLinesCumulatedLf=""
