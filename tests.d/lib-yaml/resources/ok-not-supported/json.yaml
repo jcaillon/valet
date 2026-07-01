@@ -1,0 +1,19 @@
+{
+   "glossary":{
+      "title":"example glossary",
+      "GlossDiv":{
+         "title":"S",
+         "weight":   1.0,
+         "sort": 99,
+         "draft":    false,
+         "GlossList":[
+            {
+               "ID":"SGML"
+            },
+            {
+               "ID":"ERT"
+            }
+         ]
+      }
+   }
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck source=../../../libraries.d/main
+# shellcheck source=../libraries.d/main
 source "$(valet --source)"
 include benchmark
 
@@ -8,23 +8,30 @@ SUBSTRING="${STRING%%yg*}"
 
 # shellcheck disable=SC2317
 function test1() {
-  if [[ ${STRING:0:2} == '- ' ]]; then
+  if [[ ${STRING} == '- '* ]]; then
     :
   fi
 }
 
 # shellcheck disable=SC2317
 function test2() {
-  if [[ ${STRING} == '- '* ]]; then
+  if [[ ${STRING:0:2} == '- ' ]]; then
     :
   fi
 }
 
-benchmark::run test1 test2
+# shellcheck disable=SC2317
+function test3() {
+  if [[ ${STRING} =~ ^'- ' ]]; then
+    :
+  fi
+}
+benchmark::run test1 test2 test3
 # Function name ░ Average time  ░ Compared to fastest
 # ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-# test2         ░ 0.000s 007µs ░ N/A
-# test1         ░ 0.000s 007µs ░ +9%
+# test1         ░ 0.000s 007µs ░ N/A
+# test2         ░ 0.000s 008µs ░ +9%
+# test3         ░ 0.000s 009µs ░ +15%
 
 # it is slightly faster to use the glob pattern than to use substring extraction
 

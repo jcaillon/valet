@@ -81,13 +81,8 @@ function yaml::parseFile() {
   bash::setShellOption nocasematch
 
   REPLY_MAP=()
-
   local replyCode=0 \
     errors=""
-
-  # variables that carry over each loop iteration
-  local isMultilineValue=false isQuoteOpen=false valueTag=""
-  local -i arrayExtraIndentLevelResetValue=0
 
   # keyPaths keeps track of the current path in the YAML file.
   # keyIndentLevels keeps track of the indent level for each key.
@@ -116,7 +111,16 @@ function yaml::parseFile() {
   local -i indentLevel=0 indentLevelIndex arrayIndex lineNumber=0 lastIndentLevel=0 arrayExtraIndentLevel \
     multiLineIndentLevel=-1 docNumber=0
 
-  if [[ ${prefixFirstDoc} == "true" ]]; then
+  # variables that carry over each loop iteration
+  local isMultilineValue=false isQuoteOpen=false valueTag=""
+  local -i arrayExtraIndentLevelResetValue=0
+
+  # json
+  local jsonLine isJsonOpen=0 jsonCumulatedLf=""
+  local -a jsonKeyPaths=() jsonArrayIndexes=()
+  local -i jsonDepth=-1
+
+  if [[ ${prefixFirstDoc} == true ]]; then
     docPrefix="@[0]."
   fi
 
@@ -136,10 +140,32 @@ function yaml::parseFile() {
     indent="${indent%%$'\t'*}"
     indentLevel=${#indent}
 
+    # handle json
+    if ((isJsonOpen == 1)); then
+      # all json lines must be indented at least as much as the key that started the json flow collection
+      if ((indentLevel > ${keyIndentLevels[-1]} - arrayExtraIndentLevel)); then
+        yaml_handleJsonString
+        jsonLine="${line}"
+        if ((isJsonOpen == 1)); then
+          continue
+        fi
+      elif [[ -z ${line//[\t ]/} ]]; then
+        yaml_handleJsonString
+        jsonLine="${line}"
+        continue
+      fi
+
+      # change of indentation, the json must be closed by now
+      if ((isJsonOpen == 1)); then
+        yaml_addParsingError "invalid JSON flow collection (new yaml key but the previous JSON flow collection is not closed)."
+        isJsonOpen=0
+      fi
+    fi
+
     # handle multiline quoted values
-    if [[ ${isQuoteOpen} == "true" ]]; then
+    if [[ ${isQuoteOpen} == true ]]; then
       log::debug "line inside a quote: ${line@Q}, REPLY: ${REPLY@Q}"
-      if [[ -z ${line// /} ]]; then
+      if [[ -z ${line//[\t ]/} ]]; then
         multiLinesCumulatedLf+=$'\n'
         continue
       fi
@@ -167,7 +193,7 @@ function yaml::parseFile() {
     fi
 
     # handle multiline continuation
-    if [[ ${isMultilineValue} == "true" ]]; then
+    if [[ ${isMultilineValue} == true ]]; then
       if ((indentLevel > ${keyIndentLevels[-1]} - arrayExtraIndentLevel)); then
         if ((multiLineIndentLevel == 0)); then
           # the first line of a multiline value, determine the indent level of the multiline value
@@ -189,7 +215,7 @@ function yaml::parseFile() {
         value+="${indent:0:indentLevel-multiLineIndentLevel}${line}"
         multiLinesCumulatedLf=""
         continue
-      elif [[ -z ${line// /} ]]; then
+      elif [[ -z ${line//[\t ]/} ]]; then
         multiLinesCumulatedLf+=$'\n'
         continue
       fi
@@ -342,7 +368,7 @@ function yaml::parseFile() {
       fi
 
       # act on open quote or not
-      if [[ ${isQuoteOpen} == "true" ]]; then
+      if [[ ${isQuoteOpen} == true ]]; then
         # trim ending spaces
         value="${value%"${value##*[^[:space:]]}"}"
       else
@@ -490,7 +516,15 @@ function yaml::parseFile() {
     log::debug "value: ${value@Q}, keyName: ${keyName@Q}, isArrayItemStart: ${isArrayItemStart}, firstChar: ${firstChar@Q}"
 
     # determine what the current line represents
-    if [[ ${isQuoteOpen} == "true" ]]; then
+    if [[ ${value} == [\{\[]* && ${firstChar} != [\'\"] ]]; then
+      # case of a flow collection (json)
+      isJsonOpen=1
+      jsonDepth=-1
+      jsonLine="${value}"
+      value=""
+      jsonCumulatedLf=""
+
+    elif [[ ${isQuoteOpen} == "true" ]]; then
       # case of an unclosed quote, we will continue to read the next lines until we find the closing quote
       multiLinesCumulatedLf=""
       if [[ -z ${keyName} && ${#keyPaths[@]} -eq 0 ]]; then
@@ -587,6 +621,12 @@ function yaml::parseFile() {
 
   done <"${path}"
 
+  if ((isJsonOpen == 1)); then
+    yaml_addParsingError "invalid JSON flow collection (missing closing bracket)."
+  elif [[ ${isQuoteOpen} == "true" ]]; then
+    yaml_addParsingError "invalid quoted value (missing closing quote)."
+  fi
+
   # close a multiline value if we reached the end of the file
   if [[ ${isMultilineValue} == "true" ]]; then
     value+="${multilineFinalSeparator}"
@@ -670,4 +710,24 @@ function yaml_computeValueTag() {
       valueTag="!!float"
     fi
   fi
+}
+
+function yaml_handleJsonString() {
+  log::warning "line ${lineNumber} handle: ${jsonLine@Q}, jsonDepth: ${jsonDepth}, arrayIndexes: ${arrayIndexes[*]@Q}, keyPaths: ${keyPaths[*]@Q}"
+
+  local part="${jsonLine%%[\{\}\[\]\:\'\"]*}"
+  case "${jsonLine:${#part}}" in
+  '"'*)
+    isQuoteOpen=true
+    ;;
+  "'"*)
+    isQuoteOpen=true
+    ;;
+  '['*)
+    log::warning "json array start"
+    ;;
+  '{'*)
+    log::warning "json object start"
+    ;;
+  esac
 }

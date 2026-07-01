@@ -1,7 +1,21 @@
-explicitTypes:
-  -
-    !!float
-    "123.45"
-  - !!null
-float: # !!float
-  scientific: 1.23015e+3
+hi: [
+  "double
+
+  quoted", 'single
+            quoted',
+
+  plain
+  text, [ nested, ],
+  single: pair,
+  ]
+thing:
+- { one : two , three: four , }
+- {five: six,seven : 8, key: [1, { sub: k, arr: [ sub2 ] }]}
+- k: 1
+ff:
+  {
+  null value,
+  another null value:,
+  "": empty key
+  }
+booleans: [ true, false ]

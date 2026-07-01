@@ -1,28 +1,21 @@
 hi: [
   "double
+
   quoted", 'single
             quoted',
+
   plain
-  text, [ nested ],
+  text, [ nested, ],
   single: pair,
   ]
 thing:
 - { one : two , three: four , }
-- {five: six,seven : eight}
+- {five: six,seven : 8, key: [1, { sub: k, arr: [ sub2 ] }]}
+- k: 1
 ff:
   {
-  unquoted : "separate",
-  https://foo.com,
-  omitted value:,
-  : omitted key,
+  null value,
+  another null value:,
+  "": empty key
   }
-Not indented:
- By one space: |
-    By four
-      spaces
- Flow style: [    # Leading spaces
-   By two,        # in flow style
-  Also by two,    # are neither
-    Still by two   # content nor
-    ]             # indentation.
 booleans: [ true, false ]
