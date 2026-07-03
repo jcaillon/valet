@@ -5,13 +5,18 @@ hi: [
             quoted',
 
   plain
-  text, [ nested, ],
+  text, [ [ nested ], ],
   single: pair,
+  { single: pair },
   ]
 thing:
 - { one : two , three: four , }
 - {five: six,seven : 8, key: [1, { sub: k, arr: [ sub2 ] }]}
 - k: 1
+- [
+  un,
+  deux,
+  ]
 ff:
   {
   null value,

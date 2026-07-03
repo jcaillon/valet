@@ -112,11 +112,11 @@ function yaml::parseFile() {
     multiLineIndentLevel=-1 docNumber=0
 
   # variables that carry over each loop iteration
-  local isMultilineValue=false isQuoteOpen=false valueTag=""
+  local isMultilineValue=false isQuoteOpen=false valueTag="" isJsonOpen=0
   local -i arrayExtraIndentLevelResetValue=0
 
   # json
-  local jsonLine isJsonOpen=0 jsonCumulatedLf=""
+  local jsonLine jsonCumulatedLf="" isJsonQuoteOpen=0 jsonKeyName jsonValue
   local -a jsonKeyPaths=() jsonArrayIndexes=()
   local -i jsonDepth=-1
 
@@ -144,13 +144,14 @@ function yaml::parseFile() {
     if ((isJsonOpen == 1)); then
       # all json lines must be indented at least as much as the key that started the json flow collection
       if ((indentLevel > ${keyIndentLevels[-1]} - arrayExtraIndentLevel)); then
-        yaml_handleJsonString
+        yaml_jsonHandleString
         jsonLine="${line}"
-        if ((isJsonOpen == 1)); then
+        if ((jsonDepth >= 0)); then
           continue
         fi
+        isJsonOpen=0
       elif [[ -z ${line//[\t ]/} ]]; then
-        yaml_handleJsonString
+        yaml_jsonHandleString
         jsonLine="${line}"
         continue
       fi
@@ -160,6 +161,15 @@ function yaml::parseFile() {
         yaml_addParsingError "invalid JSON flow collection (new yaml key but the previous JSON flow collection is not closed)."
         isJsonOpen=0
       fi
+
+      # reset json variables
+      jsonDepth=-1
+      isJsonQuoteOpen=0
+      jsonCumulatedLf=""
+      jsonKeyName=""
+      jsonValue=""
+      jsonKeyPaths=()
+      jsonArrayIndexes=()
     fi
 
     # handle multiline quoted values
@@ -519,10 +529,8 @@ function yaml::parseFile() {
     if [[ ${value} == [\{\[]* && ${firstChar} != [\'\"] ]]; then
       # case of a flow collection (json)
       isJsonOpen=1
-      jsonDepth=-1
       jsonLine="${value}"
       value=""
-      jsonCumulatedLf=""
 
     elif [[ ${isQuoteOpen} == "true" ]]; then
       # case of an unclosed quote, we will continue to read the next lines until we find the closing quote
@@ -712,22 +720,53 @@ function yaml_computeValueTag() {
   fi
 }
 
-function yaml_handleJsonString() {
-  log::warning "line ${lineNumber} handle: ${jsonLine@Q}, jsonDepth: ${jsonDepth}, arrayIndexes: ${arrayIndexes[*]@Q}, keyPaths: ${keyPaths[*]@Q}"
+# json
+# local jsonLine jsonCumulatedLf="" isJsonQuoteOpen=0 jsonKeyName jsonValue
+# local -a jsonKeyPaths=() jsonArrayIndexes=()
+# local -i jsonDepth=-1
 
-  local part="${jsonLine%%[\{\}\[\]\:\'\"]*}"
-  case "${jsonLine:${#part}}" in
-  '"'*)
-    isQuoteOpen=true
-    ;;
-  "'"*)
-    isQuoteOpen=true
-    ;;
-  '['*)
-    log::warning "json array start"
-    ;;
-  '{'*)
-    log::warning "json object start"
-    ;;
-  esac
+#
+
+# receives jsonLine and should parse json from it
+function yaml_jsonHandleString() {
+  log::warning "line ${lineNumber} handle: ${jsonLine@Q}, jsonDepth: ${jsonDepth}, jsonKeyPaths: ${jsonKeyPaths[*]@Q}, jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}"
+
+  while [[ -z ${jsonLine} ]]; do
+    local part="${jsonLine%%[\{\}\[\]\:\'\",]*}"
+    log::info "json part: ${part@Q}, jsonLine: ${jsonLine:${#part}}"
+    case "${jsonLine:${#part}}" in
+    '"'*)
+      isJsonQuoteOpen=true
+      ;;
+    "'"*)
+      isJsonQuoteOpen=true
+      ;;
+    '['*)
+      log::warning "json array start"
+      jsonDepth+=1
+      jsonArrayIndexes=("${jsonArrayIndexes[@]:0:jsonDepth}" 0)
+      jsonKeyPaths=("${jsonKeyPaths[@]:0:jsonDepth}" "[0]")
+      ;;
+    ']'*)
+      log::warning "json array end"
+      jsonDepth=$((jsonDepth - 1))
+      ;;
+    '{'*)
+      log::warning "json object start"
+      jsonDepth+=1
+      jsonArrayIndexes=("${jsonArrayIndexes[@]:0:jsonDepth}" -1)
+      jsonKeyPaths=("${jsonKeyPaths[@]:0:jsonDepth}" "${jsonKeyName}")
+      ;;
+    '}'*)
+      log::warning "json object start"
+      jsonDepth=$((jsonDepth - 1))
+      ;;
+    ':'*)
+      :
+      ;;
+    ','*)
+      :
+      ;;
+    esac
+  done
 }
