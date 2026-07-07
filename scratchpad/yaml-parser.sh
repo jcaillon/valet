@@ -5,9 +5,12 @@ include yaml test
 
 REPLY=""
 
-log::setLevel debug silent=true
+# log::setLevel debug silent=true
 
+time::startTimer
 yaml::parseFile tests.d/lib-yaml/resources/ok-not-supported/test.yaml
+time::logTimerElapsedTime
+
 # yaml::parseFile tests.d/lib-yaml/resources/ok/root-array.yaml
 # yaml::parseFile tests.d/lib-yaml/resources/ok/any-indent.yaml
 

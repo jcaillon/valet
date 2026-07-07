@@ -90,7 +90,7 @@ trap::setup
 declare -g -A GLOBAL_BACKGROUND_PROCESSES=() GLOBAL_BACKGROUND_PROCESSES_LOGS=()
 
 # init associative arrays
-declare -g -A REPLY_MAP=()
+declare -g -A REPLY_MAP=() REPLY_MAP2=()
 
 # Source the valet configuration from the user config dir
 if [[ -f ${GLOBAL_CONFIG_FILE} ]]; then

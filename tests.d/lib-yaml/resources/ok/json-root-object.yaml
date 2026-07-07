@@ -1,0 +1,42 @@
+{
+  "config": {
+    "features": {
+      "autoSave": true,
+      "maxItems": 100,
+      "notifications": false
+    },
+    "language": "en",
+    "theme": "dark"
+  },
+  "description": "Privacy-first developer toolbox",
+  "metadata": null,
+  "name": "ToolBox",
+  "tools": [
+    "JSON Formatter",
+    "Base64",
+    "QR Code",
+    "Hash Generator"
+  ],
+  "users": [
+    {
+      "active": true,
+      "id": 1,
+      "name": "Alice",
+      "scores": [
+        95,
+        88,
+        72
+      ]
+    },
+    {
+      "active": false,
+      "id": 2,
+      "name": "Bob",
+      "scores": [
+        60,
+        75
+      ]
+    }
+  ],
+  "version": "1.0.0"
+}

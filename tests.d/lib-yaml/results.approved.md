@@ -145,6 +145,317 @@ REPLY_MAP=(
 )
 ```
 
+> cat `resources/ok/flow-collections.yaml`
+
+```text
+hi: [
+  "double
+
+  quoted", 'single
+            quoted',
+
+  plain
+  text, [ nested, ],
+  single: pair,
+  ]
+thing:
+- {
+    one : two,
+    three: four,
+    five: [
+      [ [ "val" ]],
+      { key: { arr: [ k: v, { k2: v2 }]}},
+      tricky:stuff
+    ]
+  }
+- [ 1, "quoted", key: value, { key2: val2 }, : nullkey  , :simplevalue ]
+- {five: six,seven : 8, key: [1, { sub: k, arr: [ sub2 ] }]}
+- k: 1
+ff:
+  {
+  null value,
+  another null value:,
+  k: {null2:},
+  k2: [null3:,null4:],
+  "": empty key
+  }
+types1: [
+    1.23015e+3, 12.3015e+02, 1230.15, -.inf, .nan,
+    0o14, +12345, -9, 78, 0xC,
+    true, FALSE, TruE,
+    NULL, null, ~,
+    123.456.345
+  ]
+types2: {
+    "bool": {
+      "b1": false,
+      "b2": TRUE,
+      "b3": FalSe
+    },
+    "float": {
+      "exponential": 1230.15,
+      "fixed": 1230.15,
+      "negative infinity": -.inf,
+      "not a number": .nan,
+      "scientific": 1230.15
+    },
+    "int": {
+      "baseten": 78,
+      "hexadecimal": 12,
+      "octal": 12,
+      "signed": 12345,
+      "signed2": -9
+    },
+    "null": {
+      "null":,
+      "null2": Null,
+      "null3": ~
+    },
+    "string": {
+      "anythingElse": "ergezrg",
+      "notFloat": "123.456.345"
+    }
+  }
+other: { # comment !!
+  fu: { nested: "val '\": quoted
+  string
+
+  newline" }, 'tro"''is': "quatre",    ? key     with         spaces   : value
+
+  with      spaces     as
+  well
+  ,
+  ?    key
+  with
+
+  spaces
+  }
+```
+
+❯ `yaml::parseFile resources/ok/flow-collections.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['@.length']='1'
+['ff.""']='empty key'
+['ff.another null value']='null'
+['ff.another null value.tag']='!!null'
+['ff.k.null2']='null'
+['ff.k.null2.tag']='!!null'
+['ff.k2[0].null3']='null'
+['ff.k2[0].null3.tag']='!!null'
+['ff.k2[1].null4']='null'
+['ff.k2[1].null4.tag']='!!null'
+['ff.null value']='null'
+['ff.null value.tag']='!!null'
+['hi[0]']='double
+quoted'
+['hi[1]']='single quoted'
+['hi[2]']='plain text'
+['hi[3][0]']='nested'
+['hi[4].single']='pair'
+['other.fu.nested']='val '"'"'": quoted string
+newline'
+['other.key     with         spaces']='value
+with      spaces     as well'
+['other.key with
+spaces']='null'
+['other.key with
+spaces.tag']='!!null'
+['other.tro"'is']='quatre'
+['thing.length']='4'
+['thing[0].five[0][0][0]']='val'
+['thing[0].five[1].key.arr[0].k']='v'
+['thing[0].five[1].key.arr[1].k2']='v2'
+['thing[0].five[2]']='tricky:stuff'
+['thing[0].one']='two'
+['thing[0].three']='four'
+['thing[1][0]']='1'
+['thing[1][0].tag']='!!int'
+['thing[1][1]']='quoted'
+['thing[1][2].key']='value'
+['thing[1][3].key2']='val2'
+['thing[1][4].null']='nullkey'
+['thing[1][5]']=':simplevalue'
+['thing[2].five']='six'
+['thing[2].key[0]']='1'
+['thing[2].key[0].tag']='!!int'
+['thing[2].key[1].arr[0]']='sub2'
+['thing[2].key[1].sub']='k'
+['thing[2].seven']='8'
+['thing[2].seven.tag']='!!int'
+['thing[3].k']='1'
+['thing[3].k.tag']='!!int'
+['types1[0]']='1.23015e+3'
+['types1[0].tag']='!!float'
+['types1[10]']='true'
+['types1[10].tag']='!!bool'
+['types1[11]']='FALSE'
+['types1[11].tag']='!!bool'
+['types1[12]']='TruE'
+['types1[12].tag']='!!bool'
+['types1[13]']='NULL'
+['types1[13].tag']='!!null'
+['types1[14]']='null'
+['types1[14].tag']='!!null'
+['types1[15]']='~'
+['types1[15].tag']='!!null'
+['types1[16]']='123.456.345'
+['types1[1]']='12.3015e+02'
+['types1[1].tag']='!!float'
+['types1[2]']='1230.15'
+['types1[2].tag']='!!float'
+['types1[3]']='-.inf'
+['types1[3].tag']='!!float'
+['types1[4]']='.nan'
+['types1[4].tag']='!!float'
+['types1[5]']='0o14'
+['types1[5].tag']='!!int'
+['types1[6]']='+12345'
+['types1[6].tag']='!!int'
+['types1[7]']='-9'
+['types1[7].tag']='!!int'
+['types1[8]']='78'
+['types1[8].tag']='!!int'
+['types1[9]']='0xC'
+['types1[9].tag']='!!int'
+['types2.bool.b1']='false'
+['types2.bool.b1.tag']='!!bool'
+['types2.bool.b2']='TRUE'
+['types2.bool.b2.tag']='!!bool'
+['types2.bool.b3']='FalSe'
+['types2.bool.b3.tag']='!!bool'
+['types2.float.exponential']='1230.15'
+['types2.float.exponential.tag']='!!float'
+['types2.float.fixed']='1230.15'
+['types2.float.fixed.tag']='!!float'
+['types2.float.negative infinity']='-.inf'
+['types2.float.negative infinity.tag']='!!float'
+['types2.float.not a number']='.nan'
+['types2.float.not a number.tag']='!!float'
+['types2.float.scientific']='1230.15'
+['types2.float.scientific.tag']='!!float'
+['types2.int.baseten']='78'
+['types2.int.baseten.tag']='!!int'
+['types2.int.hexadecimal']='12'
+['types2.int.hexadecimal.tag']='!!int'
+['types2.int.octal']='12'
+['types2.int.octal.tag']='!!int'
+['types2.int.signed']='12345'
+['types2.int.signed.tag']='!!int'
+['types2.int.signed2']='-9'
+['types2.int.signed2.tag']='!!int'
+['types2.null.null']='null'
+['types2.null.null.tag']='!!null'
+['types2.null.null2']='Null'
+['types2.null.null2.tag']='!!null'
+['types2.null.null3']='~'
+['types2.null.null3.tag']='!!null'
+['types2.string.anythingElse']='ergezrg'
+['types2.string.notFloat']='123.456.345'
+)
+```
+
+> cat `resources/ok/json-root-object.yaml`
+
+```text
+{
+  "config": {
+    "features": {
+      "autoSave": true,
+      "maxItems": 100,
+      "notifications": false
+    },
+    "language": "en",
+    "theme": "dark"
+  },
+  "description": "Privacy-first developer toolbox",
+  "metadata": null,
+  "name": "ToolBox",
+  "tools": [
+    "JSON Formatter",
+    "Base64",
+    "QR Code",
+    "Hash Generator"
+  ],
+  "users": [
+    {
+      "active": true,
+      "id": 1,
+      "name": "Alice",
+      "scores": [
+        95,
+        88,
+        72
+      ]
+    },
+    {
+      "active": false,
+      "id": 2,
+      "name": "Bob",
+      "scores": [
+        60,
+        75
+      ]
+    }
+  ],
+  "version": "1.0.0"
+}
+```
+
+❯ `yaml::parseFile resources/ok/json-root-object.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['@.length']='1'
+['config.features.autoSave']='true'
+['config.features.autoSave.tag']='!!bool'
+['config.features.maxItems']='100'
+['config.features.maxItems.tag']='!!int'
+['config.features.notifications']='false'
+['config.features.notifications.tag']='!!bool'
+['config.language']='en'
+['config.theme']='dark'
+['description']='Privacy-first developer toolbox'
+['metadata']='null'
+['metadata.tag']='!!null'
+['name']='ToolBox'
+['tools[0]']='JSON Formatter'
+['tools[1]']='Base64'
+['tools[2]']='QR Code'
+['tools[3]']='Hash Generator'
+['users[0].active']='true'
+['users[0].active.tag']='!!bool'
+['users[0].id']='1'
+['users[0].id.tag']='!!int'
+['users[0].name']='Alice'
+['users[0].scores[0]']='95'
+['users[0].scores[0].tag']='!!int'
+['users[0].scores[1]']='88'
+['users[0].scores[1].tag']='!!int'
+['users[0].scores[2]']='72'
+['users[0].scores[2].tag']='!!int'
+['users[1].active']='false'
+['users[1].active.tag']='!!bool'
+['users[1].id']='2'
+['users[1].id.tag']='!!int'
+['users[1].name']='Bob'
+['users[1].scores[0]']='60'
+['users[1].scores[0].tag']='!!int'
+['users[1].scores[1]']='75'
+['users[1].scores[1].tag']='!!int'
+['version']='1.0.0'
+)
+```
+
 > cat `resources/ok/multidoc.yaml`
 
 ```text
@@ -644,7 +955,9 @@ REPLY_MAP=(
 # https://perlpunk.github.io/yaml-test-schema/schemas.html
 ---
 bool: # !!bool
-  b: false # true | True | TRUE | false | False | FALSE
+  b1: false # true | True | TRUE | false | False | FALSE
+  b2: TRUE
+  b3: False
 custom:
   application specific tag:      !e!tag     |
     The semantics of the tag
@@ -694,8 +1007,12 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['@.length']='1'
-['bool.b']='false'
-['bool.b.tag']='!!bool'
+['bool.b1']='false'
+['bool.b1.tag']='!!bool'
+['bool.b2']='TRUE'
+['bool.b2.tag']='!!bool'
+['bool.b3']='False'
+['bool.b3.tag']='!!bool'
 ['custom.application specific tag']='The semantics of the tag
 above may be different for
 different documents.

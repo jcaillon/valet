@@ -184,7 +184,7 @@ function test_exec() {
   if [[ ${printReturnedValues} == "true" ]]; then
     local REPLY_CODE REPLY REPLY2 REPLY3 REPLY4
     local -a REPLY_ARRAY REPLY_ARRAY2
-    local -A REPLY_MAP
+    local -A REPLY_MAP REPLY_MAP2
   fi
 
   # reset IFS to ensure consistent behavior
@@ -252,16 +252,19 @@ function test::printReplyVars() {
       GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
     fi
   done
-  if [[ -n "${!REPLY_MAP[*]}" ]]; then
-    GLOBAL_TEST_OUTPUT_CONTENT+="REPLY_MAP=("$'\n'
-    local -a keys=("${!REPLY_MAP[@]}")
-    include array
-    array::sort keys
-    for key in "${keys[@]}"; do
-      GLOBAL_TEST_OUTPUT_CONTENT+="['${key}']='${REPLY_MAP[${key}]//\'/\'\"\'\"\'}'"$'\n'
-    done
-    GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
-  fi
+  for varName in REPLY_MAP REPLY_MAP2; do
+    local -n associativeArrayNameRef="${varName}"
+    if [[ -n "${!associativeArrayNameRef[*]}" ]]; then
+      GLOBAL_TEST_OUTPUT_CONTENT+="REPLY_MAP=("$'\n'
+      local -a keys=("${!associativeArrayNameRef[@]}")
+      include array
+      array::sort keys
+      for key in "${keys[@]}"; do
+        GLOBAL_TEST_OUTPUT_CONTENT+="['${key}']='${associativeArrayNameRef[${key}]//\'/\'\"\'\"\'}'"$'\n'
+      done
+      GLOBAL_TEST_OUTPUT_CONTENT+=")"$'\n'
+    fi
+  done
   if [[ -n ${GLOBAL_TEST_OUTPUT_CONTENT} ]]; then
     test_applyOutputScrubbers
 

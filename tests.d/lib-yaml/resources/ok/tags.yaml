@@ -3,7 +3,9 @@
 # https://perlpunk.github.io/yaml-test-schema/schemas.html
 ---
 bool: # !!bool
-  b: false # true | True | TRUE | false | False | FALSE
+  b1: false # true | True | TRUE | false | False | FALSE
+  b2: TRUE
+  b3: False
 custom:
   application specific tag:      !e!tag     |
     The semantics of the tag

@@ -1,6 +1,0 @@
-{ # comment !!
-fu: { nested: "key '\": quoted
-string
-
-newline" }, 'tro"''is': "quatre"
-}

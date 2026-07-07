@@ -1,0 +1,82 @@
+hi: [
+  "double
+
+  quoted", 'single
+            quoted',
+
+  plain
+  text, [ nested, ],
+  single: pair,
+  ]
+thing:
+- {
+    one : two,
+    three: four,
+    five: [
+      [ [ "val" ]],
+      { key: { arr: [ k: v, { k2: v2 }]}},
+      tricky:stuff
+    ]
+  }
+- [ 1, "quoted", key: value, { key2: val2 }, : nullkey  , :simplevalue ]
+- {five: six,seven : 8, key: [1, { sub: k, arr: [ sub2 ] }]}
+- k: 1
+ff:
+  {
+  null value,
+  another null value:,
+  k: {null2:},
+  k2: [null3:,null4:],
+  "": empty key
+  }
+types1: [
+    1.23015e+3, 12.3015e+02, 1230.15, -.inf, .nan,
+    0o14, +12345, -9, 78, 0xC,
+    true, FALSE, TruE,
+    NULL, null, ~,
+    123.456.345
+  ]
+types2: {
+    "bool": {
+      "b1": false,
+      "b2": TRUE,
+      "b3": FalSe
+    },
+    "float": {
+      "exponential": 1230.15,
+      "fixed": 1230.15,
+      "negative infinity": -.inf,
+      "not a number": .nan,
+      "scientific": 1230.15
+    },
+    "int": {
+      "baseten": 78,
+      "hexadecimal": 12,
+      "octal": 12,
+      "signed": 12345,
+      "signed2": -9
+    },
+    "null": {
+      "null":,
+      "null2": Null,
+      "null3": ~
+    },
+    "string": {
+      "anythingElse": "ergezrg",
+      "notFloat": "123.456.345"
+    }
+  }
+other: { # comment !!
+  fu: { nested: "val '\": quoted
+  string
+
+  newline" }, 'tro"''is': "quatre",    ? key     with         spaces   : value
+
+  with      spaces     as
+  well
+  ,
+  ?    key
+  with
+
+  spaces
+  }

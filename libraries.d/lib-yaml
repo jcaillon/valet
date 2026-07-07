@@ -68,6 +68,9 @@ source bash
 # > /!\ This does not support some uncommon YAML features yet such as:
 # > - explicit keys (e.g. `? {myobject: key}`)
 # > - extraction of tag definitions (e.g. %TAG !e! tag:example.com,2000:app/)
+#
+# TODO: extract tags in REPLY_MAP2 !
+# TODO: we must extract tags on nodes, not only on values (e.g. key: !!tag { node } )
 function yaml::parseFile() {
   local \
     path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
@@ -106,7 +109,7 @@ function yaml::parseFile() {
 
   local line indent keyName fullKey value firstChar isArrayItemStart=false keyIndentLevelsFlatten \
     multilineTrimEnd=true multiLinesCumulatedLf multilineSeparator='' multilineFinalSeparator='' \
-    isKeyWithoutValue=false \
+    isKeyWithoutValue=false isJsonRootObject=0 inArrayIndent \
     errorPrefix="Error parsing YAML file ⌜${path}⌝" docPrefix=""
   local -i indentLevel=0 indentLevelIndex arrayIndex lineNumber=0 lastIndentLevel=0 arrayExtraIndentLevel \
     multiLineIndentLevel=-1 docNumber=0
@@ -114,11 +117,6 @@ function yaml::parseFile() {
   # variables that carry over each loop iteration
   local isMultilineValue=false isQuoteOpen=false valueTag="" isJsonOpen=0
   local -i arrayExtraIndentLevelResetValue=0
-
-  # json
-  local jsonLine jsonCumulatedLf="" isJsonQuoteOpen=0 jsonKeyName jsonValue
-  local -a jsonKeyPaths=() jsonArrayIndexes=()
-  local -i jsonDepth=-1
 
   if [[ ${prefixFirstDoc} == true ]]; then
     docPrefix="@[0]."
@@ -142,34 +140,25 @@ function yaml::parseFile() {
 
     # handle json
     if ((isJsonOpen == 1)); then
-      # all json lines must be indented at least as much as the key that started the json flow collection
-      if ((indentLevel > ${keyIndentLevels[-1]} - arrayExtraIndentLevel)); then
-        yaml_jsonHandleString
-        jsonLine="${line}"
-        if ((jsonDepth >= 0)); then
-          continue
-        fi
-        isJsonOpen=0
-      elif [[ -z ${line//[\t ]/} ]]; then
-        yaml_jsonHandleString
-        jsonLine="${line}"
+      yaml_jsonHandleString
+      jsonLine="${line}"
+
+      log::debug "JSON continuation: ${jsonLine@Q}, indentLevel: ${indentLevel}, lastIndentLevel: ${lastIndentLevel}, keyIndentLevels[-1]: ${keyIndentLevels[-1]}, arrayExtraIndentLevel: ${arrayExtraIndentLevel}, isJsonRootObject: ${isJsonRootObject}"
+
+      if [[ ${line} != *[^[:space:]]* || ${indentLevel} -gt $((${keyIndentLevels[-1]} - arrayExtraIndentLevel)) || ${isJsonRootObject} == 1 ]]; then
+        # line contains only spaces
+        # or is indented at least as much as the key that started the json flow collection
+        # or we have a json object at root level
         continue
       fi
 
       # change of indentation, the json must be closed by now
-      if ((isJsonOpen == 1)); then
+      if ((jsonDepth >= 0)); then
+        log::debug "jsonDepth: ${jsonDepth}, jsonKeyPaths: ${jsonKeyPaths[*]@Q}, jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonOpenChars: ${jsonOpenChars[*]@Q}"
         yaml_addParsingError "invalid JSON flow collection (new yaml key but the previous JSON flow collection is not closed)."
-        isJsonOpen=0
       fi
-
-      # reset json variables
-      jsonDepth=-1
-      isJsonQuoteOpen=0
-      jsonCumulatedLf=""
-      jsonKeyName=""
-      jsonValue=""
-      jsonKeyPaths=()
-      jsonArrayIndexes=()
+      isJsonOpen=0
+      isKeyWithoutValue=false
     fi
 
     # handle multiline quoted values
@@ -272,6 +261,8 @@ function yaml::parseFile() {
     if [[ ${line} == "-"* ]]; then
       # case of an array
       line="${line:2}"
+      inArrayIndent="${line%%[^[:space:]]*}"
+      line="${line:${#inArrayIndent}}"
       indentLevel+=2
       arrayExtraIndentLevel=2
       isArrayItemStart=true
@@ -282,10 +273,8 @@ function yaml::parseFile() {
     fi
 
     # handle tags
-    if [[ ${line#"${line%%[^[:space:]]*}"} == "!"* ]]; then
+    if [[ ${line} == "!"* ]]; then
       # begins with an explicit tag !
-      line="${line#"${line%%[^[:space:]]*}"}"
-
       valueTag="${line%%[[:space:]]*}"
       line="${line:${#valueTag}}"
       line="${line#"${line%%[^[:space:]]*}"}"
@@ -297,117 +286,124 @@ function yaml::parseFile() {
     # in case of an array with a scalar
     isQuoteOpen=false
     firstChar="${line:0:1}"
-    if [[ ${firstChar} == [\'\"] ]]; then
-      yaml_extractFirstQuotedTextFromLine
-      log::debug "line after extraction: ${line@Q}, REPLY: ${REPLY@Q}"
-      if [[ ${line} == "${firstChar}"* ]]; then
-        # the quote is closed
-        log::debug "quote closed"
-        isQuoteOpen=false
-        line="${line:1}"
-      else
-        # unclosed quote
-        log::debug "quote is not closed!"
-        isQuoteOpen=true
-      fi
-    elif [[ ${line} == *": "* ]]; then
-      REPLY="${line%%: *}"
-      line="${line:${#REPLY}}"
-    elif [[ ${line} == *: ]]; then
-      REPLY="${line%:}"
-      line=":"
-    else
-      REPLY="${line}"
-      line=""
-    fi
-    log::debug "line after 1st round: ${line@Q}, REPLY: ${REPLY@Q}"
 
-    # act on open quote or not
-    if [[ ${isQuoteOpen} == "true" ]]; then
+    if [[ ${firstChar} == [\{\[] ]]; then
+      value="${line}"
       keyName=""
-      # trim end spaces
-      value="${REPLY%"${REPLY##*[^[:space:]]}"}"
     else
-      # trim end spaces
-      keyName="${REPLY%"${REPLY##*[^[:space:]]}"}"
 
-      if [[ ${line} == ":"* ]]; then
-        # register keyname
-        if [[ (${firstChar} == [\'\"] && -z ${keyName}) || ${keyName} == *[\.\[]* ]]; then
-          # key was quoted and need to be re-quoted
-          keyName="\"${keyName}\""
-        elif [[ -z ${keyName} ]]; then
-          yaml_addParsingError "bad indentation of a mapping entry ${line@Q} (contains a ': ' but no key name)"
-        fi
-
-        line="${line#:}"
-        # trim beginning spaces
-        line="${line#"${line%%[^[:space:]]*}"}"
-
-        # handle tags
-        if [[ ${line} == "!"* ]]; then
-          # explicit tag
-          valueTag="${line%%[[:space:]]*}"
-          line="${line:${#valueTag}}"
-          line="${line#"${line%%[^[:space:]]*}"}"
+      if [[ ${firstChar} == [\'\"] ]]; then
+        yaml_extractFirstQuotedTextFromLine
+        log::debug "line after extraction: ${line@Q}, REPLY: ${REPLY@Q}"
+        if [[ ${line} == "${firstChar}"* ]]; then
+          # the quote is closed
+          log::debug "quote closed"
+          isQuoteOpen=false
+          line="${line:1}"
         else
-          valueTag=""
+          # unclosed quote
+          log::debug "quote is not closed!"
+          isQuoteOpen=true
         fi
-
-        firstChar="${line:0:1}"
-        if [[ ${firstChar} == [\'\"] ]]; then
-          yaml_extractFirstQuotedTextFromLine
-          log::debug "line after extraction of value: ${line@Q}, REPLY: ${REPLY@Q}"
-          if [[ ${line} == "${firstChar}"* ]]; then
-            # the quote is closed
-            log::debug "quote closed"
-            isQuoteOpen=false
-            line="${line:1}"
-          else
-            # unclosed quote
-            log::debug "quote is not closed!"
-            isQuoteOpen=true
-          fi
-          value="${REPLY}"
-        else
-          value="${line}"
-        fi
+      elif [[ ${line} == *": "* ]]; then
+        REPLY="${line%%: *}"
+        line="${line:${#REPLY}}"
+      elif [[ ${line} == *: ]]; then
+        REPLY="${line%:}"
+        line=":"
       else
-        value="${keyName}"
-        keyName=""
+        REPLY="${line}"
+        line=""
       fi
+      log::debug "line after 1st round: ${line@Q}, REPLY: ${REPLY@Q}"
 
       # act on open quote or not
-      if [[ ${isQuoteOpen} == true ]]; then
-        # trim ending spaces
-        value="${value%"${value##*[^[:space:]]}"}"
+      if [[ ${isQuoteOpen} == "true" ]]; then
+        keyName=""
+        # trim end spaces
+        value="${REPLY%"${REPLY##*[^[:space:]]}"}"
       else
-        if [[ ${firstChar} == [\'\"] ]]; then
-          # check that the remaining line after the ending quote is empty or a comment, otherwise it's a syntax error
+        # trim end spaces
+        keyName="${REPLY%"${REPLY##*[^[:space:]]}"}"
+
+        if [[ ${line} == ":"* ]]; then
+          # register keyname
+          if [[ (${firstChar} == [\'\"] && -z ${keyName}) || ${keyName} == *[\.\[]* ]]; then
+            # key was quoted and need to be re-quoted
+            keyName="\"${keyName}\""
+          elif [[ -z ${keyName} ]]; then
+            yaml_addParsingError "bad indentation of a mapping entry ${line@Q} (contains a ': ' but no key name)"
+          fi
+
+          line="${line#:}"
+          # trim beginning spaces
           line="${line#"${line%%[^[:space:]]*}"}"
-          if [[ -n ${line} && ${line} != \#* ]]; then
-            yaml_addParsingError "syntax error for ${line@Q}"
+
+          # handle tags
+          if [[ ${line} == "!"* ]]; then
+            # explicit tag
+            valueTag="${line%%[[:space:]]*}"
+            line="${line:${#valueTag}}"
+            line="${line#"${line%%[^[:space:]]*}"}"
+          else
+            valueTag=""
+          fi
+
+          firstChar="${line:0:1}"
+          if [[ ${firstChar} == [\'\"] ]]; then
+            yaml_extractFirstQuotedTextFromLine
+            log::debug "line after extraction of value: ${line@Q}, REPLY: ${REPLY@Q}"
+            if [[ ${line} == "${firstChar}"* ]]; then
+              # the quote is closed
+              log::debug "quote closed"
+              isQuoteOpen=false
+              line="${line:1}"
+            else
+              # unclosed quote
+              log::debug "quote is not closed!"
+              isQuoteOpen=true
+            fi
+            value="${REPLY}"
+          else
+            value="${line}"
           fi
         else
-          # remove trailing comments and spaces
-          if [[ ${value} == \#* ]]; then
-            value=""
-          else
-            value="${value%% \#*}"
-            # trim ending spaces
-            value="${value%"${value##*[^[:space:]]}"}"
-          fi
-          # not a quoted value, we possibly need to compute a tag
-          if [[ -z ${valueTag} ]]; then
-            yaml_computeValueTag
-          fi
+          value="${keyName}"
+          keyName=""
         fi
 
-        log::debug "line: ${lineNumber}, key: ${keyName@Q}, tag: ${valueTag@Q}, value: ${value@Q}, line ${line@Q}"
+        # act on open quote or not
+        if [[ ${isQuoteOpen} == true ]]; then
+          # trim ending spaces
+          value="${value%"${value##*[^[:space:]]}"}"
+        else
+          if [[ ${firstChar} == [\'\"] ]]; then
+            # check that the remaining line after the ending quote is empty or a comment, otherwise it's a syntax error
+            line="${line#"${line%%[^[:space:]]*}"}"
+            if [[ -n ${line} && ${line} != \#* ]]; then
+              yaml_addParsingError "syntax error for ${line@Q}"
+            fi
+          else
+            # remove trailing comments and spaces
+            if [[ ${value} == \#* ]]; then
+              value=""
+            else
+              value="${value%% \#*}"
+              # trim ending spaces
+              value="${value%"${value##*[^[:space:]]}"}"
+            fi
+            # not a quoted value, we possibly need to compute a tag
+            if [[ -z ${valueTag} ]]; then
+              yaml_computeValueTag
+            fi
+          fi
 
-        if [[ ${isArrayItemStart} != "true" && -z ${keyName} && -z ${value} ]]; then
-          # empty line
-          continue
+          log::debug "line: ${lineNumber}, key: ${keyName@Q}, tag: ${valueTag@Q}, value: ${value@Q}, line ${line@Q}"
+
+          if [[ ${isArrayItemStart} != "true" && -z ${keyName} && -z ${value} ]]; then
+            # empty line
+            continue
+          fi
         fi
       fi
     fi
@@ -488,13 +484,12 @@ function yaml::parseFile() {
           value+=" "
         fi
 
-        while [[ ${value#"${value%%[^[:space:]]*}"} == "- "* ]]; do
+        while [[ ${value} == "- "* ]]; do
           # case of an array within an array (e.g. `- - item1`)
-          indent="${value%%"- "*}"
           keyPaths=("${keyPaths[@]:0:indentLevelIndex}" "${keyName}")
           arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" 0)
           keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
-          indentLevel+=$((${#indent} + 2))
+          indentLevel+=$((${#inArrayIndent} + 2))
           indentLevelIndex+=1
           keyName="[0]"
 
@@ -504,10 +499,9 @@ function yaml::parseFile() {
           fullKey="${fullKey//'.['/'['}"
           REPLY_MAP["${fullKey}"]="1"
 
-          value="${value#"${indent}- "}"
-          if [[ ${value} == *"-" ]]; then
-            value+=" "
-          fi
+          value="${value#"- "}"
+          inArrayIndent="${value%%[^[:space:]]*}"
+          value="${value:${#inArrayIndent}}"
 
           log::debug "array within array: keyName: ${keyName@Q}, keyPaths: ${keyPaths[*]@Q}, arrayIndexes: ${arrayIndexes[*]@Q}, indentLevelIndex: ${indentLevelIndex}, arrayIndex: ${arrayIndex}"
         done
@@ -528,8 +522,17 @@ function yaml::parseFile() {
     # determine what the current line represents
     if [[ ${value} == [\{\[]* && ${firstChar} != [\'\"] ]]; then
       # case of a flow collection (json)
+      local jsonLine="${value}" jsonTempString jsonCumulatedLf="" isJsonQuoteOpen=0 jsonKeyName="" jsonPart jsonFullKey \
+        jsonLastString="" isJsonValueOpen=0 jsonCumulatedString="" jsonLastQuoteChar="" jsonValueTag
+      local -a jsonKeyPaths=() jsonArrayIndexes=() jsonOpenChars=()
+      local -i jsonDepth=-1
+
+      if ((${#keyName} == 0 && ${#keyPaths[@]} == 0)); then
+        isJsonRootObject=1
+      else
+        isJsonRootObject=0
+      fi
       isJsonOpen=1
-      jsonLine="${value}"
       value=""
 
     elif [[ ${isQuoteOpen} == "true" ]]; then
@@ -630,9 +633,13 @@ function yaml::parseFile() {
   done <"${path}"
 
   if ((isJsonOpen == 1)); then
-    yaml_addParsingError "invalid JSON flow collection (missing closing bracket)."
+    yaml_jsonHandleString
+    if ((jsonDepth >= 0)); then
+      yaml_addParsingError "invalid JSON flow collection (collection not closed)"
+    fi
+    isKeyWithoutValue=false
   elif [[ ${isQuoteOpen} == "true" ]]; then
-    yaml_addParsingError "invalid quoted value (missing closing quote)."
+    yaml_addParsingError "invalid quoted value (missing closing quote)"
   fi
 
   # close a multiline value if we reached the end of the file
@@ -720,53 +727,308 @@ function yaml_computeValueTag() {
   fi
 }
 
-# json
-# local jsonLine jsonCumulatedLf="" isJsonQuoteOpen=0 jsonKeyName jsonValue
-# local -a jsonKeyPaths=() jsonArrayIndexes=()
-# local -i jsonDepth=-1
-
-#
-
 # receives jsonLine and should parse json from it
 function yaml_jsonHandleString() {
-  log::warning "line ${lineNumber} handle: ${jsonLine@Q}, jsonDepth: ${jsonDepth}, jsonKeyPaths: ${jsonKeyPaths[*]@Q}, jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}"
+  log::debug "JSON PARSE line ${lineNumber} handle: ${jsonLine@Q}, jsonDepth: ${jsonDepth}, jsonKeyPaths: ${jsonKeyPaths[*]@Q}, jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonOpenChars: ${jsonOpenChars[*]@Q}"
 
-  while [[ -z ${jsonLine} ]]; do
-    local part="${jsonLine%%[\{\}\[\]\:\'\",]*}"
-    log::info "json part: ${part@Q}, jsonLine: ${jsonLine:${#part}}"
-    case "${jsonLine:${#part}}" in
-    '"'*)
-      isJsonQuoteOpen=true
-      ;;
-    "'"*)
-      isJsonQuoteOpen=true
-      ;;
-    '['*)
-      log::warning "json array start"
-      jsonDepth+=1
-      jsonArrayIndexes=("${jsonArrayIndexes[@]:0:jsonDepth}" 0)
-      jsonKeyPaths=("${jsonKeyPaths[@]:0:jsonDepth}" "[0]")
-      ;;
-    ']'*)
-      log::warning "json array end"
-      jsonDepth=$((jsonDepth - 1))
-      ;;
-    '{'*)
-      log::warning "json object start"
-      jsonDepth+=1
-      jsonArrayIndexes=("${jsonArrayIndexes[@]:0:jsonDepth}" -1)
-      jsonKeyPaths=("${jsonKeyPaths[@]:0:jsonDepth}" "${jsonKeyName}")
-      ;;
-    '}'*)
-      log::warning "json object start"
-      jsonDepth=$((jsonDepth - 1))
+  # a quote has been opened on a previous line
+  if ((isJsonQuoteOpen == 1)); then
+    if [[ ${jsonLine} != *[^[:space:]]* ]]; then
+      jsonCumulatedLf+=$'\n'
+      return 0
+    fi
+    if [[ -n ${jsonCumulatedLf} ]]; then
+      jsonLastString+="${jsonCumulatedLf}"
+    elif ((${#jsonLastString} > 0)); then
+      jsonLastString+=' '
+    fi
+    jsonCumulatedLf=""
+
+    jsonLine="${jsonLine#"${jsonLine%%[^[:space:]]*}"}"
+
+    # prepend the last quote char so we can parse the line as an quoted string
+    jsonLine="${jsonLastQuoteChar}${jsonLine}"
+
+  elif [[ ${isJsonValueOpen} == 1 && ${jsonLine} != *[^[:space:]]* ]]; then
+    jsonCumulatedLf+=$'\n'
+    return 0
+  fi
+
+  while ((${#jsonLine} > 0)); do
+    jsonPart="${jsonLine%%[\{\}\[\]\:\'\",#]*}"
+    log::debug "⌜${jsonLine:${#jsonPart}:1}⌝ -> json part: ${jsonPart@Q}"
+
+    case "${jsonLine:${#jsonPart}}" in
+    [\"\']*)
+      if ((isJsonQuoteOpen == 0)); then
+        if ((${#jsonLastString} > 0)); then
+          yaml_addParsingError "unexpected token (expected one of ⌜:,{}[]⌝): ${jsonPart@Q}"
+        elif [[ ${jsonPart} == *[^[:space:]]* || ${#jsonCumulatedString} -gt 0 ]]; then
+          yaml_addParsingError "unexpected token (nothing should precede a quote): ${jsonPart@Q}"
+        fi
+      fi
+
+      jsonLastQuoteChar="${jsonLine:${#jsonPart}:1}"
+
+      # extract until next unescaped quote
+      jsonLine="${jsonLine:${#jsonPart}+1}"
+      if [[ ${jsonLastQuoteChar} == '"' ]]; then
+        jsonTempString="${jsonLine//\\\"/$'\a\a'}"
+      else
+        jsonTempString="${jsonLine//\'\'/$'\a\a'}"
+      fi
+      jsonTempString="${jsonTempString%%"${jsonLastQuoteChar}"*}"
+      jsonLine="${jsonLine:${#jsonTempString}}"
+      jsonLastString+="${jsonTempString//$'\a\a'/"${jsonLastQuoteChar}"}"
+
+      if ((${#jsonLine} > 0)); then
+        isJsonQuoteOpen=0
+        jsonLine="${jsonLine:1}"
+      else
+        isJsonQuoteOpen=1
+        jsonCumulatedLf=""
+      fi
+
+      log::debug "json last string: ${jsonLastString@Q}, jsonLine: ${jsonLine@Q}, isJsonQuoteOpen: ${isJsonQuoteOpen}"
+      continue
       ;;
     ':'*)
-      :
+      if [[ ${jsonLastQuoteChar} != [\'\"] && ${jsonLine:${#jsonPart}} != ":"[\ \,\}\]]* ]]; then
+        # the "key" was not quoted, there must be a space after the colon for it to be a key/value separator
+        yaml_cumulateString
+        jsonCumulatedString+=":"
+        jsonLine="${jsonLine:${#jsonPart}+1}"
+        continue
+      fi
+
+      if ((jsonDepth < 0)); then
+        yaml_addParsingError "unexpected token (expected one of ⌜{[⌝): ${jsonPart@Q}"
+      fi
+
+      yaml_cumulateString
+
+      # the last string is the key
+      if ((${#jsonCumulatedString} > 0)); then
+        if ((${#jsonLastString} > 0)); then
+          yaml_addParsingError "unexpected token (expected one of ⌜:,}]⌝): ${jsonPart@Q}"
+        fi
+        jsonKeyName="${jsonCumulatedString}"
+      elif ((${#jsonLastString} > 0)); then
+        jsonKeyName="${jsonLastString}"
+      elif [[ ${jsonLastQuoteChar} == [\'\"] ]]; then
+        jsonKeyName=""
+      else
+        jsonKeyName="null"
+      fi
+
+      if [[ ${jsonOpenChars[jsonDepth]} == '[' ]]; then
+        # case of an object within an array but that was not explicitly opened with a {
+        jsonOpenChars[jsonDepth + 1]=''
+        jsonDepth+=1
+        log::debug "IMPLICIT json object start (jsonOpenChars: ${jsonOpenChars[*]@Q}, jsonDepth: ${jsonDepth})"
+      fi
+
+      yaml_jsonAddKey
+      jsonLastString=""
+      jsonCumulatedString=""
+      jsonCumulatedLf=""
+      jsonLastQuoteChar=""
       ;;
     ','*)
-      :
+      if ((jsonDepth < 0)); then
+        yaml_addParsingError "unexpected token (expected one of ⌜{[⌝): ${jsonPart@Q}"
+      fi
+      ;;&
+    '}'*)
+      log::debug "json object end"
+      if [[ ${jsonOpenChars[jsonDepth]} != '{' ]]; then
+        yaml_addParsingError "json object end found but last open char is not an object: ${jsonOpenChars[jsonDepth]@Q} (jsonOpenChars: ${jsonOpenChars[*]@Q}, jsonDepth: ${jsonDepth})"
+      fi
+      ;;&
+    ']'*)
+      log::debug "json array end"
+      if [[ ${jsonOpenChars[jsonDepth]} != '[' ]]; then
+        # need to also check the case were we close an implicitly opened object within an array
+        if [[ ${jsonOpenChars[jsonDepth]} != '' || ${jsonDepth} -lt 1 || ${jsonOpenChars[jsonDepth - 1]} != '[' ]]; then
+          yaml_addParsingError "json array end found but last open char is not an array: ${jsonOpenChars[jsonDepth]@Q} (jsonOpenChars: ${jsonOpenChars[*]@Q}, jsonDepth: ${jsonDepth})"
+        fi
+      fi
+      ;;&
+    [\,\}\]]*)
+      # closing a key/value pair
+      yaml_cumulateString
+
+      if ((${#jsonLastString} > 0)); then
+        # can't have both quoted strings and cumulated unquoted string
+        if ((${#jsonCumulatedString} > 0)); then
+          yaml_addParsingError "unexpected token (expected one of ⌜:,}]⌝): ${jsonPart@Q}"
+        fi
+        jsonCumulatedString="${jsonLastString}"
+      fi
+
+      if ((${#jsonKeyName} > 0)); then
+        # we have a key, this is a value
+        if [[ ${jsonLastQuoteChar} == [\'\"] ]]; then
+          # quoted string
+          jsonValueTag=""
+          yaml_jsonSaveValue
+        else
+          if ((${#jsonCumulatedString} == 0)); then
+            if [[ ${jsonOpenChars[jsonDepth]} != '[' ]]; then
+              # not in an array, this is a null value
+              jsonCumulatedString="null"
+              jsonValueTag="!!null"
+              yaml_jsonSaveValue
+            fi
+          else
+            # compute value tag
+            local -n value=jsonCumulatedString
+            local valueTag=""
+            yaml_computeValueTag
+            jsonValueTag="${valueTag}"
+            yaml_jsonSaveValue
+          fi
+        fi
+
+      elif ((${#jsonCumulatedString} > 0)); then
+        if [[ ${jsonOpenChars[jsonDepth]} == '[' ]]; then
+          # case of an array value without a key, this is the value
+          if [[ ${jsonLastQuoteChar} == [\'\"] ]]; then
+            # quoted string
+            jsonValueTag=""
+          else
+            # compute value tag
+            # shellcheck disable=SC2034
+            local -n value=jsonCumulatedString
+            local valueTag=""
+            yaml_computeValueTag
+            jsonValueTag="${valueTag}"
+          fi
+        else
+          # case of object value without a key, this is the key (with null value)
+          jsonKeyName="${jsonCumulatedString}"
+          yaml_jsonAddKey
+
+          jsonCumulatedString="null"
+          jsonValueTag="!!null"
+        fi
+        yaml_jsonSaveValue
+      fi
+
+      jsonKeyName=""
+      jsonLastString=""
+      jsonCumulatedString=""
+      jsonCumulatedLf=""
+      jsonLastQuoteChar=""
+      ;;&
+    [\,\]]*)
+      # case of an object within an array that was not explicitly opened with a {
+      if [[ ${jsonOpenChars[jsonDepth]} == '' ]]; then
+        # case of an object within an array but that was not explicitly opened with a {
+        jsonDepth=$((jsonDepth - 1))
+        log::debug "IMPLICIT json object end (jsonOpenChars: ${jsonOpenChars[*]@Q}, jsonDepth: ${jsonDepth})"
+      fi
+      ;;&
+    [\}\]]*)
+      jsonDepth=$((jsonDepth - 1))
+      if ((jsonDepth <= -1)); then
+        # final close
+        jsonLine="${jsonLine:${#jsonPart}+1}"
+        break
+      fi
+      ;;
+    ','*)
+      # possible end of an array value, increment the last array index
+      if [[ ${jsonOpenChars[jsonDepth]} == '[' ]]; then
+        log::debug "jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonKeyPaths: ${jsonKeyPaths@Q}, jsonDepth: ${jsonDepth}"
+        jsonArrayIndexes[jsonDepth]=$((jsonArrayIndexes[jsonDepth] + 1))
+        jsonKeyName="[${jsonArrayIndexes[jsonDepth]}]"
+        jsonKeyPaths[jsonDepth]="${jsonKeyName}"
+
+        log::debug "json array index incremented to ${jsonArrayIndexes[jsonDepth]} (${jsonKeyPaths[jsonDepth]})"
+        log::debug "jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonKeyPaths: ${jsonKeyPaths[*]@Q}, jsonDepth: ${jsonDepth}"
+      fi
+      ;;
+    '{'*)
+      log::debug "json object start"
+      jsonOpenChars[jsonDepth + 1]='{'
+      jsonDepth+=1
+      ;;
+    '['*)
+      log::debug "json array start"
+      jsonOpenChars[jsonDepth + 1]='['
+      jsonDepth+=1
+      jsonKeyName="[0]"
+      yaml_jsonAddKey
+      ;;
+    '#'*)
+      return 0
+      ;;
+    *)
+      # the line ends with a non quoted string
+      log::debug "part ${jsonPart@Q}, line ${jsonLine@Q} not handled"
+      yaml_cumulateString
+      isJsonValueOpen=1
+      return 0
       ;;
     esac
+
+    jsonLine="${jsonLine:${#jsonPart}+1}"
   done
+
+  isJsonValueOpen=0
+  if ((${#jsonLine} > 0)); then
+    yaml_addParsingError "json line not fully parsed: ${jsonLine@Q}"
+  fi
+}
+
+function yaml_cumulateString() {
+  # trim json part
+  jsonTempString="${jsonPart%"${jsonPart##*[^[:space:]]}"}"
+  jsonTempString="${jsonTempString#"${jsonTempString%%[^[:space:]]*}"}"
+
+  if ((${#jsonTempString} > 0)); then
+    if ((isJsonValueOpen == 1)); then
+      if [[ -n ${jsonCumulatedLf} ]]; then
+        jsonCumulatedString+="${jsonCumulatedLf}"
+      elif ((${#jsonCumulatedString} > 0)); then
+        jsonCumulatedString+=' '
+      fi
+      jsonCumulatedLf=""
+    fi
+
+    jsonCumulatedString+="${jsonTempString}"
+  fi
+
+  log::debug "cumulated string: ${jsonCumulatedString@Q}"
+}
+
+function yaml_jsonSaveValue() {
+  jsonFullKey="${jsonKeyPaths[*]:0:jsonDepth+1}"
+  jsonFullKey="${fullKey:-""}.${jsonFullKey#.}"
+  jsonFullKey="${jsonFullKey#.}"
+  jsonFullKey="${jsonFullKey//'.['/'['}"
+
+  log::debug "ADD VALUE : key: ${jsonFullKey@Q}, value: ${jsonCumulatedString@Q}, jsonDepth: ${jsonDepth}"
+  REPLY_MAP["${jsonFullKey}"]="${jsonCumulatedString}"
+  if [[ -n ${jsonValueTag} && ${jsonValueTag} != "!!str" && ${jsonValueTag} != "!" ]]; then
+    REPLY_MAP["${jsonFullKey}.tag"]="${jsonValueTag}"
+  fi
+}
+
+function yaml_jsonAddKey() {
+  if [[ ${jsonKeyName} == "? "* ]]; then
+    jsonKeyName="${jsonKeyName#\? }"
+    jsonKeyName="${jsonKeyName#"${jsonKeyName%%[^[:space:]]*}"}"
+  fi
+
+  # quote the key if needed
+  if [[ ${#jsonKeyName} == 0 || (${jsonOpenChars[jsonDepth]} != '[' && ${jsonKeyName} == *[\.\[]*) ]]; then
+    jsonKeyName="\"${jsonKeyName}\""
+  fi
+
+  jsonArrayIndexes=("${jsonArrayIndexes[@]:0:jsonDepth}" 0)
+  jsonKeyPaths=("${jsonKeyPaths[@]:0:jsonDepth}" "${jsonKeyName}")
+
+  log::debug "ADD NEW KEY : ${jsonKeyName@Q} (${jsonKeyPaths[*]:0:jsonDepth+1}), jsonDepth: ${jsonDepth}"
 }
