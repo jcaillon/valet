@@ -1,5 +1,5 @@
 ---
-title: ⌨️ Valet commands
+title: Valet commands
 cascade:
   type: docs
 weight: 400

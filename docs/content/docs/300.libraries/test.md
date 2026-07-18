@@ -1,11 +1,11 @@
 ---
-title: 📂 test
+title: test
 cascade:
   type: docs
 url: /docs/libraries/test
 ---
 
-## ⚡ test::addOutputScrubber
+## test::addOutputScrubber
 
 Add a scrubber function to modify the flushed text (both stdout and stderr) before adding it to the report.
 
@@ -27,7 +27,7 @@ Example usage:
 test::addOutputScrubber myScrubberFunction
 ```
 
-## ⚡ test::addReplyVarsScrubber
+## test::addReplyVarsScrubber
 
 Add a scrubber function to modify the REPLY variables before printing them in the report.
 
@@ -48,7 +48,7 @@ Example usage:
 test::addReplyVarsScrubber myScrubberFunction
 ```
 
-## ⚡ test::cat
+## test::cat
 
 Print the content of a file in a consistent way for testing.
 It will also print the file path before the content.
@@ -65,7 +65,7 @@ Example usage:
 test::cat "/path/to/file"
 ```
 
-## ⚡ test::clearOutputScrubbers
+## test::clearOutputScrubbers
 
 Clear the list of scrubbers to modify the flushed text (both stdout and stderr) before adding it to the report.
 
@@ -75,7 +75,7 @@ Example usage:
 test::clearOutputScrubbers
 ```
 
-## ⚡ test::clearReplyVarsScrubbers
+## test::clearReplyVarsScrubbers
 
 Clear the list of scrubbers to modify the REPLY variables before printing them in the report.
 
@@ -85,7 +85,7 @@ Example usage:
 test::clearReplyVarsScrubbers
 ```
 
-## ⚡ test::exec
+## test::exec
 
 Call this function to execute a command and write the command and its output to the report file.
 The command can fail, in which case the returned exit code is written to the report file.
@@ -107,7 +107,7 @@ test::exec echo "Hello, world!"
 test::exec command "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
-## ⚡ test::exit
+## test::exit
 
 Call this function to execute a command that can call `exit` and write the command and its output to the report file.
 The command is executed in a subshell to catch the exit.
@@ -128,7 +128,7 @@ test::exit exit 3
 test::exit core::fail "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
-## ⚡ test::fail
+## test::fail
 
 Call this function to log a message and exit with the status 142.
 This should be used to purposefully throw a test failure.
@@ -147,7 +147,7 @@ Example usage:
 test::fail "This is a failure message with a clear reason."
 ```
 
-## ⚡ test::flush
+## test::flush
 
 Call this function to flush the standard and error outputs to the report file.
 They will be added as code blocks in the report file (one for the standard
@@ -159,7 +159,7 @@ Example usage:
 test::flush
 ```
 
-## ⚡ test::flushStderr
+## test::flushStderr
 
 Call this function to flush the standard error to the report file.
 It will be added as a code block in the report file.
@@ -178,7 +178,7 @@ Example usage:
 test::flushStderr
 ```
 
-## ⚡ test::flushStdout
+## test::flushStdout
 
 Call this function to flush the standard output to the report file.
 It will be added as a code block in the report file.
@@ -197,7 +197,7 @@ Example usage:
 test::flushStdout
 ```
 
-## ⚡ test::func
+## test::func
 
 Call this function to test a function that returns a value using the valet
 conventions (REPLY, REPLY2, REPLY_ARRAY, etc...).
@@ -221,7 +221,7 @@ test::func myFunction
 test::func myFunction "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
-## ⚡ test::listPaths
+## test::listPaths
 
 Print the content of a directory in a consistent way for testing, by sorting the entries
 and printing the type of each entry (file, directory or link).
@@ -250,7 +250,7 @@ Example usage:
 test::listPaths "/path/to/directory" recursive=true includeHidden=true
 ```
 
-## ⚡ test::log
+## test::log
 
 Call this function to log a message during a test.
 This log will only show in case of a script error or when the debug
@@ -268,7 +268,7 @@ Example usage:
 test::log "This is a log message."
 ```
 
-## ⚡ test::markdown
+## test::markdown
 
 Call this function to add some markdown in the report file.
 
@@ -284,7 +284,7 @@ Example usage:
 test::markdown "> This is a **quote**."
 ```
 
-## ⚡ test::printReplyVars
+## test::printReplyVars
 
 This function can be called to print the REPLY values,
 e.g. REPLY, REPLY2, REPLY_ARRAY...
@@ -296,7 +296,7 @@ Example usage:
 test::printReplyVars
 ```
 
-## ⚡ test::printVars
+## test::printVars
 
 This function can be called to print the global variables in the report file.
 They will printed in a code block in the report file.
@@ -313,7 +313,7 @@ Example usage:
 test::printVars myVar
 ```
 
-## ⚡ test::prompt
+## test::prompt
 
 Call this function to print a 'prompt' (markdown that looks like a prompt) in the report file.
 
@@ -329,7 +329,7 @@ Example usage:
 test::prompt "echo 'Hello, world!'"
 ```
 
-## ⚡ test::resetReplyVars
+## test::resetReplyVars
 
 Resets the value of each REPLY variable.
 
@@ -339,7 +339,7 @@ Example usage:
 test::resetReplyVars
 ```
 
-## ⚡ test::setTerminalInputs
+## test::setTerminalInputs
 
 Replaces the functions `terminal::waitForChar` and `terminal::waitForKeyPress` by custom functions
 that return keys defined as an input of this function.
@@ -357,7 +357,7 @@ Example usage:
 test::setTerminalInputs "a" "b" "c"
 ```
 
-## ⚡ test::setupBashForConsistency
+## test::setupBashForConsistency
 
 This function is used to set up the Bash environment for maximum consistency during testing.
 It will override important dynamic bash variables to have more static results.
@@ -368,7 +368,7 @@ Example usage:
 test::setupBashForConsistency
 ```
 
-## ⚡ test::skipTestSuite
+## test::skipTestSuite
 
 Call this function to log a message and exit with the status 143.
 This can be used to skip the current test suite without failing the whole test execution,
@@ -386,7 +386,7 @@ Example usage:
 test::skipTestSuite "This test is not applicable."
 ```
 
-## ⚡ test::title
+## test::title
 
 Call this function to add an H3 title in the report file.
 

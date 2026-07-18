@@ -1,11 +1,11 @@
 ---
-title: 📂 log
+title: log
 cascade:
   type: docs
 url: /docs/libraries/log
 ---
 
-## ⚡ log::debug
+## log::debug
 
 Displays a debug message.
 
@@ -21,7 +21,7 @@ Example usage:
 log::debug "This is a debug message."
 ```
 
-## ⚡ log::error
+## log::error
 
 Displays an error message.
 
@@ -39,7 +39,7 @@ log::error "This is an error message."
 
 > You probably want to exit immediately after an error and should consider using core::fail function instead.
 
-## ⚡ log::errorTrace
+## log::errorTrace
 
 Displays an error trace message.
 This is a trace message that is always displayed, independently of the log level.
@@ -57,7 +57,7 @@ Example usage:
 log::errorTrace "This is a debug message."
 ```
 
-## ⚡ log::getCallStack
+## log::getCallStack
 
 This function returns the current function stack.
 
@@ -97,7 +97,7 @@ log::getCallStack stackToSkip=2 stackToSkipAtEnd=1 wrapWidth=80
 > For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`
 > variables to simulate a call stack.
 
-## ⚡ log::getLevel
+## log::getLevel
 
 Get the current log level.
 
@@ -112,7 +112,7 @@ log::getLevel
 printf '%s\n' "The log level is ⌜${REPLY}⌝."
 ```
 
-## ⚡ log::info
+## log::info
 
 Displays an info message.
 
@@ -128,7 +128,7 @@ Example usage:
 log::info "This is an info message."
 ```
 
-## ⚡ log::isDebugEnabled
+## log::isDebugEnabled
 
 Check if the debug mode is enabled.
 
@@ -144,7 +144,7 @@ Example usage:
 if log::isDebugEnabled; then printf '%s\n' "Debug mode is active."; fi
 ```
 
-## ⚡ log::isTraceEnabled
+## log::isTraceEnabled
 
 Check if the trace mode is enabled.
 
@@ -160,7 +160,7 @@ Example usage:
 if log::isTraceEnabled; then printf '%s\n' "Debug mode is active."; fi
 ```
 
-## ⚡ log::printCallStack
+## log::printCallStack
 
 This function prints the current function stack in the logs.
 
@@ -189,7 +189,7 @@ log::printCallStack stackToSkip=0
 > For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`
 > variables to simulate a call stack.
 
-## ⚡ log::printFile
+## log::printFile
 
 Display a file content with line numbers in the logs.
 The file content will be aligned with the current log output and hard wrapped if necessary.
@@ -213,7 +213,7 @@ log::printFile "/my/file/path"
 log::printFile "/my/file/path" maxLines=10
 ```
 
-## ⚡ log::printFileString
+## log::printFileString
 
 Display a file content with line numbers in the logs.
 The file content will be aligned with the current log output and hard wrapped if necessary.
@@ -239,7 +239,7 @@ log::printFileString "myvar" maxLines=10
 
 > This function is not at all suited for large strings, print the content to a file instead.
 
-## ⚡ log::printRaw
+## log::printRaw
 
 Display something in the log stream.
 Does not check the log level.
@@ -256,7 +256,7 @@ Example usage:
 log::printRaw "my line"
 ```
 
-## ⚡ log::printString
+## log::printString
 
 Display a string in the log.
 The string will be aligned with the current log output and hard wrapped if necessary.
@@ -281,7 +281,7 @@ log::printString "my line"
 log::printString "my line" newLinePadString="  "
 ```
 
-## ⚡ log::saveFile
+## log::saveFile
 
 Save the given file by copying it to a new file in the user local state directory
 (using `core::createSavedFilePath`).
@@ -315,7 +315,7 @@ Example usage:
 log::saveFile "/my/file/path" "suffix" "important result file"
 ```
 
-## ⚡ log::saveFileString
+## log::saveFileString
 
 Save the given string to a new file in the user local state directory
 (using `core::createSavedFilePath`).
@@ -349,7 +349,7 @@ Example usage:
 log::saveFileString "my content" "suffix" "important result file"
 ```
 
-## ⚡ log::setLevel
+## log::setLevel
 
 Set the log level.
 
@@ -358,12 +358,12 @@ Inputs:
 - `$1`: **log level** _as string_:
 
   The log level to set (or defaults to info), acceptable values are:
-    - trace
-    - debug
-    - info
-    - success
-    - warning
-    - error
+  - trace
+  - debug
+  - info
+  - success
+  - warning
+  - error
 
 - `${silent}` _as bool_:
 
@@ -378,7 +378,7 @@ log::setLevel debug
 log::setLevel debug silent=true
 ```
 
-## ⚡ log::success
+## log::success
 
 Displays a success message.
 
@@ -394,7 +394,7 @@ Example usage:
 log::success "This is a success message."
 ```
 
-## ⚡ log::trace
+## log::trace
 
 Displays a trace message.
 
@@ -410,7 +410,7 @@ Example usage:
 log::trace "This is a trace message."
 ```
 
-## ⚡ log::warning
+## log::warning
 
 Displays a warning.
 

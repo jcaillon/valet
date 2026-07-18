@@ -1,11 +1,11 @@
 ---
-title: 📂 command
+title: command
 cascade:
   type: docs
 url: /docs/libraries/command
 ---
 
-## ⚡ command::checkParsedResults
+## command::checkParsedResults
 
 A convenience function to check the parsing results and fails with an error message if there are
 parsing errors.
@@ -22,13 +22,12 @@ Example usage:
 command::checkParsedResults
 ```
 
-## ⚡ command::parseArguments
+## command::parseArguments
 
 Parse the arguments and options of a function and return a string that can be evaluated to set the variables.
 This should be called from a command function for which you want to parse the arguments.
 
-See the documentation for more details on the parser: <https://jcaillon.github.io/valet/docs/new-commands/#-implement-your-command>.
-
+See the documentation for more details on the parser: <https://jcaillon.github.io/valet/docs/new-commands/#implement-your-command>.
 
 Inputs:
 
@@ -54,7 +53,7 @@ Example usage:
 command::parseArguments "$@"; eval "${REPLY}"
 ```
 
-## ⚡ command::showHelp
+## command::showHelp
 
 Show the help for the current function.
 This should be called directly from a command function for which you want to display the help text.
@@ -65,7 +64,7 @@ Example usage:
 command::showHelp
 ```
 
-## ⚡ command::sourceFunction
+## command::sourceFunction
 
 Source the file associated with a command function.
 This allows you to call a command function without having to source the file manually.

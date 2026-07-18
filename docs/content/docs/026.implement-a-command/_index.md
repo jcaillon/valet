@@ -1,5 +1,5 @@
 ---
-title: ✒️ Implement a command
+title: Implement a command
 cascade:
   type: docs
 weight: 26
@@ -19,7 +19,7 @@ function helloWorld() {
 
 **Explanations:**
 
-- `command::parseArguments "$@"` is a core function of Valet which parses the input argument (i.e. `$@`) and returns a string in the global variable `REPLY` which can be evaluated to set local variables corresponding to positional arguments and options. See the function help in the [command library documentation page](../libraries/command/#-commandparsearguments).
+- `command::parseArguments "$@"` is a core function of Valet which parses the input argument (i.e. `$@`) and returns a string in the global variable `REPLY` which can be evaluated to set local variables corresponding to positional arguments and options. See the function help in the [command library documentation page](../libraries/command/#commandparsearguments).
 - `eval "${REPLY}"` evaluates the output string of the parsing function which sets local variables.
 - `command::checkParsedResults` will check if the local variable `help` is true, which corresponds to the option `--help` passed to the function, in which case it will display the function help and stop its execution. It will also check if the local variable `commandArgumentsErrors` is not empty, which indicates that the parsing function encountered input errors: the function execution is also stopped with parsing errors shown to the user.
 
@@ -30,7 +30,7 @@ After these two mandatory lines, you can implement your function and expect the 
 >
 > You can use the bash builtin `local` to list the existing local variables.
 
-## 👉 A command example
+## A command example
 
 Find below the complete definition of an `example` command that can take an option `--my-option` and requires one argument `my-argument`.
 
@@ -66,7 +66,7 @@ Executing `valet example --my-option opt1 arg1` will display `opt1 and arg1` in 
 
 Check [the command properties section][command-properties] for more details on how arguments and options are translated to local variables.
 
-## ✂️ Understand the parser
+## Understand the parser
 
 The function `command::parseArguments "$@"` will return a string that can be evaluated to define the parsed options and arguments as local variables.
 
@@ -80,7 +80,7 @@ local commandArgumentsErrors="Unknown option '--thing'"
 
 The `commandArgumentsErrors` variable contains the parser error: here we passed an option that is unknown for this command. Calling `command::checkParsedResults` will print that parsing error message to the user and exit the program.
 
-## 🧩 Access Valet library functions
+## Access Valet library functions
 
 In the function of a command, you have access by default to a set of Valet functions:
 
@@ -102,7 +102,7 @@ You can find a list of [all the standard libraries here][libraries].
 
 Additionally, you can create your own library functions. See the [create a library][newLibraryLink] section for more information.
 
-## 🐞 Error handling and return values
+## Error handling and return values
 
 Although you can simply `exit` from a command function, it is recommended to:
 
@@ -151,7 +151,7 @@ echo "${myUnsureVariable:-default value}"
 > [!NOTE]
 > You can always revert these bash options in your function. However, continuing the execution of a program that has encountered an unexpected error is most likely a bad idea.
 
-## 💡 Implementation tips and best practices
+## Implementation tips and best practices
 
 Please find these dedicated pages to help you write better bash scripts:
 
@@ -160,7 +160,7 @@ Please find these dedicated pages to help you write better bash scripts:
   {{< card icon="book-open" link="../bash-best-practices" title="Bash best practices" tag="reference" tagType="info" >}}
 {{< /cards >}}
 
-## 🐛 How to debug your program
+## How to debug your program
 
 Your command function is not working as expected or seems stuck?
 

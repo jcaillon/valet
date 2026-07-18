@@ -1,11 +1,11 @@
 ---
-title: 📂 coproc
+title: coproc
 cascade:
   type: docs
 url: /docs/libraries/coproc
 ---
 
-## ⚡ coproc::isRunning
+## coproc::isRunning
 
 This function checks if a coproc is running.
 
@@ -29,7 +29,7 @@ if coproc::isRunning "myCoproc"; then
 fi
 ```
 
-## ⚡ coproc::kill
+## coproc::kill
 
 This function kills a coproc.
 
@@ -45,7 +45,7 @@ Example usage:
 coproc::kill "myCoproc"
 ```
 
-## ⚡ coproc::receiveMessage
+## coproc::receiveMessage
 
 This function receives a message from a given coproc.
 It expects the message to end with a $'\0' character.
@@ -71,7 +71,7 @@ if coproc::receiveMessage "myCoproc"; then
 fi
 ```
 
-## ⚡ coproc::receiveMessageWithTimeOut
+## coproc::receiveMessageWithTimeOut
 
 This function receives a message from a given coproc.
 It expects the message to be placed after a $'\0' string and end with a $'\0' character.
@@ -103,7 +103,7 @@ if coproc::receiveMessageWithTimeOut "myCoproc" 0.05; then
 fi
 ```
 
-## ⚡ coproc::run
+## coproc::run
 
 This function runs commands in a coproc:
 
@@ -193,7 +193,7 @@ Example usage:
 waitForMainEnd=true coproc::run "_MY_COPROC" mainCommand loopCommand onMessageCommand
 ```
 
-## ⚡ coproc::runInParallel
+## coproc::runInParallel
 
 This function runs a list of commands in parallel with a maximum number of parallel coprocs.
 
@@ -268,7 +268,7 @@ declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
 coproc::runInParallel jobCommands maxParallelCoprocs=2
 ```
 
-## ⚡ coproc::sendMessage
+## coproc::sendMessage
 
 This function sends a message to a given coproc.
 The message will be sent with a $'\0' character at the end.
@@ -298,7 +298,7 @@ coproc::sendMessage "myCoproc" "Hello, coproc!"
 > This printf call can cause the whole shell to exit with code 141 if there is an issue with the coproc.
 > You will want to run this in a subshell to avoid exiting the main shell if your coproc is unstable.
 
-## ⚡ coproc::wait
+## coproc::wait
 
 This function waits for a coproc to finish.
 
@@ -309,6 +309,7 @@ Inputs:
   The variable name to use for the coproc.
 
 Returns:
+
 - `${REPLY_CODE}`: The exit status of the coproc (or -1 if the coproc is not running).
 
 Example usage:

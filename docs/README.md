@@ -44,7 +44,7 @@ You will be able to reach your local version of the documentation at <http://loc
 
 ### Work on the documentation
 
-It is recommended to install and work with [vscode](https://code.visualstudio.com/). 
+It is recommended to install and work with [vscode](https://code.visualstudio.com/).
 
 You will find recommended extensions for this project using the filter `@recommended` in vscode extensions marketplace.
 
@@ -83,9 +83,6 @@ You can also convert all .cast files into gifs:
 cd static/asciinema
 ./to-gifs.sh
 ```
-
-
-
 
 ## Update the theme
 

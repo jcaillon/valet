@@ -1,5 +1,5 @@
 ---
-title: 🤝 Contributing
+title: Contributing
 cascade:
   type: docs
 weight: 900

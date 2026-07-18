@@ -1,11 +1,11 @@
 ---
-title: 📂 profiler
+title: profiler
 cascade:
   type: docs
 url: /docs/libraries/profiler
 ---
 
-## ⚡ profiler::disable
+## profiler::disable
 
 Disable the profiler if previously activated with profiler::enable.
 
@@ -15,7 +15,7 @@ Example usage:
 profiler::disable
 ```
 
-## ⚡ profiler::enable
+## profiler::enable
 
 Enables the profiler and start writing to the given file.
 The profiler will also be active in subshells of this current shell.
@@ -34,7 +34,7 @@ profiler::enable "${HOME}/valet-profiler-${BASHPID}.txt"
 
 > There can be only one profiler active at a time.
 
-## ⚡ profiler::pause
+## profiler::pause
 
 Pause the profiler if previously activated with profiler::enable.
 
@@ -44,7 +44,7 @@ Example usage:
 profiler::pause
 ```
 
-## ⚡ profiler::resume
+## profiler::resume
 
 Resume the profiler if previously paused with profiler::pause.
 

@@ -1,11 +1,11 @@
 ---
-title: 📂 version
+title: version
 cascade:
   type: docs
 url: /docs/libraries/version
 ---
 
-## ⚡ version::bump
+## version::bump
 
 This function allows to bump a semantic version formatted like:
 major.minor.patch-prerelease+build
@@ -38,7 +38,7 @@ version::bump "1.2.3-prerelease+build" "major"
 local newVersion="${REPLY}"
 ```
 
-## ⚡ version::compare
+## version::compare
 
 This function allows to compare two semantic versions formatted like:
 major.minor.patch-prerelease+build

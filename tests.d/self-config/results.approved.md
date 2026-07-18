@@ -30,7 +30,7 @@ REPLY='#!/usr/bin/env bash
 # > Remember that command options are also configurable through environment variables!
 # 
 ##############################
-# 📄 About the config file
+# About the config file
 ##############################
 # 
 # The config file is sourced by Valet on startup.
@@ -57,7 +57,7 @@ REPLY='#!/usr/bin/env bash
 # > You can delete it and run the `valet self config` command to recreate it.
 # 
 ##############################
-# 🚩 Custom startup script
+# Custom startup script
 ##############################
 # 
 # You can define a custom startup script that will be sourced by Valet on startup.
@@ -78,14 +78,14 @@ REPLY='#!/usr/bin/env bash
 # The script must be named `startup` and be in the same directory as the config file. You can override the path to this file using the variable `VALET_CONFIG_STARTUP_SCRIPT`.
 # 
 ##############################
-# 🅰️ Configuration variables
+# Configuration variables
 ##############################
 # 
 # All configuration variables in valet start with `VALET_CONFIG_`.
 # 
 # 
 ####################
-# 🗺️ Configuration location
+# Configuration location
 ####################
 # 
 # These variables define the location of the configuration files.
@@ -121,7 +121,7 @@ REPLY='#!/usr/bin/env bash
 # > Remember that command options are also configurable through environment variables!
 # 
 ##############################
-# 📄 About the config file
+# About the config file
 ##############################
 # 
 # The config file is sourced by Valet on startup.
@@ -148,7 +148,7 @@ REPLY='#!/usr/bin/env bash
 # > You can delete it and run the `valet self config` command to recreate it.
 # 
 ##############################
-# 🚩 Custom startup script
+# Custom startup script
 ##############################
 # 
 # You can define a custom startup script that will be sourced by Valet on startup.
@@ -169,14 +169,14 @@ REPLY='#!/usr/bin/env bash
 # The script must be named `startup` and be in the same directory as the config file. You can override the path to this file using the variable `VALET_CONFIG_STARTUP_SCRIPT`.
 # 
 ##############################
-# 🅰️ Configuration variables
+# Configuration variables
 ##############################
 # 
 # All configuration variables in valet start with `VALET_CONFIG_`.
 # 
 # 
 ####################
-# 🗺️ Configuration location
+# Configuration location
 ####################
 # 
 # These variables define the location of the configuration files.

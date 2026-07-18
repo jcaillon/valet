@@ -1,11 +1,11 @@
 ---
-title: 📂 sfzf
+title: sfzf
 cascade:
   type: docs
 url: /docs/libraries/sfzf
 ---
 
-## ⚡ sfzf::show
+## sfzf::show
 
 Displays a menu where the user can search and select an item.
 The menu is displayed in full screen.
@@ -34,7 +34,6 @@ Inputs:
   - $2: the item number;
   - $3: the current panel width;
   - it should return the details of the item in the `REPLY` variable.
-
 
   (defaults to empty, no callback)
 

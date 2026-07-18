@@ -1,16 +1,15 @@
 ---
-title: 📂 list
+title: list
 cascade:
   type: docs
 url: /docs/libraries/list
 ---
 
-## ⚡ list::onTick
+## list::onTick
 
 This function must be called regularly (on refresh tick) and is responsible for redrawing the list if necessary.
 
-
-## ⚡ list::setItems
+## list::setItems
 
 Set up the list of items to display.
 

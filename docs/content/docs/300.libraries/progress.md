@@ -1,11 +1,11 @@
 ---
-title: 📂 progress
+title: progress
 cascade:
   type: docs
 url: /docs/libraries/progress
 ---
 
-## ⚡ progress::start
+## progress::start
 
 Shows a spinner / progress animation with configurable output including a progress bar.
 
@@ -101,7 +101,7 @@ progress::stop
 > Important: all progress functions will only work if called from the same shell
 > that started the progress bar.
 
-## ⚡ progress::stop
+## progress::stop
 
 Stop the progress bar.
 
@@ -111,7 +111,7 @@ Example usage:
 progress::stop
 ```
 
-## ⚡ progress::update
+## progress::update
 
 Update the progress bar with a new percentage and message.
 

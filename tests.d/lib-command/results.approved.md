@@ -728,7 +728,7 @@ lemon
 Returned variables:
 
 ```text
-REPLY='## ▶️ valet showcase command1
+REPLY='## valet showcase command1
 
 ### Synopsis
 

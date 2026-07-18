@@ -1,11 +1,11 @@
 ---
-title: 📂 benchmark
+title: benchmark
 cascade:
   type: docs
 url: /docs/libraries/benchmark
 ---
 
-## ⚡ benchmark::run
+## benchmark::run
 
 This function runs a benchmark on given functions.
 

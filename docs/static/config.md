@@ -14,7 +14,7 @@ These scripts are:
 > Use the `.env` files to configure your project-specific variables.
 > Remember that command options are also configurable through environment variables!
 
-## 📄 About the config file
+## About the config file
 
 The config file is sourced by Valet on startup.
 
@@ -39,7 +39,7 @@ VALET_CONFIG_MY_VAR="${VALET_CONFIG_MY_VAR:-"default value if not set"}"
 >
 > You can delete it and run the `valet self config` command to recreate it.
 
-## 🚩 Custom startup script
+## Custom startup script
 
 You can define a custom startup script that will be sourced by Valet on startup.
 
@@ -58,13 +58,13 @@ eval "${_TO_EVAL}"
 
 The script must be named `startup` and be in the same directory as the config file. You can override the path to this file using the variable `VALET_CONFIG_STARTUP_SCRIPT`.
 
-## 🅰️ Configuration variables
+## Configuration variables
 
 All configuration variables in valet start with `VALET_CONFIG_`.
 
 <!-- __________________ CONFIG LOCATION ______________________ -->
 
-### 🗺️ Configuration location
+### Configuration location
 
 These variables define the location of the configuration files.
 
@@ -86,7 +86,7 @@ Default to the `config` file in your config directory.
 
 <!-- __________________ GENERAL ______________________ -->
 
-### ⚙️ General configuration
+### General configuration
 
 #### VALET_CONFIG_EXTENSIONS_DIRECTORY
 
@@ -160,7 +160,7 @@ Defaults to the `.envrc` file in the current directory.
 
 <!-- ___________________ FEATURES _____________________ -->
 
-### ✨ Main features configuration
+### Main features configuration
 
 #### VALET_CONFIG_ENABLE_COLORS
 
@@ -222,7 +222,7 @@ Set to 0 to disable this feature and always display items in the alphabetical or
 
 <!-- _________________ LOG _______________________ -->
 
-### 🪵 Log configuration
+### Log configuration
 
 Valet allows you to precisely define the format of the logs by using a pattern and various options.
 
@@ -307,7 +307,7 @@ The default is equivalent to setting this string to: `printf -v logFile "log-%(%
 
 <!-- _________________ PROFILER _______________________ -->
 
-### 🕵️ Profiler configuration
+### Profiler configuration
 
 #### VALET_CONFIG_COMMAND_PROFILING_FILE
 
@@ -321,7 +321,7 @@ If true, it disables this behavior and you can see all the profiler lines.
 
 <!-- _________________ LIBRARIES _______________________ -->
 
-### 🖱️ Interactive mode configuration
+### Interactive mode configuration
 
 #### VALET_CONFIG_PROGRESS_DEFAULT_TEMPLATE
 
@@ -361,13 +361,13 @@ VALET_CONFIG_PROMPT_KEY_MAPPING=(
 
 <!-- _________________ THEME _______________________ -->
 
-### 🎨 Theme configuration
+### Theme configuration
 
 TODO: To be done.
 
 <!-- _________________ Developer _______________________ -->
 
-### 🧑‍💻 Developer configuration
+### Developer configuration
 
 #### VALET_CONFIG_BUMP_VERSION_ON_BUILD
 

@@ -1,11 +1,11 @@
 ---
-title: 📂 exe
+title: exe
 cascade:
   type: docs
 url: /docs/libraries/exe
 ---
 
-## ⚡ exe::invoke
+## exe::invoke
 
 This function call an executable with its optional arguments.
 

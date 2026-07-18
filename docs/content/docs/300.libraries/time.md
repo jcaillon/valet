@@ -1,11 +1,11 @@
 ---
-title: 📂 time
+title: time
 cascade:
   type: docs
 url: /docs/libraries/time
 ---
 
-## ⚡ time::getDate
+## time::getDate
 
 Get the current date in the given format.
 
@@ -31,7 +31,7 @@ time::getDate format="'%(%Hh%Mm%Ss)T'"
 
 > This function avoid to call $(date) in a subshell (date is a an external executable).
 
-## ⚡ time::getHumanTimeFromMicroseconds
+## time::getHumanTimeFromMicroseconds
 
 Convert microseconds to human readable format.
 
@@ -60,7 +60,6 @@ Inputs:
   - %L: total milliseconds
   - %U: total microseconds
 
-
   (defaults to "%HH:%MM:%SS")
 
 Returns:
@@ -75,7 +74,7 @@ time::getHumanTimeFromMicroseconds 123456789 format="%HH:%MM:%SS"
 echo "${REPLY}"
 ```
 
-## ⚡ time::getMicrosecondsFromSeconds
+## time::getMicrosecondsFromSeconds
 
 Convert seconds (float number representation) to microseconds.
 e.g. 1.234567 → 1234567
@@ -97,7 +96,7 @@ time::getMicrosecondsFromSeconds 1.234567
 echo "${REPLY}"
 ```
 
-## ⚡ time::getProgramElapsedMicroseconds
+## time::getProgramElapsedMicroseconds
 
 Get the elapsed time in µs since the program started.
 
@@ -118,7 +117,7 @@ echo "Human time: ${REPLY}"
 > The 10# forces the base 10 conversion to avoid issues with leading zeros.
 > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 
-## ⚡ time::getSecondsFromMicroseconds
+## time::getSecondsFromMicroseconds
 
 Convert microseconds to seconds (float number representation).
 e.g. 1234567 → 1.234567
@@ -147,7 +146,7 @@ time::getSecondsFromMicroseconds 1234567 precision=3
 echo "${REPLY}"
 ```
 
-## ⚡ time::getTimerMicroseconds
+## time::getTimerMicroseconds
 
 Get the time elapsed since the call of `time::startTimer`.
 By default, it returns an integer representing the elapsed time in microseconds,
@@ -181,7 +180,7 @@ time::getTimerMicroseconds format="%S.%LLs"
 echo "Total elapsed time: ${REPLY}"
 ```
 
-## ⚡ time::isSpamming
+## time::isSpamming
 
 Check if it's been less than a given delay since the last call to this function.
 
@@ -218,7 +217,7 @@ if time::isSpamming 500ms; then
 fi
 ```
 
-## ⚡ time::isTimerElapsed
+## time::isTimerElapsed
 
 Check if a given time has elapsed since the call of `time::startTimer`.
 
@@ -249,7 +248,7 @@ if time::isTimerElapsed 500ms; then
 fi
 ```
 
-## ⚡ time::logTimerElapsedTime
+## time::logTimerElapsedTime
 
 Log the time elapsed since the call of `time::startTimer`.
 
@@ -277,13 +276,14 @@ time::startTimer
 time::logTimerElapsedTime
 ```
 
-## ⚡ time::startTimer
+## time::startTimer
 
 Start a new timer.
 You can then call `time::getTimerMicroseconds` to get the elapsed time.
 Or call `time::isTimerElapsed` to check if a given time has elapsed since the call of this function.
 
-# - ${timerName} _as string_:
+# - ${timerName} _as string_
+
   (optional) A variable name that will be used to store the start time of the timer.
   Defaults to the name of the calling function.
   Can be set to a fixed value if you call this function from different functions

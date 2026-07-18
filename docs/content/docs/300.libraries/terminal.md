@@ -1,11 +1,11 @@
 ---
-title: 📂 terminal
+title: terminal
 cascade:
   type: docs
 url: /docs/libraries/terminal
 ---
 
-## ⚡ terminal::clearBox
+## terminal::clearBox
 
 Clear a "box" in the terminal.
 Will return the cursor at the current position at the end (using GLOBAL_CURSOR_LINE and GLOBAL_CURSOR_COLUMN).
@@ -43,7 +43,7 @@ terminal::getCursorPosition
 terminal::clearBox top=1 left=1 width=10 height=5
 ```
 
-## ⚡ terminal::clearKeyPressed
+## terminal::clearKeyPressed
 
 This function reads all the inputs from the user, effectively discarding them.
 
@@ -59,7 +59,7 @@ Example usage:
 terminal::clearKeyPressed
 ```
 
-## ⚡ terminal::createSpace
+## terminal::createSpace
 
 This function creates empty lines from the current cursor position.
 Then it moves back to its original line (at the column 1).
@@ -81,7 +81,7 @@ Example usage:
 terminal::createSpace 5
 ```
 
-## ⚡ terminal::getBestAutocompleteBox
+## terminal::getBestAutocompleteBox
 
 This function returns the best position and size for an autocomplete box that would open
 at the given position.
@@ -164,7 +164,7 @@ Example usage:
 terminal::getBestAutocompleteBox top=1 left=1 desiredHeight=10 desiredWidth=5
 ```
 
-## ⚡ terminal::getCursorPosition
+## terminal::getCursorPosition
 
 Get the current cursor position.
 
@@ -179,7 +179,7 @@ Example usage:
 terminal::getCursorPosition
 ```
 
-## ⚡ terminal::getTerminalSize
+## terminal::getTerminalSize
 
 This function exports the terminal size.
 
@@ -195,7 +195,7 @@ terminal::getTerminalSize
 printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
 ```
 
-## ⚡ terminal::isCursorInBox
+## terminal::isCursorInBox
 
 Check if the cursor is inside a given box.
 
@@ -249,13 +249,12 @@ else
 fi
 ```
 
-## ⚡ terminal::rebindKeymap
+## terminal::rebindKeymap
 
 Rebinds all special keys to call a given callback function.
 See @terminal::testWaitForKeyPress for an implementation example.
 
 This allows to use the `-e` option with the read command and receive events for special key press.
-
 
 This function should be called before using terminal::waitForKeyPress.
 
@@ -283,7 +282,7 @@ terminal::rebindKeymap
 > of characters that you can bind in bash.
 > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
 
-## ⚡ terminal::rerouteLogs
+## terminal::rerouteLogs
 
 Reroute the logs to a temporary file.
 The logs will be displayed when calling `terminal::restoreLogs`
@@ -294,7 +293,7 @@ Example usage:
 terminal::rerouteLogs
 ```
 
-## ⚡ terminal::restoreBindings
+## terminal::restoreBindings
 
 Reset the key bindings to the default ones.
 To be called after `terminal::rebindKeymap`.
@@ -305,7 +304,7 @@ Example usage:
 terminal::restoreBindings
 ```
 
-## ⚡ terminal::restoreInterruptTrap
+## terminal::restoreInterruptTrap
 
 Restore the original trap for the interrupt signal (SIGINT).
 To be called after terminal::setInterruptTrap.
@@ -316,7 +315,7 @@ Example usage:
 terminal::restoreInterruptTrap
 ```
 
-## ⚡ terminal::restoreLogs
+## terminal::restoreLogs
 
 Restore the logs to their original state.
 Should be called after `terminal::rerouteLogs` and at the end of an interactive session.
@@ -327,7 +326,7 @@ Example usage:
 terminal::restoreLogs
 ```
 
-## ⚡ terminal::restoreSettings
+## terminal::restoreSettings
 
 Restore the terminal options to their original state.
 Should be called after `terminal::setRawMode`.
@@ -341,7 +340,7 @@ Inputs:
 
   (defaults to false)
 
-## ⚡ terminal::saveSettings
+## terminal::saveSettings
 
 Save the current terminal options (`stty -g`) so they can be restored later.
 Call `terminal::restoreSettings` to restore the original settings.
@@ -352,7 +351,7 @@ Example usage:
 terminal::saveSettings
 ```
 
-## ⚡ terminal::setRawMode
+## terminal::setRawMode
 
 Put the terminal in "raw" mode.
 Set options to enable a satisfying and consistent behavior for the GNU readline library.
@@ -364,7 +363,7 @@ Example usage:
 terminal::setRawMode
 ```
 
-## ⚡ terminal::switchBackFromFullScreen
+## terminal::switchBackFromFullScreen
 
 Call this function to switch back from the full screen mode.
 
@@ -377,7 +376,7 @@ Example usage:
 terminal::switchBackFromFullScreen
 ```
 
-## ⚡ terminal::switchToFullScreen
+## terminal::switchToFullScreen
 
 Call this function to start an interactive session in full screen mode.
 This function will switch to the alternate screen, hide the cursor and clear the screen.
@@ -390,7 +389,7 @@ Example usage:
 terminal::switchToFullScreen
 ```
 
-## ⚡ terminal::testWaitForChar
+## terminal::testWaitForChar
 
 Wait for the user to send a character to stdin (i.e. wait for a key press)
 and prints the character that bash reads.
@@ -406,7 +405,7 @@ Example usage:
 terminal::testWaitForChar
 ```
 
-## ⚡ terminal::waitForChar
+## terminal::waitForChar
 
 Wait for a user input (single char).
 You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
@@ -421,7 +420,6 @@ Use `terminal::waitForKeyPress` if you need to listen to special keys.
 
 This simple implementation does not rely on GNU readline and does not require terminal options
 to be set using `terminal::setRawMode`.
-
 
 Inputs:
 
@@ -445,7 +443,7 @@ terminal::waitForChar -t 0.1
 
 > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>
 
-## ⚡ terminal::waitForKeyPress
+## terminal::waitForKeyPress
 
 Wait for a key press (single key).
 You can pass additional parameters to the read command (e.g. to wait for a set amount of time).

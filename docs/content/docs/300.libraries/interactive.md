@@ -1,11 +1,11 @@
 ---
-title: 📂 interactive
+title: interactive
 cascade:
   type: docs
 url: /docs/libraries/interactive
 ---
 
-## ⚡ interactive::confirm
+## interactive::confirm
 
 Ask the user to yes or no.
 
@@ -40,7 +40,7 @@ Example usage:
 if interactive::confirm "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
 ```
 
-## ⚡ interactive::confirmRaw
+## interactive::confirmRaw
 
 Ask the user to yes or no.
 
@@ -71,7 +71,7 @@ Example usage:
 interactive::confirmRaw "Do you want to continue?" && local answer="${REPLY}"
 ```
 
-## ⚡ interactive::continue
+## interactive::continue
 
 Ask the user to press the button to continue.
 
@@ -93,7 +93,7 @@ Example usage:
 interactive::continue "Press enter to continue."
 ```
 
-## ⚡ interactive::continueRaw
+## interactive::continueRaw
 
 Ask the user to press the button to continue.
 
@@ -111,7 +111,7 @@ Example usage:
 interactive::continueRaw
 ```
 
-## ⚡ interactive::displayAnswer
+## interactive::displayAnswer
 
 Displays an answer to a previous question.
 
@@ -141,7 +141,7 @@ Example usage:
 interactive::displayAnswer "My answer."
 ```
 
-## ⚡ interactive::displayQuestion
+## interactive::displayQuestion
 
 Displays a question to the user.
 

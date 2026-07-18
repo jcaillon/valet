@@ -1,11 +1,11 @@
 ---
-title: 📂 trap
+title: trap
 cascade:
   type: docs
 url: /docs/libraries/trap
 ---
 
-## ⚡ trap::register
+## trap::register
 
 Register a given function to execute when a specific event happens (e.g. on-exit, on-interrupt, etc...).
 Only one function can be registered for each event, if you register a new one it will replace the previous one.

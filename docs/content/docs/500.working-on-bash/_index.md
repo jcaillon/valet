@@ -1,5 +1,5 @@
 ---
-title: ✍️ Working on bash
+title: Working on bash
 cascade:
   type: docs
 weight: 500
@@ -9,19 +9,19 @@ url: /docs/work-on-bash-scripts
 > [!IMPORTANT] Disclaimer
 > This page is just one opinion. This is not the best way to work on bash scripts, this is just an explanation of how I work.
 
-## 🧑‍💻 VS Code
+## VS Code
 
 I work with [VS code](https://code.visualstudio.com/download) and [git bash](https://gitforwindows.org/) on Windows.
 
 WSL and the GitHub actions allow me to test Valet on different Linux distributions.
 
-### ⚙️ Settings
+### Settings
 
 After [creating a new extension](../new-extensions), you can open the extension directory as a workspace on vscode.
 
 It will come pre-configured with vscode snippets, settings, and extension recommendations.
 
-### 🧩 Extensions
+### Extensions
 
 Here is a list of recommended extensions to work on bash scripts:
 
@@ -44,7 +44,7 @@ A more up-to-date list can be found in [extensions.json](https://raw.githubuserc
 > [!TIP] Dependencies
 > For those extensions to work, you will need to install: [shfmt](https://github.com/mvdan/sh#shfmt), [shellcheck](https://github.com/koalaman/shellcheck).
 
-### 🆎 Autocompletion on Valet library functions
+### Autocompletion on Valet library functions
 
 You can use the Valet [vscode snippets](https://github.com/jcaillon/valet/blob/latest/extras/valet.code-snippets) which should already be present in your extension directory. If not, you can setup your directory with `valet extensions init`.
 
@@ -64,7 +64,7 @@ You should have autocompletion and help on all ibrary functions:
 
 ![autocompletion](image.png "Autocompletion with VS code")
 
-### 👮 shellcheck
+### shellcheck
 
 If you have installed the recommended extensions, you will also have shellcheck which will attempt to following the sourced files in your project. You should annotate each `source` statement for shellcheck to use the `lib-valet` file:
 
@@ -73,7 +73,7 @@ If you have installed the recommended extensions, you will also have shellcheck 
 source string
 ```
 
-## 🚲 Where to start your bash journey
+## Where to start your bash journey
 
 - [The official bash documentation](https://www.gnu.org/software/bash/manual/bash.html) / [Alternate view on devdocs.io](https://devdocs.io/bash/)
 - [Advanced bash scripting guide](https://tldp.org/LDP/abs/html/index.html)

@@ -1,12 +1,12 @@
 ---
-title: 💡 Introduction
+title: Introduction
 cascade:
   type: docs
 weight: 1
 url: /docs/introduction
 ---
 
-## 🤔 What is Valet?
+## What is Valet?
 
 Valet is a tool and a framework that helps you build beautiful CLI/TUI applications in bash.
 
@@ -19,7 +19,7 @@ The idea is that Valet can be **extended** by letting the user create its own se
 
 Your custom extensions can then easily be shared and installed by others in a single command.
 
-## ✨ What makes Valet different?
+## What makes Valet different?
 
 First of all, Valet is a **pure bash**[^1] framework. If you want to write bash script, chances are that you already have bash installed: and that is all you will need.
 

@@ -1,11 +1,11 @@
 ---
-title: 📂 system
+title: system
 cascade:
   type: docs
 url: /docs/libraries/system
 ---
 
-## ⚡ system::addToPath
+## system::addToPath
 
 Add the given path to the PATH environment variable for various shells,
 by adding the appropriate export command to the appropriate file.
@@ -24,7 +24,7 @@ Example usage:
 system::addToPath "/path/to/bin"
 ```
 
-## ⚡ system::getArchitecture
+## system::getArchitecture
 
 Returns the CPU architecture of the current machine.
 
@@ -39,7 +39,7 @@ system::getArchitecture
 local architecture="${REPLY}"
 ```
 
-## ⚡ system::getEnvVars
+## system::getEnvVars
 
 Get the list of all the environment variables.
 In pure bash, no need for env or printenv.
@@ -57,7 +57,7 @@ for var in "${REPLY_ARRAY[@]}"; do
 done
 ```
 
-## ⚡ system::getOs
+## system::getOs
 
 Returns the name of the current OS.
 
@@ -72,7 +72,7 @@ system::getOs
 local osName="${REPLY}"
 ```
 
-## ⚡ system::isDarwin
+## system::isDarwin
 
 Check if the current OS is macOS.
 
@@ -90,7 +90,7 @@ if system::isDarwin; then
 fi
 ```
 
-## ⚡ system::isLinux
+## system::isLinux
 
 Check if the current OS is Linux.
 
@@ -108,7 +108,7 @@ if system::isLinux; then
 fi
 ```
 
-## ⚡ system::isRoot
+## system::isRoot
 
 Check if the script is running as root.
 
@@ -126,7 +126,7 @@ if system::isRoot; then
 fi
 ```
 
-## ⚡ system::isWindows
+## system::isWindows
 
 Check if the current OS is Windows.
 
@@ -144,7 +144,7 @@ if system::isWindows; then
 fi
 ```
 
-## ⚡ system::isWindowsWithoutNativeSymlinks
+## system::isWindowsWithoutNativeSymlinks
 
 Check if the current system is Windows and does not support native symbolic links (i.e. does not have developer mode enabled).
 

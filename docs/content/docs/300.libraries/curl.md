@@ -1,11 +1,11 @@
 ---
-title: 📂 curl
+title: curl
 cascade:
   type: docs
 url: /docs/libraries/curl
 ---
 
-## ⚡ curl::download
+## curl::download
 
 This function is a wrapper around curl to save a request result in a file.
 It allows you to check the http status code and return 1 if it is not acceptable.
@@ -57,7 +57,7 @@ curl::download https://example2.com -H "header: value" --- failOnError=true acce
 echo "The curl command ended with exit code ⌜${REPLY_CODE}⌝, the http return code was ⌜${REPLY2}⌝: ${REPLY}"
 ```
 
-## ⚡ curl::request
+## curl::request
 
 This function is a wrapper around curl to save the content of a request in a variable.
 It allows you to check the http status code and return 1 if it is not acceptable.

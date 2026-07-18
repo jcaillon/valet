@@ -1,5 +1,5 @@
 ---
-title: 🧱 Create an extension
+title: Create an extension
 cascade:
   type: docs
 weight: 17
@@ -10,7 +10,7 @@ Valet can be extended to let the user create its own set of **commands** and **l
 
 Extensions can be shared as git repositories and installed by others in a single command.
 
-## ➕ Create an extension
+## Create an extension
 
 The core command `valet extensions create` allows to create a new extension (here named `my-extension`):
 
@@ -20,7 +20,7 @@ valet extensions create my-extension
 
 Move to the created directory (`cd` into it) and start creating your new [commands][new-commands] and [libraries][new-libraries].
 
-## 📂 Extensions location and anatomy
+## Extensions location and anatomy
 
 Extensions are created as a directory under the Valet extensions directory (which defaults to `~/.valet.d` and can be [overridden][valetExtensionsDirectory]).
 
@@ -59,7 +59,7 @@ About these files:
 - `lib-valet`: This is a symlink to `~/.valet.d/lib-valet` which get created by the `valet self document` command. It contains the prototype of each functions defined in Valet libraries.
 - `lib-valet.md`: This is a symlink to `~/.valet.d/lib-valet.md` which get created by the `valet self document` command. It contains the documentation of each functions defined in Valet libraries.
 
-## 🛠️ Develop your extension
+## Develop your extension
 
 Once your extension is created, you can start developing your commands, libraries and tests:
 
@@ -69,7 +69,7 @@ Once your extension is created, you can start developing your commands, librarie
   {{< card icon="beaker" link="../new-tests" title="Create a new test" tag="tutorial" tagType="info" >}}
 {{< /cards >}}
 
-## 🛜 Share and install extensions
+## Share and install extensions
 
 To share your extension, make it a git repository with `git init`, then commit and push your files to a remote Git server such as [GitHub][github].
 
@@ -88,7 +88,7 @@ valet extensions install https://github.com/jcaillon/valet-devops-toolbox.git
 >
 > You can also install a specific version of the extension by providing the git reference `--version my-ref`. See `valet extensions install --help` for more options.
 
-## 🚧 Install dependencies
+## Install dependencies
 
 If your extension requires additional dependencies, you can create a `extension.setup.sh` script at the root of your extension directory.
 

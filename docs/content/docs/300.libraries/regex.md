@@ -1,11 +1,11 @@
 ---
-title: 📂 regex
+title: regex
 cascade:
   type: docs
 url: /docs/libraries/regex
 ---
 
-## ⚡ regex::escapeRegexSpecialChars
+## regex::escapeRegexSpecialChars
 
 Escapes special characters in a string to be used as a regex.
 
@@ -26,7 +26,7 @@ regex::escapeRegexSpecialChars "a.(b)"
 echo "${REPLY}"
 ```
 
-## ⚡ regex::getFirstGroup
+## regex::getFirstGroup
 
 Matches a string against a regex and returns the first captured group of the first match.
 
@@ -53,9 +53,9 @@ regex::getFirstGroup MY_STRING "name:(.*)"
 echo "${REPLY}"
 ```
 
-> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
 
-## ⚡ regex::getFuzzySearchRegexFromSearchString
+## regex::getFuzzySearchRegexFromSearchString
 
 Allows to get a regex that can be used to fuzzy search a string.
 the -> '([^t]*)(t[^h]*h[^e]*e)'
@@ -77,7 +77,7 @@ regex::getFuzzySearchRegexFromSearchString SEARCH_STRING
 echo "${_STRING_FUZZY_FILTER_REGEX}"
 ```
 
-## ⚡ regex::getMatches
+## regex::getMatches
 
 Returns an array containing all the matched for a regex in a string.
 
@@ -124,9 +124,9 @@ for match in "${REPLY_ARRAY[@]}"; do
 done
 ```
 
-> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
 
-## ⚡ regex::replace
+## regex::replace
 
 Replaces strings within a string using a regex (replaces in place).
 
@@ -160,7 +160,6 @@ Inputs:
 
   (defaults to false)
 
-
 Example usage:
 
 ```bash
@@ -170,7 +169,7 @@ regex::replace MY_STRING "name: (.*)" "\1" maxCount=1 onlyMatches=true
 echo "${MY_STRING}"
 ```
 
-> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
+> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
 
 > [!IMPORTANT]
 > Documentation generated for the version 0.42.13 (2026-06-11).

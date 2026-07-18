@@ -1,5 +1,5 @@
 ---
-title: 💻 Installation
+title: Installation
 cascade:
   type: docs
 weight: 2
@@ -7,7 +7,7 @@ url: /docs/installation
 description: Learn how to install Valet on your system.
 ---
 
-## 📦 Dependencies
+## Dependencies
 
 - Bash version 5 or superior is required (it uses bash `EPOCHREALTIME` among other features introduced in bash 5).
 - [GNU coreutils][gnu-core-utils]: valet uses `rm`, `mv`, `cp`, `mkdir`, `ln` as they can't be done in pure bash. It also uses `chmod` for the installation/updates.
@@ -16,7 +16,7 @@ description: Learn how to install Valet on your system.
   
 Other external programs can be used if found but are not required[^exhaustive-programs-list].
 
-## 🚚 Automated installation
+## Automated installation
 
 Run the following command to install Valet:
 
@@ -35,29 +35,29 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/jcaillon/valet/latest/in
 
 Finally, call `valet` to get started with the example commands!
 
-## 🪛 Manual installation
+## Manual installation
 
 1. Download the package from the [latest release from GitHub][latest-release].
 2. Extract the archive to your favorite installation directory.
 3. Add this directory to your PATH so you can call `valet` from your terminal.
 4. Call `valet` to get started with the example commands!
 
-## 🔨 Manual installation from sources
+## Manual installation from sources
 
 1. You can clone this project or download the source from the latest release into the directory of your choice.
 2. Add this directory to your PATH so you can call `valet` from your terminal.
 3. Call `valet` to get started with the example commands!
 
-## ⚙️ Extra config for your terminal
+## Extra config for your terminal
 
 - **Nerd font**: Valet can make use of [Nerd fonts][nerdFontsLink] to display icons in the logs and interactive sessions. You can download any nerd font from [here][nerdFontsLink], install it, and configure your terminal to use that font. The demos you saw in the landing page are done with _JetBrainsMono Nerd Font_.
 - **Word separator**: Valet usually prints important values between ⌜quotes⌝ using the UTF8 top left and top right corners (respectively U+231C and U+231D). You can add these two characters as word separators in your terminal for quick double click selection: `⌜⌝`.
 
-## 🪟 Use Valet on windows
+## Use Valet on windows
 
 It is recommended to use Git bash, installed with [Git for Windows][git-for-windows-link] (or [msys2][msys2Link]) and [Windows terminal][windows-terminal-link] as your terminal program. You can also use Valet with any Linux distribution and [Windows Subsystem for Linux][wsl-installation-link] (WSL).
 
-## 🐋 Run Valet in a container
+## Run Valet in a container
 
 With a container engine (such as [Docker][docker] or [Podman][podman]), you can run a containerized version of Valet:
 

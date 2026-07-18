@@ -1,12 +1,12 @@
 ---
-title: 📦 Use standard libraries
+title: Use standard libraries
 cascade:
   type: docs
 weight: 300
 url: /docs/libraries
 ---
 
-## 🧩 Standard libraries
+## Standard libraries
 
 Valet comes with standard libraries that declare many useful functions to use in your commands and scripts.
 
@@ -32,7 +32,7 @@ All Valet functions are prefixed with the library name. E.g. the function `strin
 >
 > If you need to use the default source keyword, use `builtin source`.
 
-## 👔 About library functions
+## About library functions
 
 The functions in Valet are implemented for a good compromise between performance and readability. They generally define clear local variables for the inputs as it makes the code more understandable. However, they do not implement input validation (beside checking if the mandatory arguments are given), it is your responsibility to ensure that the inputs are correct.
 
@@ -79,13 +79,13 @@ curl::request https://example.com -X POST -H 'Authorization: token' --- failOnEr
 > [!NOTE]
 > The function documentation will always specify if the --- separator is required. Assume that it is not required otherwise.
 
-## 🪄 Using functions outside Valet
+## Using functions outside Valet
 
 You can use Valet functions in your own scripts by sourcing the Valet library files. This allows you to leverage the powerful functions provided by Valet in your own bash scripts.
 
-See [this section in usage](../usage/#-use-valet-library-functions-in-your-existing-scripts) for more information.
+See [this section in usage](../usage/#use-valet-library-functions-in-your-existing-scripts) for more information.
 
-## 🎀 Available core libraries
+## Available core libraries
 
 A complete list of library functions can be generated locally in a single file using the `valet self document` command.
 

@@ -1,11 +1,11 @@
 ---
-title: 📂 variable
+title: variable
 cascade:
   type: docs
 url: /docs/libraries/variable
 ---
 
-## ⚡ variable::deserialize
+## variable::deserialize
 
 Get a string to eval in order to restore the variables stored using variable::serialize.
 
@@ -30,7 +30,7 @@ variable::deserialize my-variables
 eval "${REPLY}"
 ```
 
-## ⚡ variable::isMissing
+## variable::isMissing
 
 This function returns the list of undeclared variables for the given names.
 
@@ -55,7 +55,7 @@ if variable::isMissing "var1" "var2"; then
 fi
 ```
 
-## ⚡ variable::serialize
+## variable::serialize
 
 Serialize the variables given as arguments to a script that can be evaluated to restore the variables with the same values.
 (call variable::deserialize to restore the variables from the script).

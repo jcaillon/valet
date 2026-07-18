@@ -1,11 +1,11 @@
 ---
-title: 📂 bash
+title: bash
 cascade:
   type: docs
 url: /docs/libraries/bash
 ---
 
-## ⚡ bash::catchErrors
+## bash::catchErrors
 
 This function runs a command and will catch any error that occurs instead of failing the program.
 The execution will continue if an error occurs in the command, but each error will be stored for later processing.
@@ -37,7 +37,7 @@ fi
 > is still triggered and you can use trace level debugging to see the caught issues.
 > Additionally, it will report all the errors that occurred during the execution of the command.
 
-## ⚡ bash::countArgs
+## bash::countArgs
 
 Returns the number of arguments passed.
 
@@ -64,7 +64,7 @@ Example usage:
 bash::countArgs 1 2 3
 ```
 
-## ⚡ bash::getBuiltinOutput
+## bash::getBuiltinOutput
 
 Capture the output of a builtin command. Can be used on bash builtins that produce output.
 It captures the stdout and stderr of said command.
@@ -91,7 +91,7 @@ bash::getBuiltinOutput declare -f bash::getBuiltinOutput
 echo "${REPLY}"
 ```
 
-## ⚡ bash::injectCodeInFunction
+## bash::injectCodeInFunction
 
 This function injects code at the beginning or the end of a function and
 returns the modified function to be evaluated.
@@ -128,7 +128,7 @@ eval "${REPLY}"
 myFunction
 ```
 
-## ⚡ bash::isCommand
+## bash::isCommand
 
 Check if the given command exists.
 
@@ -152,7 +152,7 @@ if bash::isCommand "command1"; then
 fi
 ```
 
-## ⚡ bash::isFdValid
+## bash::isFdValid
 
 Check if the given file descriptor is valid.
 
@@ -176,7 +176,7 @@ if bash::isFdValid 1; then
 fi
 ```
 
-## ⚡ bash::isFunction
+## bash::isFunction
 
 Check if the given function exists.
 
@@ -200,7 +200,7 @@ if bash::isFunction "function1"; then
 fi
 ```
 
-## ⚡ bash::isMissingCommands
+## bash::isMissingCommands
 
 This function returns the list of not existing commands for the given names.
 
@@ -225,7 +225,7 @@ if bash::isMissingCommands "command1" "command2"; then
 fi
 ```
 
-## ⚡ bash::popd
+## bash::popd
 
 Change the current directory to the one on top of the directory stack and remove it from the stack.
 
@@ -238,7 +238,7 @@ Example usage:
 bash::popd
 ```
 
-## ⚡ bash::pushd
+## bash::pushd
 
 Change the current directory and push the old one to the directory stack.
 
@@ -257,7 +257,7 @@ Example usage:
 bash::pushd "/path/to/directory"
 ```
 
-## ⚡ bash::readStdIn
+## bash::readStdIn
 
 Read the content of the standard input.
 Will immediately return if the standard input is empty.
@@ -273,7 +273,7 @@ bash::readStdIn
 echo "${REPLY}"
 ```
 
-## ⚡ bash::restoreShellOption
+## bash::restoreShellOption
 
 Restores the given shell option to its original state (see `bash::setShellOption` or `bash::unsetShellOption`).
 
@@ -289,7 +289,7 @@ Example usage:
 bash::restoreShellOption nocasematch
 ```
 
-## ⚡ bash::runInSubshell
+## bash::runInSubshell
 
 This functions runs a command in a subshell.
 The command can fail and can trigger errors; it will be caught and this function will return
@@ -330,7 +330,7 @@ _OPTION_EXIT_ON_FAIL=true bash::runInSubshell myFunction
 > see <https://www.gnu.org/software/bash/manual/bash.html#index-trap> and
 > <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.
 
-## ⚡ bash::setShellOption
+## bash::setShellOption
 
 Sets the given shell optional behavior if it is not already set.
 Allows to later use `bash::restoreShellOption` to restore the original state of the given shell option.
@@ -350,7 +350,7 @@ bash::setShellOption nocasematch
 > To set shell options, simply use `local -; set -/+ optionName` in functions (`local -` makes it local).
 > The builtin shopt cannot be scoped to a function (it is always global), this is why this function exists.
 
-## ⚡ bash::sleep
+## bash::sleep
 
 Sleep for the given amount of time.
 This is a pure bash replacement of sleep.
@@ -370,7 +370,7 @@ bash::sleep 1.5
 
 > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 
-## ⚡ bash::unsetShellOption
+## bash::unsetShellOption
 
 Unsets the given shell optional behavior if it is not already unset.
 Allows to later use `bash::restoreShellOption` to restore the original state of the given shell option.

@@ -1,5 +1,5 @@
 ---
-title: 🧪 Create a test
+title: Create a test
 cascade:
   type: docs
 weight: 40
@@ -10,7 +10,7 @@ Valet comes with a standardized way to implement and run tests for your commands
 
 Once you have [created an extension][newExtensionsLink] and moved to its directory, you can start creating your new tests.
 
-## 📂 Test suites and test files
+## Test suites and test files
 
 Tests are organized in thematic groups which are called **test suites**. A test suite is a directory which contains **test scripts**. All test suite directories should be created in the `tests.d` directory in your extension.
 
@@ -53,7 +53,7 @@ Here is an example of directory structure for your user directory:
   {{< /filetree/folder >}}
 {{< /filetree/container >}}
 
-## ✅ Approval testing
+## Approval testing
 
 In your test scripts, you will call your command functions or run any code that you wish to test. However, you will not directly do assertions like in other test frameworks (e.g. you will not do something like `assert.equal (true, true);`).
 
@@ -80,11 +80,11 @@ Each test suite will generate a different test results markdown file that can be
 
 {{% /details %}}
 
-## 🧪 Tests
+## Tests
 
 Tests are implemented in `.sh` scripts directly under a test suite directory. The name of the script will determine the `h2` header of the report file while the name of the test suite directory will determine the `h1` header. You can have several scripts or one script per test suite.
 
-## ✒️ Implement tests
+## Implement tests
 
 Here is a very simple example of script to test a command function `myCommand`:
 
@@ -104,7 +104,7 @@ You are advised to check the tests for the test library, which also documents ho
 
 The Valet [tests.d][valet-test-suites] directory contains many other examples.
 
-## 🏃‍♂️ Run tests
+## Run tests
 
 You can run all your tests with:
 
@@ -134,7 +134,7 @@ valet self test -i my-test-suite
 >
 > This allow you to modify the shell as you wish in the hooks and test implementation without impacting the other tests.
 
-## 🪝 Test hooks
+## Test hooks
 
 In addition to the test scripts, you can create other specific scripts which will be included (`source`) at different time during the tests execution:
 

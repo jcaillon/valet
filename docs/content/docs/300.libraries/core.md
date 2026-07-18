@@ -1,11 +1,11 @@
 ---
-title: 📂 core
+title: core
 cascade:
   type: docs
 url: /docs/libraries/core
 ---
 
-## ⚡ core::createSavedFilePath
+## core::createSavedFilePath
 
 Returns the path to a new file stored in the user state directory under `saved-files`.
 Can be used to save the state of important temporary files generated during a program
@@ -31,7 +31,7 @@ core::createSavedFilePath suffix="my-file"
 printf '%s\n' "The file is ⌜${REPLY}⌝."
 ```
 
-## ⚡ core::dump
+## core::dump
 
 Dumps information about the current bash session into a new file.
 
@@ -53,7 +53,7 @@ Example usage:
 core::dump
 ```
 
-## ⚡ core::exit
+## core::exit
 
 Exits the program with the given exit code.
 
@@ -81,7 +81,7 @@ core::exit 0
 core::exit 0 silent=true
 ```
 
-## ⚡ core::fail
+## core::fail
 
 Displays an error message and then exit the program with error.
 
@@ -104,7 +104,7 @@ core::fail "This is an error message."
 core::fail "This is an error message." exitCode=255
 ```
 
-## ⚡ core::getConfigurationDirectory
+## core::getConfigurationDirectory
 
 Returns the path to the valet configuration directory.
 Creates it if missing.
@@ -122,7 +122,7 @@ local directory="${REPLY}"
 
 > The default configuration directory is `~/.config/valet`.
 
-## ⚡ core::getExtensionsDirectory
+## core::getExtensionsDirectory
 
 Returns the path to the user extensions directory.
 Creates it if missing.
@@ -140,7 +140,7 @@ local directory="${REPLY}"
 
 > The default extensions directory is `~/.valet.d`.
 
-## ⚡ core::getUserCacheDirectory
+## core::getUserCacheDirectory
 
 Returns the path to the valet local cache directory.
 Where user-specific non-essential (cached) data should be written (analogous to /var/cache).
@@ -159,7 +159,7 @@ local directory="${REPLY}"
 
 > The default cache directory is `~/.cache/valet`.
 
-## ⚡ core::getUserDataDirectory
+## core::getUserDataDirectory
 
 Returns the path to the valet local data directory.
 Where user-specific data files should be written (analogous to /usr/share).
@@ -178,7 +178,7 @@ local directory="${REPLY}"
 
 > The default data directory is `~/.local/share/valet`.
 
-## ⚡ core::getUserStateDirectory
+## core::getUserStateDirectory
 
 Returns the path to the valet local cache directory.
 Where user-specific state files should be written (analogous to /var/lib).
@@ -198,7 +198,7 @@ local directory="${REPLY}"
 
 > The default state directory is `~/.local/state/valet`.
 
-## ⚡ core::getVersion
+## core::getVersion
 
 Returns the version of Valet.
 
@@ -213,7 +213,7 @@ core::getVersion
 printf '%s\n' "The version of Valet is ⌜${REPLY}⌝."
 ```
 
-## ⚡ core::initSubshell
+## core::initSubshell
 
 Do the necessary initialization for a new subshell, ensuring coherent behavior:
 
@@ -228,7 +228,7 @@ Example usage:
 core::initSubshell
 ```
 
-## ⚡ core::parseFunctionOptions
+## core::parseFunctionOptions
 
 Parses the shell parameters passed as arguments and sets the REPLY variable to a string that can be
 evaluated to set the local variables required in the calling function.
@@ -254,7 +254,7 @@ eval "${REPLY}"
 # REPLY will be: local myOption="one"; set -- "${@:1:3}"
 ```
 
-## ⚡ include
+## include
 
 Allows to include multiple library files.
 
@@ -273,7 +273,7 @@ Example usage:
 include string array ./my/path
 ```
 
-## ⚡ source
+## source
 
 Allows to source/include a library file or sources a file.
 

@@ -1,5 +1,5 @@
 ---
-title: 💅 Bash best practices
+title: Bash best practices
 cascade:
   type: docs
 weight: 650
@@ -19,7 +19,7 @@ I am keeping example bash scripts that demonstrates the points I am making in th
 
 Valet is trying to follow the best practices for CLI applications. One good guideline can be found at [clig.dev][cliGuidelineReference].
 
-## 🎨 Coding style
+## Coding style
 
 TODO: copy some of the sections from <https://google.github.io/styleguide/shellguide.html>.
 
@@ -105,7 +105,7 @@ If possible, make each function independent and self-contained. This means that 
 
 Explicitly declare all the parameters of the function at the top of the function body using `local` declare statements. This will make it easier to understand what parameters it expects and what are the default values. This extra cost is negligible.
 
-## 🕳️ Notable pitfalls
+## Notable pitfalls
 
 ### Error handling / ERR trap in bash
 

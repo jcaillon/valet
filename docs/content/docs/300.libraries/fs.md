@@ -1,11 +1,11 @@
 ---
-title: 📂 fs
+title: fs
 cascade:
   type: docs
 url: /docs/libraries/fs
 ---
 
-## ⚡ fs::cat
+## fs::cat
 
 Print the content of a file to stdout.
 This is a pure bash equivalent of cat.
@@ -24,7 +24,7 @@ fs::cat myFile
 
 > Also see log::printFile if you want to print a file for a user.
 
-## ⚡ fs::cleanTempFiles
+## fs::cleanTempFiles
 
 Removes all the temporary files and directories that were created by the
 `fs::createTempFile` and `fs::createTempDirectory` functions.
@@ -35,7 +35,7 @@ Example usage:
 fs::cleanTempFiles
 ```
 
-## ⚡ fs::createDirectoryIfNeeded
+## fs::createDirectoryIfNeeded
 
 Create the directory tree if needed.
 
@@ -56,7 +56,7 @@ fs::createDirectoryIfNeeded "/my/directory"
 echo "${REPLY}"
 ```
 
-## ⚡ fs::createFileIfNeeded
+## fs::createFileIfNeeded
 
 Make sure that the given file exists.
 Create the directory tree and the file if needed.
@@ -78,7 +78,7 @@ fs::createFileIfNeeded "myFile"
 echo "${REPLY}"
 ```
 
-## ⚡ fs::createLink
+## fs::createLink
 
 Create a soft or hard link (original ← link).
 
@@ -121,7 +121,7 @@ fs::createLink "/path/to/link" "/path/to/linked" hardlink=true force=true
 
 > The function uses the `ln` command.
 
-## ⚡ fs::createTempDirectory
+## fs::createTempDirectory
 
 Creates a temporary directory.
 
@@ -148,7 +148,7 @@ fs::createTempDirectory pathOnly=true
 > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
-## ⚡ fs::createTempFile
+## fs::createTempFile
 
 Creates a temporary file and return its path.
 
@@ -175,7 +175,7 @@ fs::createTempFile pathOnly=true
 > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
-## ⚡ fs::getAbsolutePath
+## fs::getAbsolutePath
 
 This function returns the absolute path of a path.
 Also normalizes the path (removing `..` and `.`),
@@ -202,7 +202,7 @@ echo "${REPLY}"
 > The `..` will be processed before following any symlinks, by removing
 > the immediate pathname component.
 
-## ⚡ fs::getCommandPath
+## fs::getCommandPath
 
 Get the absolute path of a command ().
 
@@ -223,7 +223,7 @@ fs::getCommandPath "command"
 echo "${REPLY}"
 ```
 
-## ⚡ fs::getFileLineCount
+## fs::getFileLineCount
 
 Get the number of lines in a file.
 
@@ -246,7 +246,7 @@ echo "${REPLY}"
 
 TODO: fails to count the last line if empty
 
-## ⚡ fs::getPwdRealPath
+## fs::getPwdRealPath
 
 Get the real path of the current directory.
 By default, the `${PWD}` variable is the logical path, which may contain symlinks.
@@ -264,7 +264,7 @@ Returns:
 
 > This is a pure bash alternative to `realpath` or `readlink` for directories.
 
-## ⚡ fs::getRealPath
+## fs::getRealPath
 
 Get the real path of a path, following symlinks.
 Returns the absolute path.
@@ -289,7 +289,7 @@ echo "${REPLY}"
 > This is a pure bash alternative to `realpath` or `readlink` only for directories.
 > To resolve files, it uses one of these two external tools.
 
-## ⚡ fs::getScriptDirectory
+## fs::getScriptDirectory
 
 This function returns the absolute path of the directory of the script that called it.
 
@@ -304,7 +304,7 @@ fs::getScriptDirectory
 echo "${REPLY}"
 ```
 
-## ⚡ fs::head
+## fs::head
 
 Print the first lines of a file to stdout.
 This is a pure bash equivalent of head.
@@ -335,7 +335,7 @@ fs::head myFile 10 toArray=true
 
 > #TODO: faster with mapfile + quantum?
 
-## ⚡ fs::isDirectoryWritable
+## fs::isDirectoryWritable
 
 Check if the directory is writable. Creates the directory if it does not exist.
 
@@ -365,7 +365,7 @@ if fs::isDirectoryWritable "/path/to/directory"; then
 fi
 ```
 
-## ⚡ fs::isValidLink
+## fs::isValidLink
 
 Check if the linked path is a valid link to the target.
 
@@ -399,7 +399,7 @@ if fs::isValidLink "/path/to/link" "/path/to/linked"; then
 fi
 ```
 
-## ⚡ fs::listDirectories
+## fs::listDirectories
 
 List all the directories in the given directory.
 
@@ -450,7 +450,7 @@ for path in "${REPLY_ARRAY[@]}"; do
 done
 ```
 
-## ⚡ fs::listFiles
+## fs::listFiles
 
 List all the files in the given directory.
 
@@ -501,7 +501,7 @@ for path in "${REPLY_ARRAY[@]}"; do
 done
 ```
 
-## ⚡ fs::listPaths
+## fs::listPaths
 
 List all the paths in the given directory.
 
@@ -557,7 +557,7 @@ done
 > - #TODO: introduce an optional (with default 10k) parameter to limit the number of results to avoid looping for too long
 > - #TODO: introduce an optional parameter for max depth for recursive listing
 
-## ⚡ fs::readFile
+## fs::readFile
 
 Reads the content of a file and returns it in the global variable REPLY.
 Uses pure bash.
@@ -589,7 +589,7 @@ fs::readFile /path/to/file maxCharacters=100
 echo "${REPLY}"
 ```
 
-## ⚡ fs::tail
+## fs::tail
 
 Print the last lines of a file to stdout.
 This is a pure bash equivalent of tail.

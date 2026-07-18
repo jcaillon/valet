@@ -1,11 +1,11 @@
 ---
-title: 📂 windows
+title: windows
 cascade:
   type: docs
 url: /docs/libraries/windows
 ---
 
-## ⚡ windows::addToPath
+## windows::addToPath
 
 Add the given path to the PATH environment variable on Windows (current user only).
 
@@ -33,7 +33,7 @@ windows::addToPath "/path/to/bin" prepend=true
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
-## ⚡ windows::createTempDirectory
+## windows::createTempDirectory
 
 Create a temporary directory on Windows and return the path both for Windows and Unix.
 
@@ -53,7 +53,7 @@ windows::createTempDirectory
 > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
-## ⚡ windows::createTempFile
+## windows::createTempFile
 
 Create a temporary file on Windows and return the path both for Windows and Unix.
 
@@ -73,7 +73,7 @@ windows::createTempFile
 > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
-## ⚡ windows::endPs1Batch
+## windows::endPs1Batch
 
 This function will run all the commands that were batched with `windows::startPs1Batch`.
 
@@ -94,7 +94,7 @@ windows::runPs1 "Write-Host \"World\""
 windows::endPs1Batch
 ```
 
-## ⚡ windows::getEnvVar
+## windows::getEnvVar
 
 Get the value of an environment variable for the current user on Windows.
 
@@ -115,7 +115,7 @@ windows::getEnvVar "MY_VAR"
 echo "${REPLY}"
 ```
 
-## ⚡ windows::getUnixPathFromWindowsPath
+## windows::getUnixPathFromWindowsPath
 
 Convert a Windows path to a unix path.
 
@@ -137,7 +137,7 @@ windows::getUnixPathFromWindowsPath "C:\path\to\file"
 
 > Handles paths starting with `X:\`.
 
-## ⚡ windows::getWindowsPathFromUnixPath
+## windows::getWindowsPathFromUnixPath
 
 Convert a unix path to a Windows path.
 
@@ -160,7 +160,7 @@ windows::getWindowsPathFromUnixPath "/path/to/file"
 > Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
 > handles other msys2 paths using `cygpath`.
 
-## ⚡ windows::runPs1
+## windows::runPs1
 
 Runs a PowerShell command.
 This is mostly useful on Windows.
@@ -199,7 +199,7 @@ windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key tha
 windows::runPs1 "Write-Host \"Hello\"" runAsAdmin=true noFail=true
 ```
 
-## ⚡ windows::setEnvVar
+## windows::setEnvVar
 
 Set an environment variable for the current user on Windows.
 
@@ -222,7 +222,7 @@ windows::setEnvVar "MY_VAR" "my_value"
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
-## ⚡ windows::startPs1Batch
+## windows::startPs1Batch
 
 After running this function, all commands that should be executed by
 `windows::runPs1` will be added to a batch that will only be played

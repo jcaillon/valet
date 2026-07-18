@@ -1,11 +1,11 @@
 ---
-title: 📂 array
+title: array
 cascade:
   type: docs
 url: /docs/libraries/array
 ---
 
-## ⚡ array::appendIfNotPresent
+## array::appendIfNotPresent
 
 Add a value to an array if it is not already present.
 Works for normal and associative arrays.
@@ -35,7 +35,7 @@ array::appendIfNotPresent myArray myValue
 printf '%s\n' "${myArray[@]}"
 ```
 
-## ⚡ array::contains
+## array::contains
 
 Check if a value is in an array.
 It uses pure bash.
@@ -62,7 +62,7 @@ declare myValue="b"
 if array::contains myArray myValue; then "b is in the array"; fi
 ```
 
-## ⚡ array::fuzzyFilterSort
+## array::fuzzyFilterSort
 
 Allows to fuzzy sort an array against a given searched string.
 Returns an array containing only the lines matching the searched string.
@@ -100,7 +100,7 @@ echo "${REPLY_ARRAY[*]}"
 > - Use `shopt -s nocasematch` to make this function is case insensitive.
 > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndGawk` for large arrays.
 
-## ⚡ array::makeArraysSameSize
+## array::makeArraysSameSize
 
 This function makes sure that all the arrays have the same size.
 It will add empty strings to the arrays that are too short.
@@ -117,7 +117,7 @@ Example usage:
 array::makeArraysSameSize "array1" "array2" "array3"
 ```
 
-## ⚡ array::remove
+## array::remove
 
 Remove a value from an array.
 Works for normal and associative arrays.
@@ -147,7 +147,7 @@ array::remove myArray myValue
 printf '%s\n' "${myArray[@]}"
 ```
 
-## ⚡ array::reverse
+## array::reverse
 
 Reverse an array.
 Will not work for associative arrays.
@@ -166,7 +166,7 @@ array::reverse myArray
 echo "${myArray[*]}"
 ```
 
-## ⚡ array::sort
+## array::sort
 
 Sorts an array using the > bash operator (lexicographic order).
 
@@ -188,7 +188,7 @@ echo "${myArray[*]}"
 > - The sorting is not stable (the order of equal elements is not preserved).
 > - It is not appropriate for large array, use the `sort` binary for such cases.
 
-## ⚡ array::sortWithCriteria
+## array::sortWithCriteria
 
 Sorts an array using multiple criteria.
 Excepts multiple arrays. The first array is the one to sort.

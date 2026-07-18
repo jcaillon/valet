@@ -1,5 +1,5 @@
 ---
-title: ✨ Create a command
+title: Create a command
 cascade:
   type: docs
 weight: 20
@@ -8,7 +8,7 @@ url: /docs/new-commands
 
 Once you have [created an extension][newExtensionsLink] and moved to its directory, you can start creating your new commands.
 
-## 📂 Command files location
+## Command files location
 
 Commands are found and indexed by Valet if they are defined in `*.sh` bash scripts located in the `commands.d` directory of your extensions.
 
@@ -27,17 +27,17 @@ Here is an example content for your user directory:
   {{< /filetree/folder >}}
 {{< /filetree/container >}}
 
-## ➕ Create a command
+## Create a command
 
 {{% steps %}}
 
-### 🧑‍💻 Setup your development environment
+### Setup your development environment
 
 The section [working on bash][work-on-bash-scripts] will help you set up a coding environment for bash.
 
 Open your existing extension directory or [create a new one][newLibraryLink].
 
-### 📄 Add a new command file
+### Add a new command file
 
 > [!TIP]
 > This step is optional, you can add a command in an existing file.
@@ -52,7 +52,7 @@ valet extensions add-command my-command
 
 Alternatively, create the file manually.
 
-### 🔤 Define your new command
+### Define your new command
 
 Valet looks for a specific YAML formatted string to read command properties.
 
@@ -98,7 +98,7 @@ Alternatively, you can comment the whole command properties block like so:
 
 The only advantage would be to have a documentation for your command function that is understandable by your IDE.
 
-### ✒️ Implement your command
+### Implement your command
 
 Once the command properties are set, the next step is to implement the command function.
 
@@ -106,7 +106,7 @@ Once the command properties are set, the next step is to implement the command f
   {{< card icon="pencil" link="../implement-a-command" title="How to implement a command" tag="tutorial" tagType="info" >}}
 {{< /cards >}}
 
-### 🧪 (optional) Test your command
+### (optional) Test your command
 
 You can optionally test your command to ensure future non-regressions of its behavior:
 
@@ -114,7 +114,7 @@ You can optionally test your command to ensure future non-regressions of its beh
   {{< card icon="beaker" link="../new-tests" title="How to test a command" tag="tutorial" tagType="info" >}}
 {{< /cards >}}
 
-### 🛠️ Rebuild valet menu
+### Rebuild valet menu
 
 You will not find your command in the Valet menu nor will you be able to execute it immediately after adding (or modifying) its definition.
 

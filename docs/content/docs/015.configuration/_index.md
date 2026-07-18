@@ -1,5 +1,5 @@
 ---
-title: 🔧 Valet configuration
+title: Valet configuration
 cascade:
   type: docs
 weight: 15

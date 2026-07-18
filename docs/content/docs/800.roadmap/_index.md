@@ -1,5 +1,5 @@
 ---
-title: 🔭 Roadmap
+title: Roadmap
 cascade:
   type: docs
 weight: 800

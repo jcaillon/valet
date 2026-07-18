@@ -11,22 +11,15 @@ hr {
   margin: 2.5rem auto;
   border: none;
   height: 3px;
-  background: linear-gradient(90deg, #017c1b 0%, #03a810 100%);
+  background: #cecece;
 }
 
 hr:is(html[class~="dark"] *) {
   width: 50%;
   margin: 2.5rem auto;
   border: none;
-  height: 3px;
-  background: linear-gradient(90deg, #fbb3ff 0%, #ee66bf 100%);
-}
-
-.hero-valet-can-do:is(html[class~="dark"] *) {
-  background: linear-gradient(90deg, #fbb3ff 0%, #ee66bf 100%);
-  background-clip: border-box;
-  -webkit-background-clip: text;
-  background-clip: text;
+  height: 2px;
+  background: rgba(88, 88, 88, 0.959);
 }
 
 .valet-hero-bg {
@@ -92,29 +85,16 @@ hr:is(html[class~="dark"] *) {
 .valet-hero-title {
   font-size: 2.25rem;
   line-height: 1;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.02em;
   font-weight: 700;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
-  background: linear-gradient(to right, #111827, #4b5563);
-  background-clip: border-box;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  margin: 0;
 }
 
 @media (min-width: 768px) {
   .valet-hero-title {
     font-size: 3rem;
   }
-}
-
-.valet-hero-title:is(html[class~="dark"] *) {
-  background: linear-gradient(to right, #f3f4f6, #9ca3af);
-  background-clip: border-box;
-  -webkit-background-clip: text;
-  background-clip: text;
 }
 
 .valet-hero-subtitle {
@@ -193,4 +173,12 @@ hr:is(html[class~="dark"] *) {
   padding-bottom: 2rem;
   padding-left: 1rem;
   padding-right: 1rem;
+}
+
+.hextra-card div {
+  margin-top: 0;
+  .hextra-card-subtitle {
+    margin-top: 0.5rem;
+    display: block;
+  }
 }

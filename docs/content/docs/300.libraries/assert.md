@@ -1,11 +1,11 @@
 ---
-title: 📂 assert
+title: assert
 cascade:
   type: docs
 url: /docs/libraries/assert
 ---
 
-## ⚡ assert::equals
+## assert::equals
 
 Assert that the two given values are equal.
 
@@ -25,7 +25,7 @@ Example usage:
 assert::equals "expected value" "actual value"
 ```
 
-## ⚡ assert::isDirectory
+## assert::isDirectory
 
 Assert that the given directory exists and is a directory.
 
@@ -41,7 +41,7 @@ Example usage:
 assert::isDirectory "/path/to/directory"
 ```
 
-## ⚡ assert::isFile
+## assert::isFile
 
 Assert that the given file exists and is a regular file.
 
@@ -57,7 +57,7 @@ Example usage:
 assert::isFile "/path/to/file"
 ```
 
-## ⚡ assert::isLink
+## assert::isLink
 
 Assert that the given path exists and is a symbolic link.
 
@@ -73,7 +73,7 @@ Example usage:
 assert::isLink "/path/to/link"
 ```
 
-## ⚡ assert::isPath
+## assert::isPath
 
 Assert that the given path exists (can be a file, directory, or link).
 

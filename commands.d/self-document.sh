@@ -239,7 +239,7 @@ function selfDocument::convertFunctionDocumentationToMarkdown() {
       REPLY+="Example usage:"$'\n'$'\n'"${line}"$'\n'
     elif [[ "${line}" == '## '* ]]; then
       # function name
-      REPLY+="## ⚡ ${line#"## "}"$'\n'
+      REPLY+="## ${line#"## "}"$'\n'
     else
       REPLY+="${line}"$'\n'
     fi

@@ -1,11 +1,11 @@
 ---
-title: 📂 yaml
+title: yaml
 cascade:
   type: docs
 url: /docs/libraries/yaml
 ---
 
-## ⚡ yaml::parseFile
+## yaml::parseFile
 
 Parses a YAML file and outputs a bash associative array with the content of the YAML
 accessible with dot notation.
@@ -51,8 +51,8 @@ Returns:
 
 - `${REPLY_MAP}`: an associative array containing the content of the YAML file in dot notation.
 - `${REPLY_CODE}`: (requires noFail=true)
-    - 0 if the file was parsed successfully,
-    - 1 if the file is not a valid YAML file.
+  - 0 if the file was parsed successfully,
+  - 1 if the file is not a valid YAML file.
 - `${REPLY}`: (requires noFail=true) the errors encountered during the parsing if any.
 
 Example usage:

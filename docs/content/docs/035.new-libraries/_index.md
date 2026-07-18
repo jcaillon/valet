@@ -1,5 +1,5 @@
 ---
-title: 📗 Create a library
+title: Create a library
 cascade:
   type: docs
 weight: 35
@@ -8,7 +8,7 @@ url: /docs/new-libraries
 
 Once you have [created an extension][newExtensionsLink] and moved to its directory, you can start creating new libraries.
 
-## 📂 Library files location
+## Library files location
 
 Library directories are found and indexed by Valet during the build process. Libraries are expected to be bash scripts prefixed with `lib-` directly placed under a `libraries.d` directory.
 
@@ -33,17 +33,17 @@ source gitlab
 include git
 ```
 
-## ➕ Create a command
+## Create a command
 
 {{% steps %}}
 
-### 🧑‍💻 Setup your development environment
+### Setup your development environment
 
 The section [working on bash][work-on-bash-scripts] will help you set up a coding environment for bash.
 
 Open your existing extension directory or [create a new one][newExtensionsLink].
 
-### 📄 Add a new library file
+### Add a new library file
 
 Run the following command to create a new library file named `lib-mylib.sh` in the `libraries.d` directory of your extension:
 
@@ -55,7 +55,7 @@ valet extensions add-library mylib
 
 Alternatively, create the file manually.
 
-### 🔤 Define new library functions
+### Define new library functions
 
 Each function that you want to expose as a library function must be named following the `mylib::myfunction` convention (where `mylib` is the name of your library, and `myfunction` the name of your function).
 
@@ -100,7 +100,7 @@ An example is given below for a `mylib` library and a `myfunction` function:
 function mylib::myfunction() { :; }
 ```
 
-### ✒️ Implement your library
+### Implement your library
 
 Please find these dedicated pages to help you write better bash functions:
 
@@ -112,7 +112,7 @@ Please find these dedicated pages to help you write better bash functions:
 > [!IMPORTANT]
 > You must follow the best practices given in this documentation if you want your library functions to be consistent with the standard Valet functions.
 
-### 🛠️ Rebuild the self documentation
+### Rebuild the self documentation
 
 Once defined, run the following command to let Valet find your custom libraries:
 
@@ -128,12 +128,12 @@ valet self document
 
 It will update the `lib-valet` script, the `lib-valet.md` documentation and the vscode snippets.
 
-### 🧩 Source your new library
+### Source your new library
 
 You can now source your new library in your command files with `source mylib`.
 
 > [!IMPORTANT]
-> The bash built-in `source` is [overridden by a function in Valet](../libraries/core/#-source). This allows to not source the same file twice, so you can safely call `source mylib` several times without impacting the runtime performance.
+> The bash built-in `source` is [overridden by a function in Valet](../libraries/core/#source). This allows to not source the same file twice, so you can safely call `source mylib` several times without impacting the runtime performance.
 >
 > If you need to use the default source keyword, use `builtin source`.
 

@@ -1,11 +1,11 @@
 ---
-title: 📂 string
+title: string
 cascade:
   type: docs
 url: /docs/libraries/string
 ---
 
-## ⚡ string::count
+## string::count
 
 Counts the number of occurrences of a substring in a string.
 
@@ -33,7 +33,7 @@ echo "${REPLY}"
 
 > This is faster than looping over the string and check the substring.
 
-## ⚡ string::doForEachLine
+## string::doForEachLine
 
 Execute a callback function for each item (e.g. line) of a string.
 The string is split using a separator (default to a new line) and
@@ -72,7 +72,7 @@ string::doForEachLine myString myCallback
 > newlines (which is not the case with a "for loop" using parameter expansion and IFS=$'\n').
 > Here string is significantly slower than using this.
 
-## ⚡ string::expandVariables
+## string::expandVariables
 
 Expand variables in a string.
 The replacement is done in place, for the given variable.
@@ -101,7 +101,7 @@ string::expandVariables MY_STRING
 echo "${MY_STRING}"
 ```
 
-## ⚡ string::extractBetween
+## string::extractBetween
 
 Extract the text between two strings within a string.
 Search for the first occurrence of the start string and the first occurrence
@@ -137,7 +137,7 @@ string::extractBetween MY_STRING "is a " " text"
 local extractedText="${REPLY}"
 ```
 
-## ⚡ string::getCamelCase
+## string::getCamelCase
 
 This function convert a SNAKE_CASE or kebab-case string to a camelCase string.
 
@@ -159,7 +159,7 @@ string::getCamelCase MY_STRING
 echo "${REPLY}"
 ```
 
-## ⚡ string::getField
+## string::getField
 
 Allows to get the nth element of a string separated by a given separator.
 This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
@@ -198,7 +198,7 @@ echo "${REPLY}"
 > - using read into an array from a here string
 > - using bash parameter expansion to remove before/after the separator
 
-## ⚡ string::getFormattedHeader
+## string::getFormattedHeader
 
 Get a formatted header string with a given width.
 The header is composed of a left/middle/right part(s).
@@ -267,7 +267,7 @@ string::getFormattedHeader "Left|Middle|Right" width=50 paddingChar="-" paddingS
 echo "${REPLY}"
 ```
 
-## ⚡ string::getHexRepresentation
+## string::getHexRepresentation
 
 Convert a string to its hexadecimal representation.
 
@@ -289,7 +289,7 @@ string::getHexRepresentation MY_STRING
 echo "${REPLY}"
 ```
 
-## ⚡ string::getIndexOf
+## string::getIndexOf
 
 Find the first index of a string within another string.
 
@@ -322,7 +322,7 @@ string::getIndexOf MY_STRING "long"
 echo "${REPLY}"
 ```
 
-## ⚡ string::getKebabCase
+## string::getKebabCase
 
 This function convert a camelCase, PascalCase or SNAKE_CASE string to a kebab-case string.
 Removes all leading/trailing dashes.
@@ -345,7 +345,7 @@ string::getKebabCase MY_STRING
 echo "${REPLY}"
 ```
 
-## ⚡ string::getSnakeCase
+## string::getSnakeCase
 
 This function convert a camelCase, PascalCase or kebab-case string to a SNAKE_CASE string.
 Removes all leading/trailing underscores.
@@ -368,7 +368,7 @@ string::getSnakeCase MY_STRING
 echo "${REPLY}"
 ```
 
-## ⚡ string::head
+## string::head
 
 Get the first nth items (e.g. lines) of a string.
 
@@ -400,7 +400,7 @@ string::head MY_STRING 2
 echo "${REPLY}"
 ```
 
-## ⚡ string::highlight
+## string::highlight
 
 Highlight characters in a string.
 
@@ -442,7 +442,7 @@ echo "${REPLY}"
 > - All characters to highlight must be found in the same order in the matched line.
 > - This functions is case insensitive.
 
-## ⚡ string::join
+## string::join
 
 Join an array of strings into a single string using a separator.
 
@@ -459,6 +459,7 @@ Inputs:
   (defaults to $'\n')
 
 Returns:
+
 - `${REPLY}`: the joined string
 
 Example usage:
@@ -469,7 +470,7 @@ string::join MY_ARRAY separator=","
 echo "${REPLY}"
 ```
 
-## ⚡ string::numberToUniqueId
+## string::numberToUniqueId
 
 Converts a number into a unique and human readable string of the same length.
 
@@ -490,7 +491,7 @@ string::numberToUniqueId 12345
 echo "${REPLY}"
 ```
 
-## ⚡ string::removeTextFormatting
+## string::removeTextFormatting
 
 Removes all text formatting from the given string.
 This includes colors, bold, underline, etc.
@@ -508,7 +509,7 @@ string::removeTextFormatting "myText"
 echo "${myText}"
 ```
 
-## ⚡ string::split
+## string::split
 
 Split a string into an array using a separator.
 
@@ -536,7 +537,7 @@ ARRAY=("${REPLY_ARRAY[@]}")
 
 > This is faster than using read into an array from a here string.
 
-## ⚡ string::trimAll
+## string::trimAll
 
 Trim all whitespaces and truncate spaces.
 The replacement is done in place, for the given variable.
@@ -555,7 +556,7 @@ string::trimAll MY_STRING
 echo "${MY_STRING}"
 ```
 
-## ⚡ string::trimEdges
+## string::trimEdges
 
 Trim leading and trailing characters (defaults to whitespaces).
 The replacement is done in place, for the given variable.
@@ -580,7 +581,7 @@ string::trimEdges MY_STRING
 echo "${MY_STRING}"
 ```
 
-## ⚡ string::truncateWithEllipsis
+## string::truncateWithEllipsis
 
 Truncate a string to a given length and add an ellipsis if truncated.
 This function takes into account invisible characters (ANSI escape codes for text formatting).
@@ -605,6 +606,7 @@ Inputs:
   (defaults to false)
 
 Returns:
+
 - `${REPLY}`: the space left after truncation
 
 Example usage:
@@ -615,7 +617,7 @@ string::truncateWithEllipsis MY_STRING maxLength=20
 echo "${REPLY}"
 ```
 
-## ⚡ string::wrapCharacters
+## string::wrapCharacters
 
 Allows to hard wrap the given string at the given width.
 Wrapping is done at character boundaries, see string::warpText for word wrapping.
@@ -665,7 +667,7 @@ echo "${REPLY}"
 > - It considers escape sequence for text formatting and does not count them as visible characters.
 > - Leading spaces after a newly wrapped line are removed.
 
-## ⚡ string::wrapWords
+## string::wrapWords
 
 Allows to soft wrap the given text at the given width.
 Wrapping is done at word boundaries.

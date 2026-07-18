@@ -1162,7 +1162,7 @@ function command::getHelpAsMarkdown() {
 
   done
 
-  REPLY="## ▶️ ${fullCommand}
+  REPLY="## ${fullCommand}
 
 ### Synopsis
 

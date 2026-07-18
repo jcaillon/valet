@@ -1,5 +1,5 @@
 ---
-title: 🫀 Valet internals
+title: Valet internals
 cascade:
   type: docs
 weight: 700

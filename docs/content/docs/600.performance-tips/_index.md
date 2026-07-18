@@ -1,5 +1,5 @@
 ---
-title: 🐇 Performance tips
+title: Performance tips
 cascade:
   type: docs
 weight: 600
