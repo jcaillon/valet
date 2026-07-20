@@ -1,0 +1,2 @@
+obj: !mytype
+  resources: !reference [ 1, 2 ]

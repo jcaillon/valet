@@ -255,7 +255,7 @@ function test::printReplyVars() {
   for varName in REPLY_MAP REPLY_MAP2; do
     local -n associativeArrayNameRef="${varName}"
     if [[ -n "${!associativeArrayNameRef[*]}" ]]; then
-      GLOBAL_TEST_OUTPUT_CONTENT+="REPLY_MAP=("$'\n'
+      GLOBAL_TEST_OUTPUT_CONTENT+="${varName}=("$'\n'
       local -a keys=("${!associativeArrayNameRef[@]}")
       include array
       array::sort keys

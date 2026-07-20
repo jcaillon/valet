@@ -55,6 +55,7 @@ source bash
 # Returns:
 #
 # - ${REPLY_MAP}: an associative array containing the content of the YAML file in dot notation.
+# - ${REPLY_MAP2}: an associative array containing the tags of the YAML file in dot notation.
 # - ${REPLY_CODE}: (requires noFail=true)
 #     - 0 if the file was parsed successfully,
 #     - 1 if the file is not a valid YAML file.
@@ -69,7 +70,6 @@ source bash
 # > - explicit keys (e.g. `? {myobject: key}`)
 # > - extraction of tag definitions (e.g. %TAG !e! tag:example.com,2000:app/)
 #
-# TODO: extract tags in REPLY_MAP2 !
 # TODO: we must extract tags on nodes, not only on values (e.g. key: !!tag { node } )
 function yaml::parseFile() {
   local \
@@ -84,6 +84,7 @@ function yaml::parseFile() {
   bash::setShellOption nocasematch
 
   REPLY_MAP=()
+  REPLY_MAP2=()
   local replyCode=0 \
     errors=""
 
@@ -627,6 +628,9 @@ function yaml::parseFile() {
       yaml_saveValue
       isKeyWithoutValue=false
     else
+      if [[ -n ${valueTag} ]]; then
+        REPLY_MAP2["${fullKey}"]="${valueTag}"
+      fi
       isKeyWithoutValue=true
     fi
 
@@ -668,13 +672,13 @@ function yaml::parseFile() {
 function yaml_saveValue() {
   REPLY_MAP["${fullKey}"]="${value}"
   if [[ -n ${valueTag} && ${valueTag} != "!!str" && ${valueTag} != "!" ]]; then
-    REPLY_MAP["${fullKey}.tag"]="${valueTag}"
+    REPLY_MAP2["${fullKey}"]="${valueTag}"
   fi
 }
 
 function yaml_saveNullValue() {
   REPLY_MAP["${fullKey}"]="null"
-  REPLY_MAP["${fullKey}.tag"]="!!null"
+  REPLY_MAP2["${fullKey}"]="!!null"
 }
 
 function yaml_extractFirstQuotedTextFromLine() {
@@ -711,11 +715,11 @@ function yaml_computeValueTag() {
   elif [[ ${value} == [0-9+-.]* ]]; then
     if [[ ${value} != *[!0-9]* ]]; then
       valueTag="!!int"
-    elif [[ ${value} == [+-]* && ${value:1} != *[!0-9]* ]]; then
+    elif [[ ${value} == [+-]* && ${#value} -gt 1 && ${value:1} != *[!0-9]* ]]; then
       valueTag="!!int"
-    elif [[ ${value} == 0o* && ${value:2} != *[!0-7]* ]]; then
+    elif [[ ${value} == 0o* && ${#value} -gt 2 && ${value:2} != *[!0-7]* ]]; then
       valueTag="!!int"
-    elif [[ ${value} == 0x* && ${value:2} != *[!0-9a-fA-F]* ]]; then
+    elif [[ ${value} == 0x* && ${#value} -gt 2 && ${value:2} != *[!0-9a-fA-F]* ]]; then
       valueTag="!!int"
     elif [[ ${value} == ".nan" || ${value} == ".inf" ]]; then
       valueTag="!!float"
@@ -1012,7 +1016,7 @@ function yaml_jsonSaveValue() {
   log::debug "ADD VALUE : key: ${jsonFullKey@Q}, value: ${jsonCumulatedString@Q}, jsonDepth: ${jsonDepth}"
   REPLY_MAP["${jsonFullKey}"]="${jsonCumulatedString}"
   if [[ -n ${jsonValueTag} && ${jsonValueTag} != "!!str" && ${jsonValueTag} != "!" ]]; then
-    REPLY_MAP["${jsonFullKey}.tag"]="${jsonValueTag}"
+    REPLY_MAP2["${jsonFullKey}"]="${jsonValueTag}"
   fi
 }
 

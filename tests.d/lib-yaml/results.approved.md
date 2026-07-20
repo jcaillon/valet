@@ -60,21 +60,14 @@ REPLY_MAP=(
 ['key.1indent.now2.arr.length']='3'
 ['key.1indent.now2.arr2.length']='3'
 ['key.1indent.now2.arr2[0]']='1'
-['key.1indent.now2.arr2[0].tag']='!!int'
 ['key.1indent.now2.arr2[1]']='2'
-['key.1indent.now2.arr2[1].tag']='!!int'
 ['key.1indent.now2.arr2[2]']='3'
-['key.1indent.now2.arr2[2].tag']='!!int'
 ['key.1indent.now2.arr[0]']='1'
-['key.1indent.now2.arr[0].tag']='!!int'
 ['key.1indent.now2.arr[1]']='2'
-['key.1indent.now2.arr[1].tag']='!!int'
 ['key.1indent.now2.arr[2]']='3'
-['key.1indent.now2.arr[2].tag']='!!int'
 ['normal.length']='7'
 ['normal[0].item']='Super Hoop'
 ['normal[0].quantity']='1'
-['normal[0].quantity.tag']='!!int'
 ['normal[1]']='Sammy Sosa completed another fine season with great stats.
 
   63 Home Runs
@@ -83,9 +76,7 @@ REPLY_MAP=(
 What a year!
 '
 ['normal[2].avg']='0.278'
-['normal[2].avg.tag']='!!float'
 ['normal[2].hr']='65'
-['normal[2].hr.tag']='!!int'
 ['normal[2].name']='Mark McGwire'
 ['normal[3]']=' explicit
 '
@@ -94,7 +85,18 @@ What a year!
 ['normal[5]']='  explicit
 '
 ['normal[6].key']='1'
-['normal[6].key.tag']='!!int'
+)
+REPLY_MAP2=(
+['key.1indent.now2.arr2[0]']='!!int'
+['key.1indent.now2.arr2[1]']='!!int'
+['key.1indent.now2.arr2[2]']='!!int'
+['key.1indent.now2.arr[0]']='!!int'
+['key.1indent.now2.arr[1]']='!!int'
+['key.1indent.now2.arr[2]']='!!int'
+['normal[0].quantity']='!!int'
+['normal[2].avg']='!!float'
+['normal[2].hr']='!!int'
+['normal[6].key']='!!int'
 )
 ```
 
@@ -243,15 +245,10 @@ REPLY_MAP=(
 ['@.length']='1'
 ['ff.""']='empty key'
 ['ff.another null value']='null'
-['ff.another null value.tag']='!!null'
 ['ff.k.null2']='null'
-['ff.k.null2.tag']='!!null'
 ['ff.k2[0].null3']='null'
-['ff.k2[0].null3.tag']='!!null'
 ['ff.k2[1].null4']='null'
-['ff.k2[1].null4.tag']='!!null'
 ['ff.null value']='null'
-['ff.null value.tag']='!!null'
 ['hi[0]']='double
 quoted'
 ['hi[1]']='single quoted'
@@ -264,8 +261,6 @@ newline'
 with      spaces     as well'
 ['other.key with
 spaces']='null'
-['other.key with
-spaces.tag']='!!null'
 ['other.tro"'is']='quatre'
 ['thing.length']='4'
 ['thing[0].five[0][0][0]']='val'
@@ -275,7 +270,6 @@ spaces.tag']='!!null'
 ['thing[0].one']='two'
 ['thing[0].three']='four'
 ['thing[1][0]']='1'
-['thing[1][0].tag']='!!int'
 ['thing[1][1]']='quoted'
 ['thing[1][2].key']='value'
 ['thing[1][3].key2']='val2'
@@ -283,80 +277,90 @@ spaces.tag']='!!null'
 ['thing[1][5]']=':simplevalue'
 ['thing[2].five']='six'
 ['thing[2].key[0]']='1'
-['thing[2].key[0].tag']='!!int'
 ['thing[2].key[1].arr[0]']='sub2'
 ['thing[2].key[1].sub']='k'
 ['thing[2].seven']='8'
-['thing[2].seven.tag']='!!int'
 ['thing[3].k']='1'
-['thing[3].k.tag']='!!int'
 ['types1[0]']='1.23015e+3'
-['types1[0].tag']='!!float'
 ['types1[10]']='true'
-['types1[10].tag']='!!bool'
 ['types1[11]']='FALSE'
-['types1[11].tag']='!!bool'
 ['types1[12]']='TruE'
-['types1[12].tag']='!!bool'
 ['types1[13]']='NULL'
-['types1[13].tag']='!!null'
 ['types1[14]']='null'
-['types1[14].tag']='!!null'
 ['types1[15]']='~'
-['types1[15].tag']='!!null'
 ['types1[16]']='123.456.345'
 ['types1[1]']='12.3015e+02'
-['types1[1].tag']='!!float'
 ['types1[2]']='1230.15'
-['types1[2].tag']='!!float'
 ['types1[3]']='-.inf'
-['types1[3].tag']='!!float'
 ['types1[4]']='.nan'
-['types1[4].tag']='!!float'
 ['types1[5]']='0o14'
-['types1[5].tag']='!!int'
 ['types1[6]']='+12345'
-['types1[6].tag']='!!int'
 ['types1[7]']='-9'
-['types1[7].tag']='!!int'
 ['types1[8]']='78'
-['types1[8].tag']='!!int'
 ['types1[9]']='0xC'
-['types1[9].tag']='!!int'
 ['types2.bool.b1']='false'
-['types2.bool.b1.tag']='!!bool'
 ['types2.bool.b2']='TRUE'
-['types2.bool.b2.tag']='!!bool'
 ['types2.bool.b3']='FalSe'
-['types2.bool.b3.tag']='!!bool'
 ['types2.float.exponential']='1230.15'
-['types2.float.exponential.tag']='!!float'
 ['types2.float.fixed']='1230.15'
-['types2.float.fixed.tag']='!!float'
 ['types2.float.negative infinity']='-.inf'
-['types2.float.negative infinity.tag']='!!float'
 ['types2.float.not a number']='.nan'
-['types2.float.not a number.tag']='!!float'
 ['types2.float.scientific']='1230.15'
-['types2.float.scientific.tag']='!!float'
 ['types2.int.baseten']='78'
-['types2.int.baseten.tag']='!!int'
 ['types2.int.hexadecimal']='12'
-['types2.int.hexadecimal.tag']='!!int'
 ['types2.int.octal']='12'
-['types2.int.octal.tag']='!!int'
 ['types2.int.signed']='12345'
-['types2.int.signed.tag']='!!int'
 ['types2.int.signed2']='-9'
-['types2.int.signed2.tag']='!!int'
 ['types2.null.null']='null'
-['types2.null.null.tag']='!!null'
 ['types2.null.null2']='Null'
-['types2.null.null2.tag']='!!null'
 ['types2.null.null3']='~'
-['types2.null.null3.tag']='!!null'
 ['types2.string.anythingElse']='ergezrg'
 ['types2.string.notFloat']='123.456.345'
+)
+REPLY_MAP2=(
+['ff.another null value']='!!null'
+['ff.k.null2']='!!null'
+['ff.k2[0].null3']='!!null'
+['ff.k2[1].null4']='!!null'
+['ff.null value']='!!null'
+['other.key with
+spaces']='!!null'
+['thing[1][0]']='!!int'
+['thing[2].key[0]']='!!int'
+['thing[2].seven']='!!int'
+['thing[3].k']='!!int'
+['types1[0]']='!!float'
+['types1[10]']='!!bool'
+['types1[11]']='!!bool'
+['types1[12]']='!!bool'
+['types1[13]']='!!null'
+['types1[14]']='!!null'
+['types1[15]']='!!null'
+['types1[1]']='!!float'
+['types1[2]']='!!float'
+['types1[3]']='!!float'
+['types1[4]']='!!float'
+['types1[5]']='!!int'
+['types1[6]']='!!int'
+['types1[7]']='!!int'
+['types1[8]']='!!int'
+['types1[9]']='!!int'
+['types2.bool.b1']='!!bool'
+['types2.bool.b2']='!!bool'
+['types2.bool.b3']='!!bool'
+['types2.float.exponential']='!!float'
+['types2.float.fixed']='!!float'
+['types2.float.negative infinity']='!!float'
+['types2.float.not a number']='!!float'
+['types2.float.scientific']='!!float'
+['types2.int.baseten']='!!int'
+['types2.int.hexadecimal']='!!int'
+['types2.int.octal']='!!int'
+['types2.int.signed']='!!int'
+['types2.int.signed2']='!!int'
+['types2.null.null']='!!null'
+['types2.null.null2']='!!null'
+['types2.null.null3']='!!null'
 )
 ```
 
@@ -417,42 +421,44 @@ REPLY=''
 REPLY_MAP=(
 ['@.length']='1'
 ['config.features.autoSave']='true'
-['config.features.autoSave.tag']='!!bool'
 ['config.features.maxItems']='100'
-['config.features.maxItems.tag']='!!int'
 ['config.features.notifications']='false'
-['config.features.notifications.tag']='!!bool'
 ['config.language']='en'
 ['config.theme']='dark'
 ['description']='Privacy-first developer toolbox'
 ['metadata']='null'
-['metadata.tag']='!!null'
 ['name']='ToolBox'
 ['tools[0]']='JSON Formatter'
 ['tools[1]']='Base64'
 ['tools[2]']='QR Code'
 ['tools[3]']='Hash Generator'
 ['users[0].active']='true'
-['users[0].active.tag']='!!bool'
 ['users[0].id']='1'
-['users[0].id.tag']='!!int'
 ['users[0].name']='Alice'
 ['users[0].scores[0]']='95'
-['users[0].scores[0].tag']='!!int'
 ['users[0].scores[1]']='88'
-['users[0].scores[1].tag']='!!int'
 ['users[0].scores[2]']='72'
-['users[0].scores[2].tag']='!!int'
 ['users[1].active']='false'
-['users[1].active.tag']='!!bool'
 ['users[1].id']='2'
-['users[1].id.tag']='!!int'
 ['users[1].name']='Bob'
 ['users[1].scores[0]']='60'
-['users[1].scores[0].tag']='!!int'
 ['users[1].scores[1]']='75'
-['users[1].scores[1].tag']='!!int'
 ['version']='1.0.0'
+)
+REPLY_MAP2=(
+['config.features.autoSave']='!!bool'
+['config.features.maxItems']='!!int'
+['config.features.notifications']='!!bool'
+['metadata']='!!null'
+['users[0].active']='!!bool'
+['users[0].id']='!!int'
+['users[0].scores[0]']='!!int'
+['users[0].scores[1]']='!!int'
+['users[0].scores[2]']='!!int'
+['users[1].active']='!!bool'
+['users[1].id']='!!int'
+['users[1].scores[0]']='!!int'
+['users[1].scores[1]']='!!int'
 )
 ```
 
@@ -503,13 +509,15 @@ REPLY=''
 REPLY_MAP=(
 ['@.length']='2'
 ['@[1].nullkeyattheend']='null'
-['@[1].nullkeyattheend.tag']='!!null'
 ['k.null']='null'
-['k.null.tag']='!!null'
 ['null   key']='null'
-['null   key.tag']='!!null'
 ['nullkeybeforenewdoc']='null'
-['nullkeybeforenewdoc.tag']='!!null'
+)
+REPLY_MAP2=(
+['@[1].nullkeyattheend']='!!null'
+['k.null']='!!null'
+['null   key']='!!null'
+['nullkeybeforenewdoc']='!!null'
 )
 ```
 
@@ -559,14 +567,12 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['""']='null'
-['"".tag']='!!null'
 ['@.length']='1'
 ['empty']=''
 ['k']='word1 word2" word3'
 ['k2']='line1
 line2'
 ['key  with colons   ::']='null'
-['key  with colons   ::.tag']='!!null'
 ['key with spaces']='ok'
 ['nested.arr.length']='2'
 ['nested.arr[0]']='
@@ -577,6 +583,10 @@ line1 line2
 
 word2" word3 '
 ['nested.k3']='v a l'"'"' u e'
+)
+REPLY_MAP2=(
+['""']='!!null'
+['key  with colons   ::']='!!null'
 )
 ```
 
@@ -735,7 +745,6 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['"num[0].key"']='1'
-['"num[0].key".tag']='!!int'
 ['@.length']='1'
 ['arr.length']='2'
 ['arr[0]']='thing'
@@ -753,27 +762,19 @@ second line
 ['nested.arr[0].array[0]']='thing'
 ['nested.arr[0].array[1].arr.length']='2'
 ['nested.arr[0].array[1].arr[0]']='1'
-['nested.arr[0].array[1].arr[0].tag']='!!int'
 ['nested.arr[0].array[1].arr[1]']='2'
-['nested.arr[0].array[1].arr[1].tag']='!!int'
 ['nested.arr[0].name']='obj1'
 ['nested.arr[0].value']='123'
-['nested.arr[0].value.tag']='!!int'
 ['nested.arr[1].name']='obj2'
 ['nested.arr[1].properties.length']='2'
 ['nested.arr[1].properties[0]']='1'
-['nested.arr[1].properties[0].tag']='!!int'
 ['nested.arr[1].properties[1]']='2'
-['nested.arr[1].properties[1].tag']='!!int'
 ['nested.arr[1].value']='456'
-['nested.arr[1].value.tag']='!!int'
 ['nested.arr[2]']='coucou text'
 ['nested.arr[3]']='nom mais allo'
 ['nested.thing']='true'
-['nested.thing.tag']='!!bool'
 ['num.length']='1'
 ['num[0].key']='2'
-['num[0].key.tag']='!!int'
 ['strings.content']='Or we
 
 
@@ -787,7 +788,6 @@ to save space'
 line2	unicode:❤'
 ['strings.empty']=''
 ['strings.empty2']='null'
-['strings.empty2.tag']='!!null'
 ['strings.folded']='
 a
 
@@ -814,6 +814,18 @@ line two
 ['strings.plain']='hello world'
 ['strings.single_quoted']='hello '"'"'world'"'"' #notacomment'
 ['strings.with_single_quote']='C'"'"'est "quoi'
+)
+REPLY_MAP2=(
+['"num[0].key"']='!!int'
+['nested.arr[0].array[1].arr[0]']='!!int'
+['nested.arr[0].array[1].arr[1]']='!!int'
+['nested.arr[0].value']='!!int'
+['nested.arr[1].properties[0]']='!!int'
+['nested.arr[1].properties[1]']='!!int'
+['nested.arr[1].value']='!!int'
+['nested.thing']='!!bool'
+['num[0].key']='!!int'
+['strings.empty2']='!!null'
 )
 ```
 
@@ -852,13 +864,15 @@ REPLY_MAP=(
 ['[0][3][0].key']='ok'
 ['[0][4].length']='1'
 ['[0][4][0]']='1'
-['[0][4][0].tag']='!!int'
 ['[0][5]']='2'
-['[0][5].tag']='!!int'
 ['[1]']='1'
-['[1].tag']='!!int'
 ['[2]']='- not an array'
 ['length']='3'
+)
+REPLY_MAP2=(
+['[0][4][0]']='!!int'
+['[0][5]']='!!int'
+['[1]']='!!int'
 )
 ```
 
@@ -947,6 +961,33 @@ REPLY_MAP=(
 )
 ```
 
+> cat `resources/ok/tags-on-keys.yaml`
+
+```text
+obj: !mytype
+  resources: !reference [ 1, 2 ]
+```
+
+❯ `yaml::parseFile resources/ok/tags-on-keys.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['@.length']='1'
+['obj.resources[0]']='1'
+['obj.resources[1]']='2'
+)
+REPLY_MAP2=(
+['obj']='!mytype'
+['obj.resources']='!reference'
+['obj.resources[0]']='!!int'
+['obj.resources[1]']='!!int'
+)
+```
+
 > cat `resources/ok/tags.yaml`
 
 ```text
@@ -1008,58 +1049,60 @@ REPLY=''
 REPLY_MAP=(
 ['@.length']='1'
 ['bool.b1']='false'
-['bool.b1.tag']='!!bool'
 ['bool.b2']='TRUE'
-['bool.b2.tag']='!!bool'
 ['bool.b3']='False'
-['bool.b3.tag']='!!bool'
 ['custom.application specific tag']='The semantics of the tag
 above may be different for
 different documents.
 '
-['custom.application specific tag.tag']='!e!tag'
 ['custom.picture']='xxxx'
-['custom.picture.tag']='!!binary'
 ['explicitTypes.length']='6'
 ['explicitTypes[0]']='123'
 ['explicitTypes[1]']='123'
 ['explicitTypes[2]']='123'
-['explicitTypes[2].tag']='!!int'
 ['explicitTypes[3]']='123.45'
-['explicitTypes[3].tag']='!!float'
 ['explicitTypes[4]']='true'
-['explicitTypes[4].tag']='!!bool'
 ['explicitTypes[5]']='null'
-['explicitTypes[5].tag']='!!null'
 ['float.exponential']='12.3015e+02'
-['float.exponential.tag']='!!float'
 ['float.fixed']='1230.15'
-['float.fixed.tag']='!!float'
 ['float.negative infinity']='-.inf'
-['float.negative infinity.tag']='!!float'
 ['float.not a number']='.nan'
-['float.not a number.tag']='!!float'
 ['float.scientific']='1.23015e+3'
-['float.scientific.tag']='!!float'
 ['int.baseten']='78'
-['int.baseten.tag']='!!int'
 ['int.hexadecimal']='0xC'
-['int.hexadecimal.tag']='!!int'
 ['int.octal']='0o14'
-['int.octal.tag']='!!int'
 ['int.signed']='+12345'
-['int.signed.tag']='!!int'
 ['int.signed2']='-9'
-['int.signed2.tag']='!!int'
 ['null.null']='null'
-['null.null.tag']='!!null'
 ['null.null2']='null'
-['null.null2.tag']='!!null'
 ['null.null3']='~'
-['null.null3.tag']='!!null'
 ['string.anythingElse']='ergezrg'
 ['string.notFloat']='123.456.345'
 ['string.s']='example'
+)
+REPLY_MAP2=(
+['bool.b1']='!!bool'
+['bool.b2']='!!bool'
+['bool.b3']='!!bool'
+['custom.application specific tag']='!e!tag'
+['custom.picture']='!!binary'
+['explicitTypes[2]']='!!int'
+['explicitTypes[3]']='!!float'
+['explicitTypes[4]']='!!bool'
+['explicitTypes[5]']='!!null'
+['float.exponential']='!!float'
+['float.fixed']='!!float'
+['float.negative infinity']='!!float'
+['float.not a number']='!!float'
+['float.scientific']='!!float'
+['int.baseten']='!!int'
+['int.hexadecimal']='!!int'
+['int.octal']='!!int'
+['int.signed']='!!int'
+['int.signed2']='!!int'
+['null.null']='!!null'
+['null.null2']='!!null'
+['null.null3']='!!null'
 )
 ```
 
@@ -1135,12 +1178,14 @@ REPLY_MAP=(
 ['@[0][0][3][0].key']='ok'
 ['@[0][0][4].length']='1'
 ['@[0][0][4][0]']='1'
-['@[0][0][4][0].tag']='!!int'
 ['@[0][0][5]']='2'
-['@[0][0][5].tag']='!!int'
 ['@[0][1]']='1'
-['@[0][1].tag']='!!int'
 ['@[0][2]']='- not an array'
+)
+REPLY_MAP2=(
+['@[0][0][4][0]']='!!int'
+['@[0][0][5]']='!!int'
+['@[0][1]']='!!int'
 )
 ```
 
@@ -1157,21 +1202,14 @@ REPLY_MAP=(
 ['@[0].key.1indent.now2.arr.length']='3'
 ['@[0].key.1indent.now2.arr2.length']='3'
 ['@[0].key.1indent.now2.arr2[0]']='1'
-['@[0].key.1indent.now2.arr2[0].tag']='!!int'
 ['@[0].key.1indent.now2.arr2[1]']='2'
-['@[0].key.1indent.now2.arr2[1].tag']='!!int'
 ['@[0].key.1indent.now2.arr2[2]']='3'
-['@[0].key.1indent.now2.arr2[2].tag']='!!int'
 ['@[0].key.1indent.now2.arr[0]']='1'
-['@[0].key.1indent.now2.arr[0].tag']='!!int'
 ['@[0].key.1indent.now2.arr[1]']='2'
-['@[0].key.1indent.now2.arr[1].tag']='!!int'
 ['@[0].key.1indent.now2.arr[2]']='3'
-['@[0].key.1indent.now2.arr[2].tag']='!!int'
 ['@[0].normal.length']='7'
 ['@[0].normal[0].item']='Super Hoop'
 ['@[0].normal[0].quantity']='1'
-['@[0].normal[0].quantity.tag']='!!int'
 ['@[0].normal[1]']='Sammy Sosa completed another fine season with great stats.
 
   63 Home Runs
@@ -1180,9 +1218,7 @@ REPLY_MAP=(
 What a year!
 '
 ['@[0].normal[2].avg']='0.278'
-['@[0].normal[2].avg.tag']='!!float'
 ['@[0].normal[2].hr']='65'
-['@[0].normal[2].hr.tag']='!!int'
 ['@[0].normal[2].name']='Mark McGwire'
 ['@[0].normal[3]']=' explicit
 '
@@ -1191,7 +1227,18 @@ What a year!
 ['@[0].normal[5]']='  explicit
 '
 ['@[0].normal[6].key']='1'
-['@[0].normal[6].key.tag']='!!int'
+)
+REPLY_MAP2=(
+['@[0].key.1indent.now2.arr2[0]']='!!int'
+['@[0].key.1indent.now2.arr2[1]']='!!int'
+['@[0].key.1indent.now2.arr2[2]']='!!int'
+['@[0].key.1indent.now2.arr[0]']='!!int'
+['@[0].key.1indent.now2.arr[1]']='!!int'
+['@[0].key.1indent.now2.arr[2]']='!!int'
+['@[0].normal[0].quantity']='!!int'
+['@[0].normal[2].avg']='!!float'
+['@[0].normal[2].hr']='!!int'
+['@[0].normal[6].key']='!!int'
 )
 ```
 
