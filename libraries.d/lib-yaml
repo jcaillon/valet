@@ -66,11 +66,10 @@ source bash
 # declare -p REPLY_MAP
 # ```
 #
-# > /!\ This does not support some uncommon YAML features yet such as:
+# > /!\ This does not support the following uncommon YAML 1.2 features:
 # > - explicit keys (e.g. `? {myobject: key}`)
 # > - extraction of tag definitions (e.g. %TAG !e! tag:example.com,2000:app/)
 #
-# TODO: we must extract tags on nodes, not only on values (e.g. key: !!tag { node } )
 function yaml::parseFile() {
   local \
     path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
@@ -110,10 +109,11 @@ function yaml::parseFile() {
 
   local line indent keyName fullKey value firstChar isArrayItemStart=false keyIndentLevelsFlatten \
     multilineTrimEnd=true multiLinesCumulatedLf multilineSeparator='' multilineFinalSeparator='' \
-    isKeyWithoutValue=false isJsonRootObject=0 inArrayIndent \
+    isKeyWithoutValue=false isJsonRootObject=0 anchorName='' inArrayIndent \
     errorPrefix="Error parsing YAML file ⌜${path}⌝" docPrefix=""
   local -i indentLevel=0 indentLevelIndex arrayIndex lineNumber=0 lastIndentLevel=0 arrayExtraIndentLevel \
     multiLineIndentLevel=-1 docNumber=0
+  local -A aliases=()
 
   # variables that carry over each loop iteration
   local isMultilineValue=false isQuoteOpen=false valueTag="" isJsonOpen=0
@@ -273,15 +273,25 @@ function yaml::parseFile() {
       isArrayItemStart=false
     fi
 
-    # handle tags
-    if [[ ${line} == "!"* ]]; then
-      # begins with an explicit tag !
-      valueTag="${line%%[[:space:]]*}"
-      line="${line:${#valueTag}}"
-      line="${line#"${line%%[^[:space:]]*}"}"
-    elif [[ ${isKeyWithoutValue} != true ]]; then
+    # handle tags / anchors
+    if [[ ${isKeyWithoutValue} != true ]]; then
       valueTag=""
     fi
+    anchorName=""
+    while [[ ${line} == "!"* || ${line} == "&"* ]]; do
+      if [[ ${line} == "!"* ]]; then
+        # explicit tag
+        valueTag="${line%%[[:space:]]*}"
+        line="${line:${#valueTag}}"
+        line="${line#"${line%%[^[:space:]]*}"}"
+      elif [[ ${line} == "&"* ]]; then
+        # anchor
+        anchorName="${line%%[[:space:]]*}"
+        line="${line:${#anchorName}}"
+        line="${line#"${line%%[^[:space:]]*}"}"
+        anchorName="${anchorName:1}"
+      fi
+    done
 
     # extract the key name and value, there can be only a value with no key name
     # in case of an array with a scalar
@@ -340,15 +350,22 @@ function yaml::parseFile() {
           # trim beginning spaces
           line="${line#"${line%%[^[:space:]]*}"}"
 
-          # handle tags
-          if [[ ${line} == "!"* ]]; then
-            # explicit tag
-            valueTag="${line%%[[:space:]]*}"
-            line="${line:${#valueTag}}"
-            line="${line#"${line%%[^[:space:]]*}"}"
-          else
-            valueTag=""
-          fi
+          # handle tags / anchors
+          valueTag=""
+          while [[ ${line} == "!"* || ${line} == "&"* ]]; do
+            if [[ ${line} == "!"* ]]; then
+              # explicit tag
+              valueTag="${line%%[[:space:]]*}"
+              line="${line:${#valueTag}}"
+              line="${line#"${line%%[^[:space:]]*}"}"
+            elif [[ ${line} == "&"* ]]; then
+              # anchor
+              anchorName="${line%%[[:space:]]*}"
+              line="${line:${#anchorName}}"
+              line="${line#"${line%%[^[:space:]]*}"}"
+              anchorName="${anchorName:1}"
+            fi
+          done
 
           firstChar="${line:0:1}"
           if [[ ${firstChar} == [\'\"] ]]; then
@@ -625,13 +642,27 @@ function yaml::parseFile() {
     fullKey="${docPrefix}${fullKey#.}"
     fullKey="${fullKey//'.['/'['}"
     if [[ -n ${value} || ${firstChar} == [\'\"] ]]; then
-      yaml_saveValue
-      isKeyWithoutValue=false
+      if [[ ${value} == '*'* && ${firstChar} != [\'\"] ]]; then
+        # case of an alias
+        value="${value:1}"
+        if [[ -v aliases[${value}] ]]; then
+          yaml_duplicateKeys "${aliases["${value}"]}" "${fullKey}"
+        else
+          yaml_addParsingError "invalid alias ${value@Q} (no anchor found for this alias)"
+        fi
+      else
+        yaml_saveValue
+        isKeyWithoutValue=false
+      fi
     else
       if [[ -n ${valueTag} ]]; then
         REPLY_MAP2["${fullKey}"]="${valueTag}"
       fi
       isKeyWithoutValue=true
+    fi
+    if [[ -n ${anchorName} ]]; then
+      log::debug "anchor ${anchorName@Q} points to ${fullKey}"
+      aliases["${anchorName}"]="${fullKey}"
     fi
 
   done <"${path}"
@@ -729,6 +760,37 @@ function yaml_computeValueTag() {
       valueTag="!!float"
     fi
   fi
+}
+
+function yaml_duplicateKeys() {
+  local \
+    sourceKey="${1}" \
+    targetKey="${2}"
+
+  log::debug "copying keys for sourceKey ${sourceKey@Q} to ${targetKey@Q}"
+
+  if [[ -v REPLY_MAP[${sourceKey}] ]]; then
+    # simple scalar value to copy
+    REPLY_MAP["${targetKey}"]="${REPLY_MAP["${sourceKey}"]}"
+    if [[ -v REPLY_MAP2[${sourceKey}] ]]; then
+      REPLY_MAP2["${targetKey}"]="${REPLY_MAP2["${sourceKey}"]}"
+      return 0
+    fi
+    return 0
+  fi
+
+  # copy all keys that start with the sourceKey
+  local key newKey
+  for key in "${!REPLY_MAP[@]}"; do
+    if [[ ${key} == "${sourceKey}"[\.\[]* ]]; then
+      newKey="${key#"${sourceKey}"}"
+      log::debug "copying key ${key@Q} sourceKey ${sourceKey@Q} to ${newKey@Q} "
+      REPLY_MAP["${targetKey}${newKey}"]="${REPLY_MAP[${key}]}"
+      if [[ -v REPLY_MAP2[${key}] ]]; then
+        REPLY_MAP2["${targetKey}${newKey}"]="${REPLY_MAP2[${key}]}"
+      fi
+    fi
+  done
 }
 
 # receives jsonLine and should parse json from it

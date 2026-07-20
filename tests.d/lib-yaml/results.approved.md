@@ -4,6 +4,63 @@
 
 ### ✅ Testing yaml::parseFile function
 
+> cat `resources/ok/aliases.yaml`
+
+```text
+- key: !!str  &val1 value 1
+- anotherKey:   *val1
+- overrideKey1:
+  - &val1 value 2
+- anotherKey2: *val1
+- int1: &int1  !!int 1
+- copiedInt: *int1
+- obj1suffix: &array1
+  - *val1
+  - true
+- obj1: &obj1
+    key1: value 1
+    key2: *array1
+- obj2: *obj1
+```
+
+❯ `yaml::parseFile resources/ok/aliases.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['@.length']='1'
+['[0].key']='value 1'
+['[1].anotherKey']='value 1'
+['[2].overrideKey1.length']='1'
+['[2].overrideKey1[0]']='value 2'
+['[3].anotherKey2']='value 2'
+['[4].int1']='1'
+['[5].copiedInt']='1'
+['[6].obj1suffix.length']='2'
+['[6].obj1suffix[0]']='value 2'
+['[6].obj1suffix[1]']='true'
+['[7].obj1.key1']='value 1'
+['[7].obj1.key2.length']='2'
+['[7].obj1.key2[0]']='value 2'
+['[7].obj1.key2[1]']='true'
+['[8].obj2.key1']='value 1'
+['[8].obj2.key2.length']='2'
+['[8].obj2.key2[0]']='value 2'
+['[8].obj2.key2[1]']='true'
+['length']='9'
+)
+REPLY_MAP2=(
+['[4].int1']='!!int'
+['[5].copiedInt']='!!int'
+['[6].obj1suffix[1]']='!!bool'
+['[7].obj1.key2[1]']='!!bool'
+['[8].obj2.key2[1]']='!!bool'
+)
+```
+
 > cat `resources/ok/any-indent.yaml`
 
 ```text

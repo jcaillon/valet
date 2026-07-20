@@ -6,8 +6,7 @@ include yaml test
 # log::setLevel debug silent=true
 
 time::startTimer
-# yaml::parseFile tests.d/lib-yaml/resources/ok-not-supported/test.yaml
-yaml::parseFile tests.d/lib-yaml/resources/ok/single-line-nested-arrays.yaml
+yaml::parseFile tests.d/lib-yaml/resources/ok-not-supported/test.yaml
 time::logTimerElapsedTime
 
 # yaml::parseFile tests.d/lib-yaml/resources/ok/root-array.yaml

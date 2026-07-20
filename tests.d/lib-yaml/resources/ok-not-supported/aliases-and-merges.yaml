@@ -11,10 +11,6 @@ Second occurrence: *anchor
 Override anchor: &anchor Bar
 Reuse anchor: *anchor
 
-# Source - https://stackoverflow.com/q/64224811
-# Posted by gavenkoa, modified by community. See post 'Timeline' for change history
-# Retrieved 2026-06-13, License - CC BY-SA 4.0
-
 defs:
 - map1: &map1-ref
     key1: val1
