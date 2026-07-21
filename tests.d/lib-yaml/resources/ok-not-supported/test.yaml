@@ -1,13 +1,13 @@
-- key: !!str  &val1 value 1
-- anotherKey:   *val1
-- overrideKey1:
-  - &val1 value 2
-- anotherKey2: *val1
-- int1: &int1  !!int 1
-- copiedInt: *int1
-- obj1: &obj1
-    key1: value 1
-    key2:
-      - *val1
-      - true
-- obj2: *obj1
+- &CENTER
+  x: 1
+  y: 2
+- &LEFT { r: 5, label: "coucou" }
+- # Merge one map
+  << : [ *CENTER, *LEFT ]
+  r: 10
+- objects:
+    first:
+      <<: [
+        *CENTER,
+        *LEFT
+      ]

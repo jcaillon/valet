@@ -3,7 +3,7 @@
 source "$(valet --source)"
 include yaml test
 
-# log::setLevel debug silent=true
+log::setLevel debug silent=true
 
 time::startTimer
 yaml::parseFile tests.d/lib-yaml/resources/ok-not-supported/test.yaml

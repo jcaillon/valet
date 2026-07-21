@@ -21,6 +21,15 @@ thing:
 - [ 1, "quoted", key: value, { key2: val2 }, : nullkey  , :simplevalue ]
 - {five: six,seven : 8, key: [1, { sub: k, arr: [ sub2 ] }]}
 - k: 1
+- # test
+  a: [
+    1,
+    2
+  ]
+  b: 3
+- # test
+  a: { b: 1}
+  c: 2
 ff:
   {
   null value,

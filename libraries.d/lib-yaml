@@ -146,11 +146,13 @@ function yaml::parseFile() {
 
       log::debug "JSON continuation: ${jsonLine@Q}, indentLevel: ${indentLevel}, lastIndentLevel: ${lastIndentLevel}, keyIndentLevels[-1]: ${keyIndentLevels[-1]}, arrayExtraIndentLevel: ${arrayExtraIndentLevel}, isJsonRootObject: ${isJsonRootObject}"
 
-      if [[ ${line} != *[^[:space:]]* || ${indentLevel} -gt $((${keyIndentLevels[-1]} - arrayExtraIndentLevel)) || ${isJsonRootObject} == 1 ]]; then
-        # line contains only spaces
-        # or is indented at least as much as the key that started the json flow collection
-        # or we have a json object at root level
-        continue
+      if ((jsonDepth >= 0)); then
+        if [[ ${line} != *[^[:space:]]* || ${indentLevel} -ge $((${keyIndentLevels[-1]} - arrayExtraIndentLevel)) || ${isJsonRootObject} == 1 ]]; then
+          # line contains only spaces
+          # or is indented at least as much as the key that started the json flow collection
+          # or we have a json object at root level
+          continue
+        fi
       fi
 
       # change of indentation, the json must be closed by now
@@ -160,6 +162,12 @@ function yaml::parseFile() {
       fi
       isJsonOpen=0
       isKeyWithoutValue=false
+
+      if [[ ${fullKey} == *[\]\.]'<<' ]]; then
+        # we opened a flow collection for a merge key,
+        # we need to merge the content of the flow collection into the current key
+        yaml_mergeFlowCollectionIntoCurrentKey
+      fi
     fi
 
     # handle multiline quoted values
@@ -426,21 +434,21 @@ function yaml::parseFile() {
       fi
     fi
 
-    # check for indent level. if valid, get the index of the indent level in the keyIndentLevels array
+    # check for indent level. if valid, get the index of the indent level in the keyIndent  Levels array
     if ((${#keyIndentLevels[@]} > 0)); then
       lastIndentLevel=${keyIndentLevels[-1]}
     fi
+
     if ((${#keyIndentLevels[@]} == 0 && indentLevel <= 4 + arrayExtraIndentLevel)); then
       # case of a new key at the root level
       indentLevelIndex=0
     elif ((indentLevel == lastIndentLevel)); then
       # case of a new key at the same level as the previous key
       indentLevelIndex=$((${#keyIndentLevels[@]} - 1))
-      if [[ ${isKeyWithoutValue} == "true" && -n ${keyName} ]]; then
-        # the previous key add a null value
+      if [[ ${isKeyWithoutValue} == "true" && -n ${keyName} && ${keyPaths[-1]:-} != "["* ]]; then
+        # the previous key add a null value except if we are in an array
         yaml_saveNullValue
         isKeyWithoutValue=false
-        log::debug "valueTag changed1"
       fi
     elif ((indentLevel > lastIndentLevel - arrayExtraIndentLevel)); then
       # case of a new key at a deeper level than the previous key
@@ -642,7 +650,16 @@ function yaml::parseFile() {
     fullKey="${docPrefix}${fullKey#.}"
     fullKey="${fullKey//'.['/'['}"
     if [[ -n ${value} || ${firstChar} == [\'\"] ]]; then
-      if [[ ${value} == '*'* && ${firstChar} != [\'\"] ]]; then
+      if [[ ${fullKey} == *[\]\.]'<<' ]]; then
+        # merge key
+        if [[ ${firstChar} != '*' ]]; then
+          yaml_addParsingError "invalid merge key ${keyName@Q} (value must be an alias)"
+        fi
+        # correct the full key
+        fullKey="${fullKey%'.<<'}"
+        fullKey="${fullKey%']<<'}"
+      fi
+      if [[ ${firstChar} == '*' ]]; then
         # case of an alias
         value="${value:1}"
         if [[ -v aliases[${value}] ]]; then
@@ -652,14 +669,15 @@ function yaml::parseFile() {
         fi
       else
         yaml_saveValue
-        isKeyWithoutValue=false
       fi
+      isKeyWithoutValue=false
     else
       if [[ -n ${valueTag} ]]; then
         REPLY_MAP2["${fullKey}"]="${valueTag}"
       fi
       isKeyWithoutValue=true
     fi
+
     if [[ -n ${anchorName} ]]; then
       log::debug "anchor ${anchorName@Q} points to ${fullKey}"
       aliases["${anchorName}"]="${fullKey}"
@@ -673,6 +691,12 @@ function yaml::parseFile() {
       yaml_addParsingError "invalid JSON flow collection (collection not closed)"
     fi
     isKeyWithoutValue=false
+
+    if [[ ${fullKey} == *[\]\.]'<<' ]]; then
+      # we opened a flow collection for a merge key,
+      # we need to merge the content of the flow collection into the current key
+      yaml_mergeFlowCollectionIntoCurrentKey
+    fi
   elif [[ ${isQuoteOpen} == "true" ]]; then
     yaml_addParsingError "invalid quoted value (missing closing quote)"
   fi
@@ -791,6 +815,32 @@ function yaml_duplicateKeys() {
       fi
     fi
   done
+}
+
+function yaml_mergeFlowCollectionIntoCurrentKey() {
+  local targetKey="${fullKey%'.<<'}"
+  targetKey="${targetKey%']<<'}"
+
+  local key alias
+  for key in "${!REPLY_MAP[@]}"; do
+    if [[ ${key} == "${fullKey}."* ]]; then
+      yaml_addParsingError "invalid merge key value (the flow collection must be a sequence)"
+    elif [[ ${key} == "${fullKey}["* ]]; then
+      alias="${REPLY_MAP["${key}"]}"
+      if [[ ${alias} != '*'* ]]; then
+        yaml_addParsingError "invalid merge key value (the flow collection must be a sequence of aliases)"
+      else
+        alias="${alias:1}"
+        if [[ -v aliases[${alias}] ]]; then
+          yaml_duplicateKeys "${aliases["${alias}"]}" "${targetKey}"
+        else
+          yaml_addParsingError "invalid alias ${alias@Q} (no anchor found for this alias)"
+        fi
+      fi
+      unset "REPLY_MAP[${key}]"
+    fi
+  done
+
 }
 
 # receives jsonLine and should parse json from it

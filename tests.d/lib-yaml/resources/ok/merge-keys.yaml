@@ -1,5 +1,7 @@
 ---
-- &CENTER { x: 1, y: 2 }
+- &CENTER
+  x: 1
+  y: 2
 - &LEFT { x: 0, y: 2 }
 - &BIG { r: 10 }
 - &SMALL { r: 1 }
@@ -18,10 +20,23 @@
   label: center/big
 
 - # Merge multiple maps
-  << : [ *CENTER, *BIG ]
+  << : [
+      *CENTER,
+      *BIG
+      ]
   label: center/big
 
 - # Override
   << : [ *BIG, *LEFT, *SMALL ]
   x: 1
-  label: center/big
+  label: left/big
+
+- objects:
+    first:
+      <<: *CENTER
+      r: 9
+    second:
+      <<: [
+        *CENTER,
+        *BIG
+      ]

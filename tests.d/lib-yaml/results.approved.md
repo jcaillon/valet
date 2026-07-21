@@ -230,6 +230,15 @@ thing:
 - [ 1, "quoted", key: value, { key2: val2 }, : nullkey  , :simplevalue ]
 - {five: six,seven : 8, key: [1, { sub: k, arr: [ sub2 ] }]}
 - k: 1
+- # test
+  a: [
+    1,
+    2
+  ]
+  b: 3
+- # test
+  a: { b: 1}
+  c: 2
 ff:
   {
   null value,
@@ -319,7 +328,7 @@ with      spaces     as well'
 ['other.key with
 spaces']='null'
 ['other.tro"'is']='quatre'
-['thing.length']='4'
+['thing.length']='6'
 ['thing[0].five[0][0][0]']='val'
 ['thing[0].five[1].key.arr[0].k']='v'
 ['thing[0].five[1].key.arr[1].k2']='v2'
@@ -338,6 +347,11 @@ spaces']='null'
 ['thing[2].key[1].sub']='k'
 ['thing[2].seven']='8'
 ['thing[3].k']='1'
+['thing[4].a[0]']='1'
+['thing[4].a[1]']='2'
+['thing[4].b']='3'
+['thing[5].a.b']='1'
+['thing[5].c']='2'
 ['types1[0]']='1.23015e+3'
 ['types1[10]']='true'
 ['types1[11]']='FALSE'
@@ -386,6 +400,11 @@ spaces']='!!null'
 ['thing[2].key[0]']='!!int'
 ['thing[2].seven']='!!int'
 ['thing[3].k']='!!int'
+['thing[4].a[0]']='!!int'
+['thing[4].a[1]']='!!int'
+['thing[4].b']='!!int'
+['thing[5].a.b']='!!int'
+['thing[5].c']='!!int'
 ['types1[0]']='!!float'
 ['types1[10]']='!!bool'
 ['types1[11]']='!!bool'
