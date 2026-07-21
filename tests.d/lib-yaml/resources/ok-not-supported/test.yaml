@@ -1,13 +1,4 @@
-- &CENTER
-  x: 1
-  y: 2
-- &LEFT { r: 5, label: "coucou" }
-- # Merge one map
-  << : [ *CENTER, *LEFT ]
-  r: 10
-- objects:
-    first:
-      <<: [
-        *CENTER,
-        *LEFT
-      ]
+-   # commm
+ key: 1
+- # comment
+  new: true

@@ -4,6 +4,79 @@
 
 ### ✅ Testing yaml::parseFile function
 
+> cat `resources/ok/a-complete-example.yaml`
+
+```text
+---
+# supports multi documents
+coordinates: &point
+  x: 1
+  y: 2
+element:
+  alias: !!str 3
+  description: |
+    This is a multi-line description
+    that can span multiple lines.
+  labels: >-
+    front
+    red
+    bold
+  name: &name example
+  opacity: 0.567
+  parent: null
+  position: *point
+  tags:
+    - tag1
+    - tag2
+    - *name
+  visible: true
+jsonLike: { "key": value, arr: [ "Support json like syntax (yaml flow collections)" ]}
+---
+simple scalar
+```
+
+❯ `yaml::parseFile resources/ok/a-complete-example.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['@[1]']='simple scalar'
+['coordinates.x']='1'
+['coordinates.y']='2'
+['element.alias']='3'
+['element.description']='This is a multi-line description
+that can span multiple lines.
+'
+['element.labels']='front red bold'
+['element.name']='example'
+['element.opacity']='0.567'
+['element.parent']='null'
+['element.position.x']='1'
+['element.position.y']='2'
+['element.tags[0]']='tag1'
+['element.tags[1]']='tag2'
+['element.tags[2]']='example'
+['element.visible']='true'
+['jsonLike.arr[0]']='Support json like syntax (yaml flow collections)'
+['jsonLike.key']='value'
+)
+REPLY_MAP2=(
+['@.length']='2'
+['coordinates.x']='!!int'
+['coordinates.y']='!!int'
+['element.opacity']='!!float'
+['element.parent']='!!null'
+['element.position.x']='!!int'
+['element.position.y']='!!int'
+['element.tags.length']='3'
+['element.visible']='!!bool'
+['jsonLike.arr.length']='0'
+)
+```
+
 > cat `resources/ok/aliases.yaml`
 
 ```text
@@ -31,33 +104,33 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['[0].key']='value 1'
 ['[1].anotherKey']='value 1'
-['[2].overrideKey1.length']='1'
 ['[2].overrideKey1[0]']='value 2'
 ['[3].anotherKey2']='value 2'
 ['[4].int1']='1'
 ['[5].copiedInt']='1'
-['[6].obj1suffix.length']='2'
 ['[6].obj1suffix[0]']='value 2'
 ['[6].obj1suffix[1]']='true'
 ['[7].obj1.key1']='value 1'
-['[7].obj1.key2.length']='2'
 ['[7].obj1.key2[0]']='value 2'
 ['[7].obj1.key2[1]']='true'
 ['[8].obj2.key1']='value 1'
-['[8].obj2.key2.length']='2'
 ['[8].obj2.key2[0]']='value 2'
 ['[8].obj2.key2[1]']='true'
-['length']='9'
 )
 REPLY_MAP2=(
+['@.length']='1'
+['[2].overrideKey1.length']='1'
 ['[4].int1']='!!int'
 ['[5].copiedInt']='!!int'
+['[6].obj1suffix.length']='2'
 ['[6].obj1suffix[1]']='!!bool'
+['[7].obj1.key2.length']='2'
 ['[7].obj1.key2[1]']='!!bool'
+['[8].obj2.key2.length']='2'
 ['[8].obj2.key2[1]']='!!bool'
+['length']='9'
 )
 ```
 
@@ -112,17 +185,13 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['key.1indent.now2.and1again.now4']='v'
-['key.1indent.now2.arr.length']='3'
-['key.1indent.now2.arr2.length']='3'
 ['key.1indent.now2.arr2[0]']='1'
 ['key.1indent.now2.arr2[1]']='2'
 ['key.1indent.now2.arr2[2]']='3'
 ['key.1indent.now2.arr[0]']='1'
 ['key.1indent.now2.arr[1]']='2'
 ['key.1indent.now2.arr[2]']='3'
-['normal.length']='7'
 ['normal[0].item']='Super Hoop'
 ['normal[0].quantity']='1'
 ['normal[1]']='Sammy Sosa completed another fine season with great stats.
@@ -144,12 +213,16 @@ What a year!
 ['normal[6].key']='1'
 )
 REPLY_MAP2=(
+['@.length']='1'
+['key.1indent.now2.arr.length']='3'
+['key.1indent.now2.arr2.length']='3'
 ['key.1indent.now2.arr2[0]']='!!int'
 ['key.1indent.now2.arr2[1]']='!!int'
 ['key.1indent.now2.arr2[2]']='!!int'
 ['key.1indent.now2.arr[0]']='!!int'
 ['key.1indent.now2.arr[1]']='!!int'
 ['key.1indent.now2.arr[2]']='!!int'
+['normal.length']='7'
 ['normal[0].quantity']='!!int'
 ['normal[2].avg']='!!float'
 ['normal[2].hr']='!!int'
@@ -187,20 +260,22 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['last']='value'
-['nested.arr.length']='1'
-['nested.arr2.length']='2'
-['nested.arr2[0].array.length']='3'
 ['nested.arr2[0].array[0]']='thing'
 ['nested.arr2[0].array[1]']='stuff'
-['nested.arr2[0].array[2].arr.length']='1'
 ['nested.arr2[0].array[2].arr[0]']='here'
 ['nested.arr2[0].name']='obj1'
 ['nested.arr2[1].name']='obj2'
 ['nested.arr[0].key']='thing'
 ['thing']='first line
   second line with indent'
+)
+REPLY_MAP2=(
+['@.length']='1'
+['nested.arr.length']='1'
+['nested.arr2.length']='2'
+['nested.arr2[0].array.length']='3'
+['nested.arr2[0].array[2].arr.length']='1'
 )
 ```
 
@@ -308,7 +383,6 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['ff.""']='empty key'
 ['ff.another null value']='null'
 ['ff.k.null2']='null'
@@ -328,7 +402,6 @@ with      spaces     as well'
 ['other.key with
 spaces']='null'
 ['other.tro"'is']='quatre'
-['thing.length']='6'
 ['thing[0].five[0][0][0]']='val'
 ['thing[0].five[1].key.arr[0].k']='v'
 ['thing[0].five[1].key.arr[1].k2']='v2'
@@ -389,22 +462,36 @@ spaces']='null'
 ['types2.string.notFloat']='123.456.345'
 )
 REPLY_MAP2=(
+['@.length']='1'
 ['ff.another null value']='!!null'
 ['ff.k.null2']='!!null'
+['ff.k2.length']='1'
 ['ff.k2[0].null3']='!!null'
 ['ff.k2[1].null4']='!!null'
 ['ff.null value']='!!null'
+['hi.length']='5'
+['hi[3].length']='1'
 ['other.key with
 spaces']='!!null'
+['thing.length']='6'
+['thing[0].five.length']='2'
+['thing[0].five[0].length']='0'
+['thing[0].five[0][0].length']='0'
+['thing[0].five[1].key.arr.length']='1'
+['thing[1].length']='5'
 ['thing[1][0]']='!!int'
+['thing[2].key.length']='1'
 ['thing[2].key[0]']='!!int'
+['thing[2].key[1].arr.length']='0'
 ['thing[2].seven']='!!int'
 ['thing[3].k']='!!int'
+['thing[4].a.length']='1'
 ['thing[4].a[0]']='!!int'
 ['thing[4].a[1]']='!!int'
 ['thing[4].b']='!!int'
 ['thing[5].a.b']='!!int'
 ['thing[5].c']='!!int'
+['types1.length']='16'
 ['types1[0]']='!!float'
 ['types1[10]']='!!bool'
 ['types1[11]']='!!bool'
@@ -437,6 +524,233 @@ spaces']='!!null'
 ['types2.null.null']='!!null'
 ['types2.null.null2']='!!null'
 ['types2.null.null3']='!!null'
+)
+```
+
+> cat `resources/ok/full.yaml`
+
+```text
+# Scalars
+strings:
+  plain: hello world
+  single_quoted: 'hello ''world'''
+  with_single_quote: "C'est \"quoi"
+  double_quoted: "line1\nline2\tunicode:\u2764"
+  empty: ""
+  multiline_literal: |
+    line one
+    line two
+      indented
+
+  multiline_folded: >
+    a
+    this text
+    is folded
+    into a single line
+content: |-
+  Or we
+  can auto
+  convert line breaks
+  to save spac
+
+num[0].zzef: 1
+num:
+  - zzef: 2
+
+# Keys with special characters
+"key with spaces": value
+"key:with:colons": value
+
+arr:
+  - name: obj1
+    value: 123
+  - name: obj2
+    value: 456
+    properties:
+      - 1
+      - 2
+
+numbers:
+  integer: 42
+  negative: -17
+  zero: 0
+  float: 3.14159
+  exponent: 1.23e+10
+
+other:
+  bool: true
+
+special_strings:
+  looks_like_bool: "true"
+  looks_like_number: "123"
+  colon: "a:b"
+  hash: "# not a comment"
+
+# Sequences
+sequence:
+  - item1
+  - item2
+  - 123
+  - true
+  - null
+  - [1, 2, 3]
+  - {a: 1, b: 2}
+
+# Mixed nesting
+nested:
+  users:
+    - id: 1
+      name: Alice
+      roles: [admin, user]
+    - id: 2
+      name: Bob
+      roles:
+        - user
+
+# Anchors and aliases
+defaults: &defaults
+  host: localhost
+  port: 8080
+  ssl: false
+
+server1:
+  <<: *defaults
+  port: 8081
+
+server2:
+  <<: *defaults
+
+# Anchors on sequences
+colors: &colors
+  - red
+  - green
+  - blue
+
+favorite_colors: *colors
+
+# Empty collections
+empty_sequence: []
+empty_mapping: {}
+```
+
+❯ `yaml::parseFile resources/ok/full.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['"num[0].zzef"']='1'
+['arr[0].name']='obj1'
+['arr[0].value']='123'
+['arr[1].name']='obj2'
+['arr[1].properties[0]']='1'
+['arr[1].properties[1]']='2'
+['arr[1].value']='456'
+['colors[0]']='red'
+['colors[1]']='green'
+['colors[2]']='blue'
+['content']='Or we
+can auto
+convert line breaks
+to save spac'
+['defaults.host']='localhost'
+['defaults.port']='8080'
+['defaults.ssl']='false'
+['favorite_colors[0]']='red'
+['favorite_colors[1]']='green'
+['favorite_colors[2]']='blue'
+['key with spaces']='value'
+['key:with:colons']='value'
+['nested.users[0].id']='1'
+['nested.users[0].name']='Alice'
+['nested.users[0].roles[0]']='admin'
+['nested.users[0].roles[1]']='user'
+['nested.users[1].id']='2'
+['nested.users[1].name']='Bob'
+['nested.users[1].roles[0]']='user'
+['num[0].zzef']='2'
+['numbers.exponent']='1.23e+10'
+['numbers.float']='3.14159'
+['numbers.integer']='42'
+['numbers.negative']='-17'
+['numbers.zero']='0'
+['other.bool']='true'
+['sequence[0]']='item1'
+['sequence[1]']='item2'
+['sequence[2]']='123'
+['sequence[3]']='true'
+['sequence[4]']='null'
+['sequence[5][0]']='1'
+['sequence[5][1]']='2'
+['sequence[5][2]']='3'
+['sequence[6].a']='1'
+['sequence[6].b']='2'
+['server1.host']='localhost'
+['server1.port']='8081'
+['server1.ssl']='false'
+['server2.host']='localhost'
+['server2.port']='8080'
+['server2.ssl']='false'
+['special_strings.colon']='a:b'
+['special_strings.hash']='# not a comment'
+['special_strings.looks_like_bool']='true'
+['special_strings.looks_like_number']='123'
+['strings.double_quoted']='line1
+line2	unicode:❤'
+['strings.empty']=''
+['strings.multiline_folded']='a this text is folded into a single line
+'
+['strings.multiline_literal']='line one
+line two
+  indented
+'
+['strings.plain']='hello world'
+['strings.single_quoted']='hello '"'"'world'"'"''
+['strings.with_single_quote']='C'"'"'est "quoi'
+)
+REPLY_MAP2=(
+['"num[0].zzef"']='!!int'
+['@.length']='1'
+['arr.length']='2'
+['arr[0].value']='!!int'
+['arr[1].properties.length']='2'
+['arr[1].properties[0]']='!!int'
+['arr[1].properties[1]']='!!int'
+['arr[1].value']='!!int'
+['colors.length']='3'
+['defaults.port']='!!int'
+['defaults.ssl']='!!bool'
+['empty_sequence.length']='0'
+['favorite_colors.length']='3'
+['nested.users.length']='2'
+['nested.users[0].id']='!!int'
+['nested.users[0].roles.length']='1'
+['nested.users[1].id']='!!int'
+['nested.users[1].roles.length']='1'
+['num.length']='1'
+['num[0].zzef']='!!int'
+['numbers.exponent']='!!float'
+['numbers.float']='!!float'
+['numbers.integer']='!!int'
+['numbers.negative']='!!int'
+['numbers.zero']='!!int'
+['other.bool']='!!bool'
+['sequence.length']='7'
+['sequence[2]']='!!int'
+['sequence[3]']='!!bool'
+['sequence[4]']='!!null'
+['sequence[5].length']='2'
+['sequence[5][0]']='!!int'
+['sequence[5][1]']='!!int'
+['sequence[5][2]']='!!int'
+['sequence[6].a']='!!int'
+['sequence[6].b']='!!int'
+['server1.port']='!!int'
+['server1.ssl']='!!bool'
+['server2.port']='!!int'
+['server2.ssl']='!!bool'
 )
 ```
 
@@ -495,7 +809,6 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['config.features.autoSave']='true'
 ['config.features.maxItems']='100'
 ['config.features.notifications']='false'
@@ -522,19 +835,152 @@ REPLY_MAP=(
 ['version']='1.0.0'
 )
 REPLY_MAP2=(
+['@.length']='1'
 ['config.features.autoSave']='!!bool'
 ['config.features.maxItems']='!!int'
 ['config.features.notifications']='!!bool'
 ['metadata']='!!null'
+['tools.length']='3'
+['users.length']='1'
 ['users[0].active']='!!bool'
 ['users[0].id']='!!int'
+['users[0].scores.length']='2'
 ['users[0].scores[0]']='!!int'
 ['users[0].scores[1]']='!!int'
 ['users[0].scores[2]']='!!int'
 ['users[1].active']='!!bool'
 ['users[1].id']='!!int'
+['users[1].scores.length']='1'
 ['users[1].scores[0]']='!!int'
 ['users[1].scores[1]']='!!int'
+)
+```
+
+> cat `resources/ok/merge-keys.yaml`
+
+```text
+---
+- &CENTER
+  x: 1
+  y: 2
+- &LEFT { x: 0, y: 2 }
+- &BIG { r: 10 }
+- &SMALL { r: 1 }
+
+- # Explicit keys
+  x: 1
+  y: 2
+  r: 10
+  label: center/big
+
+- # Merge one map
+  << : *CENTER
+  r: 10
+  label: center/big
+
+- # Merge multiple maps
+  << : [
+      *CENTER,
+      *BIG
+      ]
+  label: center/big
+
+- # Override
+  << : [ *BIG, *LEFT, *SMALL ]
+  x: 1
+  label: left/big
+
+- objects:
+    first:
+      <<: *CENTER
+      r: 9
+    second:
+      <<: [
+        *CENTER,
+        *BIG
+      ]
+
+- &LIST
+  - x: 1
+  - "value"
+  - []
+- <<: *LIST
+```
+
+❯ `yaml::parseFile resources/ok/merge-keys.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['[0].x']='1'
+['[0].y']='2'
+['[10][0].x']='1'
+['[10][1]']='value'
+['[1].x']='0'
+['[1].y']='2'
+['[2].r']='10'
+['[3].r']='1'
+['[4].label']='center/big'
+['[4].r']='10'
+['[4].x']='1'
+['[4].y']='2'
+['[5].label']='center/big'
+['[5].r']='10'
+['[5].x']='1'
+['[5].y']='2'
+['[6].label']='center/big'
+['[6].r']='10'
+['[6].x']='1'
+['[6].y']='2'
+['[7].label']='left/big'
+['[7].r']='1'
+['[7].x']='1'
+['[7].y']='2'
+['[8].objects.first.r']='9'
+['[8].objects.first.x']='1'
+['[8].objects.first.y']='2'
+['[8].objects.second.r']='10'
+['[8].objects.second.x']='1'
+['[8].objects.second.y']='2'
+['[9][0].x']='1'
+['[9][1]']='value'
+)
+REPLY_MAP2=(
+['@.length']='1'
+['[0].x']='!!int'
+['[0].y']='!!int'
+['[10].length']='3'
+['[10][0].x']='!!int'
+['[10][2].length']='0'
+['[1].x']='!!int'
+['[1].y']='!!int'
+['[2].r']='!!int'
+['[3].r']='!!int'
+['[4].r']='!!int'
+['[4].x']='!!int'
+['[4].y']='!!int'
+['[5].r']='!!int'
+['[5].x']='!!int'
+['[5].y']='!!int'
+['[6].r']='!!int'
+['[6].x']='!!int'
+['[6].y']='!!int'
+['[7].r']='!!int'
+['[7].x']='!!int'
+['[7].y']='!!int'
+['[8].objects.first.r']='!!int'
+['[8].objects.first.x']='!!int'
+['[8].objects.first.y']='!!int'
+['[8].objects.second.r']='!!int'
+['[8].objects.second.x']='!!int'
+['[8].objects.second.y']='!!int'
+['[9].length']='3'
+['[9][0].x']='!!int'
+['[9][2].length']='0'
+['length']='11'
 )
 ```
 
@@ -557,10 +1003,12 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='3'
 ['@[1].key']='thing2'
 ['@[2].key']='thing3'
 ['key']='thing'
+)
+REPLY_MAP2=(
+['@.length']='3'
 )
 ```
 
@@ -583,13 +1031,13 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='2'
 ['@[1].nullkeyattheend']='null'
 ['k.null']='null'
 ['null   key']='null'
 ['nullkeybeforenewdoc']='null'
 )
 REPLY_MAP2=(
+['@.length']='2'
 ['@[1].nullkeyattheend']='!!null'
 ['k.null']='!!null'
 ['null   key']='!!null'
@@ -643,14 +1091,12 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['""']='null'
-['@.length']='1'
 ['empty']=''
 ['k']='word1 word2" word3'
 ['k2']='line1
 line2'
 ['key  with colons   ::']='null'
 ['key with spaces']='ok'
-['nested.arr.length']='2'
 ['nested.arr[0]']='
 
 line1 line2
@@ -662,7 +1108,9 @@ word2" word3 '
 )
 REPLY_MAP2=(
 ['""']='!!null'
+['@.length']='1'
 ['key  with colons   ::']='!!null'
+['nested.arr.length']='2'
 )
 ```
 
@@ -699,24 +1147,26 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['[0].source.name']='argo-cd'
 ['[0].source.repo']='https://argoproj.github.io/argo-helm'
 ['[0].source.version']='9.5.15'
-['[0].targets.length']='1'
 ['[0].targets[0]']='oci://srescloud.azurecr.io/helm'
 ['[1].source.name']='cert-manager'
 ['[1].source.repo']='https://charts.jetstack.io'
 ['[1].source.version']='v1.14.5'
-['[1].targets.length']='3'
 ['[1].targets[0]']='oci://srescloud.azurecr.io/helm'
 ['[1].targets[1]']='oci://secondtarget.azurecr.io/helm'
 ['[1].targets[2]']='oci://thirdtarget.azurecr.io/helm'
 ['[2].source.name']='cilium'
 ['[2].source.repo']='https://helm.cilium.io/'
 ['[2].source.version']='1.19.4'
-['[2].targets.length']='1'
 ['[2].targets[0]']='oci://thing.azurecr.io/helm'
+)
+REPLY_MAP2=(
+['@.length']='1'
+['[0].targets.length']='1'
+['[1].targets.length']='3'
+['[2].targets.length']='1'
 ['length']='3'
 )
 ```
@@ -821,8 +1271,6 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['"num[0].key"']='1'
-['@.length']='1'
-['arr.length']='2'
 ['arr[0]']='thing'
 ['arr[1]']='stuff:with:colons'
 ['endingMultiline']='
@@ -833,23 +1281,18 @@ second line
 ['key']='https://example.com'
 ['key with spaces']='value'
 ['key:with:colons']='value'
-['nested.arr.length']='4'
-['nested.arr[0].array.length']='2'
 ['nested.arr[0].array[0]']='thing'
-['nested.arr[0].array[1].arr.length']='2'
 ['nested.arr[0].array[1].arr[0]']='1'
 ['nested.arr[0].array[1].arr[1]']='2'
 ['nested.arr[0].name']='obj1'
 ['nested.arr[0].value']='123'
 ['nested.arr[1].name']='obj2'
-['nested.arr[1].properties.length']='2'
 ['nested.arr[1].properties[0]']='1'
 ['nested.arr[1].properties[1]']='2'
 ['nested.arr[1].value']='456'
 ['nested.arr[2]']='coucou text'
 ['nested.arr[3]']='nom mais allo'
 ['nested.thing']='true'
-['num.length']='1'
 ['num[0].key']='2'
 ['strings.content']='Or we
 
@@ -893,13 +1336,20 @@ line two
 )
 REPLY_MAP2=(
 ['"num[0].key"']='!!int'
+['@.length']='1'
+['arr.length']='2'
+['nested.arr.length']='4'
+['nested.arr[0].array.length']='2'
+['nested.arr[0].array[1].arr.length']='2'
 ['nested.arr[0].array[1].arr[0]']='!!int'
 ['nested.arr[0].array[1].arr[1]']='!!int'
 ['nested.arr[0].value']='!!int'
+['nested.arr[1].properties.length']='2'
 ['nested.arr[1].properties[0]']='!!int'
 ['nested.arr[1].properties[1]']='!!int'
 ['nested.arr[1].value']='!!int'
 ['nested.thing']='!!bool'
+['num.length']='1'
 ['num[0].key']='!!int'
 ['strings.empty2']='!!null'
 )
@@ -929,26 +1379,26 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
-['[0].length']='6'
 ['[0][0]']='baz'
 ['[0][1].k']='v'
-['[0][2].length']='2'
 ['[0][2][0]']='a'
 ['[0][2][1]']='b'
-['[0][3].length']='1'
 ['[0][3][0].key']='ok'
-['[0][4].length']='1'
 ['[0][4][0]']='1'
 ['[0][5]']='2'
 ['[1]']='1'
 ['[2]']='- not an array'
-['length']='3'
 )
 REPLY_MAP2=(
+['@.length']='1'
+['[0].length']='6'
+['[0][2].length']='2'
+['[0][3].length']='1'
+['[0][4].length']='1'
 ['[0][4][0]']='!!int'
 ['[0][5]']='!!int'
 ['[1]']='!!int'
+['length']='3'
 )
 ```
 
@@ -966,8 +1416,10 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['@[0]']='my text'
+)
+REPLY_MAP2=(
+['@.length']='1'
 )
 ```
 
@@ -989,11 +1441,13 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['@[0]']='line1
 line2
 
 '
+)
+REPLY_MAP2=(
+['@.length']='1'
 )
 ```
 
@@ -1013,8 +1467,10 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['@[0]']='word1 word2 word3'
+)
+REPLY_MAP2=(
+['@.length']='1'
 )
 ```
 
@@ -1032,8 +1488,10 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['@[0]']='text'
+)
+REPLY_MAP2=(
+['@.length']='1'
 )
 ```
 
@@ -1052,13 +1510,14 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['obj.resources[0]']='1'
 ['obj.resources[1]']='2'
 )
 REPLY_MAP2=(
+['@.length']='1'
 ['obj']='!mytype'
 ['obj.resources']='!reference'
+['obj.resources.length']='1'
 ['obj.resources[0]']='!!int'
 ['obj.resources[1]']='!!int'
 )
@@ -1123,7 +1582,6 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['bool.b1']='false'
 ['bool.b2']='TRUE'
 ['bool.b3']='False'
@@ -1132,7 +1590,6 @@ above may be different for
 different documents.
 '
 ['custom.picture']='xxxx'
-['explicitTypes.length']='6'
 ['explicitTypes[0]']='123'
 ['explicitTypes[1]']='123'
 ['explicitTypes[2]']='123'
@@ -1157,11 +1614,13 @@ different documents.
 ['string.s']='example'
 )
 REPLY_MAP2=(
+['@.length']='1'
 ['bool.b1']='!!bool'
 ['bool.b2']='!!bool'
 ['bool.b3']='!!bool'
 ['custom.application specific tag']='!e!tag'
 ['custom.picture']='!!binary'
+['explicitTypes.length']='6'
 ['explicitTypes[2]']='!!int'
 ['explicitTypes[3]']='!!float'
 ['explicitTypes[4]']='!!bool'
@@ -1202,13 +1661,15 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['k1']='trap: not value'
 ['k2']='trap: not value'
-['k3.length']='3'
 ['k3[0]']='- - not an array'
 ['k3[1]']='- - not an array'
 ['k3[2]']='- - not an array'
+)
+REPLY_MAP2=(
+['@.length']='1'
+['k3.length']='3'
 )
 ```
 
@@ -1242,23 +1703,23 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
-['@[0].length']='3'
-['@[0][0].length']='6'
 ['@[0][0][0]']='baz'
 ['@[0][0][1].k']='v'
-['@[0][0][2].length']='2'
 ['@[0][0][2][0]']='a'
 ['@[0][0][2][1]']='b'
-['@[0][0][3].length']='1'
 ['@[0][0][3][0].key']='ok'
-['@[0][0][4].length']='1'
 ['@[0][0][4][0]']='1'
 ['@[0][0][5]']='2'
 ['@[0][1]']='1'
 ['@[0][2]']='- not an array'
 )
 REPLY_MAP2=(
+['@.length']='1'
+['@[0].length']='3'
+['@[0][0].length']='6'
+['@[0][0][2].length']='2'
+['@[0][0][3].length']='1'
+['@[0][0][4].length']='1'
 ['@[0][0][4][0]']='!!int'
 ['@[0][0][5]']='!!int'
 ['@[0][1]']='!!int'
@@ -1273,17 +1734,13 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
-['@.length']='1'
 ['@[0].key.1indent.now2.and1again.now4']='v'
-['@[0].key.1indent.now2.arr.length']='3'
-['@[0].key.1indent.now2.arr2.length']='3'
 ['@[0].key.1indent.now2.arr2[0]']='1'
 ['@[0].key.1indent.now2.arr2[1]']='2'
 ['@[0].key.1indent.now2.arr2[2]']='3'
 ['@[0].key.1indent.now2.arr[0]']='1'
 ['@[0].key.1indent.now2.arr[1]']='2'
 ['@[0].key.1indent.now2.arr[2]']='3'
-['@[0].normal.length']='7'
 ['@[0].normal[0].item']='Super Hoop'
 ['@[0].normal[0].quantity']='1'
 ['@[0].normal[1]']='Sammy Sosa completed another fine season with great stats.
@@ -1305,12 +1762,16 @@ What a year!
 ['@[0].normal[6].key']='1'
 )
 REPLY_MAP2=(
+['@.length']='1'
+['@[0].key.1indent.now2.arr.length']='3'
+['@[0].key.1indent.now2.arr2.length']='3'
 ['@[0].key.1indent.now2.arr2[0]']='!!int'
 ['@[0].key.1indent.now2.arr2[1]']='!!int'
 ['@[0].key.1indent.now2.arr2[2]']='!!int'
 ['@[0].key.1indent.now2.arr[0]']='!!int'
 ['@[0].key.1indent.now2.arr[1]']='!!int'
 ['@[0].key.1indent.now2.arr[2]']='!!int'
+['@[0].normal.length']='7'
 ['@[0].normal[0].quantity']='!!int'
 ['@[0].normal[2].avg']='!!float'
 ['@[0].normal[2].hr']='!!int'

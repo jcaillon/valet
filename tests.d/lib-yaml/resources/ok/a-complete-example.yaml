@@ -1,0 +1,26 @@
+---
+# supports multi documents
+coordinates: &point
+  x: 1
+  y: 2
+element:
+  alias: !!str 3
+  description: |
+    This is a multi-line description
+    that can span multiple lines.
+  labels: >-
+    front
+    red
+    bold
+  name: &name example
+  opacity: 0.567
+  parent: null
+  position: *point
+  tags:
+    - tag1
+    - tag2
+    - *name
+  visible: true
+jsonLike: { "key": value, arr: [ "Support json like syntax (yaml flow collections)" ]}
+---
+simple scalar
