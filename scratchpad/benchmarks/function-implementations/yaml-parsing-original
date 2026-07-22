@@ -77,13 +77,73 @@ source bash
 # declare -p REPLY_MAP
 # ```
 function yaml::parseFile() {
+  local path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  shift 1
+
+  if ! declare -F yaml::parseFileInternal >/dev/null; then
+    yaml_createInternalParseFunctions
+  fi
+
+  yaml::parseFileInternal path="${path}" "${@}"
+}
+
+# ## yaml::parseString
+#
+# Parses a YAML string.
+# See @yaml::parseFile for more details.
+#
+# - $1: **variable name** _as string_:
+#       The name of the variable containing the YAML string to parse.
+# - ${noFail} _as bool_:
+#       (optional) A boolean to indicate wether or not the function should call core::fail (exit)
+#       in case the parsing fails. By default, if the parsing fails, the script will exit.
+#       (defaults to false)
+# - ${prefixFirstDoc} _as bool_:
+#       (optional) A boolean to indicate wether or not to prefix the keys of the first document
+#       with "@[0]".
+#       (defaults to false)
+#
+# Returns:
+#
+# - ${REPLY_MAP}: an associative array containing each value of the YAML accessible in flattened nested dot notation.
+# - ${REPLY_MAP2}: an associative array containing the metadata of each node (tags of each non string values and length of arrays).
+# - ${REPLY_CODE}: (requires noFail=true)
+#     - 0 if the file was parsed successfully,
+#     - 1 if the file is not a valid YAML file.
+# - ${REPLY}: (requires noFail=true) the errors encountered during the parsing if any.
+#
+# ```bash
+# yaml::parseString "variableName" noFail=true
+# declare -p REPLY_MAP
+# ```
+function yaml::parseString() {
+  local variableName="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+  shift 1
+
+  if ! declare -F yaml::parseStringInternal >/dev/null; then
+    yaml_createInternalParseFunctions
+  fi
+
+  yaml::parseStringInternal variableName="${variableName}" "${@}"
+}
+
+# ## yaml_parse
+#
+# Parses a YAML.
+# shellcheck disable=SC2317
+function yaml_parse() {
   local \
-    path="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    path="" \
+    variableName="" \
     noFail=false \
     prefixFirstDoc=false \
     IFS=" "
-  shift 1
   eval "local a= ${*@Q}"
+
+  # need either path or inputVarName
+  if [[ (-z ${path} && -z ${variableName}) || (-n ${path} && -n ${variableName}) ]]; then
+    core::fail "Either path or variableName (mutually exclusive) must be provided to ⌜${FUNCNAME:-?}⌝."
+  fi
 
   # ignore case
   bash::setShellOption nocasematch
@@ -127,571 +187,29 @@ function yaml::parseFile() {
   local isMultilineValue=false isQuoteOpen=false valueTag="" isJsonOpen=0
   local -i arrayExtraIndentLevelResetValue=0
 
+  # json
+  local jsonLine jsonTempString jsonCumulatedLf isJsonQuoteOpen jsonKeyName jsonPart jsonFullKey \
+    jsonLastString isJsonValueOpen=0 jsonCumulatedString jsonLastQuoteChar jsonValueTag
+  local -a jsonKeyPaths jsonArrayIndexes jsonOpenChars
+  local -i jsonDepth
+
   if [[ ${prefixFirstDoc} == true ]]; then
     docPrefix="@[0]."
   fi
 
-  while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
-    lineNumber+=1
-    # shellcheck disable=SC1001
-    if [[ ${line} == [\#\%]* ]]; then
-      continue
-    fi
-
-    line="${line%$'\r'}"
-    IFS='.'
-
-    # get indent, indent level and trim it from the line
-    indent="${line%%[^[:space:]]*}"
-    line="${line:${#indent}}"
-    indent="${indent%%$'\t'*}"
-    indentLevel=${#indent}
-
-    # handle json
-    if ((isJsonOpen == 1)); then
-      yaml_jsonHandleString
-      jsonLine="${line}"
-
-      log::debug "JSON continuation: ${jsonLine@Q}, indentLevel: ${indentLevel}, lastIndentLevel: ${lastIndentLevel}, keyIndentLevels[-1]: ${keyIndentLevels[-1]}, arrayExtraIndentLevel: ${arrayExtraIndentLevel}, isJsonRootObject: ${isJsonRootObject}"
-
-      if ((jsonDepth >= 0)); then
-        if [[ ${line} != *[^[:space:]]* || ${indentLevel} -ge $((${keyIndentLevels[-1]} - arrayExtraIndentLevel)) || ${isJsonRootObject} == 1 ]]; then
-          # line contains only spaces
-          # or is indented at least as much as the key that started the json flow collection
-          # or we have a json object at root level
-          continue
-        fi
-      fi
-
-      # change of indentation, the json must be closed by now
-      if ((jsonDepth >= 0)); then
-        log::debug "jsonDepth: ${jsonDepth}, jsonKeyPaths: ${jsonKeyPaths[*]@Q}, jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonOpenChars: ${jsonOpenChars[*]@Q}"
-        yaml_addParsingError "invalid JSON flow collection (new yaml key but the previous JSON flow collection is not closed)."
-      fi
-      isJsonOpen=0
-      isKeyWithoutValue=false
-
-      if [[ ${fullKey} == *[\]\.]'<<' ]]; then
-        # we opened a flow collection for a merge key,
-        # we need to merge the content of the flow collection into the current key
-        yaml_mergeFlowCollectionIntoCurrentKey
-      fi
-    fi
-
-    # handle multiline quoted values
-    if [[ ${isQuoteOpen} == true ]]; then
-      log::debug "line inside a quote: ${line@Q}, REPLY: ${REPLY@Q}"
-      if [[ -z ${line//[\t ]/} ]]; then
-        multiLinesCumulatedLf+=$'\n'
-        continue
-      fi
-
-      if [[ -n ${multiLinesCumulatedLf} ]]; then
-        value+="${multiLinesCumulatedLf}"
-      elif [[ -n ${value} ]]; then
-        value+=' '
-      fi
-      multiLinesCumulatedLf=""
-
-      line="${firstChar}${line}"
-      yaml_extractFirstQuotedTextFromLine
-      log::debug "line inside a quote: ${line@Q}, REPLY: ${REPLY@Q}"
-      value+="${REPLY%"${REPLY##*[^[:space:]]}"}"
-      if [[ ${line} == "${firstChar}"* ]]; then
-        # the quote is closed
-        log::debug "quote closed"
-        isQuoteOpen=false
-
-        yaml_saveValue
-        isKeyWithoutValue=false
-      fi
-      continue
-    fi
-
-    # handle multiline continuation
-    if [[ ${isMultilineValue} == true ]]; then
-      if ((indentLevel > ${keyIndentLevels[-1]} - arrayExtraIndentLevel)); then
-        if ((multiLineIndentLevel == 0)); then
-          # the first line of a multiline value, determine the indent level of the multiline value
-          multiLineIndentLevel=${indentLevel}
-        fi
-
-        if [[ ${multilineSeparator} == '$\n' ]]; then
-          value+="${multiLinesCumulatedLf}"$'\n'
-        else
-          if [[ ${indentLevel} -gt ${multiLineIndentLevel} || -n ${multiLinesCumulatedLf} ]]; then
-            if [[ -n ${value} ]]; then
-              value+=$'\n'
-            fi
-            value+="${multiLinesCumulatedLf}"
-          elif [[ -n ${value} ]]; then
-            value+="${multilineSeparator}"
-          fi
-        fi
-        value+="${indent:0:indentLevel-multiLineIndentLevel}${line}"
-        multiLinesCumulatedLf=""
-        continue
-      elif [[ -z ${line//[\t ]/} ]]; then
-        multiLinesCumulatedLf+=$'\n'
-        continue
-      fi
-
-      # end of a multiline value
-      isMultilineValue=false
-      multiLineIndentLevel=-1
-      value+="${multilineFinalSeparator}"
-      if [[ ${multilineTrimEnd} != "true" ]]; then
-        value+="${multiLinesCumulatedLf}"
-      fi
-      yaml_saveValue
-      isKeyWithoutValue=false
-    fi
-
-    # shellcheck disable=SC1001
-    if [[ ${line} == [\#\%]* || ${#line} -eq 0 ]]; then
-      # case of a command or an empty, non multiline, line
-      continue
-    fi
-
-    # new doc
-    if [[ ${line} == "---"* ]]; then
-      if [[ ${isKeyWithoutValue} == "true" ]]; then
-        # the previous key add a null value
-        yaml_saveNullValue
-        isKeyWithoutValue=false
-      fi
-      if ((${#keyPaths[@]} > 0)); then
-        docNumber+=1
-      fi
-      keyPaths=()
-      keyIndentLevels=()
-      arrayIndexes=()
-      arrayExtraIndentLevelResetValue=0
-      valueTag=""
-      if [[ ${prefixFirstDoc} == "true" || ${docNumber} -gt 0 ]]; then
-        docPrefix="@[${docNumber}]."
-      fi
-      line="${line#---}"
-      line="${line#"${line%%[^[:space:]]*}"}"
-    fi
-
-    if [[ ${line} == "-"* ]]; then
-      # case of an array
-      line="${line:2}"
-      inArrayIndent="${line%%[^[:space:]]*}"
-      line="${line:${#inArrayIndent}}"
-      indentLevel+=2
-      arrayExtraIndentLevel=2
-      isArrayItemStart=true
-    else
-      arrayExtraIndentLevel=${arrayExtraIndentLevelResetValue}
-      arrayExtraIndentLevelResetValue=0
-      isArrayItemStart=false
-    fi
-
-    # handle tags / anchors
-    if [[ ${isKeyWithoutValue} != true ]]; then
-      valueTag=""
-    fi
-    anchorName=""
-    while [[ ${line} == "!"* || ${line} == "&"* ]]; do
-      if [[ ${line} == "!"* ]]; then
-        # explicit tag
-        valueTag="${line%%[[:space:]]*}"
-        line="${line:${#valueTag}}"
-        line="${line#"${line%%[^[:space:]]*}"}"
-      elif [[ ${line} == "&"* ]]; then
-        # anchor
-        anchorName="${line%%[[:space:]]*}"
-        line="${line:${#anchorName}}"
-        line="${line#"${line%%[^[:space:]]*}"}"
-        anchorName="${anchorName:1}"
-      fi
+  # main loop over each lines
+  if [[ -n ${path} ]]; then
+    while IFS=$'\n' read -rd $'\n' line || [[ -n ${line:-} ]]; do
+      yaml_handleLine
+    done <"${path}"
+  else
+    local chunk inputString="${!variableName}"
+    while [[ -n ${inputString} ]]; do
+      line="${inputString%%$'\n'*}"
+      inputString="${inputString:${#line}+1}"
+      yaml_handleLine
     done
-
-    # extract the key name and value, there can be only a value with no key name
-    # in case of an array with a scalar
-    isQuoteOpen=false
-    firstChar="${line:0:1}"
-
-    if [[ ${firstChar} == [\{\[] ]]; then
-      value="${line}"
-      keyName=""
-    else
-
-      if [[ ${firstChar} == [\'\"] ]]; then
-        yaml_extractFirstQuotedTextFromLine
-        log::debug "line after extraction: ${line@Q}, REPLY: ${REPLY@Q}"
-        if [[ ${line} == "${firstChar}"* ]]; then
-          # the quote is closed
-          log::debug "quote closed"
-          isQuoteOpen=false
-          line="${line:1}"
-        else
-          # unclosed quote
-          log::debug "quote is not closed!"
-          isQuoteOpen=true
-        fi
-      elif [[ ${line} == *": "* ]]; then
-        REPLY="${line%%: *}"
-        line="${line:${#REPLY}}"
-      elif [[ ${line} == *: ]]; then
-        REPLY="${line%:}"
-        line=":"
-      else
-        REPLY="${line}"
-        line=""
-      fi
-      log::debug "line after 1st round: ${line@Q}, REPLY: ${REPLY@Q}"
-
-      # act on open quote or not
-      if [[ ${isQuoteOpen} == "true" ]]; then
-        keyName=""
-        # trim end spaces
-        value="${REPLY%"${REPLY##*[^[:space:]]}"}"
-      else
-        # trim end spaces
-        keyName="${REPLY%"${REPLY##*[^[:space:]]}"}"
-
-        if [[ ${line} == ":"* ]]; then
-          # register keyname
-          if [[ (${firstChar} == [\'\"] && -z ${keyName}) || ${keyName} == *[\.\[]* ]]; then
-            # key was quoted and need to be re-quoted
-            keyName="\"${keyName}\""
-          elif [[ -z ${keyName} ]]; then
-            yaml_addParsingError "bad indentation of a mapping entry ${line@Q} (contains a ': ' but no key name)"
-          fi
-
-          line="${line#:}"
-          # trim beginning spaces
-          line="${line#"${line%%[^[:space:]]*}"}"
-
-          # handle tags / anchors
-          valueTag=""
-          while [[ ${line} == "!"* || ${line} == "&"* ]]; do
-            if [[ ${line} == "!"* ]]; then
-              # explicit tag
-              valueTag="${line%%[[:space:]]*}"
-              line="${line:${#valueTag}}"
-              line="${line#"${line%%[^[:space:]]*}"}"
-            elif [[ ${line} == "&"* ]]; then
-              # anchor
-              anchorName="${line%%[[:space:]]*}"
-              line="${line:${#anchorName}}"
-              line="${line#"${line%%[^[:space:]]*}"}"
-              anchorName="${anchorName:1}"
-            fi
-          done
-
-          firstChar="${line:0:1}"
-          if [[ ${firstChar} == [\'\"] ]]; then
-            yaml_extractFirstQuotedTextFromLine
-            log::debug "line after extraction of value: ${line@Q}, REPLY: ${REPLY@Q}"
-            if [[ ${line} == "${firstChar}"* ]]; then
-              # the quote is closed
-              log::debug "quote closed"
-              isQuoteOpen=false
-              line="${line:1}"
-            else
-              # unclosed quote
-              log::debug "quote is not closed!"
-              isQuoteOpen=true
-            fi
-            value="${REPLY}"
-          else
-            value="${line}"
-          fi
-        else
-          value="${keyName}"
-          keyName=""
-        fi
-
-        # act on open quote or not
-        if [[ ${isQuoteOpen} == true ]]; then
-          # trim ending spaces
-          value="${value%"${value##*[^[:space:]]}"}"
-        else
-          if [[ ${firstChar} == [\'\"] ]]; then
-            # check that the remaining line after the ending quote is empty or a comment, otherwise it's a syntax error
-            line="${line#"${line%%[^[:space:]]*}"}"
-            if [[ -n ${line} && ${line} != \#* ]]; then
-              yaml_addParsingError "syntax error for ${line@Q}"
-            fi
-          else
-            # remove trailing comments and spaces
-            if [[ ${value} == \#* ]]; then
-              value=""
-            else
-              value="${value%% \#*}"
-              # trim ending spaces
-              value="${value%"${value##*[^[:space:]]}"}"
-            fi
-            # not a quoted value, we possibly need to compute a tag
-            if [[ -z ${valueTag} ]]; then
-              yaml_computeValueTag
-            fi
-          fi
-
-          log::debug "line: ${lineNumber}, key: ${keyName@Q}, tag: ${valueTag@Q}, value: ${value@Q}, line ${line@Q}"
-
-          if [[ ${isArrayItemStart} != "true" && -z ${keyName} && -z ${value} ]]; then
-            # empty line
-            continue
-          fi
-        fi
-      fi
-    fi
-
-    # check for indent level. if valid, get the index of the indent level in the keyIndent  Levels array
-    if ((${#keyIndentLevels[@]} > 0)); then
-      lastIndentLevel=${keyIndentLevels[-1]}
-    fi
-
-    if ((${#keyIndentLevels[@]} == 0 && indentLevel <= 4 + arrayExtraIndentLevel)); then
-      # case of a new key at the root level
-      indentLevelIndex=0
-    elif ((indentLevel == lastIndentLevel)); then
-      # case of a new key at the same level as the previous key
-      indentLevelIndex=$((${#keyIndentLevels[@]} - 1))
-      if [[ ${isKeyWithoutValue} == "true" && -n ${keyName} && ${keyPaths[-1]:-} != "["* ]]; then
-        # the previous key add a null value except if we are in an array
-        yaml_saveNullValue
-        isKeyWithoutValue=false
-      fi
-    elif ((indentLevel > lastIndentLevel - arrayExtraIndentLevel)); then
-      # case of a new key at a deeper level than the previous key
-      if ((indentLevel > lastIndentLevel + 4 + arrayExtraIndentLevel)); then
-        yaml_addParsingError "too much indentation (expected at most $((lastIndentLevel + 4)))."
-        continue
-      fi
-      indentLevelIndex=${#keyIndentLevels[@]}
-    else
-      # case of a new key at a shallower level than the previous key
-      # the current indent level must be in the keyIndentLevels array, otherwise it's an invalid YAML file
-      keyIndentLevelsFlatten=".${keyIndentLevels[*]}."
-      if [[ ${keyIndentLevelsFlatten} != *".${indentLevel}."* ]]; then
-        yaml_addParsingError "invalid indentation (expected one of (${keyIndentLevels[*]}) but got ${indentLevel})."
-        continue
-      fi
-      keyIndentLevelsFlatten="${keyIndentLevelsFlatten%".${indentLevel}."*}"
-      # indentLevelIndex will be the number of . left in keyIndentLevelsFlatten
-      indentLevelIndex=${#keyIndentLevelsFlatten}
-      keyIndentLevelsFlatten="${keyIndentLevelsFlatten//"."/}"
-      indentLevelIndex=$((indentLevelIndex - ${#keyIndentLevelsFlatten}))
-      if [[ ${isKeyWithoutValue} == "true" && -n ${keyName} ]]; then
-        # the previous key add a null value
-        yaml_saveNullValue
-        isKeyWithoutValue=false
-      fi
-    fi
-
-    if log::isDebugEnabled; then
-      printf "%2s: indentLevel %2s indentLevelIndex %2s | %-20s | %-20s | %s\n" "${lineNumber}" "${indentLevel}" "${indentLevelIndex}" "${keyIndentLevels[*]}" "${keyName}" "${value}"
-    fi
-
-    # prepend the keyName with the current array index if we are in an array
-    if [[ ${isArrayItemStart} == "true" ]]; then
-      if ((${#keyIndentLevels[@]} == 0)); then
-        # start of a "root" array
-        keyPaths=("")
-        keyIndentLevels=(0)
-        arrayIndexes=(-1)
-        indentLevelIndex=1
-      fi
-      arrayIndex=$((indentLevelIndex - 1))
-      # increment current array index
-      arrayIndexes[arrayIndex]=$((arrayIndexes[arrayIndex] + 1))
-
-      # store the array length in the associative array with key (array).length
-      fullKey="${keyPaths[*]:0:arrayIndex+1}.length"
-      fullKey="${docPrefix}${fullKey#.}"
-      fullKey="${fullKey//'.['/'['}"
-      REPLY_MAP2["${fullKey}"]="$((arrayIndexes[arrayIndex] + 1))"
-
-      keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
-      keyName="${keyName%.}"
-
-      log::debug "array start: keyName: ${keyName@Q}, keyPaths: ${keyPaths[*]@Q}, arrayIndexes: ${arrayIndexes[*]@Q}, indentLevelIndex: ${indentLevelIndex}, arrayIndex: ${arrayIndex}"
-
-      if [[ ${firstChar} != [\'\"] ]]; then
-        if [[ ${value} == *"-" ]]; then
-          value+=" "
-        fi
-
-        while [[ ${value} == "- "* ]]; do
-          # case of an array within an array (e.g. `- - item1`)
-          keyPaths=("${keyPaths[@]:0:indentLevelIndex}" "${keyName}")
-          arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" 0)
-          keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
-          indentLevel+=$((${#inArrayIndent} + 2))
-          indentLevelIndex+=1
-          keyName="[0]"
-
-          # store the array length in the associative array with key (array).length
-          fullKey="${keyPaths[*]}.length"
-          fullKey="${docPrefix}${fullKey#.}"
-          fullKey="${fullKey//'.['/'['}"
-          REPLY_MAP2["${fullKey}"]="1"
-
-          value="${value#"- "}"
-          inArrayIndent="${value%%[^[:space:]]*}"
-          value="${value:${#inArrayIndent}}"
-
-          log::debug "array within array: keyName: ${keyName@Q}, keyPaths: ${keyPaths[*]@Q}, arrayIndexes: ${arrayIndexes[*]@Q}, indentLevelIndex: ${indentLevelIndex}, arrayIndex: ${arrayIndex}"
-        done
-      fi
-    else
-      arrayIndex=$((indentLevelIndex - 1))
-      log::debug "arrayIndex: ${arrayIndex}, arrayIndexes: ${arrayIndexes[*]@Q}, keyName: ${keyName@Q}"
-      if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] >= 0)); then
-        # case of a new key inside an object inside an array
-        keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
-        keyName="${keyName%.}"
-      fi
-      log::debug "keyName after arrayIndex: ${keyName@Q}"
-    fi
-
-    log::debug "value: ${value@Q}, keyName: ${keyName@Q}, isArrayItemStart: ${isArrayItemStart}, firstChar: ${firstChar@Q}"
-
-    # determine what the current line represents
-    if [[ ${value} == [\{\[]* && ${firstChar} != [\'\"] ]]; then
-      # case of a flow collection (json)
-      local jsonLine="${value}" jsonTempString jsonCumulatedLf="" isJsonQuoteOpen=0 jsonKeyName="" jsonPart jsonFullKey \
-        jsonLastString="" isJsonValueOpen=0 jsonCumulatedString="" jsonLastQuoteChar="" jsonValueTag
-      local -a jsonKeyPaths=() jsonArrayIndexes=() jsonOpenChars=()
-      local -i jsonDepth=-1
-
-      if ((${#keyName} == 0 && ${#keyPaths[@]} == 0)); then
-        isJsonRootObject=1
-      else
-        isJsonRootObject=0
-      fi
-      isJsonOpen=1
-      value=""
-
-    elif [[ ${isQuoteOpen} == "true" ]]; then
-      # case of an unclosed quote, we will continue to read the next lines until we find the closing quote
-      multiLinesCumulatedLf=""
-      if [[ -z ${keyName} && ${#keyPaths[@]} -eq 0 ]]; then
-        # the doc contains only a simple scalar value
-        fullKey="${docPrefix%.}"
-        fullKey="${fullKey:-"@[${docNumber}]"}"
-        continue
-      fi
-
-    elif [[ ${value} == [\>\|]* ]]; then
-      # new multiline value
-      isMultilineValue=true
-      multiLinesCumulatedLf=""
-      if [[ ${value} == '|'* ]]; then
-        multilineSeparator=$'\n'
-      else
-        multilineSeparator=' '
-      fi
-      value="${value:1}"
-      if [[ ${value} == [0-4]* ]]; then
-        multiLineIndentLevel=$((indentLevel - arrayExtraIndentLevel + ${value:0:1}))
-        value="${value:1}"
-      else
-        multiLineIndentLevel=0
-      fi
-      if [[ ${value} == '-'* ]]; then
-        multilineFinalSeparator=''
-      else
-        multilineFinalSeparator=$'\n'
-      fi
-      if [[ ${value} == '+'* ]]; then
-        multilineTrimEnd=false
-      else
-        multilineTrimEnd=true
-      fi
-      value=""
-
-    elif [[ -n ${keyName} && (-n ${value} || ${firstChar} == [\'\"]) ]]; then
-      # a scalar value
-      :
-
-    elif [[ ${isArrayItemStart} == "true" && ${keyName} == *']' && -n ${value} ]]; then
-      # case of a scalar array item with no key name
-      :
-
-    elif [[ ${isArrayItemStart} == "true" && ${keyName} == *']' ]]; then
-      # case of the start of an array (line contains only "-")
-      arrayExtraIndentLevelResetValue=2
-
-    elif [[ -n ${keyName} && -z ${value} ]]; then
-      # start of an object or array
-      :
-
-    elif [[ -z ${keyName} && -n ${value} && ${#keyPaths[@]} -eq 0 ]]; then
-      # the doc contains only a simple scalar value
-      fullKey="${docPrefix%.}"
-      fullKey="${fullKey:-"@[${docNumber}]"}"
-      yaml_saveValue
-      continue
-
-    elif [[ -z ${keyName} && ${isKeyWithoutValue} == "true" && -n ${value} ]]; then
-      # case of a key without value followed by a scalar value on the next line
-      :
-
-    else
-      # invalid line
-      yaml_addParsingError "invalid line ${line@Q}, level ${indentLevel}, keyName: ${keyName@Q}, value: ${value@Q}, keyPaths: ${keyPaths[*]@Q}, isArrayItemStart: ${isArrayItemStart}, arrayIndexes: ${arrayIndexes[*]@Q}"
-      continue
-    fi
-
-    if [[ -z ${keyName} && ${isKeyWithoutValue} == "true" ]]; then
-      keyPaths=("${keyPaths[@]:0:indentLevelIndex}")
-      arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}")
-      keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}")
-    else
-      keyPaths=("${keyPaths[@]:0:indentLevelIndex}" "${keyName}")
-      arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" -1)
-      keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
-    fi
-
-    if log::isDebugEnabled; then
-      printf "%2s: %50s | %20s | %s\n\n" "${lineNumber}" "${keyPaths[*]}" "${keyIndentLevels[*]}" "${arrayIndexes[*]}"
-    fi
-
-    fullKey="${keyPaths[*]}"
-    fullKey="${docPrefix}${fullKey#.}"
-    fullKey="${fullKey//'.['/'['}"
-    if [[ -n ${value} || ${firstChar} == [\'\"] ]]; then
-      if [[ ${fullKey} == *[\]\.]'<<' ]]; then
-        # merge key
-        if [[ ${firstChar} != '*' ]]; then
-          yaml_addParsingError "invalid merge key ${keyName@Q} (value must be an alias)"
-        fi
-        # correct the full key
-        fullKey="${fullKey%'.<<'}"
-        fullKey="${fullKey%']<<'}"
-      fi
-      if [[ ${firstChar} == '*' ]]; then
-        # case of an alias
-        value="${value:1}"
-        if [[ -v aliases[${value}] ]]; then
-          yaml_duplicateKeys "${aliases["${value}"]}" "${fullKey}"
-        else
-          yaml_addParsingError "invalid alias ${value@Q} (no anchor found for this alias)"
-        fi
-      else
-        yaml_saveValue
-      fi
-      isKeyWithoutValue=false
-    else
-      if [[ -n ${valueTag} ]]; then
-        REPLY_MAP2["${fullKey}"]="${valueTag}"
-      fi
-      isKeyWithoutValue=true
-    fi
-
-    if [[ -n ${anchorName} ]]; then
-      log::debug "anchor ${anchorName@Q} points to ${fullKey}"
-      aliases["${anchorName}"]="${fullKey}"
-    fi
-
-  done <"${path}"
+  fi
 
   if ((isJsonOpen == 1)); then
     yaml_jsonHandleString
@@ -709,8 +227,8 @@ function yaml::parseFile() {
     yaml_addParsingError "invalid quoted value (missing closing quote)"
   fi
 
-  # close a multiline value if we reached the end of the file
   if [[ ${isMultilineValue} == "true" ]]; then
+    # close a multiline value if we reached the end of the file
     value+="${multilineFinalSeparator}"
     if [[ ${multilineTrimEnd} != "true" ]]; then
       value+="${multiLinesCumulatedLf}"
@@ -730,6 +248,552 @@ function yaml::parseFile() {
 
   REPLY_CODE=${replyCode}
   REPLY="${errors}"
+}
+
+# shellcheck disable=SC2324
+function yaml_handleLine() {
+  lineNumber+=1
+  # shellcheck disable=SC1001
+  if [[ ${line} == [\#\%]* ]]; then
+    return 0
+  fi
+
+  line="${line%$'\r'}"
+  IFS='.'
+
+  # get indent, indent level and trim it from the line
+  indent="${line%%[^[:space:]]*}"
+  line="${line:${#indent}}"
+  indent="${indent%%$'\t'*}"
+  indentLevel=${#indent}
+
+  # handle json
+  if ((isJsonOpen == 1)); then
+    yaml_jsonHandleString
+    jsonLine="${line}"
+
+    if ((jsonDepth >= 0)); then
+      if [[ ${line} != *[^[:space:]]* || ${indentLevel} -ge $((${keyIndentLevels[-1]} - arrayExtraIndentLevel)) || ${isJsonRootObject} == 1 ]]; then
+        # line contains only spaces
+        # or is indented at least as much as the key that started the json flow collection
+        # or we have a json object at root level
+        return 0
+      fi
+    fi
+
+    # change of indentation, the json must be closed by now
+    if ((jsonDepth >= 0)); then
+      yaml_addParsingError "invalid JSON flow collection (new yaml key but the previous JSON flow collection is not closed)."
+    fi
+    isJsonOpen=0
+    isKeyWithoutValue=false
+
+    if [[ ${fullKey} == *[\]\.]'<<' ]]; then
+      # we opened a flow collection for a merge key,
+      # we need to merge the content of the flow collection into the current key
+      yaml_mergeFlowCollectionIntoCurrentKey
+    fi
+  fi
+
+  # handle multiline quoted values
+  if [[ ${isQuoteOpen} == true ]]; then
+    if [[ -z ${line//[\t ]/} ]]; then
+      multiLinesCumulatedLf+=$'\n'
+      return 0
+    fi
+
+    if [[ -n ${multiLinesCumulatedLf} ]]; then
+      value+="${multiLinesCumulatedLf}"
+    elif [[ -n ${value} ]]; then
+      value+=' '
+    fi
+    multiLinesCumulatedLf=""
+
+    line="${firstChar}${line}"
+    yaml_extractFirstQuotedTextFromLine
+    value+="${REPLY%"${REPLY##*[^[:space:]]}"}"
+    if [[ ${line} == "${firstChar}"* ]]; then
+      # the quote is closed
+      isQuoteOpen=false
+
+      yaml_saveValue
+      isKeyWithoutValue=false
+    fi
+    return 0
+  fi
+
+  # handle multiline continuation
+  if [[ ${isMultilineValue} == true ]]; then
+    if ((indentLevel > ${keyIndentLevels[-1]} - arrayExtraIndentLevel)); then
+      if ((multiLineIndentLevel == 0)); then
+        # the first line of a multiline value, determine the indent level of the multiline value
+        multiLineIndentLevel=${indentLevel}
+      fi
+
+      if [[ ${multilineSeparator} == '$\n' ]]; then
+        value+="${multiLinesCumulatedLf}"$'\n'
+      else
+        if [[ ${indentLevel} -gt ${multiLineIndentLevel} || -n ${multiLinesCumulatedLf} ]]; then
+          if [[ -n ${value} ]]; then
+            value+=$'\n'
+          fi
+          value+="${multiLinesCumulatedLf}"
+        elif [[ -n ${value} ]]; then
+          value+="${multilineSeparator}"
+        fi
+      fi
+      value+="${indent:0:indentLevel-multiLineIndentLevel}${line}"
+      multiLinesCumulatedLf=""
+      return 0
+    elif [[ -z ${line//[\t ]/} ]]; then
+      multiLinesCumulatedLf+=$'\n'
+      return 0
+    fi
+
+    # end of a multiline value
+    isMultilineValue=false
+    multiLineIndentLevel=-1
+    value+="${multilineFinalSeparator}"
+    if [[ ${multilineTrimEnd} != "true" ]]; then
+      value+="${multiLinesCumulatedLf}"
+    fi
+    yaml_saveValue
+    isKeyWithoutValue=false
+  fi
+
+  # shellcheck disable=SC1001
+  if [[ ${line} == [\#\%]* || ${#line} -eq 0 ]]; then
+    # case of a command or an empty, non multiline, line
+    return 0
+  fi
+
+  # new doc
+  if [[ ${line} == "---"* ]]; then
+    if [[ ${isKeyWithoutValue} == "true" ]]; then
+      # the previous key add a null value
+      yaml_saveNullValue
+      isKeyWithoutValue=false
+    fi
+    if ((${#keyPaths[@]} > 0)); then
+      docNumber+=1
+    fi
+    keyPaths=()
+    keyIndentLevels=()
+    arrayIndexes=()
+    arrayExtraIndentLevelResetValue=0
+    valueTag=""
+    if [[ ${prefixFirstDoc} == "true" || ${docNumber} -gt 0 ]]; then
+      docPrefix="@[${docNumber}]."
+    fi
+    line="${line#---}"
+    line="${line#"${line%%[^[:space:]]*}"}"
+  fi
+
+  if [[ ${line} == "-"* ]]; then
+    # case of an array
+    line="${line:2}"
+    inArrayIndent="${line%%[^[:space:]]*}"
+    line="${line:${#inArrayIndent}}"
+    indentLevel+=2
+    arrayExtraIndentLevel=2
+    isArrayItemStart=true
+  else
+    arrayExtraIndentLevel=${arrayExtraIndentLevelResetValue}
+    arrayExtraIndentLevelResetValue=0
+    isArrayItemStart=false
+  fi
+
+  # handle tags / anchors
+  if [[ ${isKeyWithoutValue} != true ]]; then
+    valueTag=""
+  fi
+  anchorName=""
+  while [[ ${line} == "!"* || ${line} == "&"* ]]; do
+    if [[ ${line} == "!"* ]]; then
+      # explicit tag
+      valueTag="${line%%[[:space:]]*}"
+      line="${line:${#valueTag}}"
+      line="${line#"${line%%[^[:space:]]*}"}"
+    elif [[ ${line} == "&"* ]]; then
+      # anchor
+      anchorName="${line%%[[:space:]]*}"
+      line="${line:${#anchorName}}"
+      line="${line#"${line%%[^[:space:]]*}"}"
+      anchorName="${anchorName:1}"
+    fi
+  done
+
+  # extract the key name and value, there can be only a value with no key name
+  # in case of an array with a scalar
+  isQuoteOpen=false
+  firstChar="${line:0:1}"
+
+  if [[ ${firstChar} == [\{\[] ]]; then
+    value="${line}"
+    keyName=""
+  else
+
+    if [[ ${firstChar} == [\'\"] ]]; then
+      yaml_extractFirstQuotedTextFromLine
+      if [[ ${line} == "${firstChar}"* ]]; then
+        # the quote is closed
+        isQuoteOpen=false
+        line="${line:1}"
+      else
+        # unclosed quote
+        isQuoteOpen=true
+      fi
+    elif [[ ${line} == *": "* ]]; then
+      REPLY="${line%%: *}"
+      line="${line:${#REPLY}}"
+    elif [[ ${line} == *: ]]; then
+      REPLY="${line%:}"
+      line=":"
+    else
+      REPLY="${line}"
+      line=""
+    fi
+
+    # act on open quote or not
+    if [[ ${isQuoteOpen} == "true" ]]; then
+      keyName=""
+      # trim end spaces
+      value="${REPLY%"${REPLY##*[^[:space:]]}"}"
+    else
+      # trim end spaces
+      keyName="${REPLY%"${REPLY##*[^[:space:]]}"}"
+
+      if [[ ${line} == ":"* ]]; then
+        # register keyname
+        if [[ (${firstChar} == [\'\"] && -z ${keyName}) || ${keyName} == *[\.\[]* ]]; then
+          # key was quoted and need to be re-quoted
+          keyName="\"${keyName}\""
+        elif [[ -z ${keyName} ]]; then
+          yaml_addParsingError "bad indentation of a mapping entry ${line@Q} (contains a ': ' but no key name)"
+        fi
+
+        line="${line#:}"
+        # trim beginning spaces
+        line="${line#"${line%%[^[:space:]]*}"}"
+
+        # handle tags / anchors
+        valueTag=""
+        while [[ ${line} == "!"* || ${line} == "&"* ]]; do
+          if [[ ${line} == "!"* ]]; then
+            # explicit tag
+            valueTag="${line%%[[:space:]]*}"
+            line="${line:${#valueTag}}"
+            line="${line#"${line%%[^[:space:]]*}"}"
+          elif [[ ${line} == "&"* ]]; then
+            # anchor
+            anchorName="${line%%[[:space:]]*}"
+            line="${line:${#anchorName}}"
+            line="${line#"${line%%[^[:space:]]*}"}"
+            anchorName="${anchorName:1}"
+          fi
+        done
+
+        firstChar="${line:0:1}"
+        if [[ ${firstChar} == [\'\"] ]]; then
+          yaml_extractFirstQuotedTextFromLine
+          if [[ ${line} == "${firstChar}"* ]]; then
+            # the quote is closed
+            isQuoteOpen=false
+            line="${line:1}"
+          else
+            # unclosed quote
+            isQuoteOpen=true
+          fi
+          value="${REPLY}"
+        else
+          value="${line}"
+        fi
+      else
+        value="${keyName}"
+        keyName=""
+      fi
+
+      # act on open quote or not
+      if [[ ${isQuoteOpen} == true ]]; then
+        # trim ending spaces
+        value="${value%"${value##*[^[:space:]]}"}"
+      else
+        if [[ ${firstChar} == [\'\"] ]]; then
+          # check that the remaining line after the ending quote is empty or a comment, otherwise it's a syntax error
+          line="${line#"${line%%[^[:space:]]*}"}"
+          if [[ -n ${line} && ${line} != \#* ]]; then
+            yaml_addParsingError "syntax error for ${line@Q}"
+          fi
+        else
+          # remove trailing comments and spaces
+          if [[ ${value} == \#* ]]; then
+            value=""
+          else
+            value="${value%% \#*}"
+            # trim ending spaces
+            value="${value%"${value##*[^[:space:]]}"}"
+          fi
+          # not a quoted value, we possibly need to compute a tag
+          if [[ -z ${valueTag} ]]; then
+            yaml_computeValueTag
+          fi
+        fi
+
+        if [[ ${isArrayItemStart} != "true" && -z ${keyName} && -z ${value} ]]; then
+          # empty line
+          return 0
+        fi
+      fi
+    fi
+  fi
+
+  # check for indent level. if valid, get the index of the indent level in the keyIndent  Levels array
+  if ((${#keyIndentLevels[@]} > 0)); then
+    lastIndentLevel=${keyIndentLevels[-1]}
+  fi
+
+  if ((${#keyIndentLevels[@]} == 0 && indentLevel <= 4 + arrayExtraIndentLevel)); then
+    # case of a new key at the root level
+    indentLevelIndex=0
+  elif ((indentLevel == lastIndentLevel)); then
+    # case of a new key at the same level as the previous key
+    indentLevelIndex=$((${#keyIndentLevels[@]} - 1))
+    if [[ ${isKeyWithoutValue} == "true" && -n ${keyName} && ${keyPaths[-1]:-} != "["* ]]; then
+      # the previous key add a null value except if we are in an array
+      yaml_saveNullValue
+      isKeyWithoutValue=false
+    fi
+  elif ((indentLevel > lastIndentLevel - arrayExtraIndentLevel)); then
+    # case of a new key at a deeper level than the previous key
+    if ((indentLevel > lastIndentLevel + 4 + arrayExtraIndentLevel)); then
+      yaml_addParsingError "too much indentation (expected at most $((lastIndentLevel + 4)))."
+      return 0
+    fi
+    indentLevelIndex=${#keyIndentLevels[@]}
+  else
+    # case of a new key at a shallower level than the previous key
+    # the current indent level must be in the keyIndentLevels array, otherwise it's an invalid YAML file
+    keyIndentLevelsFlatten=".${keyIndentLevels[*]}."
+    if [[ ${keyIndentLevelsFlatten} != *".${indentLevel}."* ]]; then
+      yaml_addParsingError "invalid indentation (expected one of (${keyIndentLevels[*]}) but got ${indentLevel})."
+      return 0
+    fi
+    keyIndentLevelsFlatten="${keyIndentLevelsFlatten%".${indentLevel}."*}"
+    # indentLevelIndex will be the number of . left in keyIndentLevelsFlatten
+    indentLevelIndex=${#keyIndentLevelsFlatten}
+    keyIndentLevelsFlatten="${keyIndentLevelsFlatten//"."/}"
+    indentLevelIndex=$((indentLevelIndex - ${#keyIndentLevelsFlatten}))
+    if [[ ${isKeyWithoutValue} == "true" && -n ${keyName} ]]; then
+      # the previous key add a null value
+      yaml_saveNullValue
+      isKeyWithoutValue=false
+    fi
+  fi
+
+  if log::isDebugEnabled; then
+    printf "%2s: indentLevel %2s indentLevelIndex %2s | %-20s | %-20s | %s\n" "${lineNumber}" "${indentLevel}" "${indentLevelIndex}" "${keyIndentLevels[*]}" "${keyName}" "${value}"
+  fi
+
+  # prepend the keyName with the current array index if we are in an array
+  if [[ ${isArrayItemStart} == "true" ]]; then
+    if ((${#keyIndentLevels[@]} == 0)); then
+      # start of a "root" array
+      keyPaths=("")
+      keyIndentLevels=(0)
+      arrayIndexes=(-1)
+      indentLevelIndex=1
+    fi
+    arrayIndex=$((indentLevelIndex - 1))
+    # increment current array index
+    arrayIndexes[arrayIndex]=$((arrayIndexes[arrayIndex] + 1))
+
+    # store the array length in the associative array with key (array).length
+    fullKey="${keyPaths[*]:0:arrayIndex+1}.length"
+    fullKey="${docPrefix}${fullKey#.}"
+    fullKey="${fullKey//'.['/'['}"
+    REPLY_MAP2["${fullKey}"]="$((arrayIndexes[arrayIndex] + 1))"
+
+    keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
+    keyName="${keyName%.}"
+
+    if [[ ${firstChar} != [\'\"] ]]; then
+      if [[ ${value} == *"-" ]]; then
+        value+=" "
+      fi
+
+      while [[ ${value} == "- "* ]]; do
+        # case of an array within an array (e.g. `- - item1`)
+        keyPaths=("${keyPaths[@]:0:indentLevelIndex}" "${keyName}")
+        arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" 0)
+        keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
+        indentLevel+=$((${#inArrayIndent} + 2))
+        indentLevelIndex+=1
+        keyName="[0]"
+
+        # store the array length in the associative array with key (array).length
+        fullKey="${keyPaths[*]}.length"
+        fullKey="${docPrefix}${fullKey#.}"
+        fullKey="${fullKey//'.['/'['}"
+        REPLY_MAP2["${fullKey}"]="1"
+
+        value="${value#"- "}"
+        inArrayIndent="${value%%[^[:space:]]*}"
+        value="${value:${#inArrayIndent}}"
+      done
+    fi
+  else
+    arrayIndex=$((indentLevelIndex - 1))
+    if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] >= 0)); then
+      # case of a new key inside an object inside an array
+      keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
+      keyName="${keyName%.}"
+    fi
+  fi
+
+  # determine what the current line represents
+  if [[ ${value} == [\{\[]* && ${firstChar} != [\'\"] ]]; then
+    # case of a flow collection (json)
+    jsonLine="${value}"
+    jsonCumulatedLf=""
+    isJsonQuoteOpen=0
+    jsonKeyName=""
+    jsonLastString=""
+    isJsonValueOpen=0
+    jsonCumulatedString=""
+    jsonLastQuoteChar=""
+    jsonKeyPaths=()
+    jsonArrayIndexes=()
+    jsonOpenChars=()
+    jsonDepth=-1
+
+    if ((${#keyName} == 0 && ${#keyPaths[@]} == 0)); then
+      isJsonRootObject=1
+    else
+      isJsonRootObject=0
+    fi
+    isJsonOpen=1
+    value=""
+
+  elif [[ ${isQuoteOpen} == "true" ]]; then
+    # case of an unclosed quote, we will continue to read the next lines until we find the closing quote
+    multiLinesCumulatedLf=""
+    if [[ -z ${keyName} && ${#keyPaths[@]} -eq 0 ]]; then
+      # the doc contains only a simple scalar value
+      fullKey="${docPrefix%.}"
+      fullKey="${fullKey:-"@[${docNumber}]"}"
+      return 0
+    fi
+
+  elif [[ ${value} == [\>\|]* ]]; then
+    # new multiline value
+    isMultilineValue=true
+    multiLinesCumulatedLf=""
+    if [[ ${value} == '|'* ]]; then
+      multilineSeparator=$'\n'
+    else
+      multilineSeparator=' '
+    fi
+    value="${value:1}"
+    if [[ ${value} == [0-4]* ]]; then
+      multiLineIndentLevel=$((indentLevel - arrayExtraIndentLevel + ${value:0:1}))
+      value="${value:1}"
+    else
+      multiLineIndentLevel=0
+    fi
+    if [[ ${value} == '-'* ]]; then
+      multilineFinalSeparator=''
+    else
+      multilineFinalSeparator=$'\n'
+    fi
+    if [[ ${value} == '+'* ]]; then
+      multilineTrimEnd=false
+    else
+      multilineTrimEnd=true
+    fi
+    value=""
+
+  elif [[ -n ${keyName} && (-n ${value} || ${firstChar} == [\'\"]) ]]; then
+    # a scalar value
+    :
+
+  elif [[ ${isArrayItemStart} == "true" && ${keyName} == *']' && -n ${value} ]]; then
+    # case of a scalar array item with no key name
+    :
+
+  elif [[ ${isArrayItemStart} == "true" && ${keyName} == *']' ]]; then
+    # case of the start of an array (line contains only "-")
+    arrayExtraIndentLevelResetValue=2
+
+  elif [[ -n ${keyName} && -z ${value} ]]; then
+    # start of an object or array
+    :
+
+  elif [[ -z ${keyName} && -n ${value} && ${#keyPaths[@]} -eq 0 ]]; then
+    # the doc contains only a simple scalar value
+    fullKey="${docPrefix%.}"
+    fullKey="${fullKey:-"@[${docNumber}]"}"
+    yaml_saveValue
+    return 0
+
+  elif [[ -z ${keyName} && ${isKeyWithoutValue} == "true" && -n ${value} ]]; then
+    # case of a key without value followed by a scalar value on the next line
+    :
+
+  else
+    # invalid line
+    yaml_addParsingError "invalid line ${line@Q}, level ${indentLevel}, keyName: ${keyName@Q}, value: ${value@Q}, keyPaths: ${keyPaths[*]@Q}, isArrayItemStart: ${isArrayItemStart}, arrayIndexes: ${arrayIndexes[*]@Q}"
+    return 0
+  fi
+
+  if [[ -z ${keyName} && ${isKeyWithoutValue} == "true" ]]; then
+    keyPaths=("${keyPaths[@]:0:indentLevelIndex}")
+    arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}")
+    keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}")
+  else
+    keyPaths=("${keyPaths[@]:0:indentLevelIndex}" "${keyName}")
+    arrayIndexes=("${arrayIndexes[@]:0:indentLevelIndex}" -1)
+    keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
+  fi
+
+  if log::isDebugEnabled; then
+    printf "%2s: %50s | %20s | %s\n\n" "${lineNumber}" "${keyPaths[*]}" "${keyIndentLevels[*]}" "${arrayIndexes[*]}"
+  fi
+
+  fullKey="${keyPaths[*]}"
+  fullKey="${docPrefix}${fullKey#.}"
+  fullKey="${fullKey//'.['/'['}"
+  if [[ -n ${value} || ${firstChar} == [\'\"] ]]; then
+    if [[ ${fullKey} == *[\]\.]'<<' ]]; then
+      # merge key
+      if [[ ${firstChar} != '*' ]]; then
+        yaml_addParsingError "invalid merge key ${keyName@Q} (value must be an alias)"
+      fi
+      # correct the full key
+      fullKey="${fullKey%'.<<'}"
+      fullKey="${fullKey%']<<'}"
+    fi
+    if [[ ${firstChar} == '*' ]]; then
+      # case of an alias
+      value="${value:1}"
+      if [[ -v aliases[${value}] ]]; then
+        yaml_duplicateKeys "${aliases["${value}"]}" "${fullKey}"
+      else
+        yaml_addParsingError "invalid alias ${value@Q} (no anchor found for this alias)"
+      fi
+    else
+      yaml_saveValue
+    fi
+    isKeyWithoutValue=false
+  else
+    if [[ -n ${valueTag} ]]; then
+      REPLY_MAP2["${fullKey}"]="${valueTag}"
+    fi
+    isKeyWithoutValue=true
+  fi
+
+  if [[ -n ${anchorName} ]]; then
+    aliases["${anchorName}"]="${fullKey}"
+  fi
 }
 
 function yaml_saveValue() {
@@ -799,8 +863,6 @@ function yaml_duplicateKeys() {
     sourceKey="${1}" \
     targetKey="${2}"
 
-  log::debug "copying keys for sourceKey ${sourceKey@Q} to ${targetKey@Q}"
-
   if [[ -v REPLY_MAP[${sourceKey}] ]]; then
     # simple scalar value to copy
     REPLY_MAP["${targetKey}"]="${REPLY_MAP["${sourceKey}"]}"
@@ -816,7 +878,6 @@ function yaml_duplicateKeys() {
   for key in "${!REPLY_MAP[@]}" "${!REPLY_MAP2[@]}"; do
     if [[ ${key} == "${sourceKey}"[\.\[]* ]]; then
       newKey="${key#"${sourceKey}"}"
-      log::debug "copying key ${key@Q} sourceKey ${sourceKey@Q} to ${newKey@Q} "
       if [[ -v REPLY_MAP[${key}] ]]; then
         REPLY_MAP["${targetKey}${newKey}"]="${REPLY_MAP[${key}]}"
       fi
@@ -859,8 +920,8 @@ function yaml_mergeFlowCollectionIntoCurrentKey() {
 }
 
 # receives jsonLine and should parse json from it
+# shellcheck disable=SC2324
 function yaml_jsonHandleString() {
-  log::debug "JSON PARSE line ${lineNumber} handle: ${jsonLine@Q}, jsonDepth: ${jsonDepth}, jsonKeyPaths: ${jsonKeyPaths[*]@Q}, jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonOpenChars: ${jsonOpenChars[*]@Q}"
 
   # a quote has been opened on a previous line
   if ((isJsonQuoteOpen == 1)); then
@@ -887,7 +948,6 @@ function yaml_jsonHandleString() {
 
   while ((${#jsonLine} > 0)); do
     jsonPart="${jsonLine%%[\{\}\[\]\:\'\",#]*}"
-    log::debug "⌜${jsonLine:${#jsonPart}:1}⌝ -> json part: ${jsonPart@Q}"
 
     case "${jsonLine:${#jsonPart}}" in
     [\"\']*)
@@ -920,7 +980,6 @@ function yaml_jsonHandleString() {
         jsonCumulatedLf=""
       fi
 
-      log::debug "json last string: ${jsonLastString@Q}, jsonLine: ${jsonLine@Q}, isJsonQuoteOpen: ${isJsonQuoteOpen}"
       continue
       ;;
     ':'*)
@@ -956,7 +1015,6 @@ function yaml_jsonHandleString() {
         # case of an object within an array but that was not explicitly opened with a {
         jsonOpenChars[jsonDepth + 1]=''
         jsonDepth+=1
-        log::debug "IMPLICIT json object start (jsonOpenChars: ${jsonOpenChars[*]@Q}, jsonDepth: ${jsonDepth})"
       fi
 
       yaml_jsonAddKey
@@ -971,13 +1029,11 @@ function yaml_jsonHandleString() {
       fi
       ;;&
     '}'*)
-      log::debug "json object end"
       if [[ ${jsonOpenChars[jsonDepth]} != '{' ]]; then
         yaml_addParsingError "json object end found but last open char is not an object: ${jsonOpenChars[jsonDepth]@Q} (jsonOpenChars: ${jsonOpenChars[*]@Q}, jsonDepth: ${jsonDepth})"
       fi
       ;;&
     ']'*)
-      log::debug "json array end"
       if [[ ${jsonOpenChars[jsonDepth]} != '[' ]]; then
         # need to also check the case were we close an implicitly opened object within an array
         if [[ ${jsonOpenChars[jsonDepth]} != '' || ${jsonDepth} -lt 1 || ${jsonOpenChars[jsonDepth - 1]} != '[' ]]; then
@@ -1057,7 +1113,6 @@ function yaml_jsonHandleString() {
       if [[ ${jsonOpenChars[jsonDepth]} == '' ]]; then
         # case of an object within an array but that was not explicitly opened with a {
         jsonDepth=$((jsonDepth - 1))
-        log::debug "IMPLICIT json object end (jsonOpenChars: ${jsonOpenChars[*]@Q}, jsonDepth: ${jsonDepth})"
       fi
       ;;&
     [\}\]]*)
@@ -1071,23 +1126,17 @@ function yaml_jsonHandleString() {
     ','*)
       # possible end of an array value, increment the last array index
       if [[ ${jsonOpenChars[jsonDepth]} == '[' ]]; then
-        log::debug "jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonKeyPaths: ${jsonKeyPaths@Q}, jsonDepth: ${jsonDepth}"
         jsonArrayIndexes[jsonDepth]=$((jsonArrayIndexes[jsonDepth] + 1))
         jsonKeyName="[${jsonArrayIndexes[jsonDepth]}]"
         jsonKeyPaths[jsonDepth]="${jsonKeyName}"
         yaml_jsonSaveArrayLength
-
-        log::debug "json array index incremented to ${jsonArrayIndexes[jsonDepth]} (${jsonKeyPaths[jsonDepth]})"
-        log::debug "jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonKeyPaths: ${jsonKeyPaths[*]@Q}, jsonDepth: ${jsonDepth}"
       fi
       ;;
     '{'*)
-      log::debug "json object start"
       jsonOpenChars[jsonDepth + 1]='{'
       jsonDepth+=1
       ;;
     '['*)
-      log::debug "json array start"
       jsonOpenChars[jsonDepth + 1]='['
       jsonDepth+=1
       jsonKeyName="[0]"
@@ -1099,7 +1148,6 @@ function yaml_jsonHandleString() {
       ;;
     *)
       # the line ends with a non quoted string
-      log::debug "part ${jsonPart@Q}, line ${jsonLine@Q} not handled"
       yaml_cumulateString
       isJsonValueOpen=1
       return 0
@@ -1132,8 +1180,6 @@ function yaml_cumulateString() {
 
     jsonCumulatedString+="${jsonTempString}"
   fi
-
-  log::debug "cumulated string: ${jsonCumulatedString@Q}"
 }
 
 function yaml_jsonSaveValue() {
@@ -1142,7 +1188,6 @@ function yaml_jsonSaveValue() {
   jsonFullKey="${jsonFullKey#.}"
   jsonFullKey="${jsonFullKey//'.['/'['}"
 
-  log::debug "ADD VALUE : key: ${jsonFullKey@Q}, value: ${jsonCumulatedString@Q}, jsonDepth: ${jsonDepth}"
   REPLY_MAP["${jsonFullKey}"]="${jsonCumulatedString}"
   if [[ -n ${jsonValueTag} && ${jsonValueTag} != "!!str" && ${jsonValueTag} != "!" ]]; then
     REPLY_MAP2["${jsonFullKey}"]="${jsonValueTag}"
@@ -1171,6 +1216,45 @@ function yaml_jsonAddKey() {
 
   jsonArrayIndexes=("${jsonArrayIndexes[@]:0:jsonDepth}" 0)
   jsonKeyPaths=("${jsonKeyPaths[@]:0:jsonDepth}" "${jsonKeyName}")
-
-  log::debug "ADD NEW KEY : ${jsonKeyName@Q} (${jsonKeyPaths[*]:0:jsonDepth+1}), jsonDepth: ${jsonDepth}"
 }
+
+# calling the yaml_handleLine function inside a while loop has a significant performance overhead,
+# so we will inline the function to avoid this overhead
+function yaml_createInternalParseFunctions() {
+  function yaml_getFunctionBody() {
+    bash::getBuiltinOutput declare -f "${1}"
+    REPLY="${REPLY#*'{'}"
+    REPLY="${REPLY%'}'*}"
+  }
+
+  # get and modify the body of yaml_handleLine to inline functions and avoir func call overhead
+  yaml_getFunctionBody yaml_handleLine
+  local handleLineFunctionBody="${REPLY//"return 0"/"continue"}"
+  local functionName
+  for functionName in yaml_saveValue yaml_saveNullValue yaml_extractFirstQuotedTextFromLine yaml_computeValueTag; do
+    yaml_getFunctionBody "${functionName}"
+    handleLineFunctionBody="${handleLineFunctionBody//"${functionName};"/"${REPLY}"}"
+  done
+
+  yaml_getFunctionBody yaml_parse
+  local parseFunctionBody="${REPLY}"
+
+  # replace either the first or second occurrence of yaml_handleLine depending on the output func
+  eval "function yaml::parseFileInternal() {"$'\n'"${parseFunctionBody/"yaml_handleLine;"/"${handleLineFunctionBody}"}"$'\n'"}"
+  parseFunctionBody="${parseFunctionBody/"yaml_handleLine;"/':'}"
+  eval "function yaml::parseStringInternal() {"$'\n'"${parseFunctionBody/"yaml_handleLine;"/"${handleLineFunctionBody}"}"$'\n'"}"
+
+  # get and modify the body of yaml_jsonHandleString to inline functions and avoir func call overhead
+  yaml_getFunctionBody yaml_jsonHandleString
+  local jsonHandleStringFunctionBody="${REPLY}"
+  local functionName
+  for functionName in yaml_cumulateString yaml_jsonSaveValue yaml_jsonSaveArrayLength yaml_jsonAddKey; do
+    yaml_getFunctionBody "${functionName}"
+    jsonHandleStringFunctionBody="${jsonHandleStringFunctionBody//"${functionName};"/"${REPLY}"}"
+  done
+  eval "function yaml_jsonHandleString() {"$'\n'"${jsonHandleStringFunctionBody}"$'\n'"}"
+
+  unset -f yaml_getFunctionBody yaml_createInternalParseFunctions
+}
+
+yaml_createInternalParseFunctions

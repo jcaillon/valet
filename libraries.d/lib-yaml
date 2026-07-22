@@ -250,6 +250,7 @@ function yaml_parse() {
   REPLY="${errors}"
 }
 
+# shellcheck disable=SC2324
 function yaml_handleLine() {
   lineNumber+=1
   # shellcheck disable=SC1001
@@ -271,8 +272,6 @@ function yaml_handleLine() {
     yaml_jsonHandleString
     jsonLine="${line}"
 
-    log::debug "JSON continuation: ${jsonLine@Q}, indentLevel: ${indentLevel}, lastIndentLevel: ${lastIndentLevel}, keyIndentLevels[-1]: ${keyIndentLevels[-1]}, arrayExtraIndentLevel: ${arrayExtraIndentLevel}, isJsonRootObject: ${isJsonRootObject}"
-
     if ((jsonDepth >= 0)); then
       if [[ ${line} != *[^[:space:]]* || ${indentLevel} -ge $((${keyIndentLevels[-1]} - arrayExtraIndentLevel)) || ${isJsonRootObject} == 1 ]]; then
         # line contains only spaces
@@ -284,7 +283,6 @@ function yaml_handleLine() {
 
     # change of indentation, the json must be closed by now
     if ((jsonDepth >= 0)); then
-      log::debug "jsonDepth: ${jsonDepth}, jsonKeyPaths: ${jsonKeyPaths[*]@Q}, jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonOpenChars: ${jsonOpenChars[*]@Q}"
       yaml_addParsingError "invalid JSON flow collection (new yaml key but the previous JSON flow collection is not closed)."
     fi
     isJsonOpen=0
@@ -299,7 +297,6 @@ function yaml_handleLine() {
 
   # handle multiline quoted values
   if [[ ${isQuoteOpen} == true ]]; then
-    log::debug "line inside a quote: ${line@Q}, REPLY: ${REPLY@Q}"
     if [[ -z ${line//[\t ]/} ]]; then
       multiLinesCumulatedLf+=$'\n'
       return 0
@@ -314,11 +311,9 @@ function yaml_handleLine() {
 
     line="${firstChar}${line}"
     yaml_extractFirstQuotedTextFromLine
-    log::debug "line inside a quote: ${line@Q}, REPLY: ${REPLY@Q}"
     value+="${REPLY%"${REPLY##*[^[:space:]]}"}"
     if [[ ${line} == "${firstChar}"* ]]; then
       # the quote is closed
-      log::debug "quote closed"
       isQuoteOpen=false
 
       yaml_saveValue
@@ -440,15 +435,12 @@ function yaml_handleLine() {
 
     if [[ ${firstChar} == [\'\"] ]]; then
       yaml_extractFirstQuotedTextFromLine
-      log::debug "line after extraction: ${line@Q}, REPLY: ${REPLY@Q}"
       if [[ ${line} == "${firstChar}"* ]]; then
         # the quote is closed
-        log::debug "quote closed"
         isQuoteOpen=false
         line="${line:1}"
       else
         # unclosed quote
-        log::debug "quote is not closed!"
         isQuoteOpen=true
       fi
     elif [[ ${line} == *": "* ]]; then
@@ -461,7 +453,6 @@ function yaml_handleLine() {
       REPLY="${line}"
       line=""
     fi
-    log::debug "line after 1st round: ${line@Q}, REPLY: ${REPLY@Q}"
 
     # act on open quote or not
     if [[ ${isQuoteOpen} == "true" ]]; then
@@ -505,15 +496,12 @@ function yaml_handleLine() {
         firstChar="${line:0:1}"
         if [[ ${firstChar} == [\'\"] ]]; then
           yaml_extractFirstQuotedTextFromLine
-          log::debug "line after extraction of value: ${line@Q}, REPLY: ${REPLY@Q}"
           if [[ ${line} == "${firstChar}"* ]]; then
             # the quote is closed
-            log::debug "quote closed"
             isQuoteOpen=false
             line="${line:1}"
           else
             # unclosed quote
-            log::debug "quote is not closed!"
             isQuoteOpen=true
           fi
           value="${REPLY}"
@@ -550,8 +538,6 @@ function yaml_handleLine() {
             yaml_computeValueTag
           fi
         fi
-
-        log::debug "line: ${lineNumber}, key: ${keyName@Q}, tag: ${valueTag@Q}, value: ${value@Q}, line ${line@Q}"
 
         if [[ ${isArrayItemStart} != "true" && -z ${keyName} && -z ${value} ]]; then
           # empty line
@@ -630,8 +616,6 @@ function yaml_handleLine() {
     keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
     keyName="${keyName%.}"
 
-    log::debug "array start: keyName: ${keyName@Q}, keyPaths: ${keyPaths[*]@Q}, arrayIndexes: ${arrayIndexes[*]@Q}, indentLevelIndex: ${indentLevelIndex}, arrayIndex: ${arrayIndex}"
-
     if [[ ${firstChar} != [\'\"] ]]; then
       if [[ ${value} == *"-" ]]; then
         value+=" "
@@ -655,22 +639,16 @@ function yaml_handleLine() {
         value="${value#"- "}"
         inArrayIndent="${value%%[^[:space:]]*}"
         value="${value:${#inArrayIndent}}"
-
-        log::debug "array within array: keyName: ${keyName@Q}, keyPaths: ${keyPaths[*]@Q}, arrayIndexes: ${arrayIndexes[*]@Q}, indentLevelIndex: ${indentLevelIndex}, arrayIndex: ${arrayIndex}"
       done
     fi
   else
     arrayIndex=$((indentLevelIndex - 1))
-    log::debug "arrayIndex: ${arrayIndex}, arrayIndexes: ${arrayIndexes[*]@Q}, keyName: ${keyName@Q}"
     if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] >= 0)); then
       # case of a new key inside an object inside an array
       keyName="[${arrayIndexes[arrayIndex]}].${keyName}"
       keyName="${keyName%.}"
     fi
-    log::debug "keyName after arrayIndex: ${keyName@Q}"
   fi
-
-  log::debug "value: ${value@Q}, keyName: ${keyName@Q}, isArrayItemStart: ${isArrayItemStart}, firstChar: ${firstChar@Q}"
 
   # determine what the current line represents
   if [[ ${value} == [\{\[]* && ${firstChar} != [\'\"] ]]; then
@@ -814,7 +792,6 @@ function yaml_handleLine() {
   fi
 
   if [[ -n ${anchorName} ]]; then
-    log::debug "anchor ${anchorName@Q} points to ${fullKey}"
     aliases["${anchorName}"]="${fullKey}"
   fi
 }
@@ -886,8 +863,6 @@ function yaml_duplicateKeys() {
     sourceKey="${1}" \
     targetKey="${2}"
 
-  log::debug "copying keys for sourceKey ${sourceKey@Q} to ${targetKey@Q}"
-
   if [[ -v REPLY_MAP[${sourceKey}] ]]; then
     # simple scalar value to copy
     REPLY_MAP["${targetKey}"]="${REPLY_MAP["${sourceKey}"]}"
@@ -903,7 +878,6 @@ function yaml_duplicateKeys() {
   for key in "${!REPLY_MAP[@]}" "${!REPLY_MAP2[@]}"; do
     if [[ ${key} == "${sourceKey}"[\.\[]* ]]; then
       newKey="${key#"${sourceKey}"}"
-      log::debug "copying key ${key@Q} sourceKey ${sourceKey@Q} to ${newKey@Q} "
       if [[ -v REPLY_MAP[${key}] ]]; then
         REPLY_MAP["${targetKey}${newKey}"]="${REPLY_MAP[${key}]}"
       fi
@@ -946,8 +920,8 @@ function yaml_mergeFlowCollectionIntoCurrentKey() {
 }
 
 # receives jsonLine and should parse json from it
+# shellcheck disable=SC2324
 function yaml_jsonHandleString() {
-  log::debug "JSON PARSE line ${lineNumber} handle: ${jsonLine@Q}, jsonDepth: ${jsonDepth}, jsonKeyPaths: ${jsonKeyPaths[*]@Q}, jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonOpenChars: ${jsonOpenChars[*]@Q}"
 
   # a quote has been opened on a previous line
   if ((isJsonQuoteOpen == 1)); then
@@ -974,7 +948,6 @@ function yaml_jsonHandleString() {
 
   while ((${#jsonLine} > 0)); do
     jsonPart="${jsonLine%%[\{\}\[\]\:\'\",#]*}"
-    log::debug "⌜${jsonLine:${#jsonPart}:1}⌝ -> json part: ${jsonPart@Q}"
 
     case "${jsonLine:${#jsonPart}}" in
     [\"\']*)
@@ -1007,7 +980,6 @@ function yaml_jsonHandleString() {
         jsonCumulatedLf=""
       fi
 
-      log::debug "json last string: ${jsonLastString@Q}, jsonLine: ${jsonLine@Q}, isJsonQuoteOpen: ${isJsonQuoteOpen}"
       continue
       ;;
     ':'*)
@@ -1043,7 +1015,6 @@ function yaml_jsonHandleString() {
         # case of an object within an array but that was not explicitly opened with a {
         jsonOpenChars[jsonDepth + 1]=''
         jsonDepth+=1
-        log::debug "IMPLICIT json object start (jsonOpenChars: ${jsonOpenChars[*]@Q}, jsonDepth: ${jsonDepth})"
       fi
 
       yaml_jsonAddKey
@@ -1058,13 +1029,11 @@ function yaml_jsonHandleString() {
       fi
       ;;&
     '}'*)
-      log::debug "json object end"
       if [[ ${jsonOpenChars[jsonDepth]} != '{' ]]; then
         yaml_addParsingError "json object end found but last open char is not an object: ${jsonOpenChars[jsonDepth]@Q} (jsonOpenChars: ${jsonOpenChars[*]@Q}, jsonDepth: ${jsonDepth})"
       fi
       ;;&
     ']'*)
-      log::debug "json array end"
       if [[ ${jsonOpenChars[jsonDepth]} != '[' ]]; then
         # need to also check the case were we close an implicitly opened object within an array
         if [[ ${jsonOpenChars[jsonDepth]} != '' || ${jsonDepth} -lt 1 || ${jsonOpenChars[jsonDepth - 1]} != '[' ]]; then
@@ -1144,7 +1113,6 @@ function yaml_jsonHandleString() {
       if [[ ${jsonOpenChars[jsonDepth]} == '' ]]; then
         # case of an object within an array but that was not explicitly opened with a {
         jsonDepth=$((jsonDepth - 1))
-        log::debug "IMPLICIT json object end (jsonOpenChars: ${jsonOpenChars[*]@Q}, jsonDepth: ${jsonDepth})"
       fi
       ;;&
     [\}\]]*)
@@ -1158,23 +1126,17 @@ function yaml_jsonHandleString() {
     ','*)
       # possible end of an array value, increment the last array index
       if [[ ${jsonOpenChars[jsonDepth]} == '[' ]]; then
-        log::debug "jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonKeyPaths: ${jsonKeyPaths@Q}, jsonDepth: ${jsonDepth}"
         jsonArrayIndexes[jsonDepth]=$((jsonArrayIndexes[jsonDepth] + 1))
         jsonKeyName="[${jsonArrayIndexes[jsonDepth]}]"
         jsonKeyPaths[jsonDepth]="${jsonKeyName}"
         yaml_jsonSaveArrayLength
-
-        log::debug "json array index incremented to ${jsonArrayIndexes[jsonDepth]} (${jsonKeyPaths[jsonDepth]})"
-        log::debug "jsonArrayIndexes: ${jsonArrayIndexes[*]@Q}, jsonKeyPaths: ${jsonKeyPaths[*]@Q}, jsonDepth: ${jsonDepth}"
       fi
       ;;
     '{'*)
-      log::debug "json object start"
       jsonOpenChars[jsonDepth + 1]='{'
       jsonDepth+=1
       ;;
     '['*)
-      log::debug "json array start"
       jsonOpenChars[jsonDepth + 1]='['
       jsonDepth+=1
       jsonKeyName="[0]"
@@ -1186,7 +1148,6 @@ function yaml_jsonHandleString() {
       ;;
     *)
       # the line ends with a non quoted string
-      log::debug "part ${jsonPart@Q}, line ${jsonLine@Q} not handled"
       yaml_cumulateString
       isJsonValueOpen=1
       return 0
@@ -1219,8 +1180,6 @@ function yaml_cumulateString() {
 
     jsonCumulatedString+="${jsonTempString}"
   fi
-
-  log::debug "cumulated string: ${jsonCumulatedString@Q}"
 }
 
 function yaml_jsonSaveValue() {
@@ -1229,7 +1188,6 @@ function yaml_jsonSaveValue() {
   jsonFullKey="${jsonFullKey#.}"
   jsonFullKey="${jsonFullKey//'.['/'['}"
 
-  log::debug "ADD VALUE : key: ${jsonFullKey@Q}, value: ${jsonCumulatedString@Q}, jsonDepth: ${jsonDepth}"
   REPLY_MAP["${jsonFullKey}"]="${jsonCumulatedString}"
   if [[ -n ${jsonValueTag} && ${jsonValueTag} != "!!str" && ${jsonValueTag} != "!" ]]; then
     REPLY_MAP2["${jsonFullKey}"]="${jsonValueTag}"
@@ -1258,10 +1216,10 @@ function yaml_jsonAddKey() {
 
   jsonArrayIndexes=("${jsonArrayIndexes[@]:0:jsonDepth}" 0)
   jsonKeyPaths=("${jsonKeyPaths[@]:0:jsonDepth}" "${jsonKeyName}")
-
-  log::debug "ADD NEW KEY : ${jsonKeyName@Q} (${jsonKeyPaths[*]:0:jsonDepth+1}), jsonDepth: ${jsonDepth}"
 }
 
+# calling the yaml_handleLine function inside a while loop has a significant performance overhead,
+# so we will inline the function to avoid this overhead
 function yaml_createInternalParseFunctions() {
   function yaml_getFunctionBody() {
     bash::getBuiltinOutput declare -f "${1}"
@@ -1296,7 +1254,7 @@ function yaml_createInternalParseFunctions() {
   done
   eval "function yaml_jsonHandleString() {"$'\n'"${jsonHandleStringFunctionBody}"$'\n'"}"
 
-  unset -f yaml_parse yaml_getFunctionBody yaml_createInternalParseFunctions
+  unset -f yaml_getFunctionBody yaml_createInternalParseFunctions
 }
 
 yaml_createInternalParseFunctions
