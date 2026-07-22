@@ -1779,3 +1779,5 @@ REPLY_MAP2=(
 )
 ```
 
+### ✅ Testing yaml::parseFile and yaml::parseString are equal
+

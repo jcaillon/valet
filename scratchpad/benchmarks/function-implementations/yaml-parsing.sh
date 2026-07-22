@@ -16,6 +16,8 @@ for func in "${REPLY_ARRAY[@]}"; do
     bash::getBuiltinOutput declare -f "${func}"
     REPLY="${REPLY#*$'\n'}"
     REPLY="${REPLY#*$'\n'}"
+    REPLY="${REPLY//"yaml::"/"original_yaml::"}"
+    REPLY="${REPLY//"yaml_"/"original_yaml_"}"
     eval "function ${newFuncName}() { ${REPLY}"
   fi
 done
