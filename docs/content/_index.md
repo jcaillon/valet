@@ -59,13 +59,13 @@ sidebar:
     link="#create-a-command"
     icon="terminal"
     title="Turn your scripts into commands"
-    subtitle="Valet enables you to easily create **commands** that can take arguments and/or options automatically parsed by the Valet. Exceptions are gracefully handled with the error stack printed to the user."
+    subtitle="Valet enables you to easily create **commands** and parses its arguments and/or options automatically. Exceptions are gracefully handled with the error stack printed to the user."
   >}}
   {{< card
     link="#an-interactive-menu"
     icon="cursor-click"
     title="Interactively execute your commands"
-    subtitle="Find all your commands in a convenient menu with fuzzy finding capabilities. Get prompted for missing arguments or options to make your commands easy to use."
+    subtitle="Find all your commands in a convenient menu with fuzzy finding capabilities."
   >}}
   {{< card
     link="./docs/new-extensions/"
@@ -77,19 +77,19 @@ sidebar:
     link="#libraries-of-functions"
     icon="puzzle"
     title="Libraries of pure bash functions"
-    subtitle="Make your scripts more performant and write code faster by using Valet libraries for string manipulation, interactive prompt, pure bash I/O and more... You can also extend Valet to create and share your own libraries!"
+    subtitle="Make your scripts more performant and write code faster by using Valet libraries for string manipulation, yaml, interactive prompt, pure bash I/O and more... You can also extend Valet to create and share your own libraries!"
   >}}
   {{< card
     link="#test-framework"
     icon="beaker"
     title="Test your commands"
-    subtitle="Ever wondered how you can effectively setup unit tests for your scripts? Valet standardizes the way you test functions and commands with approval tests approach. Run them all in a single command and automate tests in CI pipelines."
+    subtitle="Valet standardizes the way you can test your functions and commands with approval tests approach. Run all your tests in a single command and automate them in CI pipelines."
   >}}
   {{< card
     link="#clear-and-standardized-help"
     icon="book-open"
     title="Clear and standardized help"
-    subtitle="Declare properties for your commands with YAML which are used to automatically display a user friendly documentation."
+    subtitle="The properties of your commands (arguments, options, etc...) are used to automatically display a user-friendly documentation."
   >}}
   {{< card
     link="#advanced-logging"
@@ -101,24 +101,26 @@ sidebar:
     link="#automatic-parsing-of-arguments-and-options"
     icon="cube-transparent"
     title="Pure bash, zero dependencies"
-    subtitle="Simply run the install script which copies Valet and you are good to go, you will only ever need bash! And thanks to bash scripting nature, you can highly customize Valet itself by re-declaring functions to your liking."
+    subtitle="Simply run the install script which copies Valet and you are good to go, you will only ever need bash! Thanks to bash scripting nature, you can highly customize Valet itself by re-declaring functions to your liking."
   >}}
   {{< card
     link="#libraries-of-functions"
     icon="lightning-bolt"
     title="Lighting fast on any platform"
-    subtitle="Valet does not use forking which makes it super fast, even on windows Git bash."
+    subtitle="Valet does not use external commands and avoids forking bash sessions, which makes it super fast, even on Windows bash."
   >}}
 {{< /cards >}}
 
 **Valet in a gist:**
 
-- In Valet, you can create new **commands** that you can invoke with `valet my-command`.
-- Each command has properties that describe it (a description, a list of arguments and options, and so on...).
+- In Valet, you create new **commands** that you can invoke with `valet my-command`.
+- Each command has properties (a description, a list of arguments and options, and so on...).
 - Each command has an associated bash function that is called when the command is invoked and which contains your logic.
-- You define commands and their functions in `.sh` files under your valet extensions directory and Valet takes care of indexing your commands; which allows you to quickly find them, parse options, arguments, print their help...
 - Commands are packaged in **extensions** that can easily be shared and downloaded by other Valet users.
+- You define commands, their properties and functions in `.sh` files under an extension directory.
+- Valet takes care of **building** (indexing) the commands, which allows you to quickly find them, parse options, arguments, print their help, etc...
 - In commands, you have access to hundreds of utility functions written in pure bash.
+- You can extend these function libraries by creating your own and share them through an extension.
 
 ---
 
