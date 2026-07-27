@@ -318,5 +318,9 @@ _OPTION_CONTINUE_IF_NOT_FOUND=false _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 so
 > - The file can be relative to the current script (script that calls this function).
 > - Use `builtin source` if you want to include the file even if it was already included.
 
+## yaml_parse
+
+Parses a YAML.
+
 > [!IMPORTANT]
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).

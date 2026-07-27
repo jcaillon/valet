@@ -211,14 +211,16 @@ Inputs:
 
   (defaults to 8)
 
-- `${completedCallback}` _as string_:
+- `${onCompletedFunction}` _as string_:
 
   (optional) The name of the function to call when a coproc is completed (successfully or not).
   The function will receive the following arguments:
+
   - $1 the coproc index
   - $2 the coproc exit code
   - $3 the percentage of coprocs already completed
   - $4 the path of the file containing the accumulated logs of the coproc (if redirectLogs is true)
+
   If the function sets REPLY to 1, the script will exit early. Otherwise it should set REPLY to 0.
   Set to an empty string to not call any callback function.
 
@@ -309,7 +311,6 @@ Inputs:
   The variable name to use for the coproc.
 
 Returns:
-
 - `${REPLY_CODE}`: The exit status of the coproc (or -1 if the coproc is not running).
 
 Example usage:
@@ -319,4 +320,4 @@ coproc::wait "myCoproc"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).

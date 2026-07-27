@@ -256,6 +256,7 @@ See @terminal::testWaitForKeyPress for an implementation example.
 
 This allows to use the `-e` option with the read command and receive events for special key press.
 
+
 This function should be called before using terminal::waitForKeyPress.
 
 You can call `terminal::restoreBindings` to restore the default bindings. However, this is not
@@ -421,6 +422,7 @@ Use `terminal::waitForKeyPress` if you need to listen to special keys.
 This simple implementation does not rely on GNU readline and does not require terminal options
 to be set using `terminal::setRawMode`.
 
+
 Inputs:
 
 - `$@`: read parameters _as any_:
@@ -488,4 +490,4 @@ terminal::waitForKeyPress -t 0.1
 >    and send a specific sequence of characters that you can bind in bash.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).

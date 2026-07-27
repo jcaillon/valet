@@ -1,8 +1,8 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).
 
-## ⚡ array::appendIfNotPresent
+## array::appendIfNotPresent
 
 Add a value to an array if it is not already present.
 Works for normal and associative arrays.
@@ -32,7 +32,7 @@ array::appendIfNotPresent myArray myValue
 printf '%s\n' "${myArray[@]}"
 ```
 
-## ⚡ array::contains
+## array::contains
 
 Check if a value is in an array.
 It uses pure bash.
@@ -59,7 +59,7 @@ declare myValue="b"
 if array::contains myArray myValue; then "b is in the array"; fi
 ```
 
-## ⚡ array::fuzzyFilterSort
+## array::fuzzyFilterSort
 
 Allows to fuzzy sort an array against a given searched string.
 Returns an array containing only the lines matching the searched string.
@@ -97,7 +97,7 @@ echo "${REPLY_ARRAY[*]}"
 > - Use `shopt -s nocasematch` to make this function is case insensitive.
 > - This function is not appropriate for large arrays (>10k elements), see `array::fuzzyFilterSortFileWithGrepAndGawk` for large arrays.
 
-## ⚡ array::makeArraysSameSize
+## array::makeArraysSameSize
 
 This function makes sure that all the arrays have the same size.
 It will add empty strings to the arrays that are too short.
@@ -114,7 +114,7 @@ Example usage:
 array::makeArraysSameSize "array1" "array2" "array3"
 ```
 
-## ⚡ array::remove
+## array::remove
 
 Remove a value from an array.
 Works for normal and associative arrays.
@@ -144,7 +144,7 @@ array::remove myArray myValue
 printf '%s\n' "${myArray[@]}"
 ```
 
-## ⚡ array::reverse
+## array::reverse
 
 Reverse an array.
 Will not work for associative arrays.
@@ -163,7 +163,7 @@ array::reverse myArray
 echo "${myArray[*]}"
 ```
 
-## ⚡ array::sort
+## array::sort
 
 Sorts an array using the > bash operator (lexicographic order).
 
@@ -185,7 +185,7 @@ echo "${myArray[*]}"
 > - The sorting is not stable (the order of equal elements is not preserved).
 > - It is not appropriate for large array, use the `sort` binary for such cases.
 
-## ⚡ array::sortWithCriteria
+## array::sortWithCriteria
 
 Sorts an array using multiple criteria.
 Excepts multiple arrays. The first array is the one to sort.
@@ -226,7 +226,7 @@ echo "${REPLY_ARRAY[@]}"
 > - The sorting is not stable (the order of equal elements is not preserved).
 > - It is not appropriate for large array, use the `sort` binary for such cases.
 
-## ⚡ assert::equals
+## assert::equals
 
 Assert that the two given values are equal.
 
@@ -246,7 +246,7 @@ Example usage:
 assert::equals "expected value" "actual value"
 ```
 
-## ⚡ assert::isDirectory
+## assert::isDirectory
 
 Assert that the given directory exists and is a directory.
 
@@ -262,7 +262,7 @@ Example usage:
 assert::isDirectory "/path/to/directory"
 ```
 
-## ⚡ assert::isFile
+## assert::isFile
 
 Assert that the given file exists and is a regular file.
 
@@ -278,7 +278,7 @@ Example usage:
 assert::isFile "/path/to/file"
 ```
 
-## ⚡ assert::isLink
+## assert::isLink
 
 Assert that the given path exists and is a symbolic link.
 
@@ -294,7 +294,7 @@ Example usage:
 assert::isLink "/path/to/link"
 ```
 
-## ⚡ assert::isPath
+## assert::isPath
 
 Assert that the given path exists (can be a file, directory, or link).
 
@@ -310,7 +310,7 @@ Example usage:
 assert::isPath "/path/to/file"
 ```
 
-## ⚡ bash::catchErrors
+## bash::catchErrors
 
 This function runs a command and will catch any error that occurs instead of failing the program.
 The execution will continue if an error occurs in the command, but each error will be stored for later processing.
@@ -342,7 +342,7 @@ fi
 > is still triggered and you can use trace level debugging to see the caught issues.
 > Additionally, it will report all the errors that occurred during the execution of the command.
 
-## ⚡ bash::countArgs
+## bash::countArgs
 
 Returns the number of arguments passed.
 
@@ -369,7 +369,7 @@ Example usage:
 bash::countArgs 1 2 3
 ```
 
-## ⚡ bash::getBuiltinOutput
+## bash::getBuiltinOutput
 
 Capture the output of a builtin command. Can be used on bash builtins that produce output.
 It captures the stdout and stderr of said command.
@@ -396,7 +396,7 @@ bash::getBuiltinOutput declare -f bash::getBuiltinOutput
 echo "${REPLY}"
 ```
 
-## ⚡ bash::injectCodeInFunction
+## bash::injectCodeInFunction
 
 This function injects code at the beginning or the end of a function and
 returns the modified function to be evaluated.
@@ -433,7 +433,7 @@ eval "${REPLY}"
 myFunction
 ```
 
-## ⚡ bash::isCommand
+## bash::isCommand
 
 Check if the given command exists.
 
@@ -457,7 +457,7 @@ if bash::isCommand "command1"; then
 fi
 ```
 
-## ⚡ bash::isFdValid
+## bash::isFdValid
 
 Check if the given file descriptor is valid.
 
@@ -481,7 +481,7 @@ if bash::isFdValid 1; then
 fi
 ```
 
-## ⚡ bash::isFunction
+## bash::isFunction
 
 Check if the given function exists.
 
@@ -505,7 +505,7 @@ if bash::isFunction "function1"; then
 fi
 ```
 
-## ⚡ bash::isMissingCommands
+## bash::isMissingCommands
 
 This function returns the list of not existing commands for the given names.
 
@@ -530,7 +530,7 @@ if bash::isMissingCommands "command1" "command2"; then
 fi
 ```
 
-## ⚡ bash::popd
+## bash::popd
 
 Change the current directory to the one on top of the directory stack and remove it from the stack.
 
@@ -543,7 +543,7 @@ Example usage:
 bash::popd
 ```
 
-## ⚡ bash::pushd
+## bash::pushd
 
 Change the current directory and push the old one to the directory stack.
 
@@ -562,7 +562,7 @@ Example usage:
 bash::pushd "/path/to/directory"
 ```
 
-## ⚡ bash::readStdIn
+## bash::readStdIn
 
 Read the content of the standard input.
 Will immediately return if the standard input is empty.
@@ -578,7 +578,7 @@ bash::readStdIn
 echo "${REPLY}"
 ```
 
-## ⚡ bash::restoreShellOption
+## bash::restoreShellOption
 
 Restores the given shell option to its original state (see `bash::setShellOption` or `bash::unsetShellOption`).
 
@@ -594,7 +594,7 @@ Example usage:
 bash::restoreShellOption nocasematch
 ```
 
-## ⚡ bash::runInSubshell
+## bash::runInSubshell
 
 This functions runs a command in a subshell.
 The command can fail and can trigger errors; it will be caught and this function will return
@@ -635,7 +635,7 @@ _OPTION_EXIT_ON_FAIL=true bash::runInSubshell myFunction
 > see <https://www.gnu.org/software/bash/manual/bash.html#index-trap> and
 > <https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1>.
 
-## ⚡ bash::setShellOption
+## bash::setShellOption
 
 Sets the given shell optional behavior if it is not already set.
 Allows to later use `bash::restoreShellOption` to restore the original state of the given shell option.
@@ -655,7 +655,7 @@ bash::setShellOption nocasematch
 > To set shell options, simply use `local -; set -/+ optionName` in functions (`local -` makes it local).
 > The builtin shopt cannot be scoped to a function (it is always global), this is why this function exists.
 
-## ⚡ bash::sleep
+## bash::sleep
 
 Sleep for the given amount of time.
 This is a pure bash replacement of sleep.
@@ -675,7 +675,7 @@ bash::sleep 1.5
 
 > The sleep command is not a built-in command in bash, but a separate executable. When you use sleep, you are creating a new process.
 
-## ⚡ bash::unsetShellOption
+## bash::unsetShellOption
 
 Unsets the given shell optional behavior if it is not already unset.
 Allows to later use `bash::restoreShellOption` to restore the original state of the given shell option.
@@ -695,7 +695,7 @@ bash::unsetShellOption nocasematch
 > To unset shell options, simply use `local -; set -/+ optionName` in functions (`local -` makes it local).
 > The builtin shopt cannot be scoped to a function (it is always global), this is why this function exists.
 
-## ⚡ benchmark::run
+## benchmark::run
 
 This function runs a benchmark on given functions.
 
@@ -735,7 +735,7 @@ benchmark::run baseline function1 function2
 benchmark::run baseline function1 function2 --- baselineTimeInSeconds=5 maxRuns=100
 ```
 
-## ⚡ command::checkParsedResults
+## command::checkParsedResults
 
 A convenience function to check the parsing results and fails with an error message if there are
 parsing errors.
@@ -752,12 +752,12 @@ Example usage:
 command::checkParsedResults
 ```
 
-## ⚡ command::parseArguments
+## command::parseArguments
 
 Parse the arguments and options of a function and return a string that can be evaluated to set the variables.
 This should be called from a command function for which you want to parse the arguments.
 
-See the documentation for more details on the parser: <https://jcaillon.github.io/valet/docs/new-commands/#implement-your-command>.
+See the documentation for more details on the parser: <https://jcaillon.github.io/valet/docs/new-commands/#-implement-your-command>.
 
 
 Inputs:
@@ -784,7 +784,7 @@ Example usage:
 command::parseArguments "$@"; eval "${REPLY}"
 ```
 
-## ⚡ command::showHelp
+## command::showHelp
 
 Show the help for the current function.
 This should be called directly from a command function for which you want to display the help text.
@@ -795,7 +795,7 @@ Example usage:
 command::showHelp
 ```
 
-## ⚡ command::sourceFunction
+## command::sourceFunction
 
 Source the file associated with a command function.
 This allows you to call a command function without having to source the file manually.
@@ -812,7 +812,7 @@ Example usage:
 command::sourceFunction "functionName"
 ```
 
-## ⚡ coproc::isRunning
+## coproc::isRunning
 
 This function checks if a coproc is running.
 
@@ -836,7 +836,7 @@ if coproc::isRunning "myCoproc"; then
 fi
 ```
 
-## ⚡ coproc::kill
+## coproc::kill
 
 This function kills a coproc.
 
@@ -852,7 +852,7 @@ Example usage:
 coproc::kill "myCoproc"
 ```
 
-## ⚡ coproc::receiveMessage
+## coproc::receiveMessage
 
 This function receives a message from a given coproc.
 It expects the message to end with a $'\0' character.
@@ -878,7 +878,7 @@ if coproc::receiveMessage "myCoproc"; then
 fi
 ```
 
-## ⚡ coproc::receiveMessageWithTimeOut
+## coproc::receiveMessageWithTimeOut
 
 This function receives a message from a given coproc.
 It expects the message to be placed after a $'\0' string and end with a $'\0' character.
@@ -910,7 +910,7 @@ if coproc::receiveMessageWithTimeOut "myCoproc" 0.05; then
 fi
 ```
 
-## ⚡ coproc::run
+## coproc::run
 
 This function runs commands in a coproc:
 
@@ -1000,7 +1000,7 @@ Example usage:
 waitForMainEnd=true coproc::run "_MY_COPROC" mainCommand loopCommand onMessageCommand
 ```
 
-## ⚡ coproc::runInParallel
+## coproc::runInParallel
 
 This function runs a list of commands in parallel with a maximum number of parallel coprocs.
 
@@ -1018,14 +1018,16 @@ Inputs:
 
   (defaults to 8)
 
-- `${completedCallback}` _as string_:
+- `${onCompletedFunction}` _as string_:
 
   (optional) The name of the function to call when a coproc is completed (successfully or not).
   The function will receive the following arguments:
+
   - $1 the coproc index
   - $2 the coproc exit code
   - $3 the percentage of coprocs already completed
   - $4 the path of the file containing the accumulated logs of the coproc (if redirectLogs is true)
+
   If the function sets REPLY to 1, the script will exit early. Otherwise it should set REPLY to 0.
   Set to an empty string to not call any callback function.
 
@@ -1075,7 +1077,7 @@ declare -a jobCommands=("sleep 1" "sleep 2" "sleep 3")
 coproc::runInParallel jobCommands maxParallelCoprocs=2
 ```
 
-## ⚡ coproc::sendMessage
+## coproc::sendMessage
 
 This function sends a message to a given coproc.
 The message will be sent with a $'\0' character at the end.
@@ -1105,7 +1107,7 @@ coproc::sendMessage "myCoproc" "Hello, coproc!"
 > This printf call can cause the whole shell to exit with code 141 if there is an issue with the coproc.
 > You will want to run this in a subshell to avoid exiting the main shell if your coproc is unstable.
 
-## ⚡ coproc::wait
+## coproc::wait
 
 This function waits for a coproc to finish.
 
@@ -1124,7 +1126,7 @@ Example usage:
 coproc::wait "myCoproc"
 ```
 
-## ⚡ core::createSavedFilePath
+## core::createSavedFilePath
 
 Returns the path to a new file stored in the user state directory under `saved-files`.
 Can be used to save the state of important temporary files generated during a program
@@ -1150,7 +1152,7 @@ core::createSavedFilePath suffix="my-file"
 printf '%s\n' "The file is ⌜${REPLY}⌝."
 ```
 
-## ⚡ core::dump
+## core::dump
 
 Dumps information about the current bash session into a new file.
 
@@ -1172,7 +1174,7 @@ Example usage:
 core::dump
 ```
 
-## ⚡ core::exit
+## core::exit
 
 Exits the program with the given exit code.
 
@@ -1200,7 +1202,7 @@ core::exit 0
 core::exit 0 silent=true
 ```
 
-## ⚡ core::fail
+## core::fail
 
 Displays an error message and then exit the program with error.
 
@@ -1223,7 +1225,7 @@ core::fail "This is an error message."
 core::fail "This is an error message." exitCode=255
 ```
 
-## ⚡ core::getConfigurationDirectory
+## core::getConfigurationDirectory
 
 Returns the path to the valet configuration directory.
 Creates it if missing.
@@ -1241,7 +1243,7 @@ local directory="${REPLY}"
 
 > The default configuration directory is `~/.config/valet`.
 
-## ⚡ core::getExtensionsDirectory
+## core::getExtensionsDirectory
 
 Returns the path to the user extensions directory.
 Creates it if missing.
@@ -1259,7 +1261,7 @@ local directory="${REPLY}"
 
 > The default extensions directory is `~/.valet.d`.
 
-## ⚡ core::getUserCacheDirectory
+## core::getUserCacheDirectory
 
 Returns the path to the valet local cache directory.
 Where user-specific non-essential (cached) data should be written (analogous to /var/cache).
@@ -1278,7 +1280,7 @@ local directory="${REPLY}"
 
 > The default cache directory is `~/.cache/valet`.
 
-## ⚡ core::getUserDataDirectory
+## core::getUserDataDirectory
 
 Returns the path to the valet local data directory.
 Where user-specific data files should be written (analogous to /usr/share).
@@ -1297,7 +1299,7 @@ local directory="${REPLY}"
 
 > The default data directory is `~/.local/share/valet`.
 
-## ⚡ core::getUserStateDirectory
+## core::getUserStateDirectory
 
 Returns the path to the valet local cache directory.
 Where user-specific state files should be written (analogous to /var/lib).
@@ -1317,7 +1319,7 @@ local directory="${REPLY}"
 
 > The default state directory is `~/.local/state/valet`.
 
-## ⚡ core::getVersion
+## core::getVersion
 
 Returns the version of Valet.
 
@@ -1332,7 +1334,7 @@ core::getVersion
 printf '%s\n' "The version of Valet is ⌜${REPLY}⌝."
 ```
 
-## ⚡ core::initSubshell
+## core::initSubshell
 
 Do the necessary initialization for a new subshell, ensuring coherent behavior:
 
@@ -1347,7 +1349,7 @@ Example usage:
 core::initSubshell
 ```
 
-## ⚡ core::parseFunctionOptions
+## core::parseFunctionOptions
 
 Parses the shell parameters passed as arguments and sets the REPLY variable to a string that can be
 evaluated to set the local variables required in the calling function.
@@ -1373,7 +1375,7 @@ eval "${REPLY}"
 # REPLY will be: local myOption="one"; set -- "${@:1:3}"
 ```
 
-## ⚡ curl::download
+## curl::download
 
 This function is a wrapper around curl to save a request result in a file.
 It allows you to check the http status code and return 1 if it is not acceptable.
@@ -1425,7 +1427,7 @@ curl::download https://example2.com -H "header: value" --- failOnError=true acce
 echo "The curl command ended with exit code ⌜${REPLY_CODE}⌝, the http return code was ⌜${REPLY2}⌝: ${REPLY}"
 ```
 
-## ⚡ curl::request
+## curl::request
 
 This function is a wrapper around curl to save the content of a request in a variable.
 It allows you to check the http status code and return 1 if it is not acceptable.
@@ -1470,7 +1472,7 @@ curl::request https://example.com -X POST -H 'Authorization: token' --- failOnEr
 echo "The curl command ended with exit code ⌜${REPLY_CODE}⌝, the http return code was ⌜${REPLY2}⌝: ${REPLY}"
 ```
 
-## ⚡ esc-codes::*
+## esc-codes::*
 
 ANSI codes for text attributes, colors, cursor control, and other common escape sequences.
 These codes can be used to format text in the terminal.
@@ -1506,7 +1508,7 @@ An interesting read: https://sw.kovidgoyal.net/kitty/keyboard-protocol/
 > While it could be very handy to define a function for each of these instructions,
 > it would also be slower to execute (function overhead + multiple printf calls).
 
-## ⚡ exe::invoke
+## exe::invoke
 
 This function call an executable with its optional arguments.
 
@@ -1650,7 +1652,7 @@ exe::invoke cat --- stdin="Hello World"
 > - On linux, it is slightly faster (but it might be slower if you don't have SSD?).
 > - On linux, you can use a tmpfs directory for massive gains over subshells.
 
-## ⚡ fs::cat
+## fs::cat
 
 Print the content of a file to stdout.
 This is a pure bash equivalent of cat.
@@ -1669,7 +1671,7 @@ fs::cat myFile
 
 > Also see log::printFile if you want to print a file for a user.
 
-## ⚡ fs::cleanTempFiles
+## fs::cleanTempFiles
 
 Removes all the temporary files and directories that were created by the
 `fs::createTempFile` and `fs::createTempDirectory` functions.
@@ -1680,7 +1682,7 @@ Example usage:
 fs::cleanTempFiles
 ```
 
-## ⚡ fs::createDirectoryIfNeeded
+## fs::createDirectoryIfNeeded
 
 Create the directory tree if needed.
 
@@ -1701,7 +1703,7 @@ fs::createDirectoryIfNeeded "/my/directory"
 echo "${REPLY}"
 ```
 
-## ⚡ fs::createFileIfNeeded
+## fs::createFileIfNeeded
 
 Make sure that the given file exists.
 Create the directory tree and the file if needed.
@@ -1723,7 +1725,7 @@ fs::createFileIfNeeded "myFile"
 echo "${REPLY}"
 ```
 
-## ⚡ fs::createLink
+## fs::createLink
 
 Create a soft or hard link (original ← link).
 
@@ -1766,7 +1768,7 @@ fs::createLink "/path/to/link" "/path/to/linked" hardlink=true force=true
 
 > The function uses the `ln` command.
 
-## ⚡ fs::createTempDirectory
+## fs::createTempDirectory
 
 Creates a temporary directory.
 
@@ -1793,7 +1795,7 @@ fs::createTempDirectory pathOnly=true
 > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
-## ⚡ fs::createTempFile
+## fs::createTempFile
 
 Creates a temporary file and return its path.
 
@@ -1820,7 +1822,7 @@ fs::createTempFile pathOnly=true
 > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
-## ⚡ fs::getAbsolutePath
+## fs::getAbsolutePath
 
 This function returns the absolute path of a path.
 Also normalizes the path (removing `..` and `.`),
@@ -1847,7 +1849,7 @@ echo "${REPLY}"
 > The `..` will be processed before following any symlinks, by removing
 > the immediate pathname component.
 
-## ⚡ fs::getCommandPath
+## fs::getCommandPath
 
 Get the absolute path of a command ().
 
@@ -1868,7 +1870,7 @@ fs::getCommandPath "command"
 echo "${REPLY}"
 ```
 
-## ⚡ fs::getFileLineCount
+## fs::getFileLineCount
 
 Get the number of lines in a file.
 
@@ -1891,7 +1893,7 @@ echo "${REPLY}"
 
 TODO: fails to count the last line if empty
 
-## ⚡ fs::getPwdRealPath
+## fs::getPwdRealPath
 
 Get the real path of the current directory.
 By default, the `${PWD}` variable is the logical path, which may contain symlinks.
@@ -1909,7 +1911,7 @@ Returns:
 
 > This is a pure bash alternative to `realpath` or `readlink` for directories.
 
-## ⚡ fs::getRealPath
+## fs::getRealPath
 
 Get the real path of a path, following symlinks.
 Returns the absolute path.
@@ -1934,7 +1936,7 @@ echo "${REPLY}"
 > This is a pure bash alternative to `realpath` or `readlink` only for directories.
 > To resolve files, it uses one of these two external tools.
 
-## ⚡ fs::getScriptDirectory
+## fs::getScriptDirectory
 
 This function returns the absolute path of the directory of the script that called it.
 
@@ -1949,7 +1951,7 @@ fs::getScriptDirectory
 echo "${REPLY}"
 ```
 
-## ⚡ fs::head
+## fs::head
 
 Print the first lines of a file to stdout.
 This is a pure bash equivalent of head.
@@ -1980,7 +1982,7 @@ fs::head myFile 10 toArray=true
 
 > #TODO: faster with mapfile + quantum?
 
-## ⚡ fs::isDirectoryWritable
+## fs::isDirectoryWritable
 
 Check if the directory is writable. Creates the directory if it does not exist.
 
@@ -2010,7 +2012,7 @@ if fs::isDirectoryWritable "/path/to/directory"; then
 fi
 ```
 
-## ⚡ fs::isValidLink
+## fs::isValidLink
 
 Check if the linked path is a valid link to the target.
 
@@ -2044,7 +2046,7 @@ if fs::isValidLink "/path/to/link" "/path/to/linked"; then
 fi
 ```
 
-## ⚡ fs::listDirectories
+## fs::listDirectories
 
 List all the directories in the given directory.
 
@@ -2095,7 +2097,7 @@ for path in "${REPLY_ARRAY[@]}"; do
 done
 ```
 
-## ⚡ fs::listFiles
+## fs::listFiles
 
 List all the files in the given directory.
 
@@ -2146,7 +2148,7 @@ for path in "${REPLY_ARRAY[@]}"; do
 done
 ```
 
-## ⚡ fs::listPaths
+## fs::listPaths
 
 List all the paths in the given directory.
 
@@ -2202,7 +2204,7 @@ done
 > - #TODO: introduce an optional (with default 10k) parameter to limit the number of results to avoid looping for too long
 > - #TODO: introduce an optional parameter for max depth for recursive listing
 
-## ⚡ fs::readFile
+## fs::readFile
 
 Reads the content of a file and returns it in the global variable REPLY.
 Uses pure bash.
@@ -2234,7 +2236,7 @@ fs::readFile /path/to/file maxCharacters=100
 echo "${REPLY}"
 ```
 
-## ⚡ fs::tail
+## fs::tail
 
 Print the last lines of a file to stdout.
 This is a pure bash equivalent of tail.
@@ -2265,7 +2267,7 @@ fs::tail myFile 10
 
 > #TODO: use mapfile quantum to not have to read the whole file in a single go.
 
-## ⚡ include
+## include
 
 Allows to include multiple library files.
 
@@ -2284,7 +2286,7 @@ Example usage:
 include string array ./my/path
 ```
 
-## ⚡ interactive::confirm
+## interactive::confirm
 
 Ask the user to yes or no.
 
@@ -2319,7 +2321,7 @@ Example usage:
 if interactive::confirm "Do you want to continue?"; then echo "Yes."; else echo "No."; fi
 ```
 
-## ⚡ interactive::confirmRaw
+## interactive::confirmRaw
 
 Ask the user to yes or no.
 
@@ -2350,7 +2352,7 @@ Example usage:
 interactive::confirmRaw "Do you want to continue?" && local answer="${REPLY}"
 ```
 
-## ⚡ interactive::continue
+## interactive::continue
 
 Ask the user to press the button to continue.
 
@@ -2372,7 +2374,7 @@ Example usage:
 interactive::continue "Press enter to continue."
 ```
 
-## ⚡ interactive::continueRaw
+## interactive::continueRaw
 
 Ask the user to press the button to continue.
 
@@ -2390,7 +2392,7 @@ Example usage:
 interactive::continueRaw
 ```
 
-## ⚡ interactive::displayAnswer
+## interactive::displayAnswer
 
 Displays an answer to a previous question.
 
@@ -2420,7 +2422,7 @@ Example usage:
 interactive::displayAnswer "My answer."
 ```
 
-## ⚡ interactive::displayQuestion
+## interactive::displayQuestion
 
 Displays a question to the user.
 
@@ -2450,12 +2452,12 @@ Example usage:
 interactive::displayPrompt "Do you want to continue?"
 ```
 
-## ⚡ list::onTick
+## list::onTick
 
 This function must be called regularly (on refresh tick) and is responsible for redrawing the list if necessary.
 
 
-## ⚡ list::setItems
+## list::setItems
 
 Set up the list of items to display.
 
@@ -2465,7 +2467,7 @@ Inputs:
 
   The name of the array that contains the items to display.
 
-## ⚡ log::debug
+## log::debug
 
 Displays a debug message.
 
@@ -2481,7 +2483,7 @@ Example usage:
 log::debug "This is a debug message."
 ```
 
-## ⚡ log::error
+## log::error
 
 Displays an error message.
 
@@ -2499,7 +2501,7 @@ log::error "This is an error message."
 
 > You probably want to exit immediately after an error and should consider using core::fail function instead.
 
-## ⚡ log::errorTrace
+## log::errorTrace
 
 Displays an error trace message.
 This is a trace message that is always displayed, independently of the log level.
@@ -2517,7 +2519,7 @@ Example usage:
 log::errorTrace "This is a debug message."
 ```
 
-## ⚡ log::getCallStack
+## log::getCallStack
 
 This function returns the current function stack.
 
@@ -2557,7 +2559,7 @@ log::getCallStack stackToSkip=2 stackToSkipAtEnd=1 wrapWidth=80
 > For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`
 > variables to simulate a call stack.
 
-## ⚡ log::getLevel
+## log::getLevel
 
 Get the current log level.
 
@@ -2572,7 +2574,7 @@ log::getLevel
 printf '%s\n' "The log level is ⌜${REPLY}⌝."
 ```
 
-## ⚡ log::info
+## log::info
 
 Displays an info message.
 
@@ -2588,7 +2590,7 @@ Example usage:
 log::info "This is an info message."
 ```
 
-## ⚡ log::isDebugEnabled
+## log::isDebugEnabled
 
 Check if the debug mode is enabled.
 
@@ -2604,7 +2606,7 @@ Example usage:
 if log::isDebugEnabled; then printf '%s\n' "Debug mode is active."; fi
 ```
 
-## ⚡ log::isTraceEnabled
+## log::isTraceEnabled
 
 Check if the trace mode is enabled.
 
@@ -2620,7 +2622,7 @@ Example usage:
 if log::isTraceEnabled; then printf '%s\n' "Debug mode is active."; fi
 ```
 
-## ⚡ log::printCallStack
+## log::printCallStack
 
 This function prints the current function stack in the logs.
 
@@ -2649,7 +2651,7 @@ log::printCallStack stackToSkip=0
 > For test purposes, you can set the `GLOBAL_MOCK_STACK_FUNCTION_NAMES`, `GLOBAL_MOCK_STACK_SOURCE_FILES` and `GLOBAL_MOCK_STACK_LINE_NUMBERS`
 > variables to simulate a call stack.
 
-## ⚡ log::printFile
+## log::printFile
 
 Display a file content with line numbers in the logs.
 The file content will be aligned with the current log output and hard wrapped if necessary.
@@ -2673,7 +2675,7 @@ log::printFile "/my/file/path"
 log::printFile "/my/file/path" maxLines=10
 ```
 
-## ⚡ log::printFileString
+## log::printFileString
 
 Display a file content with line numbers in the logs.
 The file content will be aligned with the current log output and hard wrapped if necessary.
@@ -2699,7 +2701,7 @@ log::printFileString "myvar" maxLines=10
 
 > This function is not at all suited for large strings, print the content to a file instead.
 
-## ⚡ log::printRaw
+## log::printRaw
 
 Display something in the log stream.
 Does not check the log level.
@@ -2716,7 +2718,7 @@ Example usage:
 log::printRaw "my line"
 ```
 
-## ⚡ log::printString
+## log::printString
 
 Display a string in the log.
 The string will be aligned with the current log output and hard wrapped if necessary.
@@ -2741,7 +2743,7 @@ log::printString "my line"
 log::printString "my line" newLinePadString="  "
 ```
 
-## ⚡ log::saveFile
+## log::saveFile
 
 Save the given file by copying it to a new file in the user local state directory
 (using `core::createSavedFilePath`).
@@ -2775,7 +2777,7 @@ Example usage:
 log::saveFile "/my/file/path" "suffix" "important result file"
 ```
 
-## ⚡ log::saveFileString
+## log::saveFileString
 
 Save the given string to a new file in the user local state directory
 (using `core::createSavedFilePath`).
@@ -2809,7 +2811,7 @@ Example usage:
 log::saveFileString "my content" "suffix" "important result file"
 ```
 
-## ⚡ log::setLevel
+## log::setLevel
 
 Set the log level.
 
@@ -2838,7 +2840,7 @@ log::setLevel debug
 log::setLevel debug silent=true
 ```
 
-## ⚡ log::success
+## log::success
 
 Displays a success message.
 
@@ -2854,7 +2856,7 @@ Example usage:
 log::success "This is a success message."
 ```
 
-## ⚡ log::trace
+## log::trace
 
 Displays a trace message.
 
@@ -2870,7 +2872,7 @@ Example usage:
 log::trace "This is a trace message."
 ```
 
-## ⚡ log::warning
+## log::warning
 
 Displays a warning.
 
@@ -2886,7 +2888,7 @@ Example usage:
 log::warning "This is a warning message."
 ```
 
-## ⚡ profiler::disable
+## profiler::disable
 
 Disable the profiler if previously activated with profiler::enable.
 
@@ -2896,7 +2898,7 @@ Example usage:
 profiler::disable
 ```
 
-## ⚡ profiler::enable
+## profiler::enable
 
 Enables the profiler and start writing to the given file.
 The profiler will also be active in subshells of this current shell.
@@ -2915,7 +2917,7 @@ profiler::enable "${HOME}/valet-profiler-${BASHPID}.txt"
 
 > There can be only one profiler active at a time.
 
-## ⚡ profiler::pause
+## profiler::pause
 
 Pause the profiler if previously activated with profiler::enable.
 
@@ -2925,7 +2927,7 @@ Example usage:
 profiler::pause
 ```
 
-## ⚡ profiler::resume
+## profiler::resume
 
 Resume the profiler if previously paused with profiler::pause.
 
@@ -2935,7 +2937,7 @@ Example usage:
 profiler::resume
 ```
 
-## ⚡ progress::start
+## progress::start
 
 Shows a spinner / progress animation with configurable output including a progress bar.
 
@@ -3031,7 +3033,7 @@ progress::stop
 > Important: all progress functions will only work if called from the same shell
 > that started the progress bar.
 
-## ⚡ progress::stop
+## progress::stop
 
 Stop the progress bar.
 
@@ -3041,7 +3043,7 @@ Example usage:
 progress::stop
 ```
 
-## ⚡ progress::update
+## progress::update
 
 Update the progress bar with a new percentage and message.
 
@@ -3068,7 +3070,7 @@ Example usage:
 progress::update percent=50 message="Doing something..."
 ```
 
-## ⚡ regex::escapeRegexSpecialChars
+## regex::escapeRegexSpecialChars
 
 Escapes special characters in a string to be used as a regex.
 
@@ -3089,7 +3091,7 @@ regex::escapeRegexSpecialChars "a.(b)"
 echo "${REPLY}"
 ```
 
-## ⚡ regex::getFirstGroup
+## regex::getFirstGroup
 
 Matches a string against a regex and returns the first captured group of the first match.
 
@@ -3118,7 +3120,7 @@ echo "${REPLY}"
 
 > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
-## ⚡ regex::getFuzzySearchRegexFromSearchString
+## regex::getFuzzySearchRegexFromSearchString
 
 Allows to get a regex that can be used to fuzzy search a string.
 the -> '([^t]*)(t[^h]*h[^e]*e)'
@@ -3140,7 +3142,7 @@ regex::getFuzzySearchRegexFromSearchString SEARCH_STRING
 echo "${_STRING_FUZZY_FILTER_REGEX}"
 ```
 
-## ⚡ regex::getMatches
+## regex::getMatches
 
 Returns an array containing all the matched for a regex in a string.
 
@@ -3189,7 +3191,7 @@ done
 
 > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
-## ⚡ regex::replace
+## regex::replace
 
 Replaces strings within a string using a regex (replaces in place).
 
@@ -3235,7 +3237,7 @@ echo "${MY_STRING}"
 
 > Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
-## ⚡ sfzf::show
+## sfzf::show
 
 Displays a menu where the user can search and select an item.
 The menu is displayed in full screen.
@@ -3254,7 +3256,7 @@ Inputs:
 
   (defaults to "Select an item:")
 
-- `${itemDetailsCallback}` _as string_:
+- `${returnItemDetailsFunction}` _as string_:
 
   (optional) The function to call when an item is selected
   this parameter can be left empty to hide the preview right pane;
@@ -3289,7 +3291,7 @@ sfzf::show "What's your favorite color?" SELECTION_ARRAY
 log::info "You selected: ⌜${REPLY}⌝ (index: ⌜${REPLY2}⌝)"
 ```
 
-## ⚡ source
+## source
 
 Allows to source/include a library file or sources a file.
 
@@ -3334,7 +3336,7 @@ _OPTION_CONTINUE_IF_NOT_FOUND=false _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 so
 > - The file can be relative to the current script (script that calls this function).
 > - Use `builtin source` if you want to include the file even if it was already included.
 
-## ⚡ string::count
+## string::count
 
 Counts the number of occurrences of a substring in a string.
 
@@ -3362,7 +3364,7 @@ echo "${REPLY}"
 
 > This is faster than looping over the string and check the substring.
 
-## ⚡ string::doForEachLine
+## string::doForEachLine
 
 Execute a callback function for each item (e.g. line) of a string.
 The string is split using a separator (default to a new line) and
@@ -3383,8 +3385,6 @@ Inputs:
 
   The function must return 0 if we should continue to the next line, 1 otherwise.
 
-  (defaults to "")
-
 - `${separator}` _as string_:
 
   (optional) The separator character to use.
@@ -3401,7 +3401,7 @@ string::doForEachLine myString myCallback
 > newlines (which is not the case with a "for loop" using parameter expansion and IFS=$'\n').
 > Here string is significantly slower than using this.
 
-## ⚡ string::expandVariables
+## string::expandVariables
 
 Expand variables in a string.
 The replacement is done in place, for the given variable.
@@ -3430,7 +3430,7 @@ string::expandVariables MY_STRING
 echo "${MY_STRING}"
 ```
 
-## ⚡ string::extractBetween
+## string::extractBetween
 
 Extract the text between two strings within a string.
 Search for the first occurrence of the start string and the first occurrence
@@ -3466,7 +3466,7 @@ string::extractBetween MY_STRING "is a " " text"
 local extractedText="${REPLY}"
 ```
 
-## ⚡ string::getCamelCase
+## string::getCamelCase
 
 This function convert a SNAKE_CASE or kebab-case string to a camelCase string.
 
@@ -3488,7 +3488,7 @@ string::getCamelCase MY_STRING
 echo "${REPLY}"
 ```
 
-## ⚡ string::getField
+## string::getField
 
 Allows to get the nth element of a string separated by a given separator.
 This is the equivalent of the cut command "cut -d"${separator}" -f"${fieldNumber}""
@@ -3527,7 +3527,7 @@ echo "${REPLY}"
 > - using read into an array from a here string
 > - using bash parameter expansion to remove before/after the separator
 
-## ⚡ string::getFormattedHeader
+## string::getFormattedHeader
 
 Get a formatted header string with a given width.
 The header is composed of a left/middle/right part(s).
@@ -3596,7 +3596,7 @@ string::getFormattedHeader "Left|Middle|Right" width=50 paddingChar="-" paddingS
 echo "${REPLY}"
 ```
 
-## ⚡ string::getHexRepresentation
+## string::getHexRepresentation
 
 Convert a string to its hexadecimal representation.
 
@@ -3618,7 +3618,7 @@ string::getHexRepresentation MY_STRING
 echo "${REPLY}"
 ```
 
-## ⚡ string::getIndexOf
+## string::getIndexOf
 
 Find the first index of a string within another string.
 
@@ -3651,7 +3651,7 @@ string::getIndexOf MY_STRING "long"
 echo "${REPLY}"
 ```
 
-## ⚡ string::getKebabCase
+## string::getKebabCase
 
 This function convert a camelCase, PascalCase or SNAKE_CASE string to a kebab-case string.
 Removes all leading/trailing dashes.
@@ -3674,7 +3674,7 @@ string::getKebabCase MY_STRING
 echo "${REPLY}"
 ```
 
-## ⚡ string::getSnakeCase
+## string::getSnakeCase
 
 This function convert a camelCase, PascalCase or kebab-case string to a SNAKE_CASE string.
 Removes all leading/trailing underscores.
@@ -3697,7 +3697,7 @@ string::getSnakeCase MY_STRING
 echo "${REPLY}"
 ```
 
-## ⚡ string::head
+## string::head
 
 Get the first nth items (e.g. lines) of a string.
 
@@ -3729,7 +3729,7 @@ string::head MY_STRING 2
 echo "${REPLY}"
 ```
 
-## ⚡ string::highlight
+## string::highlight
 
 Highlight characters in a string.
 
@@ -3771,7 +3771,7 @@ echo "${REPLY}"
 > - All characters to highlight must be found in the same order in the matched line.
 > - This functions is case insensitive.
 
-## ⚡ string::join
+## string::join
 
 Join an array of strings into a single string using a separator.
 
@@ -3798,7 +3798,7 @@ string::join MY_ARRAY separator=","
 echo "${REPLY}"
 ```
 
-## ⚡ string::numberToUniqueId
+## string::numberToUniqueId
 
 Converts a number into a unique and human readable string of the same length.
 
@@ -3819,7 +3819,7 @@ string::numberToUniqueId 12345
 echo "${REPLY}"
 ```
 
-## ⚡ string::removeTextFormatting
+## string::removeTextFormatting
 
 Removes all text formatting from the given string.
 This includes colors, bold, underline, etc.
@@ -3837,7 +3837,7 @@ string::removeTextFormatting "myText"
 echo "${myText}"
 ```
 
-## ⚡ string::split
+## string::split
 
 Split a string into an array using a separator.
 
@@ -3865,7 +3865,7 @@ ARRAY=("${REPLY_ARRAY[@]}")
 
 > This is faster than using read into an array from a here string.
 
-## ⚡ string::trimAll
+## string::trimAll
 
 Trim all whitespaces and truncate spaces.
 The replacement is done in place, for the given variable.
@@ -3884,7 +3884,7 @@ string::trimAll MY_STRING
 echo "${MY_STRING}"
 ```
 
-## ⚡ string::trimEdges
+## string::trimEdges
 
 Trim leading and trailing characters (defaults to whitespaces).
 The replacement is done in place, for the given variable.
@@ -3909,7 +3909,7 @@ string::trimEdges MY_STRING
 echo "${MY_STRING}"
 ```
 
-## ⚡ string::truncateWithEllipsis
+## string::truncateWithEllipsis
 
 Truncate a string to a given length and add an ellipsis if truncated.
 This function takes into account invisible characters (ANSI escape codes for text formatting).
@@ -3944,7 +3944,7 @@ string::truncateWithEllipsis MY_STRING maxLength=20
 echo "${REPLY}"
 ```
 
-## ⚡ string::wrapCharacters
+## string::wrapCharacters
 
 Allows to hard wrap the given string at the given width.
 Wrapping is done at character boundaries, see string::warpText for word wrapping.
@@ -3994,7 +3994,7 @@ echo "${REPLY}"
 > - It considers escape sequence for text formatting and does not count them as visible characters.
 > - Leading spaces after a newly wrapped line are removed.
 
-## ⚡ string::wrapWords
+## string::wrapWords
 
 Allows to soft wrap the given text at the given width.
 Wrapping is done at word boundaries.
@@ -4043,7 +4043,7 @@ echo "${REPLY}"
 > - This function effectively trims all the extra spaces in the text (leading, trailing but also in the middle).
 > - It considers escape sequence for text formatting and does not count them as visible characters.
 
-## ⚡ system::addToPath
+## system::addToPath
 
 Add the given path to the PATH environment variable for various shells,
 by adding the appropriate export command to the appropriate file.
@@ -4062,7 +4062,7 @@ Example usage:
 system::addToPath "/path/to/bin"
 ```
 
-## ⚡ system::getArchitecture
+## system::getArchitecture
 
 Returns the CPU architecture of the current machine.
 
@@ -4077,7 +4077,7 @@ system::getArchitecture
 local architecture="${REPLY}"
 ```
 
-## ⚡ system::getEnvVars
+## system::getEnvVars
 
 Get the list of all the environment variables.
 In pure bash, no need for env or printenv.
@@ -4095,7 +4095,7 @@ for var in "${REPLY_ARRAY[@]}"; do
 done
 ```
 
-## ⚡ system::getOs
+## system::getOs
 
 Returns the name of the current OS.
 
@@ -4110,7 +4110,7 @@ system::getOs
 local osName="${REPLY}"
 ```
 
-## ⚡ system::isDarwin
+## system::isDarwin
 
 Check if the current OS is macOS.
 
@@ -4128,7 +4128,7 @@ if system::isDarwin; then
 fi
 ```
 
-## ⚡ system::isLinux
+## system::isLinux
 
 Check if the current OS is Linux.
 
@@ -4146,7 +4146,7 @@ if system::isLinux; then
 fi
 ```
 
-## ⚡ system::isRoot
+## system::isRoot
 
 Check if the script is running as root.
 
@@ -4164,7 +4164,7 @@ if system::isRoot; then
 fi
 ```
 
-## ⚡ system::isWindows
+## system::isWindows
 
 Check if the current OS is Windows.
 
@@ -4182,7 +4182,7 @@ if system::isWindows; then
 fi
 ```
 
-## ⚡ system::isWindowsWithoutNativeSymlinks
+## system::isWindowsWithoutNativeSymlinks
 
 Check if the current system is Windows and does not support native symbolic links (i.e. does not have developer mode enabled).
 
@@ -4200,7 +4200,7 @@ if system::isWindowsWithoutNativeSymlinks; then
 fi
 ```
 
-## ⚡ terminal::clearBox
+## terminal::clearBox
 
 Clear a "box" in the terminal.
 Will return the cursor at the current position at the end (using GLOBAL_CURSOR_LINE and GLOBAL_CURSOR_COLUMN).
@@ -4238,7 +4238,7 @@ terminal::getCursorPosition
 terminal::clearBox top=1 left=1 width=10 height=5
 ```
 
-## ⚡ terminal::clearKeyPressed
+## terminal::clearKeyPressed
 
 This function reads all the inputs from the user, effectively discarding them.
 
@@ -4254,7 +4254,7 @@ Example usage:
 terminal::clearKeyPressed
 ```
 
-## ⚡ terminal::createSpace
+## terminal::createSpace
 
 This function creates empty lines from the current cursor position.
 Then it moves back to its original line (at the column 1).
@@ -4276,7 +4276,7 @@ Example usage:
 terminal::createSpace 5
 ```
 
-## ⚡ terminal::getBestAutocompleteBox
+## terminal::getBestAutocompleteBox
 
 This function returns the best position and size for an autocomplete box that would open
 at the given position.
@@ -4359,7 +4359,7 @@ Example usage:
 terminal::getBestAutocompleteBox top=1 left=1 desiredHeight=10 desiredWidth=5
 ```
 
-## ⚡ terminal::getCursorPosition
+## terminal::getCursorPosition
 
 Get the current cursor position.
 
@@ -4374,7 +4374,7 @@ Example usage:
 terminal::getCursorPosition
 ```
 
-## ⚡ terminal::getTerminalSize
+## terminal::getTerminalSize
 
 This function exports the terminal size.
 
@@ -4390,7 +4390,7 @@ terminal::getTerminalSize
 printf '%s\n' "The terminal has ⌜${GLOBAL_COLUMNS}⌝ columns and ⌜${GLOBAL_LINES}⌝ lines."
 ```
 
-## ⚡ terminal::isCursorInBox
+## terminal::isCursorInBox
 
 Check if the cursor is inside a given box.
 
@@ -4444,7 +4444,7 @@ else
 fi
 ```
 
-## ⚡ terminal::rebindKeymap
+## terminal::rebindKeymap
 
 Rebinds all special keys to call a given callback function.
 See @terminal::testWaitForKeyPress for an implementation example.
@@ -4478,7 +4478,7 @@ terminal::rebindKeymap
 > of characters that you can bind in bash.
 > `showkey -a` is a good program to see the sequence of characters sent by the terminal.
 
-## ⚡ terminal::rerouteLogs
+## terminal::rerouteLogs
 
 Reroute the logs to a temporary file.
 The logs will be displayed when calling `terminal::restoreLogs`
@@ -4489,7 +4489,7 @@ Example usage:
 terminal::rerouteLogs
 ```
 
-## ⚡ terminal::restoreBindings
+## terminal::restoreBindings
 
 Reset the key bindings to the default ones.
 To be called after `terminal::rebindKeymap`.
@@ -4500,7 +4500,7 @@ Example usage:
 terminal::restoreBindings
 ```
 
-## ⚡ terminal::restoreInterruptTrap
+## terminal::restoreInterruptTrap
 
 Restore the original trap for the interrupt signal (SIGINT).
 To be called after terminal::setInterruptTrap.
@@ -4511,7 +4511,7 @@ Example usage:
 terminal::restoreInterruptTrap
 ```
 
-## ⚡ terminal::restoreLogs
+## terminal::restoreLogs
 
 Restore the logs to their original state.
 Should be called after `terminal::rerouteLogs` and at the end of an interactive session.
@@ -4522,7 +4522,7 @@ Example usage:
 terminal::restoreLogs
 ```
 
-## ⚡ terminal::restoreSettings
+## terminal::restoreSettings
 
 Restore the terminal options to their original state.
 Should be called after `terminal::setRawMode`.
@@ -4536,7 +4536,7 @@ Inputs:
 
   (defaults to false)
 
-## ⚡ terminal::saveSettings
+## terminal::saveSettings
 
 Save the current terminal options (`stty -g`) so they can be restored later.
 Call `terminal::restoreSettings` to restore the original settings.
@@ -4547,7 +4547,7 @@ Example usage:
 terminal::saveSettings
 ```
 
-## ⚡ terminal::setRawMode
+## terminal::setRawMode
 
 Put the terminal in "raw" mode.
 Set options to enable a satisfying and consistent behavior for the GNU readline library.
@@ -4559,7 +4559,7 @@ Example usage:
 terminal::setRawMode
 ```
 
-## ⚡ terminal::switchBackFromFullScreen
+## terminal::switchBackFromFullScreen
 
 Call this function to switch back from the full screen mode.
 
@@ -4572,7 +4572,7 @@ Example usage:
 terminal::switchBackFromFullScreen
 ```
 
-## ⚡ terminal::switchToFullScreen
+## terminal::switchToFullScreen
 
 Call this function to start an interactive session in full screen mode.
 This function will switch to the alternate screen, hide the cursor and clear the screen.
@@ -4585,7 +4585,7 @@ Example usage:
 terminal::switchToFullScreen
 ```
 
-## ⚡ terminal::testWaitForChar
+## terminal::testWaitForChar
 
 Wait for the user to send a character to stdin (i.e. wait for a key press)
 and prints the character that bash reads.
@@ -4601,7 +4601,7 @@ Example usage:
 terminal::testWaitForChar
 ```
 
-## ⚡ terminal::waitForChar
+## terminal::waitForChar
 
 Wait for a user input (single char).
 You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
@@ -4640,7 +4640,7 @@ terminal::waitForChar -t 0.1
 
 > <https://en.wikipedia.org/wiki/ANSI_escape_code#Terminal_input_sequences>
 
-## ⚡ terminal::waitForKeyPress
+## terminal::waitForKeyPress
 
 Wait for a key press (single key).
 You can pass additional parameters to the read command (e.g. to wait for a set amount of time).
@@ -4684,7 +4684,7 @@ terminal::waitForKeyPress -t 0.1
 >    For advanced key combinations, you will need to use a terminal that allows to remap such keys
 >    and send a specific sequence of characters that you can bind in bash.
 
-## ⚡ test::addOutputScrubber
+## test::addOutputScrubber
 
 Add a scrubber function to modify the flushed text (both stdout and stderr) before adding it to the report.
 
@@ -4706,7 +4706,7 @@ Example usage:
 test::addOutputScrubber myScrubberFunction
 ```
 
-## ⚡ test::addReplyVarsScrubber
+## test::addReplyVarsScrubber
 
 Add a scrubber function to modify the REPLY variables before printing them in the report.
 
@@ -4727,7 +4727,7 @@ Example usage:
 test::addReplyVarsScrubber myScrubberFunction
 ```
 
-## ⚡ test::cat
+## test::cat
 
 Print the content of a file in a consistent way for testing.
 It will also print the file path before the content.
@@ -4744,7 +4744,7 @@ Example usage:
 test::cat "/path/to/file"
 ```
 
-## ⚡ test::clearOutputScrubbers
+## test::clearOutputScrubbers
 
 Clear the list of scrubbers to modify the flushed text (both stdout and stderr) before adding it to the report.
 
@@ -4754,7 +4754,7 @@ Example usage:
 test::clearOutputScrubbers
 ```
 
-## ⚡ test::clearReplyVarsScrubbers
+## test::clearReplyVarsScrubbers
 
 Clear the list of scrubbers to modify the REPLY variables before printing them in the report.
 
@@ -4764,7 +4764,7 @@ Example usage:
 test::clearReplyVarsScrubbers
 ```
 
-## ⚡ test::exec
+## test::exec
 
 Call this function to execute a command and write the command and its output to the report file.
 The command can fail, in which case the returned exit code is written to the report file.
@@ -4786,7 +4786,7 @@ test::exec echo "Hello, world!"
 test::exec command "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
-## ⚡ test::exit
+## test::exit
 
 Call this function to execute a command that can call `exit` and write the command and its output to the report file.
 The command is executed in a subshell to catch the exit.
@@ -4807,7 +4807,7 @@ test::exit exit 3
 test::exit core::fail "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
-## ⚡ test::fail
+## test::fail
 
 Call this function to log a message and exit with the status 142.
 This should be used to purposefully throw a test failure.
@@ -4826,7 +4826,7 @@ Example usage:
 test::fail "This is a failure message with a clear reason."
 ```
 
-## ⚡ test::flush
+## test::flush
 
 Call this function to flush the standard and error outputs to the report file.
 They will be added as code blocks in the report file (one for the standard
@@ -4838,7 +4838,7 @@ Example usage:
 test::flush
 ```
 
-## ⚡ test::flushStderr
+## test::flushStderr
 
 Call this function to flush the standard error to the report file.
 It will be added as a code block in the report file.
@@ -4857,7 +4857,7 @@ Example usage:
 test::flushStderr
 ```
 
-## ⚡ test::flushStdout
+## test::flushStdout
 
 Call this function to flush the standard output to the report file.
 It will be added as a code block in the report file.
@@ -4876,7 +4876,7 @@ Example usage:
 test::flushStdout
 ```
 
-## ⚡ test::func
+## test::func
 
 Call this function to test a function that returns a value using the valet
 conventions (REPLY, REPLY2, REPLY_ARRAY, etc...).
@@ -4900,7 +4900,7 @@ test::func myFunction
 test::func myFunction "'string arguments with special < characters >'" '"${MY_VAR}"'
 ```
 
-## ⚡ test::listPaths
+## test::listPaths
 
 Print the content of a directory in a consistent way for testing, by sorting the entries
 and printing the type of each entry (file, directory or link).
@@ -4929,7 +4929,7 @@ Example usage:
 test::listPaths "/path/to/directory" recursive=true includeHidden=true
 ```
 
-## ⚡ test::log
+## test::log
 
 Call this function to log a message during a test.
 This log will only show in case of a script error or when the debug
@@ -4947,7 +4947,7 @@ Example usage:
 test::log "This is a log message."
 ```
 
-## ⚡ test::markdown
+## test::markdown
 
 Call this function to add some markdown in the report file.
 
@@ -4963,7 +4963,7 @@ Example usage:
 test::markdown "> This is a **quote**."
 ```
 
-## ⚡ test::printReplyVars
+## test::printReplyVars
 
 This function can be called to print the REPLY values,
 e.g. REPLY, REPLY2, REPLY_ARRAY...
@@ -4975,7 +4975,7 @@ Example usage:
 test::printReplyVars
 ```
 
-## ⚡ test::printVars
+## test::printVars
 
 This function can be called to print the global variables in the report file.
 They will printed in a code block in the report file.
@@ -4992,7 +4992,7 @@ Example usage:
 test::printVars myVar
 ```
 
-## ⚡ test::prompt
+## test::prompt
 
 Call this function to print a 'prompt' (markdown that looks like a prompt) in the report file.
 
@@ -5008,7 +5008,7 @@ Example usage:
 test::prompt "echo 'Hello, world!'"
 ```
 
-## ⚡ test::resetReplyVars
+## test::resetReplyVars
 
 Resets the value of each REPLY variable.
 
@@ -5018,7 +5018,7 @@ Example usage:
 test::resetReplyVars
 ```
 
-## ⚡ test::setTerminalInputs
+## test::setTerminalInputs
 
 Replaces the functions `terminal::waitForChar` and `terminal::waitForKeyPress` by custom functions
 that return keys defined as an input of this function.
@@ -5036,7 +5036,7 @@ Example usage:
 test::setTerminalInputs "a" "b" "c"
 ```
 
-## ⚡ test::setupBashForConsistency
+## test::setupBashForConsistency
 
 This function is used to set up the Bash environment for maximum consistency during testing.
 It will override important dynamic bash variables to have more static results.
@@ -5047,7 +5047,7 @@ Example usage:
 test::setupBashForConsistency
 ```
 
-## ⚡ test::skipTestSuite
+## test::skipTestSuite
 
 Call this function to log a message and exit with the status 143.
 This can be used to skip the current test suite without failing the whole test execution,
@@ -5065,7 +5065,7 @@ Example usage:
 test::skipTestSuite "This test is not applicable."
 ```
 
-## ⚡ test::title
+## test::title
 
 Call this function to add an H3 title in the report file.
 
@@ -5081,7 +5081,7 @@ Example usage:
 test::title "Testing something"
 ```
 
-## ⚡ time::getDate
+## time::getDate
 
 Get the current date in the given format.
 
@@ -5107,7 +5107,7 @@ time::getDate format="'%(%Hh%Mm%Ss)T'"
 
 > This function avoid to call $(date) in a subshell (date is a an external executable).
 
-## ⚡ time::getHumanTimeFromMicroseconds
+## time::getHumanTimeFromMicroseconds
 
 Convert microseconds to human readable format.
 
@@ -5151,7 +5151,7 @@ time::getHumanTimeFromMicroseconds 123456789 format="%HH:%MM:%SS"
 echo "${REPLY}"
 ```
 
-## ⚡ time::getMicrosecondsFromSeconds
+## time::getMicrosecondsFromSeconds
 
 Convert seconds (float number representation) to microseconds.
 e.g. 1.234567 → 1234567
@@ -5173,7 +5173,7 @@ time::getMicrosecondsFromSeconds 1.234567
 echo "${REPLY}"
 ```
 
-## ⚡ time::getProgramElapsedMicroseconds
+## time::getProgramElapsedMicroseconds
 
 Get the elapsed time in µs since the program started.
 
@@ -5194,7 +5194,7 @@ echo "Human time: ${REPLY}"
 > The 10# forces the base 10 conversion to avoid issues with leading zeros.
 > Fun fact: this function will fail in 2038 on 32-bit systems because the number of seconds will overflow.
 
-## ⚡ time::getSecondsFromMicroseconds
+## time::getSecondsFromMicroseconds
 
 Convert microseconds to seconds (float number representation).
 e.g. 1234567 → 1.234567
@@ -5223,7 +5223,7 @@ time::getSecondsFromMicroseconds 1234567 precision=3
 echo "${REPLY}"
 ```
 
-## ⚡ time::getTimerMicroseconds
+## time::getTimerMicroseconds
 
 Get the time elapsed since the call of `time::startTimer`.
 By default, it returns an integer representing the elapsed time in microseconds,
@@ -5257,7 +5257,7 @@ time::getTimerMicroseconds format="%S.%LLs"
 echo "Total elapsed time: ${REPLY}"
 ```
 
-## ⚡ time::isSpamming
+## time::isSpamming
 
 Check if it's been less than a given delay since the last call to this function.
 
@@ -5294,7 +5294,7 @@ if time::isSpamming 500ms; then
 fi
 ```
 
-## ⚡ time::isTimerElapsed
+## time::isTimerElapsed
 
 Check if a given time has elapsed since the call of `time::startTimer`.
 
@@ -5325,7 +5325,7 @@ if time::isTimerElapsed 500ms; then
 fi
 ```
 
-## ⚡ time::logTimerElapsedTime
+## time::logTimerElapsedTime
 
 Log the time elapsed since the call of `time::startTimer`.
 
@@ -5353,7 +5353,7 @@ time::startTimer
 time::logTimerElapsedTime
 ```
 
-## ⚡ time::startTimer
+## time::startTimer
 
 Start a new timer.
 You can then call `time::getTimerMicroseconds` to get the elapsed time.
@@ -5374,7 +5374,7 @@ time::startTimer myTimer
 time::getTimerMicroseconds myTimer
 ```
 
-## ⚡ trap::register
+## trap::register
 
 Register a given function to execute when a specific event happens (e.g. on-exit, on-interrupt, etc...).
 Only one function can be registered for each event, if you register a new one it will replace the previous one.
@@ -5425,7 +5425,7 @@ trap::register myCleanUpFunction on-exit
 trap::register "" on-exit
 ```
 
-## ⚡ variable::deserialize
+## variable::deserialize
 
 Get a string to eval in order to restore the variables stored using variable::serialize.
 
@@ -5450,7 +5450,7 @@ variable::deserialize my-variables
 eval "${REPLY}"
 ```
 
-## ⚡ variable::isMissing
+## variable::isMissing
 
 This function returns the list of undeclared variables for the given names.
 
@@ -5475,7 +5475,7 @@ if variable::isMissing "var1" "var2"; then
 fi
 ```
 
-## ⚡ variable::serialize
+## variable::serialize
 
 Serialize the variables given as arguments to a script that can be evaluated to restore the variables with the same values.
 (call variable::deserialize to restore the variables from the script).
@@ -5502,7 +5502,7 @@ variable::serialize my-variables VAR1 VAR2
 local scriptPath="${REPLY}"
 ```
 
-## ⚡ version::bump
+## version::bump
 
 This function allows to bump a semantic version formatted like:
 major.minor.patch-prerelease+build
@@ -5535,7 +5535,7 @@ version::bump "1.2.3-prerelease+build" "major"
 local newVersion="${REPLY}"
 ```
 
-## ⚡ version::compare
+## version::compare
 
 This function allows to compare two semantic versions formatted like:
 major.minor.patch-prerelease+build
@@ -5566,7 +5566,7 @@ local comparison="${REPLY}"
 
 > The prerelease and build are ignored in the comparison.
 
-## ⚡ windows::addToPath
+## windows::addToPath
 
 Add the given path to the PATH environment variable on Windows (current user only).
 
@@ -5594,7 +5594,7 @@ windows::addToPath "/path/to/bin" prepend=true
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
-## ⚡ windows::createTempDirectory
+## windows::createTempDirectory
 
 Create a temporary directory on Windows and return the path both for Windows and Unix.
 
@@ -5614,7 +5614,7 @@ windows::createTempDirectory
 > Directories created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
-## ⚡ windows::createTempFile
+## windows::createTempFile
 
 Create a temporary file on Windows and return the path both for Windows and Unix.
 
@@ -5634,7 +5634,7 @@ windows::createTempFile
 > Files created this way are automatically cleaned up by the fs::cleanTempFiles
 > function when valet ends.
 
-## ⚡ windows::endPs1Batch
+## windows::endPs1Batch
 
 This function will run all the commands that were batched with `windows::startPs1Batch`.
 
@@ -5655,7 +5655,7 @@ windows::runPs1 "Write-Host \"World\""
 windows::endPs1Batch
 ```
 
-## ⚡ windows::getEnvVar
+## windows::getEnvVar
 
 Get the value of an environment variable for the current user on Windows.
 
@@ -5676,7 +5676,7 @@ windows::getEnvVar "MY_VAR"
 echo "${REPLY}"
 ```
 
-## ⚡ windows::getUnixPathFromWindowsPath
+## windows::getUnixPathFromWindowsPath
 
 Convert a Windows path to a unix path.
 
@@ -5698,7 +5698,7 @@ windows::getUnixPathFromWindowsPath "C:\path\to\file"
 
 > Handles paths starting with `X:\`.
 
-## ⚡ windows::getWindowsPathFromUnixPath
+## windows::getWindowsPathFromUnixPath
 
 Convert a unix path to a Windows path.
 
@@ -5721,7 +5721,7 @@ windows::getWindowsPathFromUnixPath "/path/to/file"
 > Handles paths starting with `/mnt/x/` or `/x/` in pure bash,
 > handles other msys2 paths using `cygpath`.
 
-## ⚡ windows::runPs1
+## windows::runPs1
 
 Runs a PowerShell command.
 This is mostly useful on Windows.
@@ -5760,7 +5760,7 @@ windows::runPs1 "Write-Host \"Press any key:\"; Write-Host -Object ('The key tha
 windows::runPs1 "Write-Host \"Hello\"" runAsAdmin=true noFail=true
 ```
 
-## ⚡ windows::setEnvVar
+## windows::setEnvVar
 
 Set an environment variable for the current user on Windows.
 
@@ -5783,7 +5783,7 @@ windows::setEnvVar "MY_VAR" "my_value"
 
 > This function is only available on Windows, it uses `powershell` to directly modify the registry.
 
-## ⚡ windows::startPs1Batch
+## windows::startPs1Batch
 
 After running this function, all commands that should be executed by
 `windows::runPs1` will be added to a batch that will only be played
@@ -5801,34 +5801,48 @@ windows::runPs1 "Write-Host \"World\""
 windows::endPs1Batch
 ```
 
-## ⚡ yaml::parseFile
+## yaml::parseFile
 
-Parses a YAML file and outputs a bash associative array with the content of the YAML
-accessible with dot notation.
+Parses a YAML file and outputs:
+
+- a bash associative array containing each value of the YAML accessible in flattened nested dot notation,
+- a second associative array with the metadata of each node (tags of each non string values and length of arrays).
 
 For example, if the YAML file contains:
 
 ```yaml
-key: test
 array:
-  - item1
-  - item2
+  - true
+  - 1
 nested:
   key: value
 ```
 
-The resulting associative array will have the following content:
+The resulting associative arrays will have the following content:
 
 ```sh
-REPLY_MAP['key']="test"
-REPLY_MAP['array.length']=2
-REPLY_MAP['array[0]']="item1"
-REPLY_MAP['array[1]']="item2"
+REPLY_MAP['array[0]']="true"
+REPLY_MAP['array[1]']="1"
 REPLY_MAP['nested.key']="value"
+
+REPLY_MAP2['@.length']="0"
+REPLY_MAP2['array.length']=2
+REPLY_MAP2["array[0]"]='!!bool'
+REPLY_MAP2["array[1]"]='!!int'
 ```
 
-The length of each array is stored in the associative array with the key `(array).length` to allow
-iterating over the array items.
+- The values are always stored as a string in REPLY_MAP.
+- Use the corresponding tag (if any) in REPLY_MAP2 to convert the value to the correct type.
+- Use [[ -v REPLY_MAP2[${key}] ]] to check if a key has a tag or not (if the value is a string, there will be no tag).
+- The length of each array is stored in REPLY_MAP2["${key}.length"] to allow iterating over the array items.
+- The number of documents in the YAML file is stored in the associative array with the key `@.length`.
+- Each key of the n > 1 document (and optionally for the first document) will be prefixed with `@[n - 1].` to indicate the document number.
+- If a key contains a '.' or '[', it will be quoted in the resulting associative array.
+- This parser supports most of the YAML 1.2 specification and also implements merge keys from YAML 1.1.
+
+> /!\ This does not support the following uncommon YAML 1.2 features:
+> - explicit keys (e.g. `? {myobject: key}`)
+> - extraction of tag definitions (e.g. %TAG !e! tag:example.com,2000:app/)
 
 Inputs:
 
@@ -5843,9 +5857,30 @@ Inputs:
 
   (defaults to false)
 
+- `${prefixFirstDoc}` _as bool_:
+
+  (optional) A boolean to indicate wether or not to prefix the keys of the first document
+  with "@[0]".
+
+  (defaults to false)
+
+- `${onKeyValueFunction}` _as string_:
+
+  (optional) The name of a callback function to be called for each key/value parsed.
+  The function will be called with the following arguments:
+
+  - $1: the full key of the value (e.g. `@[0].nested.key`)
+
+  The value of the corresponding key can be read using REPLY_MAP["${1}"] and
+  the tag of the value can be read using REPLY_MAP2["${1}"].
+
+
+  (defaults to :)
+
 Returns:
 
-- `${REPLY_MAP}`: an associative array containing the content of the YAML file in dot notation.
+- `${REPLY_MAP}`: an associative array containing each value of the YAML accessible in flattened nested dot notation.
+- `${REPLY_MAP2}`: an associative array containing the metadata of each node (tags of each non string values and length of arrays).
 - `${REPLY_CODE}`: (requires noFail=true)
     - 0 if the file was parsed successfully,
     - 1 if the file is not a valid YAML file.
@@ -5858,9 +5893,61 @@ yaml::parseFile "file.yaml" noFail=true
 declare -p REPLY_MAP
 ```
 
-> /!\ this does not support all YAML features yet, working in progress...
-> TODO: complete the implementation to support more YAML features, and add more tests.
+## yaml::parseString
+
+Parses a YAML string.
+See @yaml::parseFile for more details.
+
+Inputs:
+
+- `$1`: **variable name** _as string_:
+
+  The name of the variable containing the YAML string to parse.
+
+- `${noFail}` _as bool_:
+
+  (optional) A boolean to indicate wether or not the function should call core::fail (exit)
+  in case the parsing fails. By default, if the parsing fails, the script will exit.
+
+  (defaults to false)
+
+- `${prefixFirstDoc}` _as bool_:
+
+  (optional) A boolean to indicate wether or not to prefix the keys of the first document
+  with "@[0]".
+
+  (defaults to false)
+
+- `${onKeyValueFunction}` _as string_:
+
+  (optional) The name of a callback function to be called for each key/value parsed.
+  The function will be called with the following arguments:
+
+  - $1: the full key of the value (e.g. `@[0].nested.key`)
+
+  The value of the corresponding key can be read using REPLY_MAP["${1}"] and
+  the tag of the value can be read using REPLY_MAP2["${1}"].
+
+Returns:
+
+- `${REPLY_MAP}`: an associative array containing each value of the YAML accessible in flattened nested dot notation.
+- `${REPLY_MAP2}`: an associative array containing the metadata of each node (tags of each non string values and length of arrays).
+- `${REPLY_CODE}`: (requires noFail=true)
+    - 0 if the file was parsed successfully,
+    - 1 if the file is not a valid YAML file.
+- `${REPLY}`: (requires noFail=true) the errors encountered during the parsing if any.
+
+Example usage:
+
+```bash
+yaml::parseString "variableName" noFail=true
+declare -p REPLY_MAP
+```
+
+## yaml_parse
+
+Parses a YAML.
 
 
 
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).

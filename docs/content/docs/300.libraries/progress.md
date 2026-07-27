@@ -139,4 +139,4 @@ progress::update percent=50 message="Doing something..."
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).

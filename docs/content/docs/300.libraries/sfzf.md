@@ -24,7 +24,7 @@ Inputs:
 
   (defaults to "Select an item:")
 
-- `${itemDetailsCallback}` _as string_:
+- `${returnItemDetailsFunction}` _as string_:
 
   (optional) The function to call when an item is selected
   this parameter can be left empty to hide the preview right pane;
@@ -34,6 +34,7 @@ Inputs:
   - $2: the item number;
   - $3: the current panel width;
   - it should return the details of the item in the `REPLY` variable.
+
 
   (defaults to empty, no callback)
 
@@ -59,4 +60,4 @@ log::info "You selected: ⌜${REPLY}⌝ (index: ⌜${REPLY2}⌝)"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).

@@ -1,8 +1,8 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).
 
-## ▶ valet bash bootstrap
+## valet bash bootstrap
 
 ### Synopsis
 
@@ -162,7 +162,7 @@ valet bash bootstrap [options]
   Source valet functions in your bash script or bash prompt.
   You can then can then use valet function as if you were in a command script.
 
-## ▶ valet bash links
+## valet bash links
 
 ### Synopsis
 
@@ -237,7 +237,7 @@ valet bash links [options]
 
   Create symbolic links as defined in the links definition directory.
 
-## ▶ valet extensions add-command
+## valet extensions add-command
 
 ### Synopsis
 
@@ -270,7 +270,7 @@ valet extensions add-command [options] [--] <command-name>
 
   Create a new command named **my-command** in the current extension under the **commands.d** directory.
 
-## ▶ valet extensions add-library
+## valet extensions add-library
 
 ### Synopsis
 
@@ -302,7 +302,7 @@ valet extensions add-library [options] [--] <library-name>
 
   Create a new library named **my-library** in the current extension under the **libraries.d** directory.
 
-## ▶ valet extensions create
+## valet extensions create
 
 ### Synopsis
 
@@ -333,7 +333,7 @@ valet extensions create [options] [--] <name>
 
   Create a new Valet extension.
 
-## ▶ valet extensions init
+## valet extensions init
 
 ### Synopsis
 
@@ -364,7 +364,7 @@ valet extensions init [options]
 
   Initialize the current directory as a Valet extension.
 
-## ▶ valet extensions install
+## valet extensions install
 
 ### Synopsis
 
@@ -434,7 +434,7 @@ valet extensions install [options] [--] <git-repo>
   Download the **main** reference of the jcaillon/valet-devops-toolbox repository and install it as **extension-1** for Valet.
   Skip the execution of the `extension.setup.sh` script.
 
-## ▶ valet extensions list
+## valet extensions list
 
 ### Synopsis
 
@@ -459,7 +459,7 @@ valet extensions list [options]
 
   List all Valet extensions.
 
-## ▶ valet extensions update
+## valet extensions update
 
 ### Synopsis
 
@@ -500,7 +500,7 @@ valet extensions update [options]
 
   Update all Valet extensions.
 
-## ▶ valet self build
+## valet self build
 
 ### Synopsis
 
@@ -573,7 +573,7 @@ valet self build [options]
 
   Build the valet user commands from the directory **~/my-valet-directory** and with minimal log output.
 
-## ▶ valet self config
+## valet self config
 
 ### Synopsis
 
@@ -622,7 +622,7 @@ valet self config [options]
 
   Create (or recreate) the configuration file of Valet reusing the possible current values of the variables.
 
-## ▶ valet self document
+## valet self document
 
 ### Synopsis
 
@@ -664,7 +664,7 @@ valet self document [options]
 
   Generate the documentation for all the library functions of Valet and output to the default directory.
 
-## ▶ valet self release
+## valet self release
 
 ### Synopsis
 
@@ -709,7 +709,7 @@ valet self release [options]
 
   Display the help for this command.
 
-## ▶ valet self setup
+## valet self setup
 
 ### Synopsis
 
@@ -770,7 +770,7 @@ valet self setup [options]
 
   Display the help for this command.
 
-## ▶ valet self source
+## valet self source
 
 ### Synopsis
 
@@ -824,7 +824,7 @@ valet self source [options]
 
   The preferred mode to source valet functions in your shell prompt.
 
-## ▶ valet self test
+## valet self test
 
 ### Synopsis
 
@@ -903,7 +903,7 @@ valet self test [options]
 
   Run only the test suites that match the regex pattern **(my-thing|my-stuff)**.
 
-## ▶ valet self uninstall
+## valet self uninstall
 
 ### Synopsis
 
@@ -934,7 +934,7 @@ valet self uninstall [options]
 
   Display the help for this command.
 
-## ▶ valet self update
+## valet self update
 
 ### Synopsis
 
@@ -968,7 +968,7 @@ valet self update [options]
 
   Update Valet to the latest version without interactive confirmation.
 
-## ▶ valet help
+## valet help
 
 ### Synopsis
 
@@ -1014,7 +1014,7 @@ valet help [options] [--] [commands...]
 
   Shows the help for the program without any color and with a maximum of 50 columns
 
-## ▶ valet
+## valet
 
 ### Synopsis
 
@@ -1194,6 +1194,14 @@ valet [options] [--] [commands...]
 
   Generate the k8s manifests as seen by ArgoCD for a GitOps repository.
 
+- `gitops-tenants-promote`
+
+  Promote a release for the gitops-tenants repository.
+
+- `gitops-tenants-release`
+
+  Create a new release for the gitops-tenants repository.
+
 - `gitops-test-repository`
 
   Test the validity of the gitops repository.
@@ -1290,10 +1298,6 @@ valet [options] [--] [commands...]
 
   Update valet to the latest release.
 
-- `send-repo-status`
-
-  Send a report of the current repository status.
-
 - `showcase command1`
 
   A showcase command that uses arguments and options.
@@ -1332,4 +1336,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).

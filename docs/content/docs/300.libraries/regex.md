@@ -53,7 +53,7 @@ regex::getFirstGroup MY_STRING "name:(.*)"
 echo "${REPLY}"
 ```
 
-> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
+> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
 ## regex::getFuzzySearchRegexFromSearchString
 
@@ -124,7 +124,7 @@ for match in "${REPLY_ARRAY[@]}"; do
 done
 ```
 
-> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
+> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
 ## regex::replace
 
@@ -160,6 +160,7 @@ Inputs:
 
   (defaults to false)
 
+
 Example usage:
 
 ```bash
@@ -169,7 +170,7 @@ regex::replace MY_STRING "name: (.*)" "\1" maxCount=1 onlyMatches=true
 echo "${MY_STRING}"
 ```
 
-> Regex wiki: <https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions>
+> Regex wiki: https://en.wikibooks.org/wiki/Regular_Expressions/POSIX-Extended_Regular_Expressions
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).

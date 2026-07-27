@@ -54,8 +54,6 @@ Inputs:
 
   The function must return 0 if we should continue to the next line, 1 otherwise.
 
-  (defaults to "")
-
 - `${separator}` _as string_:
 
   (optional) The separator character to use.
@@ -459,7 +457,6 @@ Inputs:
   (defaults to $'\n')
 
 Returns:
-
 - `${REPLY}`: the joined string
 
 Example usage:
@@ -606,7 +603,6 @@ Inputs:
   (defaults to false)
 
 Returns:
-
 - `${REPLY}`: the space left after truncation
 
 Example usage:
@@ -717,4 +713,4 @@ echo "${REPLY}"
 > - It considers escape sequence for text formatting and does not count them as visible characters.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).

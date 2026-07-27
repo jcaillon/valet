@@ -60,6 +60,7 @@ Inputs:
   - %L: total milliseconds
   - %U: total microseconds
 
+
   (defaults to "%HH:%MM:%SS")
 
 Returns:
@@ -282,8 +283,7 @@ Start a new timer.
 You can then call `time::getTimerMicroseconds` to get the elapsed time.
 Or call `time::isTimerElapsed` to check if a given time has elapsed since the call of this function.
 
-# - ${timerName} _as string_
-
+# - ${timerName} _as string_:
   (optional) A variable name that will be used to store the start time of the timer.
   Defaults to the name of the calling function.
   Can be set to a fixed value if you call this function from different functions
@@ -299,4 +299,4 @@ time::getTimerMicroseconds myTimer
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.42.13 (2026-06-11).
+> Documentation generated for the version 0.43.381 (2026-07-27).
