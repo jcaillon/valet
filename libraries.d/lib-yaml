@@ -62,6 +62,16 @@ source bash
 #       (optional) A boolean to indicate wether or not to prefix the keys of the first document
 #       with "@[0]".
 #       (defaults to false)
+# - ${onKeyValueFunction} _as string_:
+#       (optional) The name of a callback function to be called for each key/value parsed.
+#       The function will be called with the following arguments:
+#
+#       - $1: the full key of the value (e.g. `@[0].nested.key`)
+#
+#       The value of the corresponding key can be read using REPLY_MAP["${1}"] and
+#       the tag of the value can be read using REPLY_MAP2["${1}"].
+#
+#       (defaults to :)
 #
 # Returns:
 #
@@ -102,6 +112,14 @@ function yaml::parseFile() {
 #       (optional) A boolean to indicate wether or not to prefix the keys of the first document
 #       with "@[0]".
 #       (defaults to false)
+# - ${onKeyValueFunction} _as string_:
+#       (optional) The name of a callback function to be called for each key/value parsed.
+#       The function will be called with the following arguments:
+#
+#       - $1: the full key of the value (e.g. `@[0].nested.key`)
+#
+#       The value of the corresponding key can be read using REPLY_MAP["${1}"] and
+#       the tag of the value can be read using REPLY_MAP2["${1}"].
 #
 # Returns:
 #
@@ -137,12 +155,18 @@ function yaml_parse() {
     variableName="" \
     noFail=false \
     prefixFirstDoc=false \
+    onKeyValueFunction=":" \
     IFS=" "
   eval "local a= ${*@Q}"
 
   # need either path or inputVarName
   if [[ (-z ${path} && -z ${variableName}) || (-n ${path} && -n ${variableName}) ]]; then
     core::fail "Either path or variableName (mutually exclusive) must be provided to ⌜${FUNCNAME:-?}⌝."
+  fi
+
+  # check existing function
+  if [[ ${onKeyValueFunction} != : ]] && ! declare -F "${onKeyValueFunction}" &>/dev/null; then
+    core::fail "The function ⌜${onKeyValueFunction}⌝ does not exist."
   fi
 
   # ignore case
@@ -177,7 +201,7 @@ function yaml_parse() {
 
   local line indent keyName fullKey value firstChar isArrayItemStart=false keyIndentLevelsFlatten \
     multilineTrimEnd=true multiLinesCumulatedLf multilineSeparator='' multilineFinalSeparator='' \
-    isKeyWithoutValue=false isJsonRootObject=0 anchorName='' inArrayIndent \
+    isKeyWithoutValue=false isJsonRootObject=0 anchorName='' inArrayIndent kvCallbackFunc="${onKeyValueFunction}" \
     errorPrefix="Error parsing YAML file ⌜${path}⌝" docPrefix=""
   local -i indentLevel=0 indentLevelIndex arrayIndex lineNumber=0 lastIndentLevel=0 arrayExtraIndentLevel \
     multiLineIndentLevel=-1 docNumber=0
@@ -189,8 +213,8 @@ function yaml_parse() {
 
   # json
   local jsonLine jsonTempString jsonCumulatedLf isJsonQuoteOpen jsonKeyName jsonPart jsonFullKey \
-    jsonLastString isJsonValueOpen=0 jsonCumulatedString jsonLastQuoteChar jsonValueTag
-  local -a jsonKeyPaths jsonArrayIndexes jsonOpenChars
+    jsonLastString isJsonValueOpen=0 jsonCumulatedString jsonLastQuoteChar jsonValueTag isValueToSave
+  local -a jsonKeyPaths jsonArrayIndexes jsonArrayHasValues jsonOpenChars
   local -i jsonDepth
 
   if [[ ${prefixFirstDoc} == true ]]; then
@@ -223,11 +247,11 @@ function yaml_parse() {
       # we need to merge the content of the flow collection into the current key
       yaml_mergeFlowCollectionIntoCurrentKey
     fi
+
   elif [[ ${isQuoteOpen} == "true" ]]; then
     yaml_addParsingError "invalid quoted value (missing closing quote)"
-  fi
 
-  if [[ ${isMultilineValue} == "true" ]]; then
+  elif [[ ${isMultilineValue} == "true" ]]; then
     # close a multiline value if we reached the end of the file
     value+="${multilineFinalSeparator}"
     if [[ ${multilineTrimEnd} != "true" ]]; then
@@ -235,6 +259,7 @@ function yaml_parse() {
     fi
     fullKey="${fullKey:-"@[${docNumber}]"}"
     yaml_saveValue
+
   elif [[ ${isKeyWithoutValue} == "true" ]]; then
     # the previous key add a null value
     fullKey="${fullKey:-"@[${docNumber}]"}"
@@ -287,6 +312,7 @@ function yaml_handleLine() {
     fi
     isJsonOpen=0
     isKeyWithoutValue=false
+    kvCallbackFunc="${onKeyValueFunction}"
 
     if [[ ${fullKey} == *[\]\.]'<<' ]]; then
       # we opened a flow collection for a merge key,
@@ -590,10 +616,6 @@ function yaml_handleLine() {
     fi
   fi
 
-  if log::isDebugEnabled; then
-    printf "%2s: indentLevel %2s indentLevelIndex %2s | %-20s | %-20s | %s\n" "${lineNumber}" "${indentLevel}" "${indentLevelIndex}" "${keyIndentLevels[*]}" "${keyName}" "${value}"
-  fi
-
   # prepend the keyName with the current array index if we are in an array
   if [[ ${isArrayItemStart} == "true" ]]; then
     if ((${#keyIndentLevels[@]} == 0)); then
@@ -664,6 +686,7 @@ function yaml_handleLine() {
     jsonKeyPaths=()
     jsonArrayIndexes=()
     jsonOpenChars=()
+    jsonArrayHasValues=()
     jsonDepth=-1
 
     if ((${#keyName} == 0 && ${#keyPaths[@]} == 0)); then
@@ -673,6 +696,10 @@ function yaml_handleLine() {
     fi
     isJsonOpen=1
     value=""
+    if [[ ${keyName} == '<<' ]]; then
+      # in case of a merge key, we do not want to use the callback function
+      kvCallbackFunc=":"
+    fi
 
   elif [[ ${isQuoteOpen} == "true" ]]; then
     # case of an unclosed quote, we will continue to read the next lines until we find the closing quote
@@ -755,10 +782,6 @@ function yaml_handleLine() {
     keyIndentLevels=("${keyIndentLevels[@]:0:indentLevelIndex}" "${indentLevel}")
   fi
 
-  if log::isDebugEnabled; then
-    printf "%2s: %50s | %20s | %s\n\n" "${lineNumber}" "${keyPaths[*]}" "${keyIndentLevels[*]}" "${arrayIndexes[*]}"
-  fi
-
   fullKey="${keyPaths[*]}"
   fullKey="${docPrefix}${fullKey#.}"
   fullKey="${fullKey//'.['/'['}"
@@ -801,11 +824,13 @@ function yaml_saveValue() {
   if [[ -n ${valueTag} && ${valueTag} != "!!str" && ${valueTag} != "!" ]]; then
     REPLY_MAP2["${fullKey}"]="${valueTag}"
   fi
+  ${kvCallbackFunc} "${fullKey}"
 }
 
 function yaml_saveNullValue() {
   REPLY_MAP["${fullKey}"]="null"
   REPLY_MAP2["${fullKey}"]="!!null"
+  ${kvCallbackFunc} "${fullKey}"
 }
 
 function yaml_extractFirstQuotedTextFromLine() {
@@ -868,8 +893,8 @@ function yaml_duplicateKeys() {
     REPLY_MAP["${targetKey}"]="${REPLY_MAP["${sourceKey}"]}"
     if [[ -v REPLY_MAP2[${sourceKey}] ]]; then
       REPLY_MAP2["${targetKey}"]="${REPLY_MAP2["${sourceKey}"]}"
-      return 0
     fi
+    ${kvCallbackFunc} "${targetKey}"
     return 0
   fi
 
@@ -884,6 +909,7 @@ function yaml_duplicateKeys() {
       if [[ -v REPLY_MAP2[${key}] ]]; then
         REPLY_MAP2["${targetKey}${newKey}"]="${REPLY_MAP2[${key}]}"
       fi
+      ${kvCallbackFunc} "${targetKey}${newKey}"
     fi
   done
 }
@@ -982,6 +1008,27 @@ function yaml_jsonHandleString() {
 
       continue
       ;;
+    '{'*)
+      if [[ ${jsonDepth} -ge 0 && ${jsonOpenChars[jsonDepth]:-} == '[' ]]; then
+        jsonArrayHasValues[jsonDepth]=1
+      fi
+      jsonDepth+=1
+      jsonOpenChars[jsonDepth]='{'
+      ;;
+    '['*)
+      if [[ ${jsonDepth} -ge 0 && ${jsonOpenChars[jsonDepth]:-} == '[' ]]; then
+        jsonArrayHasValues[jsonDepth]=1
+      fi
+      jsonDepth+=1
+      jsonOpenChars[jsonDepth]='['
+      jsonArrayHasValues[jsonDepth]=0
+      jsonKeyName="[0]"
+      yaml_jsonAddKey
+      yaml_jsonSaveArrayLength
+      ;;
+    '#'*)
+      return 0
+      ;;
     ':'*)
       if [[ ${jsonLastQuoteChar} != [\'\"] && ${jsonLine:${#jsonPart}} != ":"[\ \,\}\]]* ]]; then
         # the "key" was not quoted, there must be a space after the colon for it to be a key/value separator
@@ -1012,9 +1059,10 @@ function yaml_jsonHandleString() {
       fi
 
       if [[ ${jsonOpenChars[jsonDepth]} == '[' ]]; then
+        jsonArrayHasValues[jsonDepth]=1
         # case of an object within an array but that was not explicitly opened with a {
-        jsonOpenChars[jsonDepth + 1]=''
         jsonDepth+=1
+        jsonOpenChars[jsonDepth]=''
       fi
 
       yaml_jsonAddKey
@@ -1023,6 +1071,8 @@ function yaml_jsonHandleString() {
       jsonCumulatedLf=""
       jsonLastQuoteChar=""
       ;;
+
+    # case of , ] and }
     ','*)
       if ((jsonDepth < 0)); then
         yaml_addParsingError "unexpected token (expected one of ⌜{[⌝): ${jsonPart@Q}"
@@ -1053,19 +1103,21 @@ function yaml_jsonHandleString() {
         jsonCumulatedString="${jsonLastString}"
       fi
 
+      isValueToSave=0
+
       if ((${#jsonKeyName} > 0)); then
         # we have a key, this is a value
         if [[ ${jsonLastQuoteChar} == [\'\"] ]]; then
           # quoted string
           jsonValueTag=""
-          yaml_jsonSaveValue
+          isValueToSave=1
         else
           if ((${#jsonCumulatedString} == 0)); then
             if [[ ${jsonOpenChars[jsonDepth]} != '[' ]]; then
               # not in an array, this is a null value
               jsonCumulatedString="null"
               jsonValueTag="!!null"
-              yaml_jsonSaveValue
+              isValueToSave=1
             fi
           else
             # compute value tag
@@ -1073,7 +1125,7 @@ function yaml_jsonHandleString() {
             local valueTag=""
             yaml_computeValueTag
             jsonValueTag="${valueTag}"
-            yaml_jsonSaveValue
+            isValueToSave=1
           fi
         fi
 
@@ -1099,7 +1151,12 @@ function yaml_jsonHandleString() {
           jsonCumulatedString="null"
           jsonValueTag="!!null"
         fi
+        isValueToSave=1
+      fi
+
+      if ((isValueToSave == 1)); then
         yaml_jsonSaveValue
+        jsonArrayHasValues[jsonDepth]=1
       fi
 
       jsonKeyName=""
@@ -1115,6 +1172,20 @@ function yaml_jsonHandleString() {
         jsonDepth=$((jsonDepth - 1))
       fi
       ;;&
+    [\,\]]*)
+      if [[ ${jsonOpenChars[jsonDepth]} == '[' && ${jsonArrayHasValues[jsonDepth]} == 1 ]]; then
+        # case of new value in an array, increment the last array index
+        jsonArrayIndexes[jsonDepth]=$((jsonArrayIndexes[jsonDepth] + 1))
+        yaml_jsonSaveArrayLength
+      fi
+      ;;&
+    ','*)
+      if [[ ${jsonOpenChars[jsonDepth]} == '[' ]]; then
+        jsonKeyName="[${jsonArrayIndexes[jsonDepth]}]"
+        jsonKeyPaths[jsonDepth]="${jsonKeyName}"
+      fi
+      jsonArrayHasValues[jsonDepth]=0
+      ;;
     [\}\]]*)
       jsonDepth=$((jsonDepth - 1))
       if ((jsonDepth <= -1)); then
@@ -1122,29 +1193,6 @@ function yaml_jsonHandleString() {
         jsonLine="${jsonLine:${#jsonPart}+1}"
         break
       fi
-      ;;
-    ','*)
-      # possible end of an array value, increment the last array index
-      if [[ ${jsonOpenChars[jsonDepth]} == '[' ]]; then
-        jsonArrayIndexes[jsonDepth]=$((jsonArrayIndexes[jsonDepth] + 1))
-        jsonKeyName="[${jsonArrayIndexes[jsonDepth]}]"
-        jsonKeyPaths[jsonDepth]="${jsonKeyName}"
-        yaml_jsonSaveArrayLength
-      fi
-      ;;
-    '{'*)
-      jsonOpenChars[jsonDepth + 1]='{'
-      jsonDepth+=1
-      ;;
-    '['*)
-      jsonOpenChars[jsonDepth + 1]='['
-      jsonDepth+=1
-      jsonKeyName="[0]"
-      yaml_jsonAddKey
-      yaml_jsonSaveArrayLength
-      ;;
-    '#'*)
-      return 0
       ;;
     *)
       # the line ends with a non quoted string
@@ -1192,6 +1240,7 @@ function yaml_jsonSaveValue() {
   if [[ -n ${jsonValueTag} && ${jsonValueTag} != "!!str" && ${jsonValueTag} != "!" ]]; then
     REPLY_MAP2["${jsonFullKey}"]="${jsonValueTag}"
   fi
+  ${kvCallbackFunc} "${jsonFullKey}"
 }
 
 function yaml_jsonSaveArrayLength() {

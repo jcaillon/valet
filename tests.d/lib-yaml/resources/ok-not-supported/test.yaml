@@ -1,4 +1,12 @@
--   # commm
- key: 1
-- # comment
-  new: true
+{
+  "users": [
+    name: Alice,
+    {
+      "name": "Bob"
+    },
+    {
+      "name": "Jack"
+    }
+  ],
+  "version": "1.0.0"
+}

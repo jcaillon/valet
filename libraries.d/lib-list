@@ -77,7 +77,7 @@ source string
 #       If the number of items is greater than this value, the filtering is done using an external program.
 #       This is to avoid performance issues when filtering a large number of items using pure bash.
 #       (defaults to 1042)
-# - ${callbackFunctionOnListClosed} _as string_:
+# - ${onListClosedFunction} _as string_:
 #       (optional) The name of a function to call when the autocompletion box is closed.
 #       Can be used to clean up resources or to update the screen.
 #       The function is called with arguments:
@@ -89,7 +89,7 @@ source string
 #
 #       The function must return 0 to state that prompt does not have to be redrawn, 1 otherwise.
 #       (defaults to empty)
-# - ${callbackFunctionOnItemDisplayed} _as string_:
+# - ${onItemDisplayedFunction} _as string_:
 #       (optional) The name of a function to call when an item needs to be displayed in the list.
 #       This can be used to change the text displayed for the item (which default to the item string).
 #       The following variables are available:
@@ -174,7 +174,7 @@ function list::setOptions() {
   _LIST_ITEMS_COUNT_FILTERING_STRING_LENGTH=${#visibleCharacters}
 
   # callbacks
-  _LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED="${callbackFunctionOnItemDisplayed:-}"
+  _LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED="${onItemDisplayedFunction:-}"
   if [[ -n ${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED} ]]; then
     if ! declare -F "${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}" &>/dev/null; then
       core::fail "The callback function ⌜${_LIST_CALLBACK_FUNCTION_ON_ITEM_DISPLAYED}⌝ does not exist."

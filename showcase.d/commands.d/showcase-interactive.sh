@@ -20,7 +20,8 @@ description: |-
   This command demonstrates how to interact with the user using valet's interactive library.
 COMMAND_YAML
 function showcaseInteractive() {
-  command::parseArguments "$@"; eval "${REPLY}"
+  command::parseArguments "$@"
+  eval "${REPLY}"
   command::checkParsedResults
 
   log::info "Getting the cursor size:"
@@ -70,8 +71,11 @@ function showcaseInteractive() {
   SELECTION_ARRAY=("blue" "red" "green" "yellow")
   # shellcheck disable=SC2317
 
-  function getColorSample() { local -n color="ESC__FG_${1^^}"; REPLY="${color}ESC__FG_${1^^}${ESC__TEXT_RESET}"; }
-  sfzf::show SELECTION_ARRAY prompt="What's your favorite color?" itemDetailsCallback="getColorSample" previewTitle="Color sample"
+  function getColorSample() {
+    local -n color="ESC__FG_${1^^}"
+    REPLY="${color}ESC__FG_${1^^}${ESC__TEXT_RESET}"
+  }
+  sfzf::show SELECTION_ARRAY prompt="What's your favorite color?" returnItemDetailsFunction="getColorSample" previewTitle="Color sample"
   log::info "You selected: ⌜${REPLY}⌝ (index: ⌜${REPLY2}⌝)"
 
   ############################
@@ -91,7 +95,6 @@ function showcaseInteractive() {
 
   progress::stop
 
-
   ############################
   # Progress bar
   ############################
@@ -108,8 +111,6 @@ function showcaseInteractive() {
 
   progress::stop
 
-
   log::info "End of demo!"
-
 
 }

@@ -49,7 +49,7 @@ function test_coproc::runInParallel() {
     callbackLines+=("coproc index ${1} finished with status ${2} (progress is ${3}%, logs: ${4})")
   }
   local -a callbackLines=()
-  test::exec coproc::runInParallel coprocNames maxInParallel=1 completedCallback=callback redirectLogs=true
+  test::exec coproc::runInParallel coprocNames maxInParallel=1 onCompletedFunction=callback redirectLogs=true
 
   array::sort callbackLines
   test::printVars callbackLines

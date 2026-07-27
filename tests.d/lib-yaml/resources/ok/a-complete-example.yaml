@@ -1,5 +1,5 @@
+%YAML 1.2
 ---
-# supports multi documents
 coordinates: &point
   x: 1
   y: 2
@@ -17,10 +17,26 @@ element:
   parent: null
   position: *point
   tags:
-    - tag1
+    - # first tag
+      tag1
     - tag2
     - *name
+    - # another tag
+      # with key/value
+      key:
+        # value
+        tag4
   visible: true
-jsonLike: { "key": value, arr: [ "Support json like syntax (yaml flow collections)" ]}
+jsonLike: {
+    "key": value,
+    arr: [ "Support json like syntax (yaml flow collections)", ],
+  }
+sphere:
+  <<: [ *point ]
+  z: 1
+  r: 9.23
 ---
 simple scalar
+---
+nullValue:
+secondNullValue:

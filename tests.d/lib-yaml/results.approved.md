@@ -7,8 +7,8 @@
 > cat `resources/ok/a-complete-example.yaml`
 
 ```text
+%YAML 1.2
 ---
-# supports multi documents
 coordinates: &point
   x: 1
   y: 2
@@ -26,13 +26,29 @@ element:
   parent: null
   position: *point
   tags:
-    - tag1
+    - # first tag
+      tag1
     - tag2
     - *name
+    - # another tag
+      # with key/value
+      key:
+        # value
+        tag4
   visible: true
-jsonLike: { "key": value, arr: [ "Support json like syntax (yaml flow collections)" ]}
+jsonLike: {
+    "key": value,
+    arr: [ "Support json like syntax (yaml flow collections)", ],
+  }
+sphere:
+  <<: [ *point ]
+  z: 1
+  r: 9.23
 ---
 simple scalar
+---
+nullValue:
+secondNullValue:
 ```
 
 ❯ `yaml::parseFile resources/ok/a-complete-example.yaml`
@@ -44,6 +60,8 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['@[1]']='simple scalar'
+['@[1].nullValue']='null'
+['@[1].secondNullValue']='null'
 ['coordinates.x']='1'
 ['coordinates.y']='2'
 ['element.alias']='3'
@@ -59,21 +77,32 @@ that can span multiple lines.
 ['element.tags[0]']='tag1'
 ['element.tags[1]']='tag2'
 ['element.tags[2]']='example'
+['element.tags[3].key']='tag4'
 ['element.visible']='true'
 ['jsonLike.arr[0]']='Support json like syntax (yaml flow collections)'
 ['jsonLike.key']='value'
+['sphere.r']='9.23'
+['sphere.x']='1'
+['sphere.y']='2'
+['sphere.z']='1'
 )
 REPLY_MAP2=(
 ['@.length']='2'
+['@[1].nullValue']='!!null'
+['@[1].secondNullValue']='!!null'
 ['coordinates.x']='!!int'
 ['coordinates.y']='!!int'
 ['element.opacity']='!!float'
 ['element.parent']='!!null'
 ['element.position.x']='!!int'
 ['element.position.y']='!!int'
-['element.tags.length']='3'
+['element.tags.length']='4'
 ['element.visible']='!!bool'
-['jsonLike.arr.length']='0'
+['jsonLike.arr.length']='1'
+['sphere.r']='!!float'
+['sphere.x']='!!int'
+['sphere.y']='!!int'
+['sphere.z']='!!int'
 )
 ```
 
@@ -373,6 +402,12 @@ other: { # comment !!
 
   spaces
   }
+arrayLengths: {
+    arr0: [],
+    arr1: [ one ],
+    arr2: [ 1, 2 ],
+    arr3: [ 1, 2, 3, ],
+  }
 ```
 
 ❯ `yaml::parseFile resources/ok/flow-collections.yaml`
@@ -383,6 +418,12 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
+['arrayLengths.arr1[0]']='one'
+['arrayLengths.arr2[0]']='1'
+['arrayLengths.arr2[1]']='2'
+['arrayLengths.arr3[0]']='1'
+['arrayLengths.arr3[1]']='2'
+['arrayLengths.arr3[2]']='3'
 ['ff.""']='empty key'
 ['ff.another null value']='null'
 ['ff.k.null2']='null'
@@ -463,9 +504,18 @@ spaces']='null'
 )
 REPLY_MAP2=(
 ['@.length']='1'
+['arrayLengths.arr0.length']='0'
+['arrayLengths.arr1.length']='1'
+['arrayLengths.arr2.length']='2'
+['arrayLengths.arr2[0]']='!!int'
+['arrayLengths.arr2[1]']='!!int'
+['arrayLengths.arr3.length']='3'
+['arrayLengths.arr3[0]']='!!int'
+['arrayLengths.arr3[1]']='!!int'
+['arrayLengths.arr3[2]']='!!int'
 ['ff.another null value']='!!null'
 ['ff.k.null2']='!!null'
-['ff.k2.length']='1'
+['ff.k2.length']='2'
 ['ff.k2[0].null3']='!!null'
 ['ff.k2[1].null4']='!!null'
 ['ff.null value']='!!null'
@@ -474,24 +524,24 @@ REPLY_MAP2=(
 ['other.key with
 spaces']='!!null'
 ['thing.length']='6'
-['thing[0].five.length']='2'
-['thing[0].five[0].length']='0'
-['thing[0].five[0][0].length']='0'
-['thing[0].five[1].key.arr.length']='1'
-['thing[1].length']='5'
+['thing[0].five.length']='3'
+['thing[0].five[0].length']='1'
+['thing[0].five[0][0].length']='1'
+['thing[0].five[1].key.arr.length']='2'
+['thing[1].length']='6'
 ['thing[1][0]']='!!int'
-['thing[2].key.length']='1'
+['thing[2].key.length']='2'
 ['thing[2].key[0]']='!!int'
-['thing[2].key[1].arr.length']='0'
+['thing[2].key[1].arr.length']='1'
 ['thing[2].seven']='!!int'
 ['thing[3].k']='!!int'
-['thing[4].a.length']='1'
+['thing[4].a.length']='2'
 ['thing[4].a[0]']='!!int'
 ['thing[4].a[1]']='!!int'
 ['thing[4].b']='!!int'
 ['thing[5].a.b']='!!int'
 ['thing[5].c']='!!int'
-['types1.length']='16'
+['types1.length']='17'
 ['types1[0]']='!!float'
 ['types1[10]']='!!bool'
 ['types1[11]']='!!bool'
@@ -726,7 +776,7 @@ REPLY_MAP2=(
 ['favorite_colors.length']='3'
 ['nested.users.length']='2'
 ['nested.users[0].id']='!!int'
-['nested.users[0].roles.length']='1'
+['nested.users[0].roles.length']='2'
 ['nested.users[1].id']='!!int'
 ['nested.users[1].roles.length']='1'
 ['num.length']='1'
@@ -741,7 +791,7 @@ REPLY_MAP2=(
 ['sequence[2]']='!!int'
 ['sequence[3]']='!!bool'
 ['sequence[4]']='!!null'
-['sequence[5].length']='2'
+['sequence[5].length']='3'
 ['sequence[5][0]']='!!int'
 ['sequence[5][1]']='!!int'
 ['sequence[5][2]']='!!int'
@@ -791,6 +841,12 @@ REPLY_MAP2=(
       "active": false,
       "id": 2,
       "name": "Bob",
+      "scores": []
+    },
+    {
+      "active": true,
+      "id": 3,
+      "name": "Jack",
       "scores": [
         60,
         75
@@ -830,8 +886,11 @@ REPLY_MAP=(
 ['users[1].active']='false'
 ['users[1].id']='2'
 ['users[1].name']='Bob'
-['users[1].scores[0]']='60'
-['users[1].scores[1]']='75'
+['users[2].active']='true'
+['users[2].id']='3'
+['users[2].name']='Jack'
+['users[2].scores[0]']='60'
+['users[2].scores[1]']='75'
 ['version']='1.0.0'
 )
 REPLY_MAP2=(
@@ -840,19 +899,22 @@ REPLY_MAP2=(
 ['config.features.maxItems']='!!int'
 ['config.features.notifications']='!!bool'
 ['metadata']='!!null'
-['tools.length']='3'
-['users.length']='1'
+['tools.length']='4'
+['users.length']='3'
 ['users[0].active']='!!bool'
 ['users[0].id']='!!int'
-['users[0].scores.length']='2'
+['users[0].scores.length']='3'
 ['users[0].scores[0]']='!!int'
 ['users[0].scores[1]']='!!int'
 ['users[0].scores[2]']='!!int'
 ['users[1].active']='!!bool'
 ['users[1].id']='!!int'
-['users[1].scores.length']='1'
-['users[1].scores[0]']='!!int'
-['users[1].scores[1]']='!!int'
+['users[1].scores.length']='0'
+['users[2].active']='!!bool'
+['users[2].id']='!!int'
+['users[2].scores.length']='2'
+['users[2].scores[0]']='!!int'
+['users[2].scores[1]']='!!int'
 )
 ```
 
@@ -1517,7 +1579,7 @@ REPLY_MAP2=(
 ['@.length']='1'
 ['obj']='!mytype'
 ['obj.resources']='!reference'
-['obj.resources.length']='1'
+['obj.resources.length']='2'
 ['obj.resources[0]']='!!int'
 ['obj.resources[1]']='!!int'
 )

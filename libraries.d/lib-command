@@ -450,7 +450,7 @@ function command_showInteractiveCommandsMenu() {
   # shellcheck source=lib-sfzf
   source sfzf
 
-  sfzf::show "${commandSelectionItemsArrayName}" prompt="${menuHeader}" itemDetailsCallback="command_onFsfsItemSelectionChange" previewTitle="Command help"
+  sfzf::show "${commandSelectionItemsArrayName}" prompt="${menuHeader}" returnItemDetailsFunction="command_onFsfsItemSelectionChange" previewTitle="Command help"
 
   choice="${REPLY}"
   if (( ${#choice} >= CMD_MAX_COMMAND_WIDTH)); then

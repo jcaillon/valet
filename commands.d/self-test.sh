@@ -198,7 +198,7 @@ function selfTest() {
 
   coproc::runInParallel _TEST_COMMANDS \
     maxInParallel="${_TEST_NB_PARALLEL_TEST_SUITES}" \
-    completedCallback=selfTest_parallelCallback \
+    onCompletedFunction=selfTest_parallelCallback \
     printRedirectedLogs=true
 
   progress::stop

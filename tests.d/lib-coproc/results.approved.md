@@ -188,7 +188,7 @@ FAIL     failed
 
 ### ✅ Testing coproc::runInParallel with a completed callback and redirecting logs
 
-❯ `coproc::runInParallel coprocNames maxInParallel=1 completedCallback=callback redirectLogs=true`
+❯ `coproc::runInParallel coprocNames maxInParallel=1 onCompletedFunction=callback redirectLogs=true`
 
 ```text
 callbackLines=(

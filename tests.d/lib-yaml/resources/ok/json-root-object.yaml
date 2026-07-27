@@ -32,6 +32,12 @@
       "active": false,
       "id": 2,
       "name": "Bob",
+      "scores": []
+    },
+    {
+      "active": true,
+      "id": 3,
+      "name": "Jack",
       "scores": [
         60,
         75

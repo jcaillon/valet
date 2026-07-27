@@ -11,13 +11,13 @@ include tui coproc fs bash terminal
 JOB_NAMES=(name{1..30})
 JOB_COMMANDS=()
 for i in {1..30}; do
-  JOB_COMMANDS+=("log::info 'Job $i started with pid \$BASHPID'; bash::sleep $((RANDOM % 3 + 50 )); log::warning 'Job $i done'")
+  JOB_COMMANDS+=("log::info 'Job $i started with pid \$BASHPID'; bash::sleep $((RANDOM % 3 + 50)); log::warning 'Job $i done'")
 done
 
 function callback() {
   log::info "Done running index ${1}: ${2}, logs in: ${4}"
 }
 
-bash::runInSubshell coproc::runInParallel JOB_COMMANDS maxInParallel=1 completedCallback=callback printRedirectedLogs=true
+bash::runInSubshell coproc::runInParallel JOB_COMMANDS maxInParallel=1 onCompletedFunction=callback printRedirectedLogs=true
 
 # We start a subshell that starts a coproc. Verify that CTRL+C kills everything.

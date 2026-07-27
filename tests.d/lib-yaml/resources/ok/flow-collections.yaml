@@ -89,3 +89,9 @@ other: { # comment !!
 
   spaces
   }
+arrayLengths: {
+    arr0: [],
+    arr1: [ one ],
+    arr2: [ 1, 2 ],
+    arr3: [ 1, 2, 3, ],
+  }

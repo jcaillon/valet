@@ -8,6 +8,7 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+- rename `completedCallback` to `onCompletedFunction`
 - add test::run (that runs a valet command using parsmainArgs ? and myabe in a subshell ? see if we trigger the exit trap or not)
 - Fix: A spinner or progress bar is already running.
 - Improve bash::sleep to have a progress bar in interactive mode

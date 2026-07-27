@@ -470,7 +470,6 @@ function string_headCallback() {
 #       - $1: the current item (line) content
 #
 #       The function must return 0 if we should continue to the next line, 1 otherwise.
-#       (defaults to "")
 # - ${separator} _as string_:
 #       (optional) The separator character to use.
 #       (defaults to $'\n')

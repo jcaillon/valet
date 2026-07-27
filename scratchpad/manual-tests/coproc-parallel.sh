@@ -16,7 +16,7 @@ progress::start percent=0 message="Running test suites."
 JOB_NAMES=(name{1..30})
 JOB_COMMANDS=()
 for i in {1..30}; do
-  JOB_COMMANDS+=("log::info 'Job $i started'; bash::sleep $((RANDOM % 3 + 1 )); log::warning 'Job ${i} done'")
+  JOB_COMMANDS+=("log::info 'Job $i started'; bash::sleep $((RANDOM % 3 + 1)); log::warning 'Job ${i} done'")
 done
 
 function callback() {
@@ -24,13 +24,12 @@ function callback() {
   log::info "logs in: ${4}"
 }
 
-coproc::runInParallel JOB_COMMANDS maxInParallel=1 completedCallback=callback printRedirectedLogs=true
+coproc::runInParallel JOB_COMMANDS maxInParallel=1 onCompletedFunction=callback printRedirectedLogs=true
 
-if (( REPLY != 0 )); then
+if ((REPLY != 0)); then
   log::error "Did not executed all coprocs."
 else
   log::info "${REPLY2} coprocs completed with exit code 0."
 fi
 
 progress::stop
-

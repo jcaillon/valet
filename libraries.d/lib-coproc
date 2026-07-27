@@ -13,13 +13,15 @@
 # - ${maxInParallel} _as int_:
 #       (optional) The maximum number of parallel coprocs to run.
 #       (defaults to 8)
-# - ${completedCallback} _as string_:
+# - ${onCompletedFunction} _as string_:
 #       (optional) The name of the function to call when a coproc is completed (successfully or not).
 #       The function will receive the following arguments:
+#
 #       - $1 the coproc index
 #       - $2 the coproc exit code
 #       - $3 the percentage of coprocs already completed
 #       - $4 the path of the file containing the accumulated logs of the coproc (if redirectLogs is true)
+#
 #       If the function sets REPLY to 1, the script will exit early. Otherwise it should set REPLY to 0.
 #       Set to an empty string to not call any callback function.
 #       (defaults to "")
@@ -57,7 +59,7 @@ function coproc::runInParallel() {
   local -n jobCommands_nameRef="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   local \
     maxInParallel=8 \
-    completedCallback="" \
+    onCompletedFunction="" \
     redirectLogs=false \
     printRedirectedLogs=false \
     simulateSequentialRun=false \
@@ -148,12 +150,12 @@ function coproc::runInParallel() {
       fi
 
       # execute the completed callback if defined
-      if [[ -n ${completedCallback} ]]; then
+      if [[ -n ${onCompletedFunction} ]]; then
         local -i percentageCompleted=$((${#exitCodes[@]} * 100 / ${#jobCommands_nameRef[@]}))
         REPLY=0
-        "${completedCallback}" "${endedCoprocIndex}" "${endedCoprocExitStatus}" "${percentageCompleted}" "${logFiles[endedCoprocIndex]}"
+        "${onCompletedFunction}" "${endedCoprocIndex}" "${endedCoprocExitStatus}" "${percentageCompleted}" "${logFiles[endedCoprocIndex]}"
         if ((REPLY != 0)); then
-          log::debug "The completed callback function ${completedCallback} requested to stop the parallel execution."
+          log::debug "The completed callback function ${onCompletedFunction} requested to stop the parallel execution."
           REPLY=1
           break 2
         fi
