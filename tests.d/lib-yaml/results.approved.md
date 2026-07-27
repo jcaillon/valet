@@ -42,6 +42,7 @@ jsonLike: {
   }
 sphere:
   <<: [ *point ]
+  x: 3
   z: 1
   r: 9.23
 ---
@@ -82,7 +83,7 @@ that can span multiple lines.
 ['jsonLike.arr[0]']='Support json like syntax (yaml flow collections)'
 ['jsonLike.key']='value'
 ['sphere.r']='9.23'
-['sphere.x']='1'
+['sphere.x']='3'
 ['sphere.y']='2'
 ['sphere.z']='1'
 )
@@ -1839,6 +1840,40 @@ REPLY_MAP2=(
 ['@[0].normal[2].hr']='!!int'
 ['@[0].normal[6].key']='!!int'
 )
+```
+
+### ✅ Testing yaml::parseFile with visitor
+
+❯ `yaml::parseFile resources/ok/a-complete-example.yaml onKeyValueFunction=yamlVisitor`
+
+**Standard output**:
+
+```text
+coordinates.x
+coordinates.y
+element.alias
+element.description
+element.labels
+element.name
+element.opacity
+element.parent
+element.position.x
+element.position.y
+element.tags[0]
+element.tags[1]
+element.tags[2]
+element.tags[3].key
+element.visible
+jsonLike.key
+jsonLike.arr[0]
+sphere.x
+sphere.y
+sphere.x
+sphere.z
+sphere.r
+@[1]
+@[1].nullValue
+@[1].secondNullValue
 ```
 
 ### ✅ Testing yaml::parseFile and yaml::parseString are equal

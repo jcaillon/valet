@@ -33,6 +33,8 @@ function test_yaml::parseFile() {
   test::func yaml::parseFile "resources/ok/single-line-nested-arrays.yaml" prefixFirstDoc=true
   test::func yaml::parseFile "resources/ok/any-indent.yaml" prefixFirstDoc=true
 
+  test::title "✅ Testing yaml::parseFile with visitor"
+  test::exec yaml::parseFile "resources/ok/a-complete-example.yaml" onKeyValueFunction=yamlVisitor
 }
 
 function test_yaml::parseString() {
@@ -71,7 +73,13 @@ function stringifyReplyMaps() {
     done
     REPLY+=")"$'\n'
   done
+}
 
+function yamlVisitor() {
+  echo "${1}"
+  if [[ ! -v REPLY_MAP[${1}] ]]; then
+    test::fail "yamlVisitor: The key ${1@Q} is not in the REPLY_MAP associative array."
+  fi
 }
 
 main

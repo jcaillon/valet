@@ -419,7 +419,7 @@ function selfRelease_writeAllFunctionsDocumentation() {
     # init the file if necessary
     if [[ ! -v documentationPageContent["${path}"] ]]; then
       documentationPageContent["${path}"]="---
-title: 📂 ${packageName}
+title: ${packageName}
 cascade:
   type: docs
 url: /docs/libraries/${packageName}

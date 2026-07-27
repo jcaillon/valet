@@ -899,24 +899,33 @@ function yaml_duplicateKeys() {
   fi
 
   # copy all keys that start with the sourceKey
+  local -a keysToCopy=()
   local key newKey
   for key in "${!REPLY_MAP[@]}" "${!REPLY_MAP2[@]}"; do
     if [[ ${key} == "${sourceKey}"[\.\[]* ]]; then
-      newKey="${key#"${sourceKey}"}"
-      if [[ -v REPLY_MAP[${key}] ]]; then
-        REPLY_MAP["${targetKey}${newKey}"]="${REPLY_MAP[${key}]}"
-      fi
-      if [[ -v REPLY_MAP2[${key}] ]]; then
-        REPLY_MAP2["${targetKey}${newKey}"]="${REPLY_MAP2[${key}]}"
-      fi
-      ${kvCallbackFunc} "${targetKey}${newKey}"
+      for newKey in "${keysToCopy[@]}"; do
+        if [[ ${newKey} == "${key}" ]]; then
+          continue 2
+        fi
+      done
+      keysToCopy+=("${key}")
     fi
+  done
+  for key in "${keysToCopy[@]}"; do
+    newKey="${key#"${sourceKey}"}"
+    if [[ -v REPLY_MAP[${key}] ]]; then
+      REPLY_MAP["${targetKey}${newKey}"]="${REPLY_MAP[${key}]}"
+    fi
+    if [[ -v REPLY_MAP2[${key}] ]]; then
+      REPLY_MAP2["${targetKey}${newKey}"]="${REPLY_MAP2[${key}]}"
+    fi
+    ${kvCallbackFunc} "${targetKey}${newKey}"
   done
 }
 
 function yaml_mergeFlowCollectionIntoCurrentKey() {
-  local targetKey="${fullKey%'.<<'}"
-  targetKey="${targetKey%']<<'}"
+  local mergeTargetKey="${fullKey%'.<<'}"
+  mergeTargetKey="${mergeTargetKey%']<<'}"
 
   local key alias
   for key in "${!REPLY_MAP[@]}"; do
@@ -929,7 +938,7 @@ function yaml_mergeFlowCollectionIntoCurrentKey() {
       else
         alias="${alias:1}"
         if [[ -v aliases[${alias}] ]]; then
-          yaml_duplicateKeys "${aliases["${alias}"]}" "${targetKey}"
+          yaml_duplicateKeys "${aliases["${alias}"]}" "${mergeTargetKey}"
         else
           yaml_addParsingError "invalid alias ${alias@Q} (no anchor found for this alias)"
         fi

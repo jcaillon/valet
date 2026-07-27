@@ -33,6 +33,7 @@ jsonLike: {
   }
 sphere:
   <<: [ *point ]
+  x: 3
   z: 1
   r: 9.23
 ---
