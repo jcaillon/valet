@@ -111,6 +111,8 @@ Although you can simply `exit` from a command function, it is recommended to:
 
 > [!IMPORTANT]
 > In Valet, the following bash options are set: `set -Eeu -o pipefail`: your function will stop with an error if any statement returns an error code different from zero; this also include any program in a pipe (e.g. `myProgramThatFails | cat`). It will end with an error if you try to use an unset variable.
+>
+> Please check the [bash best practices page](/docs/bash-best-practices#notable-pitfalls) for more information on this topic and why it is enabled by default in Valet.
 
 The options `set -Eeu -o pipefail` have the [following meaning][bash-manual-set]:
 

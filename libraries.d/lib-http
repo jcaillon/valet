@@ -5,7 +5,7 @@
 # shellcheck source=lib-fs
 source fs
 
-# ## http::request (private)
+# ## http::request
 #
 # This function exists to demonstrate how to make a simple HTTP request using pure bash.
 # It should not be used for anything serious as it is seriously limited.
@@ -177,7 +177,7 @@ function http::request() {
     exitCode=1
   fi
 
-  if (( exitCode != 0 )); then
+  if ((exitCode != 0)); then
     if log::isDebugEnabled || [[ ${failOnError} == "true" ]]; then
       log::errorTrace "HTTP response:"
       log::printString "${headers}"$'\n'"${body:-}"

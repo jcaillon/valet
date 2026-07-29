@@ -107,23 +107,50 @@ Explicitly declare all the parameters of the function at the top of the function
 
 ## Notable pitfalls
 
-### Error handling / ERR trap in bash
+### errexit bash option and ERR trap in bash
 
-It is crucial to remember that any command executed in a `until`, `while`, `if`, or as part of a `!`, `||`, `&&` pipeline will not trigger the **ERR trap** if it fails! This behavior is described in the [trap builtin documentation](https://www.gnu.org/software/bash/manual/bash.html#index-trap) as well as in the [set builtin documentation](https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1) for the `-e` option.
+It is crucial to remember that any command executed in a `until`, `while`, `if`, or as part of a `!`, `||`, `&&` pipeline will not trigger the **ERR trap** if it fails! This behavior is described in the [trap builtin documentation][bashTrapReference] as well as in the [set builtin documentation][bashSetBuiltinReference] for the `-e` option.
 
 This is also true for the body of a function or for command/functions that runs in this context where the **ERR trap** is not triggered.
+
+When creating a complex function, do not use `return 1` (or any exit code different than 0) because this would encourage a bad usage of the function (i.e. it would encourage `if myfunction then...`). Instead, use `REPLY_CODE` and simply return 0 from the function. Of course, for very simple functions, it is acceptable to use `return 1` to simplify its usage.
+
+> [!IMPORTANT]
+> Do not call a complex function in a `until`, `while`, `if`, or as part of a `!`, `||`, `&&` pipeline because any error happening in the function will not trigger the **ERR trap** and will effectively be silent.
 
 See the [lessons-learned/error-handling.sh][error-handling] for a demonstration.
 
 > Quote from bash manual: If a compound command or shell function executes in a context where -e is being ignored, none of the commands executed within the compound command or function body will be affected by the -e setting, even if -e is set and a command returns a failure status.
 
-The bash option `nounset` will cause bash to exit without triggering the ERR trap if a variable is not set. This is because the ERR trap is only triggered by commands that return a non-zero exit status, and an unset variable does not return a non-zero exit status.
+This is the reason why many bash users recommend to not use `set -e` in bash scripts (see [bash pitfalls][bashPitfallReference]).
 
-> [!TIP]
-> Do not call a complex function in a `until`, `while`, `if`, or as part of a `!`, `||`, `&&` pipeline because any error happening in the function will not trigger the **ERR trap** and will effectively be silent.
+**However**, Valet has been designed with this pitfall in mind and all the library functions are written in a way that discourages users from using functions in a context where the **ERR trap** is not triggered.
 
-> [!TIP]
-> When creating a complex function, do not use `return` and set an exit code because this would encourage a bad usage of the function. Instead, use `REPLY` and simply return 0 from the function.
+Moreover, in my opinion, not using the `errexit` option will cause more issues because it allows the script to continue executing when it should have exited (e.g. after failing to change directory, which leads to run `rm -f ./*` in the wrong directory).
+
+For these reasons, I think that the `errexit` option is relevant and that's why it is enabled by default in Valet.
+
+### pipefail
+
+Same as errexit, there are some pitfalls with the `pipefail` option which are well explained in the (see [bash pitfalls][bashPitfallReference]) page.
+
+**However**, contrary to errexit, the errors produced by this option are always *defensive*. Meaning that sometimes it will cause the script to exit early when it should not, but it will never allow the script to continue when it should have exited.
+
+Moreover, since pipes create subshells, you should always avoid them in your scripts and they are never used in Valet itself.
+
+This is why I think that this option is relevant and should be enabled by default in Valet.
+
+### nounset bash option
+
+The bash option `nounset` will cause bash to exit if a variable is not set.
+
+Not that an unset variable will NOT trigger the ERR trap. This is because the ERR trap is only triggered by commands that return a non-zero exit status, and an unset variable does not return a non-zero exit status.
+
+Instead, it prints an error message to stderr and exits with a non-zero exit status.
+
+However, this error will always be caught during your tests and should never happen during the execution of your scripts by end users (or this means that the tests were not exhaustive enough).
+
+Thus, I believe that there are no good reasons to disable this option when writing new bash scripts.
 
 ### Jobs and coproc
 
@@ -149,3 +176,7 @@ To make our life easier, Valet only uses coproc and never uses jobs. Coproc are 
 [codingStyleTestSuite]: https://github.com/jcaillon/valet/blob/main/tests.d/coding-style/00.coding-style.sh
 
 {{< main-section-end >}}
+
+[bashPitfallReference]: https://mywiki.wooledge.org/BashPitfalls#set_-euo_pipefail
+[bashSetBuiltinReference]: https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin-1
+[bashTrapReference]: https://www.gnu.org/software/bash/manual/bash.html#index-trap

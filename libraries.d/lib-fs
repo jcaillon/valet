@@ -210,6 +210,7 @@ function fs::readFile() {
     read -rd '' REPLY <"${filePath}" || [[ -n ${REPLY} ]] || REPLY=""
     # fail safe for cases where the file is suppose to not be empty but we get null string
     if [[ -z ${REPLY} ]]; then
+      # CAVEAT: the trailing newline will be removed !
       REPLY="$(<"${filePath}")"
     fi
   fi
