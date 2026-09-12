@@ -36,7 +36,6 @@ options:
   description: |-
     Specify your valet extensions directory, in which to look for your extension commands.
     Defaults to the valet extensions directory.
-options:
 - name: --extra-extension-directories <path>
   description: |-
     Comma separated list of additional valet extension directories, in which to look for commands and libraries.
@@ -640,7 +639,8 @@ source string
 source version
 
 # if this script is run directly, execute the function, otherwise valet will do it
-if [[ ${_NOT_EXECUTED_FROM_VALET:-false} == "true" ]]; then
+if [[ ${_NOT_EXECUTED_FROM_VALET:-} == true ]]; then
   selfBuild "$@"
+  # shellcheck disable=SC2034
   GLOBAL_EXPECTED_EXIT=true
 fi

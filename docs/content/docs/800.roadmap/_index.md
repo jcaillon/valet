@@ -8,6 +8,27 @@ url: /docs/roadmap
 
 This page lists the features that I would like to implement in Valet. They come in addition to new features described in the [issues][valet-issues].
 
+Currently working on:
+
+- Revamp self build:
+  - <https://usage.jdx.dev/spec/reference/>
+  - an error in the user extensions should not prevent from building valet core commands so we don't fail an install
+  - add more checks on command definition
+  - Filter build command for `commands.d` directory
+  - we split the commands file into several one, per extension, so we don't have to load everything immediately
+  - self build has 2 modes: either build each command with the extension preprend (yg generate, showcase interactive); this is the default. Or also give the option to build the commands without the extension prefix.
+- Allow an extension maintainer to create a tool where valet is not mentioned. Idea: a simple shim that allows to override the valet COMMAND_YAML + translates XXX_ variables into VALET_variables + in the help, hint to use XXX_ vars instead of VALET_ vars.
+- When calling `valet extension-name`, it should show the commands of the extension.
+- Arguments parser:
+  - Make the program parser catch all global options and verify in the build command that we do not reuse the same global option in different commands.
+  - Allow options to be inherited from parent commands. We can check the existence of the base options in the command::parse function (for verbose, log level, progress bars). For source and version, mark them as `inherited: false` as we only want to handle them in the main parsing loop, at valet level.
+  - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
+- main menu:
+  - add info of the extension from which a command comes from
+  - in the menu we can filter by extension (and we see the extension of a command)
+
+Backlog:
+
 - rename `completedCallback` to `onCompletedFunction`
 - add test::run (that runs a valet command using parsmainArgs ? and myabe in a subshell ? see if we trigger the exit trap or not)
 - Fix: A spinner or progress bar is already running.
@@ -15,10 +36,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - make version a command instead of an option, and add a `valet version` command that shows the current version and the latest release. Also show the extension versions ?
 - add a self debug command to test waitForKeyPress / waitForChar.
 - validate execution of .env or .envrc
-- Arguments parser:
-  - Make the program parser catch all global options and verify in the build command that we do not reuse the same global option in different commands.
-  - Allow options to be inherited from parent commands. We can check the existence of the base options in the command::parse function (for verbose, log level, progress bars). For source and version, mark them as `inherited: false` as we only want to handle them in the main parsing loop, at valet level.
-  - allow an array for options `--file 1 --file 2` -> `files=(1 2)` `--file <files*>`
 - test the "sudo" feature: it runs the command by forking. We could add an option to instead rerun valet with sudo.
 - add a yaml library for basic parsing. Same for json. The parse method can optionally output .keys and .length variable allowing to easily loop over keys or arrays (e.g. REPLY_MAP["thing.stuff.length"])
 - Add tooltip in interactive functions (Enter shows help, Tab autocompletes, etc...)
@@ -34,21 +51,10 @@ This page lists the features that I would like to implement in Valet. They come 
   - Add a full screen view with the keyboard shortcuts in edit mode (new interactive::showFullScreenHelp ?).
 - fzf:
   - draw in a given rectangle, we handle full screen or not before calling sfzf
-- main menu:
-  - add info of the extension from which a command comes from
-  - in the menu we can filter by extension (and we see the extension of a command)
-- When calling `valet extension-name`, it should show the commands of the extension.
 - Add full support for interactive mode:
   - prompt the user in the scrolling terminal. Then we add an option to instead open a full screen editor.
 - In benchmark, with debug mode on, we can compute the time spent on each line of a function. See extdebug shopt.
 - add snippets for the esc codes. Add snippets on the global variables.
-- Revamp self build:
-  - <https://usage.jdx.dev/spec/reference/>
-  - an error in the user extensions should not prevent from building valet core commands so we don't fail an install
-  - add more checks on command definition
-  - Filter build command for `commands.d` directory
-  - we split the commands file into several one, per extension, so we don't have to load everything immediately
-  - self build has 2 modes: either build each command with the extension preprend (yg generate, showcase interactive); this is the default. Or also give the option to build the commands without the extension prefix.
 - Tests:
   - add an option to display the received outputs markdown instead of comparing (or in addition to comparing). We can add our own function to display a markdown file.
   - self-add-test
@@ -63,7 +69,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - For argument and option autocompletion, accept any multiline string that will be eval and that should set REPLY_ARRAY with the list of possible completion.
 - Generate an autocompletion script for bash and zsh.
 - Add a command `self package` that build the user commands into a single script file. We want to add options to the build command so we can exclude some commands. It will include all source required and try to minify the bash script.
-- Allow an extension maintainer to create a tool where valet is not mentioned. Idea: a simple shim that allows to override the valet COMMAND_YAML + translates XXX_ variables into VALET_variables + in the help, hint to use XXX_ vars instead of VALET_ vars.
 - add valet in brew
 - add man page for valet
 - Allow self release to release extensions.
@@ -76,7 +81,6 @@ This page lists the features that I would like to implement in Valet. They come 
 - Add a function to display a table, use it for benchmark.
 - Add a function to display a text using figlet fonts.
 - Links to file and line number of each function implementation.
-- implement a simple http server with accept
 
 [valet-issues]: https://github.com/jcaillon/valet/issues
 

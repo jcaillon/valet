@@ -78,13 +78,13 @@ Any new feature that you implement should be accompanied with a test suite.
 In any cases, you must then run all the tests to make sure nothing broke:
 
 ```bash
-valet self test --core-only
+valet self test --core
 ```
 
 If all the changes look legit, then approve them:
 
 ```bash
-valet self test --core-only --auto-approve
+valet self test --core --auto-approve
 ```
 
 ### Code Review

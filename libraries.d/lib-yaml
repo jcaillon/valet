@@ -68,8 +68,19 @@ source bash
 #
 #       - $1: the full key of the value (e.g. `@[0].nested.key`)
 #
-#       The value of the corresponding key can be read using REPLY_MAP["${1}"] and
-#       the tag of the value can be read using REPLY_MAP2["${1}"].
+#       The value of the corresponding key can be read using `REPLY_MAP["${1}"]` and
+#       the tag of the value can be read using `REPLY_MAP2["${1}"]`.
+#
+#       Note: a same key can be called multiple times if the key is a merge key, e.g. in the following example
+#             you will get two calls for the key `sphere.r`:
+#
+#       ```yaml
+#       default: &default
+#         r: 1
+#       sphere:
+#         <<: [ *default ]
+#         r: 3
+#       ```
 #
 #       (defaults to :)
 #
@@ -118,8 +129,21 @@ function yaml::parseFile() {
 #
 #       - $1: the full key of the value (e.g. `@[0].nested.key`)
 #
-#       The value of the corresponding key can be read using REPLY_MAP["${1}"] and
-#       the tag of the value can be read using REPLY_MAP2["${1}"].
+#       The value of the corresponding key can be read using `REPLY_MAP["${1}"]` and
+#       the tag of the value can be read using `REPLY_MAP2["${1}"]`.
+#
+#       Note: a same key can be called multiple times if the key is a merge key, e.g. in the following example
+#             you will get two calls for the key `sphere.r`:
+#
+#       ```yaml
+#       default: &default
+#         r: 1
+#       sphere:
+#         <<: [ *default ]
+#         r: 3
+#       ```
+#
+#       (defaults to :)
 #
 # Returns:
 #

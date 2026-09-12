@@ -1,0 +1,539 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+
+#===============================================================
+# >>> command: self build
+#===============================================================
+
+# shellcheck source=../libraries.d/lib-fs
+source fs
+# shellcheck source=../libraries.d/lib-array
+source array
+# shellcheck source=../libraries.d/lib-bash
+source bash
+# shellcheck source=../libraries.d/lib-string
+source string
+# shellcheck source=../libraries.d/lib-version
+source version
+
+: <<"COMMAND_YAML"
+command: self build2
+function: selfBuild
+author: github.com/jcaillon
+shortDescription: Index all the commands and libraries present in the valet extensions directory and installation directory.
+description: |-
+  Index all the commands and libraries present in the valet extensions directory and installation directory.
+
+  This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
+
+  Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in ⌜showcase.d⌝ directory to learn how to create and modified your commands.
+
+  This command:
+
+  - Makes a list of all the eligible files in which we could find command definitions.
+  - For each file in this list, extract the command definitions.
+  - Build your commands file (in your valet extensions directory) from these definitions.
+  - Makes a list of all `libraries.d` directories found in the user directory.
+options:
+- name: -d, --extensions-directory <path>
+  description: |-
+    Specify your valet extensions directory, in which to look for your extension commands.
+    Defaults to the valet extensions directory.
+    #default: '${| core::getExtensionsDirectory; }'
+- name: --extra-extension-directories <path>
+  description: |-
+    Comma separated list of additional valet extension directories, in which to look for commands and libraries.
+- name: -o, --output <path>
+  description: |-
+    Specify the directory path in which to write the command definition variable files.
+
+    This defaults to your user data folder `~/.local/share/valet`.
+    #default: '${| core::getUserDataDirectory; }'
+- name: -s, --silent
+  description: |-
+    Build silently without any info logs.
+examples:
+- name: self build
+  description: |-
+    Build the valet user commands.
+- name: self build -d ~/my-valet-directory --silent
+  description: |-
+    Build the valet user commands from the directory ⌜~/my-valet-directory⌝ and with minimal log output.
+COMMAND_YAML
+function selfBuild() {
+  # TODO: when calling from command::sourceCommandsIndex, overwrite command::parseArguments temporarily
+  # to set the values we want for the command.
+  command::parseArguments "$@"
+  eval "${REPLY}"
+  command::checkParsedResults
+
+  # TODO: remove once we handle default values with ${| command; }
+  core::getExtensionsDirectory
+  extensionsDirectory="${extensionsDirectory:-${REPLY}}"
+  core::getUserDataDirectory
+  output="${output:-${REPLY}}"
+
+  # get a list of absolute paths for all extension directories
+  fs::getAbsolutePath "${extensionsDirectory}"
+  fs::listDirectories "${REPLY}"
+  local -a extensionDirectories=("${REPLY_ARRAY[@]}")
+
+  if [[ -n ${extraExtensionDirectories:-} ]]; then
+    string::split extraExtensionDirectories ","
+    local directory
+    for directory in "${REPLY_ARRAY[@]}"; do
+      if [[ ! -d ${directory} ]]; then
+        core::fail "The extra extension directory ⌜${directory}⌝ does not exist."
+      fi
+      fs::getAbsolutePath "${directory}"
+      extensionDirectories+=("${REPLY}")
+    done
+  fi
+
+  # list all the library directories and command definition files in which we need to look for command definitions
+  fs::getAbsolutePath "${GLOBAL_INSTALLATION_DIRECTORY}"
+  local -a \
+    libraryDirectories=() \
+    commandDefinitionFiles=(
+      "${REPLY}/valet"
+      "${REPLY}/commands.d"/*.sh
+    )
+
+  local extensionDirectory
+  for extensionDirectory in "${extensionDirectories[@]}"; do
+    log::debug "Looking for commands and libraries in ⌜${extensionDirectory}⌝."
+    if [[ -d ${extensionDirectory}/libraries.d ]]; then
+      libraryDirectories+=("${extensionDirectory}/libraries.d")
+    fi
+    if [[ -d ${extensionDirectory}/commands.d ]]; then
+      commandDefinitionFiles+=("${extensionDirectory}/commands.d"/*.sh)
+    fi
+  done
+
+  if log::isDebugEnabled; then
+    local IFS=$'\n'
+    log::debug "Will extract command definitions from the following files:"$'\n'"${commandDefinitionFiles[*]}"
+  fi
+
+  # add the list of library directories
+  CMD_LIBRARY_DIRECTORIES=("${libraryDirectories[@]}")
+
+  # extract the command definitions to variables
+  # extractCommandDefinitionsToVariables "${commandDefinitionFiles[@]}"
+
+  # summarize
+
+  unset CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY
+
+  if [[ -n ${SELF_BUILD_ERRORS:-} ]]; then
+    core::fail "The valet user commands have not been successfully built. Please check the following errors:"$'\n'"${SELF_BUILD_ERRORS}"
+  fi
+
+  if [[ ${VALET_CONFIG_BUMP_VERSION_ON_BUILD:-false} == "true" ]]; then
+    bumpValetBuildVersion
+  fi
+
+  log::success "The valet user commands have been successfully built."
+}
+
+#===============================================================
+# >>> Internal functions
+#===============================================================
+
+# This function summarizes the command definitions that have been extracted for the user.
+function summarize() {
+  local -
+  set -o noglob
+  local -i numberOfVars=0
+  local _var
+  for _var in ${!CMD_*}; do
+    numberOfVars+=1
+  done
+
+  local message="== Summary of the commands =="$'\n\n'
+  message+="- Number of variables declared: ⌜${numberOfVars}⌝."$'\n'
+  message+="- Number of functions: ⌜${#CMD_ALL_FUNCTIONS_ARRAY[@]}⌝."$'\n'
+  message+="- Number of commands: ⌜${#CMD_ALL_COMMANDS_ARRAY[@]}⌝."$'\n'
+  message+="- Number of user library directories found: ⌜${#CMD_LIBRARY_DIRECTORIES[@]}⌝."$'\n'
+  message+="- Maximum sub command level: ⌜${CMD_MAX_SUB_COMMAND_LEVEL:-0}⌝."$'\n'
+
+  local IFS=$'\n'
+
+  if ((${#CMD_LIBRARY_DIRECTORIES[@]} > 0)); then
+    message+=$'\n'"== List of user library directories =="$'\n\n'
+    message+="${CMD_LIBRARY_DIRECTORIES[*]}"$'\n'
+  fi
+
+  message+=$'\n'"== List of all the hidden commands =="$'\n\n'
+  message+="${CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY[*]}"$'\n'
+
+  message+=$'\n'"== List of all the commands =="$'\n\n'
+  message+="${CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY[*]}"$'\n'
+
+  log::info "${message}"
+}
+
+# Bump the valet build version by one patch.
+function bumpValetBuildVersion() {
+  core::getVersion
+  local currentVersion="${REPLY:-0.0.0}"
+  currentVersion="${currentVersion%%$'\n'*}"
+
+  version::bump "${currentVersion}" "patch" keepPreRelease=true
+
+  printf '%s' "${REPLY}" >"${GLOBAL_INSTALLATION_DIRECTORY}/version"
+
+  log::info "The valet build version has been bumped to ⌜${REPLY}⌝."
+}
+
+# This function extracts the command definitions from the files and stores them in
+# CMD_BUILD_* global variables.
+#
+# $@: The files to extract from.
+function extractCommandDefinitionsToVariables() {
+  local IFS=$' \t\n'
+  local -i duplicatedCommands=0
+  while [[ $# -gt 0 ]]; do
+    local file="${1}"
+    shift
+    if [[ ${file} == *"*.sh" ]]; then
+      continue
+    fi
+    log::info "Extracting commands from ⌜${file}⌝."
+    selfBuild_extractCommandYamls "${file}"
+    local content
+    for content in "${REPLY_ARRAY[@]}"; do
+
+      if log::isTraceEnabled; then
+        log::trace "Extracting command definition for:"
+        log::printFileString content
+      fi
+
+      selfBuild_extractCommandDefinitionToVariables "${content}"
+
+      local function command
+      function="${TEMP_CMD_BUILD_function:-}"
+      string::trimAll function
+      command="${TEMP_CMD_BUILD_command:-}"
+      string::trimAll command
+
+      # trim the leading "valet" from the command
+      command="${command#valet }"
+      command="${command#valet}"
+
+      if array::contains CMD_ALL_COMMANDS_ARRAY command; then
+        log::warning "                         ├── Skipping ⌜${command}⌝ (already defined)."
+        duplicatedCommands+=1
+        continue
+      else
+        log::info "                         ├── ⌜${command}⌝."
+      fi
+
+      fs::getAbsolutePath "${file}" && TEMP_CMD_BUILD_fileToSource="${REPLY}"
+      TEMP_CMD_BUILD_fileToSource="${TEMP_CMD_BUILD_fileToSource#"${GLOBAL_INSTALLATION_DIRECTORY}"/}"
+
+      # make sure that all these arrays exists and have the same size
+      array::makeArraysSameSize TEMP_CMD_BUILD_options_name TEMP_CMD_BUILD_options_description TEMP_CMD_BUILD_options_noEnvironmentVariable TEMP_CMD_BUILD_options_default
+      array::makeArraysSameSize TEMP_CMD_BUILD_arguments_name TEMP_CMD_BUILD_arguments_description
+      array::makeArraysSameSize TEMP_CMD_BUILD_examples_name TEMP_CMD_BUILD_examples_description
+
+      if log::isTraceEnabled; then
+        # shellcheck disable=SC2086
+        bash::getBuiltinOutput declare -p ${!TEMP_CMD_BUILD_*}
+        local declaredVariables="${REPLY}"
+        log::trace "Declared variables for this command:"
+        log::printFileString declaredVariables
+      fi
+
+      # verify that the command definition is valid
+      selfBuild_verifyCommandDefinition "${function}" "${command}"
+
+      # declare common variables
+      declareFinalCommandDefinitionCommonVariables "${function}" "${command}"
+
+      # declare help variables
+      declareFinalCommandDefinitionHelpVariables "${function}"
+
+      # declare options and arguments for the parser
+      declareFinalCommandDefinitionParserVariables "${function}"
+    done
+  done
+
+  # declare complementary variables
+  declareOtherCommandVariables
+
+  if ((duplicatedCommands > 0)); then
+    core::fail "There are ${duplicatedCommands} duplicated commands, please remove them. Do you have a duplicated folder in your valet extensions directory?"
+  fi
+}
+
+# This function uses the global TEMP_CMD_BUILD_* variables to declare the final
+# command definition variables that are needed in the commands file.
+#
+# Declared variables:
+# CMD_ALL_FUNCTIONS_ARRAY = array of all the functions callable with a command
+# CMD_ALL_COMMANDS_ARRAY = array of all the commands
+# CMD_ALL_MENU_COMMANDS_ARRAY = array of all the commands that should open a sub menu to show a list of sub commands
+# CMD_MAX_SUB_COMMAND_LEVEL = maximum number of sub command levels; e.g. 'command subcommand subsubcommand' has 2 levels
+# CMD_MAX_COMMAND_WIDTH = get the maximum width (nb characters) among all commands
+# CMD_FUNCTION_NAME_yyy = the function name for the given yyy command
+# CMD_COMMAND_xxx = the command of the function
+# CMD_FILETOSOURCE_xxx = the file to source for the function
+# CMD_HIDEINMENU_xxx = true to hide the command in the menu
+function declareFinalCommandDefinitionCommonVariables() {
+  local -
+  set -o noglob
+
+  local function command
+  function="${1}"
+  command="${2}"
+
+  # add to the list of all the functions
+  CMD_ALL_FUNCTIONS_ARRAY+=("${function}")
+
+  # add to the list of all the commands
+  if [[ -n ${command} ]]; then
+    CMD_ALL_COMMANDS_ARRAY+=("${command}")
+  fi
+
+  # get the maximum number of sub command levels; e.g. 'command subcommand subsubcommand' has 2 levels,
+  # we count the number of spaces in the command name
+  local -i level=-1
+  local word
+  for word in ${command}; do
+    level+=1
+  done
+  if [[ "${level}" -gt "${CMD_MAX_SUB_COMMAND_LEVEL:--1}" ]]; then
+    CMD_MAX_SUB_COMMAND_LEVEL="${level}"
+  fi
+
+  # make a list of all the commands that should open a sub menu to show a list of sub commands
+  # takes each word of the command except the last one
+  local parentCommand=""
+  local -i index=0
+  for word in ${command}; do
+    if [[ index -lt level ]]; then
+      parentCommand+=" ${word}"
+    else
+      break
+    fi
+    index+=1
+  done
+  parentCommand="${parentCommand# }"
+  if [[ -n ${parentCommand} ]]; then
+    array::appendIfNotPresent CMD_ALL_MENU_COMMANDS_ARRAY parentCommand
+    if ((REPLY_CODE != 0)); then
+      declare -g "CMD_FUNCTION_NAME_${parentCommand//[^[:alnum:]]/_}"="_menu"
+    fi
+  fi
+
+  # get the maximum width (nb characters) among all commands
+  local -i width="${#command}"
+  if [[ "${width}" -gt "${CMD_MAX_COMMAND_WIDTH:-0}" ]]; then
+    CMD_MAX_COMMAND_WIDTH="${width}"
+  fi
+
+  # get the function name from a command
+  declare -g "CMD_FUNCTION_NAME_${command//[^[:alnum:]]/_}"="${function}"
+
+  # declare basic properties
+  declare -g "CMD_COMMAND_${function}"="${command}"
+  declare -g "CMD_FILETOSOURCE_${function}"="${TEMP_CMD_BUILD_fileToSource}"
+  if [[ ${TEMP_CMD_BUILD_hideInMenu:-false} == "true" ]]; then
+    declare -g "CMD_HIDEINMENU_${function}"=true
+  fi
+}
+
+# This function uses the global TEMP_CMD_BUILD_* variables to declare the final
+# command definition variables that are needed in the commands file.
+#
+# Declared variables:
+# CMD_SHORTDESCRIPTION_xxx = the short description of the function
+# CMD_DESCRIPTION_xxx = the description of the function
+# CMD_SUDO_xxx = true if the function requires sudo
+# CMD_EXAMPLES_NAME_xxx = array with each example name
+# CMD_EXAMPLES_DESCRIPTION_xxx = array with each example description
+# CMD_OPTIONS_NAME_xxx = array with each option name
+# CMD_OPTIONS_DESCRIPTION_xxx = array with each option description
+# CMD_ARGUMENTS_NAME_xxx = array with each argument name
+# CMD_ARGUMENTS_DESCRIPTION_xxx = array with each argument description
+#
+# shellcheck disable=SC2154
+function declareFinalCommandDefinitionHelpVariables() {
+  local function="${1}"
+
+  declare -g "CMD_SHORT_DESCRIPTION_${function}"="${TEMP_CMD_BUILD_shortDescription}"
+  declare -g "CMD_DESCRIPTION_${function}"="${TEMP_CMD_BUILD_description}"
+  if [[ -n ${TEMP_CMD_BUILD_sudo:-} ]]; then declare -g "CMD_SUDO_${function}"="${TEMP_CMD_BUILD_sudo}"; fi
+
+  # add the default --help option
+  TEMP_CMD_BUILD_options_name+=("-h, --help")
+  TEMP_CMD_BUILD_options_description+=("Display the help for this command.")
+  TEMP_CMD_BUILD_options_noEnvironmentVariable+=("true")
+
+  # for each option, add the text to specify the possibility to define it with an env var
+  local -i index
+  local optionValue
+  for ((index = 0; index < ${#TEMP_CMD_BUILD_options_name[@]}; index++)); do
+    if [[ "${TEMP_CMD_BUILD_options_noEnvironmentVariable[index]}" != "true" ]]; then
+      optionValue="${TEMP_CMD_BUILD_options_name[index]}"
+      if [[ ${optionValue} == *"<"* ]]; then optionValue="<${optionValue##*<}"; else optionValue="true"; fi
+      selfBuild_extractFirstLongNameFromOptionString "${TEMP_CMD_BUILD_options_name[index]}"
+      string::getSnakeCase REPLY
+      TEMP_CMD_BUILD_options_description[index]+=$'\n'"This option can be set by exporting the variable VALET_${REPLY}='${optionValue}'."
+    fi
+  done
+
+  # for each example, prepend valet to the example name
+  local example
+  local -a examples=()
+  for example in "${TEMP_CMD_BUILD_examples_name[@]}"; do
+    if [[ ${example} == "!"* ]]; then
+      examples+=("${example:1}")
+    else
+      examples+=("valet ${example}")
+    fi
+  done
+
+  # declare examples, arguments and options for the help
+  if [[ "${#examples[@]}" -gt 0 ]]; then eval "CMD_EXAMPLES_NAME_${function}=(\"\${examples[@]}\")"; fi
+  if [[ "${#TEMP_CMD_BUILD_examples_description[@]}" -gt 0 ]]; then eval "CMD_EXAMPLES_DESCRIPTION_${function}=(\"\${TEMP_CMD_BUILD_examples_description[@]}\")"; fi
+  eval "CMD_OPTIONS_NAME_${function}=(\"\${TEMP_CMD_BUILD_options_name[@]}\")"
+  eval "CMD_OPTIONS_DESCRIPTION_${function}=(\"\${TEMP_CMD_BUILD_options_description[@]}\")"
+  if [[ "${#TEMP_CMD_BUILD_arguments_name[@]}" -gt 0 ]]; then eval "CMD_ARGUMENTS_NAME_${function}=(\"\${TEMP_CMD_BUILD_arguments_name[@]}\")"; fi
+  if [[ "${#TEMP_CMD_BUILD_arguments_description[@]}" -gt 0 ]]; then eval "CMD_ARGUMENTS_DESCRIPTION_${function}=(\"\${TEMP_CMD_BUILD_arguments_description[@]}\")"; fi
+
+  return 0
+}
+
+# Declare the following variables:
+#
+# CMD_OPTS_xxx = array with each option separated by a space
+# CMD_OPTS_HAS_VALUE_xxx = array which indicates for each option if it has a value or not
+# CMD_OPTS_NAME_xxx = array with each option names in camel case
+# CMD_OPTS_NAME_SC_xxx = array with each option names in snake case
+# CMD_OPTS_DEFAULT_xxx = contains the default value for this option
+#
+# CMD_ARGS_NAME_xxx = array with each argument names in camel case
+# CMD_ARGS_LAST_IS_ARRAY_xxx = true/false to indicate if the last argument of the function is an array (contains with ...)
+# CMD_ARGS_NB_OPTIONAL_xxx = integer to indicate the number of optional arguments (contains ?)
+function declareFinalCommandDefinitionParserVariables() {
+  local function="${1}"
+
+  # for each option
+  local -i index
+  local option optionName optionNameSc optionNameCc optionHasValue optionNoEnvVar
+  for ((index = 0; index < ${#TEMP_CMD_BUILD_options_name[@]}; index++)); do
+    option="${TEMP_CMD_BUILD_options_name[index]}"
+    optionNoEnvVar="${TEMP_CMD_BUILD_options_noEnvironmentVariable[index]}"
+    if [[ ${option} == *"<"* ]]; then
+      optionHasValue="true"
+      option="${option%%<*}"
+    else
+      optionHasValue="false"
+    fi
+    option="${option//,/ }"
+    string::trimAll option
+    selfBuild_extractFirstLongNameFromOptionString "${option}"
+    # shellcheck disable=SC2034
+    optionName="${REPLY}"
+    string::getCamelCase optionName
+    optionNameCc="${REPLY}"
+    if [[ "${optionNoEnvVar}" != "true" ]]; then
+      string::getSnakeCase optionName
+      optionNameSc="${REPLY}"
+      optionNameSc="VALET_${optionNameSc}"
+    else
+      optionNameSc=""
+    fi
+
+    eval "CMD_OPTS_${function}+=(\"${option}\")"
+    eval "CMD_OPTS_HAS_VALUE_${function}+=(\"${optionHasValue}\")"
+    eval "CMD_OPTS_NAME_${function}+=(\"${optionNameCc}\")"
+    eval "CMD_OPTS_NAME_SC_${function}+=(\"${optionNameSc}\")"
+    eval "CMD_OPTS_DEFAULT_${function}+=(\"${TEMP_CMD_BUILD_options_default[index]:-}\")"
+  done
+
+  # for each arguments
+  if [[ "${#TEMP_CMD_BUILD_arguments_name[@]}" -gt 0 ]]; then
+    local argument lastArgumentIsArray
+    local -i nbOptionalArguments=0
+    for ((index = 0; index < ${#TEMP_CMD_BUILD_arguments_name[@]}; index++)); do
+      argument="${TEMP_CMD_BUILD_arguments_name[index]}"
+      if [[ ${argument} == *"..."* ]]; then
+        argument="${argument//\.\.\./}"
+        lastArgumentIsArray="true"
+      fi
+      if [[ ${argument} == *"?"* ]]; then
+        argument="${argument//\?/}"
+        nbOptionalArguments+=1
+      fi
+      string::getCamelCase argument
+      eval "CMD_ARGS_NAME_${function}+=(\"${REPLY}\")"
+    done
+    declare -g "CMD_ARGS_LAST_IS_ARRAY_${function}"="${lastArgumentIsArray:-false}"
+    declare -g "CMD_ARGS_NB_OPTIONAL_${function}"="${nbOptionalArguments}"
+  fi
+
+  return 0
+}
+
+# This function declare additional variables that are needed in the commands file.
+# It is executed after all the command definitions have been extracted.
+#
+# Declared variables:
+# CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY = the input used to display the commands menu
+# CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY = all the commands that are not shown in the menu
+# CMD_COMMANDS_NAME_this = array with each sub command name
+# CMD_COMMANDS_DESCRIPTION_this = array with each sub commmand short description
+# CMD_ALL_FUNCTIONS = list all the functions callable with a command
+# CMD_ALL_COMMANDS = list all the commands
+# shellcheck disable=SC2034
+function declareOtherCommandVariables() {
+  # sort commands in alphabetical order
+  array::sort CMD_ALL_COMMANDS_ARRAY
+
+  CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY=()
+  CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY=()
+  CMD_COMMANDS_NAME_this=()
+  CMD_COMMANDS_DESCRIPTION_this=()
+
+  # for each command
+  local command line
+  for command in "${CMD_ALL_COMMANDS_ARRAY[@]}"; do
+    if [[ -z ${command} ]]; then continue; fi
+
+    # get the function name from a command
+    local -n function="CMD_FUNCTION_NAME_${command//[^[:alnum:]]/_}"
+    local -n shortDescription="CMD_SHORT_DESCRIPTION_${function}"
+    local -n hideInMenu="CMD_HIDEINMENU_${function}"
+
+    printf -v line "%-$((CMD_MAX_COMMAND_WIDTH + 4))s%s" "${command}" "${shortDescription}"
+
+    # declare the command menu body
+    if [[ ${hideInMenu:-false} == "true" ]]; then
+      CMD_ALL_COMMAND_SELECTION_HIDDEN_ITEMS_ARRAY+=("${line}")
+    else
+      CMD_ALL_COMMAND_SELECTION_ITEMS_ARRAY+=("${line}")
+    fi
+
+    # declare the sub commands for the main menu
+    CMD_COMMANDS_NAME_this+=("${command}")
+    CMD_COMMANDS_DESCRIPTION_this+=("${shortDescription}")
+  done
+
+  # CMD_ALL_COMMANDS and CMD_ALL_FUNCTIONS
+  local IFS=$'\n'
+  CMD_ALL_COMMANDS="${CMD_ALL_MENU_COMMANDS_ARRAY[*]}"$'\n'"${CMD_ALL_COMMANDS_ARRAY[*]}"
+  CMD_ALL_FUNCTIONS="${CMD_ALL_FUNCTIONS_ARRAY[*]}"
+  unset IFS
+
+  # declare additional variables for the sub commands menu
+  CMD_DESCRIPTION__menu="Show a menu with sub commands for the current command."
+  CMD_OPTIONS_NAME__menu="-h, --help"
+  CMD_OPTIONS_DESCRIPTION__menu="Display the help for this command."
+  CMD_OPTS__menu=("-h --help")
+  CMD_OPTS_NAME__menu=("help")
+
+  return 0
+}

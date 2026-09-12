@@ -41,9 +41,9 @@ options:
 - name: -r, --replay-failed-tests
   description: |-
     Replay the failed tests from the previous run (or run all tests if none failed).
-- name: -c, --core-only
+- name: -c, --core
   description: |-
-    Only test the valet core functions. Skips the tests for user commands.
+    Test the valet core functions and commands instead of the user commands.
 
     This option is intended to be used by people modifying valet itself.
 - name: -i, --include <pattern>
@@ -123,7 +123,7 @@ function selfTest() {
     _TEST_FAILED_TEST_SUITE_DIRECTORIES=() \
     _TEST_SKIPPED_TEST_SUITE_NAMES=()
 
-  if [[ ${coreOnly:-} == "true" && ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/tests.d ]]; then
+  if [[ ${core:-} == "true" && ! -d ${GLOBAL_INSTALLATION_DIRECTORY}/tests.d ]]; then
     core::fail "The valet core tests directory ⌜${GLOBAL_INSTALLATION_DIRECTORY}/tests.d⌝ does not exist, cannot run core tests."
   fi
 
@@ -134,7 +134,7 @@ function selfTest() {
   local buildOutputDirectory="${REPLY}"
 
   # core test suites
-  if [[ ${coreOnly} == "true" ]]; then
+  if [[ ${core} == "true" ]]; then
     # we need to rebuild the commands for the core commands only
     selfTestUtils_rebuildCommands --extensions-directory "${GLOBAL_INSTALLATION_DIRECTORY}/no-directory" --extra-extension-directories "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d/.mock-extension,${GLOBAL_INSTALLATION_DIRECTORY}/showcase.d" --output "${buildOutputDirectory}"
   else
@@ -163,7 +163,7 @@ function selfTest() {
   fi
 
   if ((${#_TEST_SUITE_NAMES[@]} == 0)); then
-    if [[ ${coreOnly:-false} == "true" ]]; then
+    if [[ ${core:-false} == "true" ]]; then
       # core test suites
       selfTest_addTestSuites "${GLOBAL_INSTALLATION_DIRECTORY}/tests.d" "${buildOutputDirectory}"
 
