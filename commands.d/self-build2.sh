@@ -18,7 +18,7 @@ source version
 
 : <<"COMMAND_YAML"
 command: self build2
-function: selfBuild
+function: selfBuild2
 author: github.com/jcaillon
 shortDescription: Index all the commands and libraries present in the valet extensions directory and installation directory.
 description: |-
@@ -60,7 +60,7 @@ examples:
   description: |-
     Build the valet user commands from the directory ⌜~/my-valet-directory⌝ and with minimal log output.
 COMMAND_YAML
-function selfBuild() {
+function selfBuild2() {
   # TODO: when calling from command::sourceCommandsIndex, overwrite command::parseArguments temporarily
   # to set the values we want for the command.
   command::parseArguments "$@"

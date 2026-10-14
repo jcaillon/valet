@@ -29,6 +29,7 @@ Currently working on:
 
 Backlog:
 
+- implement a runInParallelBatches that groups up command into n batches and runs them.
 - rename `completedCallback` to `onCompletedFunction`
 - add test::run (that runs a valet command using parsmainArgs ? and myabe in a subshell ? see if we trigger the exit trap or not)
 - Fix: A spinner or progress bar is already running.

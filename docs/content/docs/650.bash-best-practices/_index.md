@@ -169,6 +169,14 @@ To make our life easier, Valet only uses coproc and never uses jobs. Coproc are 
 > [!TIP]
 > For background tasks, always use the [coproc](../libraries/coproc) library which correctly handles all the subtleties of correctly managing a coproc.
 
+### Aliases
+
+It sounds like a good idea to use aliases in Valet to speed up the execution time by aliasing functions that should get bypassed in certain conditions.
+
+For example, define `alias log::debug=': #' log::trace=': #'` to bypass the debug and trace logging functions when they are not needed.
+
+However, aliases are expanded when a function definition is read, not when the function is executed. So if we do that, we would bypass the logging functions even if we unalias them later.
+
 [lessons-learned]: https://github.com/jcaillon/valet/tree/main/lessons-learned
 [error-handling]: https://github.com/jcaillon/valet/tree/main/lessons-learned/error-handling.sh
 [cliGuidelineReference]: https://clig.dev/
