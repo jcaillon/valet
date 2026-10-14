@@ -8,6 +8,177 @@ source fs
 source string
 # shellcheck source=lib-bash
 source bash
+# shellcheck source=lib-array
+source array
+
+# ## yaml::writeString
+#
+# Writes a YAML string from the provided associative arrays:
+#
+# - a bash associative array containing each value of the YAML accessible in flattened nested dot notation,
+# - a second associative array with the metadata of each node (tags of each non string values and length of arrays).
+#
+# For example, with the following associative arrays:
+#
+# ```sh
+# REPLY_MAP['array[0]']="true"
+# REPLY_MAP['array[1]']="1"
+# REPLY_MAP['nested.key']="value"
+#
+# REPLY_MAP2['@.length']="1"
+# REPLY_MAP2['array.length']=2
+# REPLY_MAP2["array[0]"]='!!bool'
+# REPLY_MAP2["array[1]"]='!!int'
+# ```
+#
+# this function will write the following YAML string:
+#
+# ```yaml
+# array:
+#   - true
+#   - 1
+# nested:
+#   key: value
+# ```
+#
+# For scalar values, strings are always quoted and boolean/integer/float/null are not.
+#
+# - $1: **yaml associative array** _as string_:
+#       The associative array containing the YAML values in flattened nested dot notation.
+# - $2: **metadata associative array** _as string_:
+#       The associative array containing the metadata of each node (tags of each non string values and length of arrays).
+#
+# Returns:
+#
+# - ${REPLY}: the resulting YAML string.
+#
+# ```bash
+# yaml::parseFile "file.yaml"
+# yaml::writeString REPLY_MAP REPLY_MAP2
+# echo "${REPLY}"
+# ```
+function yaml::writeString() {
+  local -n \
+    yamlMap="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}" \
+    metadataMap="${2?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
+
+  local -a keys=("${!yamlMap[@]}")
+  array::sort keys
+
+  local currentIndentString="" key remainingKey keyPart chunk chunkPart quotedValue
+  local -i keyIndex keyPartIndex isNewKey documentIndex
+  local -a keyParts=() currentKeyParts=()
+
+  REPLY=""
+  if ((${metadataMap['@.length']:-1} > 1)); then
+    REPLY+="---"$'\n'
+  fi
+
+  # TODO: bug, does not write empty: [] sequences correctly
+  # TODO: bug, does not correctly write the tags !!
+
+  for ((documentIndex = 0; documentIndex < ${metadataMap['@.length']:-1}; documentIndex++)); do
+    if ((documentIndex > 0)); then
+      REPLY+="---"$'\n'
+    fi
+    for ((keyIndex = 0; keyIndex < ${#keys[@]}; keyIndex++)); do
+
+      key="${keys[keyIndex]}"
+      if [[ ${key:0:1} != '@' ]]; then
+        if [[ ${documentIndex} -gt 0 ]]; then
+          continue
+        fi
+      else
+        if [[ ${key:0:4} != "@[${documentIndex}]" ]]; then
+          continue
+        fi
+      fi
+
+      # split the key into parts based on dots and brackets
+      # (each array index is treated as a separate part)
+      keyParts=()
+      remainingKey="${key#"@[${documentIndex}]"}"
+      remainingKey="${remainingKey#.}"
+      while [[ -n ${remainingKey} ]]; do
+        if [[ ${remainingKey:0:1} == \" ]]; then
+          remainingKey="${remainingKey#\"}"
+          chunk="\"${remainingKey%%\"*}\""
+          remainingKey="${remainingKey:${#chunk}-1}"
+          while [[ ${chunk: -2} == \\\" ]]; do
+            chunkPart="${remainingKey%%\"*}"
+            chunk+="${chunkPart}\""
+            remainingKey="${remainingKey:${#chunkPart}+1}"
+          done
+          if [[ ${remainingKey:0:1} == . ]]; then
+            remainingKey="${remainingKey:1}"
+          elif [[ ${remainingKey:0:1} != '[' && ${#remainingKey} -gt 0 ]]; then
+            core::fail "Found invalid yaml key while writing yaml: ${key@Q}, remainingKey: ${remainingKey@Q}"
+          fi
+        else
+          chunk="${remainingKey%%.*}"
+          if [[ ${chunk:0:1} == '[' ]]; then
+            chunk="${chunk#[}"
+            chunk="[${chunk%%[*}"
+            remainingKey="${remainingKey:${#chunk}}"
+            remainingKey="${remainingKey#.}"
+          elif [[ ${chunk: -1} == ']' ]]; then
+            chunk="${chunk%%[*}"
+            remainingKey="${remainingKey:${#chunk}}"
+          else
+            remainingKey="${remainingKey:${#chunk}+1}"
+          fi
+        fi
+        keyParts+=("${chunk}")
+      done
+
+      isNewKey=0
+      currentIndentString=""
+      if ((${#keyParts[@]} - 1 >= 0)); then
+        currentKeyParts=("${currentKeyParts[@]:0:${#keyParts[@]}-1}")
+      fi
+      for ((keyPartIndex = 0; keyPartIndex < ${#keyParts[@]} - 1; keyPartIndex++)); do
+        keyPart="${keyParts[keyPartIndex]}"
+        if [[ ${isNewKey} == 1 || "${keyPart}" != "${currentKeyParts[keyPartIndex]:-}" ]]; then
+          isNewKey=1
+          currentKeyParts[keyPartIndex]="${keyPart}"
+          if [[ ${keyPart:0:1} == '[' ]]; then
+            REPLY+="${currentIndentString}- "$'\n'
+          else
+            REPLY+="${currentIndentString}${keyPart}:"$'\n'
+          fi
+        fi
+        currentIndentString+="  "
+      done
+
+      if ((${#keyParts[@]} > 0)); then
+        # write the final key-value pair
+        if [[ ${keyParts[-1]:0:1} == '[' ]]; then
+          REPLY+="${currentIndentString}- "
+        else
+          REPLY+="${currentIndentString}${keyParts[-1]}: "
+        fi
+      fi
+
+      case "${metadataMap["${key}"]:-}" in
+      "!!bool" | "!!int" | "!!float")
+        REPLY+="${yamlMap["${key}"]}"$'\n'
+        ;;
+      "!!null")
+        REPLY+="null"$'\n'
+        ;;
+      *)
+        # originally used printf %q but it adds too many backslashes (e.g. before each space and parenthesis)
+        quotedValue="${yamlMap["${key}"]//\\/\\\\}"
+        quotedValue="${quotedValue//\"/\\\"}"
+        quotedValue="${quotedValue//$'\n'/\\n}"
+        quotedValue="${quotedValue//$'\r'/\\r}"
+        quotedValue="${quotedValue//$'\t'/\\t}"
+        REPLY+="\"${quotedValue}\""$'\n'
+        ;;
+      esac
+    done
+  done
+}
 
 # ## yaml::parseFile
 #
@@ -33,7 +204,7 @@ source bash
 # REPLY_MAP['array[1]']="1"
 # REPLY_MAP['nested.key']="value"
 #
-# REPLY_MAP2['@.length']="0"
+# REPLY_MAP2['@.length']="1"
 # REPLY_MAP2['array.length']=2
 # REPLY_MAP2["array[0]"]='!!bool'
 # REPLY_MAP2["array[1]"]='!!int'
@@ -510,10 +681,10 @@ function yaml_handleLine() {
       # trim end spaces
       value="${REPLY%"${REPLY##*[^[:space:]]}"}"
     else
-      # trim end spaces
-      keyName="${REPLY%"${REPLY##*[^[:space:]]}"}"
-
       if [[ ${line} == ":"* ]]; then
+        # trim end spaces
+        keyName="${REPLY%"${REPLY##*[^[:space:]]}"}"
+
         # register keyname
         if [[ (${firstChar} == [\'\"] && -z ${keyName}) || ${keyName} == *[\.\[]* ]]; then
           # key was quoted and need to be re-quoted
@@ -559,7 +730,11 @@ function yaml_handleLine() {
           value="${line}"
         fi
       else
-        value="${keyName}"
+        value="${REPLY}"
+        if [[ ${firstChar} != [\'\"] ]]; then
+          # trim end spaces
+          value="${value%"${value##*[^[:space:]]}"}"
+        fi
         keyName=""
       fi
 
@@ -583,8 +758,8 @@ function yaml_handleLine() {
             # trim ending spaces
             value="${value%"${value##*[^[:space:]]}"}"
           fi
-          # not a quoted value, we possibly need to compute a tag
-          if [[ -z ${valueTag} ]]; then
+          # not a quoted value, we possibly need to compute a tag (for array, compute later)
+          if [[ -z ${valueTag} && ${isArrayItemStart} != true ]]; then
             yaml_computeValueTag
           fi
         fi
@@ -687,6 +862,7 @@ function yaml_handleLine() {
         value="${value:${#inArrayIndent}}"
       done
     fi
+    yaml_computeValueTag
   else
     arrayIndex=$((indentLevelIndex - 1))
     if ((arrayIndex >= 0 && arrayIndexes[arrayIndex] >= 0)); then
@@ -732,6 +908,7 @@ function yaml_handleLine() {
       # the doc contains only a simple scalar value
       fullKey="${docPrefix%.}"
       fullKey="${fullKey:-"@[${docNumber}]"}"
+      keyPaths=("")
       return 0
     fi
 
@@ -784,6 +961,7 @@ function yaml_handleLine() {
     fullKey="${docPrefix%.}"
     fullKey="${fullKey:-"@[${docNumber}]"}"
     yaml_saveValue
+    keyPaths=("")
     return 0
 
   elif [[ -z ${keyName} && ${isKeyWithoutValue} == "true" && -n ${value} ]]; then
@@ -870,6 +1048,7 @@ function yaml_extractFirstQuotedTextFromLine() {
     REPLY="${line%%\"*}"
     REPLY="${REPLY//$'\a'/\"}"
     line="${line:${#REPLY}}"
+    REPLY="${REPLY//\\ / }"
     # in a double quoted value, we also want to convert \n, \t, \uXXXX... to their actual value
     eval "REPLY=$'${REPLY//\'/\\\'}'"
   fi

@@ -1,0 +1,26 @@
+a.fist.key:
+  '2':
+    t"hr"ee:
+      - five: "some\ value\ escaped\ spaces \n"
+arr1:
+  - arr2:
+      - - 1
+        - 2
+      - - 3
+  - key: 4
+content: |-
+  Or we
+  can auto
+  convert line breaks
+  to save space
+defaults:
+  host: localhost
+  port: 8080
+  ssl: false
+  scientific: 1.23015e+3
+  null:
+  null2: null
+favorite_colors:
+  - red
+  - green
+  - "blue \n"

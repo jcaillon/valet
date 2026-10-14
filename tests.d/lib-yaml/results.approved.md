@@ -48,6 +48,9 @@ sphere:
 ---
 simple scalar
 ---
+"quoted
+string"
+---
 nullValue:
 secondNullValue:
 ```
@@ -61,8 +64,9 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['@[1]']='simple scalar'
-['@[1].nullValue']='null'
-['@[1].secondNullValue']='null'
+['@[2]']='quoted string'
+['@[3].nullValue']='null'
+['@[3].secondNullValue']='null'
 ['coordinates.x']='1'
 ['coordinates.y']='2'
 ['element.alias']='3'
@@ -88,9 +92,9 @@ that can span multiple lines.
 ['sphere.z']='1'
 )
 REPLY_MAP2=(
-['@.length']='2'
-['@[1].nullValue']='!!null'
-['@[1].secondNullValue']='!!null'
+['@.length']='4'
+['@[3].nullValue']='!!null'
+['@[3].secondNullValue']='!!null'
 ['coordinates.x']='!!int'
 ['coordinates.y']='!!int'
 ['element.opacity']='!!float'
@@ -1684,6 +1688,8 @@ REPLY_MAP2=(
 ['custom.application specific tag']='!e!tag'
 ['custom.picture']='!!binary'
 ['explicitTypes.length']='6'
+['explicitTypes[0]']='!!int'
+['explicitTypes[1]']='!!int'
 ['explicitTypes[2]']='!!int'
 ['explicitTypes[3]']='!!float'
 ['explicitTypes[4]']='!!bool'
@@ -1733,6 +1739,87 @@ REPLY_MAP=(
 REPLY_MAP2=(
 ['@.length']='1'
 ['k3.length']='3'
+)
+```
+
+> cat `resources/ok/write.yaml`
+
+```text
+a.fist.key:
+  '2':
+    t"hr"ee:
+      - five: "some\ value\ escaped\ spaces \n"
+arr1:
+  - arr2:
+      - - 1
+        - 2
+      - - 3
+  - key: 4
+content: |-
+  Or we
+  can auto
+  convert line breaks
+  to save space
+defaults:
+  host: localhost
+  port: 8080
+  ssl: false
+  scientific: 1.23015e+3
+  null:
+  null2: null
+favorite_colors:
+  - red
+  - green
+  - "blue \n"
+
+```
+
+❯ `yaml::parseFile resources/ok/write.yaml`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY=''
+REPLY_MAP=(
+['"a.fist.key".2.t"hr"ee[0].five']='some value escaped spaces 
+'
+['arr1[0].arr2[0][0]']='1'
+['arr1[0].arr2[0][1]']='2'
+['arr1[0].arr2[1][0]']='3'
+['arr1[1].key']='4'
+['content']='Or we
+can auto
+convert line breaks
+to save space'
+['defaults.host']='localhost'
+['defaults.null']='null'
+['defaults.null2']='null'
+['defaults.port']='8080'
+['defaults.scientific']='1.23015e+3'
+['defaults.ssl']='false'
+['favorite_colors[0]']='red'
+['favorite_colors[1]']='green'
+['favorite_colors[2]']='blue 
+'
+)
+REPLY_MAP2=(
+['"a.fist.key".2.t"hr"ee.length']='1'
+['@.length']='1'
+['arr1.length']='2'
+['arr1[0].arr2.length']='2'
+['arr1[0].arr2[0].length']='2'
+['arr1[0].arr2[0][0]']='!!int'
+['arr1[0].arr2[0][1]']='!!int'
+['arr1[0].arr2[1].length']='1'
+['arr1[0].arr2[1][0]']='!!int'
+['arr1[1].key']='!!int'
+['defaults.null']='!!null'
+['defaults.null2']='!!null'
+['defaults.port']='!!int'
+['defaults.scientific']='!!float'
+['defaults.ssl']='!!bool'
+['favorite_colors.length']='3'
 )
 ```
 
@@ -1872,9 +1959,89 @@ sphere.x
 sphere.z
 sphere.r
 @[1]
-@[1].nullValue
-@[1].secondNullValue
+@[2]
+@[3].nullValue
+@[3].secondNullValue
 ```
 
-### ✅ Testing yaml::parseFile and yaml::parseString are equal
+### ✅ Testing the results of yaml::parseFile, yaml::parseString, yaml::writeString
+
+outputs of yaml::parseFile and yaml::parseString are equal
+
+parsing a file, then writing it back using testing yaml::writeString, then reparsing the output yield to the same result
+
+### ✅ Testing yaml::writeString function
+
+Returned variables:
+
+```text
+REPLY='"a.fist.key":
+  2:
+    t"hr"ee:
+      - 
+        five: "some value escaped spaces \n"
+arr1:
+  - 
+    arr2:
+      - 
+        - 1
+        - 2
+      - 
+        - 3
+  - 
+    key: 4
+content: "Or we\ncan auto\nconvert line breaks\nto save space"
+defaults:
+  host: "localhost"
+  null: null
+  null2: null
+  port: 8080
+  scientific: 1.23015e+3
+  ssl: false
+favorite_colors:
+  - "red"
+  - "green"
+  - "blue \n"
+'
+REPLY_MAP=(
+['"a.fist.key".2.t"hr"ee[0].five']='some value escaped spaces 
+'
+['arr1[0].arr2[0][0]']='1'
+['arr1[0].arr2[0][1]']='2'
+['arr1[0].arr2[1][0]']='3'
+['arr1[1].key']='4'
+['content']='Or we
+can auto
+convert line breaks
+to save space'
+['defaults.host']='localhost'
+['defaults.null']='null'
+['defaults.null2']='null'
+['defaults.port']='8080'
+['defaults.scientific']='1.23015e+3'
+['defaults.ssl']='false'
+['favorite_colors[0]']='red'
+['favorite_colors[1]']='green'
+['favorite_colors[2]']='blue 
+'
+)
+REPLY_MAP2=(
+['"a.fist.key".2.t"hr"ee.length']='1'
+['@.length']='1'
+['arr1.length']='2'
+['arr1[0].arr2.length']='2'
+['arr1[0].arr2[0].length']='2'
+['arr1[0].arr2[0][0]']='!!int'
+['arr1[0].arr2[0][1]']='!!int'
+['arr1[0].arr2[1].length']='1'
+['arr1[0].arr2[1][0]']='!!int'
+['arr1[1].key']='!!int'
+['defaults.null']='!!null'
+['defaults.null2']='!!null'
+['defaults.port']='!!int'
+['defaults.scientific']='!!float'
+['defaults.ssl']='!!bool'
+['favorite_colors.length']='3'
+)
+```
 

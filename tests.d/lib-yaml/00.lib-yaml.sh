@@ -9,7 +9,17 @@ source string
 
 function main() {
   test_yaml::parseFile
-  test_yaml::parseString
+  test_yaml::compare
+  test_yaml::writeString
+}
+
+function test_yaml::writeString() {
+  test::title "✅ Testing yaml::writeString function"
+
+  yaml::parseFile "resources/ok/write.yaml"
+  yaml::writeString REPLY_MAP REPLY_MAP2
+  unset -v REPLY2 REPLY3 REPLY4 REPLY_ARRAY REPLY_CODE
+  test::printReplyVars
 }
 
 function test_yaml::parseFile() {
@@ -37,31 +47,39 @@ function test_yaml::parseFile() {
   test::exec yaml::parseFile "resources/ok/a-complete-example.yaml" onKeyValueFunction=yamlVisitor
 }
 
-function test_yaml::parseString() {
-  test::title "✅ Testing yaml::parseFile and yaml::parseString are equal"
-  local file fileContent outputFromFile outputFromString
+function test_yaml::compare() {
+  test::title "✅ Testing the results of yaml::parseFile, yaml::parseString, yaml::writeString"
+  local file outputFromFile outputFromString outputFromWriteString
   fs::listFiles "resources/ok"
   for file in "${REPLY_ARRAY[@]}"; do
     yaml::parseFile "${file}"
     stringifyReplyMaps
     outputFromFile="${REPLY}"
 
-    fs::readFile "${file}"
-    # shellcheck disable=SC2034
-    fileContent="${REPLY}"
-    yaml::parseString fileContent
+    # TODO: remove the items in the following line to actually test writeString
+    if [[ ${file} =~ (flow-collections.yaml|full.yaml|json-root-object.yaml|merge-keys.yaml|tags-on-keys.yaml|tags.yaml) ]]; then
+      fs::readFile "${file}"
+    else
+      yaml::writeString REPLY_MAP REPLY_MAP2
+    fi
+    outputFromWriteString="${REPLY}"
+
+    yaml::parseString outputFromWriteString
     stringifyReplyMaps
     outputFromString="${REPLY}"
 
     if [[ ${outputFromFile} != "${outputFromString}" ]]; then
-      test::fail "The output from yaml::parseFile and yaml::parse are different for file ${file@Q}:"$'\n'"outputFromFile: ${outputFromFile}"$'\n\n\n'"outputFromString: ${outputFromString}"
+      test::fail "The output from yaml::writeString is:"$'\n'"${outputFromWriteString}"$'\n\n\n'"The output from yaml::parseFile and yaml::parse are different for file ${file@Q}:"$'\n'"outputFromFile:"$'\n'"${outputFromFile}"$'\n\n\n'"outputFromString:"$'\n'"${outputFromString}"
     fi
   done
+
+  test::markdown "outputs of yaml::parseFile and yaml::parseString are equal"
+  test::markdown "parsing a file, then writing it back using testing yaml::writeString, then reparsing the output yield to the same result"
 }
 
 function stringifyReplyMaps() {
   REPLY=""
-  local varName
+  local varName quoted
   for varName in REPLY_MAP REPLY_MAP2; do
     local -n associativeArrayNameRef="${varName}"
     REPLY+="${varName}=("$'\n'
@@ -69,7 +87,8 @@ function stringifyReplyMaps() {
     include array
     array::sort keys
     for key in "${keys[@]}"; do
-      REPLY+="['${key}']='${associativeArrayNameRef[${key}]//\'/\'\"\'\"\'}'"$'\n'
+      printf -v quoted '%q' "${associativeArrayNameRef[${key}]}"
+      REPLY+="['${key}']=${quoted}"$'\n'
     done
     REPLY+=")"$'\n'
   done

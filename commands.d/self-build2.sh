@@ -16,7 +16,8 @@ source string
 # shellcheck source=../libraries.d/lib-version
 source version
 
-: <<"COMMAND_YAML"
+# TODO: this is a work in progress, do not use ! change below line to activate
+: <<"COMMAND_YAML_ignored"
 command: self build2
 function: selfBuild2
 author: github.com/jcaillon
@@ -59,7 +60,7 @@ examples:
 - name: self build -d ~/my-valet-directory --silent
   description: |-
     Build the valet user commands from the directory ⌜~/my-valet-directory⌝ and with minimal log output.
-COMMAND_YAML
+COMMAND_YAML_ignored
 function selfBuild2() {
   # TODO: when calling from command::sourceCommandsIndex, overwrite command::parseArguments temporarily
   # to set the values we want for the command.

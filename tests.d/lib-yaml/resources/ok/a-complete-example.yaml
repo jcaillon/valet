@@ -39,5 +39,8 @@ sphere:
 ---
 simple scalar
 ---
+"quoted
+string"
+---
 nullValue:
 secondNullValue:

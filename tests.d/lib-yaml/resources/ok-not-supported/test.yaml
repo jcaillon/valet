@@ -1,12 +1,6 @@
-{
-  "users": [
-    name: Alice,
-    {
-      "name": "Bob"
-    },
-    {
-      "name": "Jack"
-    }
-  ],
-  "version": "1.0.0"
-}
+other: { # comment !!
+  ?    key
+  with
+
+  spaces
+  }

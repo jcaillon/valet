@@ -34,6 +34,7 @@ INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/h
 INFO                              ├── ⌜help⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-build.sh⌝.
 INFO                              ├── ⌜self build⌝.
+INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-build2.sh⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-config.sh⌝.
 INFO                              ├── ⌜self config⌝.
 INFO     Extracting commands from ⌜$GLOBAL_INSTALLATION_DIRECTORY/commands.d/self-document.sh⌝.

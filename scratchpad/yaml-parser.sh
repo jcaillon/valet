@@ -20,7 +20,8 @@ array::sort keys
 
 REPLY="REPLY_MAP=("$'\n'
 for key in "${keys[@]}"; do
-  REPLY+="[\"${key}\"]='${REPLY_MAP[${key}]//\'/\'\"\'\"\'}'"$'\n'
+  printf -v QUOTED '%q' "${REPLY_MAP[${key}]}"
+  REPLY+="[\"${key}\"]=${QUOTED}"$'\n'
 done
 REPLY+=")"$'\n'
 
@@ -32,7 +33,8 @@ array::sort keys
 
 REPLY="REPLY_MAP2=("$'\n'
 for key in "${keys[@]}"; do
-  REPLY+="[\"${key}\"]='${REPLY_MAP2[${key}]//\'/\'\"\'\"\'}'"$'\n'
+  printf -v QUOTED '%q' "${REPLY_MAP2[${key}]}"
+  REPLY+="[\"${key}\"]=${QUOTED}"$'\n'
 done
 REPLY+=")"$'\n'
 

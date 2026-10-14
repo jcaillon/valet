@@ -636,9 +636,6 @@ function core::setShellOptions() {
     shopt -u varredir_close patsub_replacement
   fi
 
-  # remove all aliases
-  # unalias -a
-
   # unset important variables
   unset -v CDPATH TMOUT
 

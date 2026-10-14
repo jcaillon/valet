@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2034
+GLOBAL_EXPECTED_EXIT=true
+# shellcheck source=../libraries.d/main
+source "$(valet --source)"
+include yaml
+
+log::setLevel debug
+
+REPLY_MAP=(
+  ["arrayLengths.arr1[0]"]=one
+  ["arrayLengths.arr2[0]"]=1
+  ["arrayLengths.arr2[1]"]=2
+  ["arrayLengths.arr3[0]"]=1
+  ["arrayLengths.arr3[1]"]=2
+  ["arrayLengths.arr3[2]"]=3
+  ["ff."""]=empty\ key
+  ["ff.another null value"]=null
+  ["ff.k.null2"]=null
+  ["ff.k2[0].null3"]=null
+  ["ff.k2[1].null4"]=null
+  ["ff.null value"]=null
+  ["hi[0]"]=$'double\nquoted'
+  ["hi[1]"]=single\ quoted
+  ["hi[2]"]=plain\ text
+  ["hi[3][0]"]=nested
+  ["hi[4].single"]=pair
+  ["other.fu.nested"]=$'val \'": quoted string\nnewline'
+  ["other.key     with         spaces"]=$'value\nwith      spaces     as well'
+  ["other.key with
+spaces"]=null
+  ["thing[0].five[0][0][0]"]=val
+  ["thing[0].five[1].key.arr[0].k"]=v
+  ["thing[0].five[1].key.arr[1].k2"]=v2
+  ["thing[0].five[2]"]=tricky:stuff
+  ["thing[0].one"]=two
+  ["thing[0].three"]=four
+  ["thing[1][0]"]=1
+  ["thing[1][1]"]=quoted
+  ["thing[1][2].key"]=value
+  ["thing[1][3].key2"]=val2
+  ["thing[1][4].null"]=nullkey
+  ["thing[1][5]"]=:simplevalue
+  ["thing[2].five"]=six
+  ["thing[2].key[0]"]=1
+  ["thing[2].key[1].arr[0]"]=sub2
+  ["thing[2].key[1].sub"]=k
+  ["thing[2].seven"]=8
+  ["thing[3].k"]=1
+  ["thing[4].a[0]"]=1
+  ["thing[4].a[1]"]=2
+  ["thing[4].b"]=3
+  ["thing[5].a.b"]=1
+  ["thing[5].c"]=2
+  ["types1[0]"]=1.23015e+3
+  ["types1[10]"]=true
+  ["types1[11]"]=FALSE
+  ["types1[12]"]=TruE
+  ["types1[13]"]=NULL
+  ["types1[14]"]=null
+  ["types1[15]"]=\~
+  ["types1[16]"]=123.456.345
+  ["types1[1]"]=12.3015e+02
+  ["types1[2]"]=1230.15
+  ["types1[3]"]=-.inf
+  ["types1[4]"]=.nan
+  ["types1[5]"]=0o14
+  ["types1[6]"]=+12345
+  ["types1[7]"]=-9
+  ["types1[8]"]=78
+  ["types1[9]"]=0xC
+  ["types2.bool.b1"]=false
+  ["types2.bool.b2"]=TRUE
+  ["types2.bool.b3"]=FalSe
+  ["types2.float.exponential"]=1230.15
+  ["types2.float.fixed"]=1230.15
+  ["types2.float.negative infinity"]=-.inf
+  ["types2.float.not a number"]=.nan
+  ["types2.float.scientific"]=1230.15
+  ["types2.int.baseten"]=78
+  ["types2.int.hexadecimal"]=12
+  ["types2.int.octal"]=12
+  ["types2.int.signed"]=12345
+  ["types2.int.signed2"]=-9
+  ["types2.null.null"]=null
+  ["types2.null.null2"]=Null
+  ["types2.null.null3"]=\~
+  ["types2.string.anythingElse"]=ergezrg
+  ["types2.string.notFloat"]=123.456.345
+)
+
+REPLY_MAP2=(
+  ["@.length"]=1
+  ["arrayLengths.arr0.length"]=0
+  ["arrayLengths.arr1.length"]=1
+  ["arrayLengths.arr2.length"]=2
+  ["arrayLengths.arr2[0]"]=\!\!int
+  ["arrayLengths.arr2[1]"]=\!\!int
+  ["arrayLengths.arr3.length"]=3
+  ["arrayLengths.arr3[0]"]=\!\!int
+  ["arrayLengths.arr3[1]"]=\!\!int
+  ["arrayLengths.arr3[2]"]=\!\!int
+  ["ff.another null value"]=\!\!null
+  ["ff.k.null2"]=\!\!null
+  ["ff.k2.length"]=2
+  ["ff.k2[0].null3"]=\!\!null
+  ["ff.k2[1].null4"]=\!\!null
+  ["ff.null value"]=\!\!null
+  ["hi.length"]=5
+  ["hi[3].length"]=1
+  ["other.key with
+spaces"]=\!\!null
+  ["thing.length"]=6
+  ["thing[0].five.length"]=3
+  ["thing[0].five[0].length"]=1
+  ["thing[0].five[0][0].length"]=1
+  ["thing[0].five[1].key.arr.length"]=2
+  ["thing[1].length"]=6
+  ["thing[1][0]"]=\!\!int
+  ["thing[2].key.length"]=2
+  ["thing[2].key[0]"]=\!\!int
+  ["thing[2].key[1].arr.length"]=1
+  ["thing[2].seven"]=\!\!int
+  ["thing[3].k"]=\!\!int
+  ["thing[4].a.length"]=2
+  ["thing[4].a[0]"]=\!\!int
+  ["thing[4].a[1]"]=\!\!int
+  ["thing[4].b"]=\!\!int
+  ["thing[5].a.b"]=\!\!int
+  ["thing[5].c"]=\!\!int
+  ["types1.length"]=17
+  ["types1[0]"]=\!\!float
+  ["types1[10]"]=\!\!bool
+  ["types1[11]"]=\!\!bool
+  ["types1[12]"]=\!\!bool
+  ["types1[13]"]=\!\!null
+  ["types1[14]"]=\!\!null
+  ["types1[15]"]=\!\!null
+  ["types1[1]"]=\!\!float
+  ["types1[2]"]=\!\!float
+  ["types1[3]"]=\!\!float
+  ["types1[4]"]=\!\!float
+  ["types1[5]"]=\!\!int
+  ["types1[6]"]=\!\!int
+  ["types1[7]"]=\!\!int
+  ["types1[8]"]=\!\!int
+  ["types1[9]"]=\!\!int
+  ["types2.bool.b1"]=\!\!bool
+  ["types2.bool.b2"]=\!\!bool
+  ["types2.bool.b3"]=\!\!bool
+  ["types2.float.exponential"]=\!\!float
+  ["types2.float.fixed"]=\!\!float
+  ["types2.float.negative infinity"]=\!\!float
+  ["types2.float.not a number"]=\!\!float
+  ["types2.float.scientific"]=\!\!float
+  ["types2.int.baseten"]=\!\!int
+  ["types2.int.hexadecimal"]=\!\!int
+  ["types2.int.octal"]=\!\!int
+  ["types2.int.signed"]=\!\!int
+  ["types2.int.signed2"]=\!\!int
+  ["types2.null.null"]=\!\!null
+  ["types2.null.null2"]=\!\!null
+  ["types2.null.null3"]=\!\!null
+)
+
+# yaml::parseFile tests.d/lib-yaml/resources/ok/flow-collections.yaml
+
+yaml::writeString REPLY_MAP REPLY_MAP2
+echo "${REPLY}"
