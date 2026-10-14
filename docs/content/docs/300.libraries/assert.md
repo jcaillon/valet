@@ -90,4 +90,4 @@ assert::isPath "/path/to/file"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.43.381 (2026-07-27).
+> Documentation generated for the version 0.44.176 (2026-10-15).

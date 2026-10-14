@@ -29,7 +29,7 @@ REPLY_MAP['array[0]']="true"
 REPLY_MAP['array[1]']="1"
 REPLY_MAP['nested.key']="value"
 
-REPLY_MAP2['@.length']="0"
+REPLY_MAP2['@.length']="1"
 REPLY_MAP2['array.length']=2
 REPLY_MAP2["array[0]"]='!!bool'
 REPLY_MAP2["array[1]"]='!!int'
@@ -75,8 +75,19 @@ Inputs:
 
   - $1: the full key of the value (e.g. `@[0].nested.key`)
 
-  The value of the corresponding key can be read using REPLY_MAP["${1}"] and
-  the tag of the value can be read using REPLY_MAP2["${1}"].
+  The value of the corresponding key can be read using `REPLY_MAP["${1}"]` and
+  the tag of the value can be read using `REPLY_MAP2["${1}"]`.
+
+  Note: a same key can be called multiple times if the key is a merge key, e.g. in the following example
+        you will get two calls for the key `sphere.r`:
+
+  ```yaml
+  default: &default
+    r: 1
+  sphere:
+    <<: [ *default ]
+    r: 3
+  ```
 
 
   (defaults to :)
@@ -129,8 +140,22 @@ Inputs:
 
   - $1: the full key of the value (e.g. `@[0].nested.key`)
 
-  The value of the corresponding key can be read using REPLY_MAP["${1}"] and
-  the tag of the value can be read using REPLY_MAP2["${1}"].
+  The value of the corresponding key can be read using `REPLY_MAP["${1}"]` and
+  the tag of the value can be read using `REPLY_MAP2["${1}"]`.
+
+  Note: a same key can be called multiple times if the key is a merge key, e.g. in the following example
+        you will get two calls for the key `sphere.r`:
+
+  ```yaml
+  default: &default
+    r: 1
+  sphere:
+    <<: [ *default ]
+    r: 3
+  ```
+
+
+  (defaults to :)
 
 Returns:
 
@@ -148,5 +173,59 @@ yaml::parseString "variableName" noFail=true
 declare -p REPLY_MAP
 ```
 
+## yaml::writeString
+
+Writes a YAML string from the provided associative arrays:
+
+- a bash associative array containing each value of the YAML accessible in flattened nested dot notation,
+- a second associative array with the metadata of each node (tags of each non string values and length of arrays).
+
+For example, with the following associative arrays:
+
+```sh
+REPLY_MAP['array[0]']="true"
+REPLY_MAP['array[1]']="1"
+REPLY_MAP['nested.key']="value"
+
+REPLY_MAP2['@.length']="1"
+REPLY_MAP2['array.length']=2
+REPLY_MAP2["array[0]"]='!!bool'
+REPLY_MAP2["array[1]"]='!!int'
+```
+
+this function will write the following YAML string:
+
+```yaml
+array:
+  - true
+  - 1
+nested:
+  key: value
+```
+
+For scalar values, strings are always quoted and boolean/integer/float/null are not.
+
+Inputs:
+
+- `$1`: **yaml associative array** _as string_:
+
+  The associative array containing the YAML values in flattened nested dot notation.
+
+- `$2`: **metadata associative array** _as string_:
+
+  The associative array containing the metadata of each node (tags of each non string values and length of arrays).
+
+Returns:
+
+- `${REPLY}`: the resulting YAML string.
+
+Example usage:
+
+```bash
+yaml::parseFile "file.yaml"
+yaml::writeString REPLY_MAP REPLY_MAP2
+echo "${REPLY}"
+```
+
 > [!IMPORTANT]
-> Documentation generated for the version 0.43.381 (2026-07-27).
+> Documentation generated for the version 0.44.176 (2026-10-15).

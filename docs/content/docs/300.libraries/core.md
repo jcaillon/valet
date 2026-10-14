@@ -323,4 +323,4 @@ _OPTION_CONTINUE_IF_NOT_FOUND=false _OPTION_RETURN_CODE_IF_ALREADY_INCLUDED=2 so
 Parses a YAML.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.43.381 (2026-07-27).
+> Documentation generated for the version 0.44.176 (2026-10-15).

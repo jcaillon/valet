@@ -391,4 +391,4 @@ bash::unsetShellOption nocasematch
 > The builtin shopt cannot be scoped to a function (it is always global), this is why this function exists.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.43.381 (2026-07-27).
+> Documentation generated for the version 0.44.176 (2026-10-15).

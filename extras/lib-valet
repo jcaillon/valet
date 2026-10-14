@@ -2,7 +2,7 @@
 # This script contains the documentation of all the valet library functions.
 # It can be used in your editor to provide auto-completion and documentation.
 #
-# Documentation generated for the version 0.43.381 (2026-07-27).
+# Documentation generated for the version 0.44.176 (2026-10-15).
 
 # ## array::appendIfNotPresent
 # 
@@ -1871,6 +1871,52 @@ function fs::readFile() { :; }
 # > #TODO: use mapfile quantum to not have to read the whole file in a single go.
 # 
 function fs::tail() { :; }
+
+# ## http::request
+# 
+# This function exists to demonstrate how to make a simple HTTP request using pure bash.
+# It should not be used for anything serious as it is seriously limited.
+# BUG: It only handles pure text responses (can't download anything else than plain text, json and such).
+# **Seriously, use curl instead!**
+# 
+# - $1: **verb** _as string_:
+#       The HTTP verb to use (GET, POST, PUT, DELETE, etc.).
+# - $2: **url** _as string_:
+#       The URL to request. Can be http or https but it will only send a request to port 80 anyway.
+# - ${failOnError} _as bool_:
+#       (optional) If true, the function will use core::fail if the HTTP status code is not acceptable.
+#       (defaults to false)
+# - ${acceptableCodes} _as string_:
+#       (optional) The list of acceptable status codes, comma separated.
+#       (defaults to 200,201,202,204,301,304,308)
+# - ${output} _as string_:
+#       (optional) The file in which to save the output of the request.
+#       (defaults to "" which means the body will be returned in the variable `REPLY`)
+# - ${followRedirection} _as bool_:
+#       (optional) If true, the function will follow redirections.
+#       (defaults to false)
+# - ${timeout} _as int_:
+#       (optional) The timeout in seconds for the response (can be a decimal number).
+#       (defaults to 5)
+# 
+# Returns:
+# 
+# - ${REPLY_CODE}:
+#   - 0 if the http status code is acceptable
+#   - 1 otherwise
+# - ${REPLY}: the body of the response or the path to the file where it was saved
+# - ${REPLY2}: the headers of the response
+# - ${REPLY3}: the http status code
+# 
+# ```bash
+# VALET_CONFIG_ENABLE_INSECURE_WEB_REQUESTS=true
+# http::request GET http://example.com failOnError=true acceptableCodes=200,201 followRedirection=true
+# http::request GET https://api.ip2location.io/ output=test.json
+# http::request GET http://httpbin.org/get
+# echo "Returns HTTP code was ${REPLY3}, response:"$'\n'"${REPLY2}"$'\n'"${REPLY}"
+# ```
+# 
+function http::request() { :; }
 
 # ## include
 # 
@@ -4836,7 +4882,7 @@ function windows::startPs1Batch() { :; }
 # REPLY_MAP['array[1]']="1"
 # REPLY_MAP['nested.key']="value"
 # 
-# REPLY_MAP2['@.length']="0"
+# REPLY_MAP2['@.length']="1"
 # REPLY_MAP2['array.length']=2
 # REPLY_MAP2["array[0]"]='!!bool'
 # REPLY_MAP2["array[1]"]='!!int'
@@ -4871,8 +4917,19 @@ function windows::startPs1Batch() { :; }
 # 
 #       - $1: the full key of the value (e.g. `@[0].nested.key`)
 # 
-#       The value of the corresponding key can be read using REPLY_MAP["${1}"] and
-#       the tag of the value can be read using REPLY_MAP2["${1}"].
+#       The value of the corresponding key can be read using `REPLY_MAP["${1}"]` and
+#       the tag of the value can be read using `REPLY_MAP2["${1}"]`.
+# 
+#       Note: a same key can be called multiple times if the key is a merge key, e.g. in the following example
+#             you will get two calls for the key `sphere.r`:
+# 
+#       ```yaml
+#       default: &default
+#         r: 1
+#       sphere:
+#         <<: [ *default ]
+#         r: 3
+#       ```
 # 
 #       (defaults to :)
 # 
@@ -4913,8 +4970,21 @@ function yaml::parseFile() { :; }
 # 
 #       - $1: the full key of the value (e.g. `@[0].nested.key`)
 # 
-#       The value of the corresponding key can be read using REPLY_MAP["${1}"] and
-#       the tag of the value can be read using REPLY_MAP2["${1}"].
+#       The value of the corresponding key can be read using `REPLY_MAP["${1}"]` and
+#       the tag of the value can be read using `REPLY_MAP2["${1}"]`.
+# 
+#       Note: a same key can be called multiple times if the key is a merge key, e.g. in the following example
+#             you will get two calls for the key `sphere.r`:
+# 
+#       ```yaml
+#       default: &default
+#         r: 1
+#       sphere:
+#         <<: [ *default ]
+#         r: 3
+#       ```
+# 
+#       (defaults to :)
 # 
 # Returns:
 # 
@@ -4931,6 +5001,55 @@ function yaml::parseFile() { :; }
 # ```
 # 
 function yaml::parseString() { :; }
+
+# ## yaml::writeString
+# 
+# Writes a YAML string from the provided associative arrays:
+# 
+# - a bash associative array containing each value of the YAML accessible in flattened nested dot notation,
+# - a second associative array with the metadata of each node (tags of each non string values and length of arrays).
+# 
+# For example, with the following associative arrays:
+# 
+# ```sh
+# REPLY_MAP['array[0]']="true"
+# REPLY_MAP['array[1]']="1"
+# REPLY_MAP['nested.key']="value"
+# 
+# REPLY_MAP2['@.length']="1"
+# REPLY_MAP2['array.length']=2
+# REPLY_MAP2["array[0]"]='!!bool'
+# REPLY_MAP2["array[1]"]='!!int'
+# ```
+# 
+# this function will write the following YAML string:
+# 
+# ```yaml
+# array:
+#   - true
+#   - 1
+# nested:
+#   key: value
+# ```
+# 
+# For scalar values, strings are always quoted and boolean/integer/float/null are not.
+# 
+# - $1: **yaml associative array** _as string_:
+#       The associative array containing the YAML values in flattened nested dot notation.
+# - $2: **metadata associative array** _as string_:
+#       The associative array containing the metadata of each node (tags of each non string values and length of arrays).
+# 
+# Returns:
+# 
+# - ${REPLY}: the resulting YAML string.
+# 
+# ```bash
+# yaml::parseFile "file.yaml"
+# yaml::writeString REPLY_MAP REPLY_MAP2
+# echo "${REPLY}"
+# ```
+# 
+function yaml::writeString() { :; }
 
 # ## yaml_parse
 # 

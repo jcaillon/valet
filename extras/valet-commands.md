@@ -1,6 +1,6 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.43.381 (2026-07-27).
+> Documentation generated for the version 0.44.176 (2026-10-15).
 
 ## valet bash bootstrap
 
@@ -573,6 +573,70 @@ valet self build [options]
 
   Build the valet user commands from the directory **~/my-valet-directory** and with minimal log output.
 
+## valet self build2
+
+### Synopsis
+
+Index all the commands and libraries present in the valet extensions directory and installation directory.
+
+This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
+
+Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in **showcase.d** directory to learn how to create and modified your commands.
+
+This command:
+
+- Makes a list of all the eligible files in which we could find command definitions.
+- For each file in this list, extract the command definitions.
+- Build your commands file (in your valet extensions directory) from these definitions.
+- Makes a list of all `libraries.d` directories found in the user directory.
+
+### Usage
+
+```bash
+valet self build2 [options]
+```
+
+### Options
+
+- `-d, --extensions-directory <path>`
+
+  Specify your valet extensions directory, in which to look for your extension commands.
+  Defaults to the valet extensions directory.
+  #default: '${| core::getExtensionsDirectory; }'
+  This option can be set by exporting the variable VALET_EXTENSIONS_DIRECTORY='<path>'.
+
+- `--extra-extension-directories <path>`
+
+  Comma separated list of additional valet extension directories, in which to look for commands and libraries.
+  This option can be set by exporting the variable VALET_EXTRA_EXTENSION_DIRECTORIES='<path>'.
+
+- `-o, --output <path>`
+
+  Specify the directory path in which to write the command definition variable files.
+  
+  This defaults to your user data folder `~/.local/share/valet`.
+  #default: '${| core::getUserDataDirectory; }'
+  This option can be set by exporting the variable VALET_OUTPUT='<path>'.
+
+- `-s, --silent`
+
+  Build silently without any info logs.
+  This option can be set by exporting the variable VALET_SILENT='true'.
+
+- `-h, --help`
+
+  Display the help for this command.
+
+### Examples
+
+- `valet self build`
+
+  Build the valet user commands.
+
+- `valet self build -d ~/my-valet-directory --silent`
+
+  Build the valet user commands from the directory **~/my-valet-directory** and with minimal log output.
+
 ## valet self config
 
 ### Synopsis
@@ -855,12 +919,12 @@ valet self test [options]
   Replay the failed tests from the previous run (or run all tests if none failed).
   This option can be set by exporting the variable VALET_REPLAY_FAILED_TESTS='true'.
 
-- `-c, --core-only`
+- `-c, --core`
 
-  Only test the valet core functions. Skips the tests for user commands.
+  Test the valet core functions and commands instead of the user commands.
   
   This option is intended to be used by people modifying valet itself.
-  This option can be set by exporting the variable VALET_CORE_ONLY='true'.
+  This option can be set by exporting the variable VALET_CORE='true'.
 
 - `-i, --include <pattern>`
 
@@ -1114,9 +1178,9 @@ valet [options] [--] [commands...]
 
   Cleanup AWS resources.
 
-- `aws-find-secret`
+- `aws-find-secrets`
 
-  Find a secret from AWS Secrets Manager.
+  Find secrets from AWS Secrets Manager.
 
 - `aws-login`
 
@@ -1190,6 +1254,14 @@ valet [options] [--] [commands...]
 
   Generate the yaml from the given kustomize directory.
 
+- `gitlab clone-group`
+
+  Clone (or fetch + rebase) all projects of a group on GitLab.
+
+- `gitlab list-deployed-helm`
+
+  List deployed Helm charts.
+
 - `gitops-generate-manifests`
 
   Generate the k8s manifests as seen by ArgoCD for a GitOps repository.
@@ -1242,9 +1314,9 @@ valet [options] [--] [commands...]
 
   Allows to switch on/off k8s resources.
 
-- `k8s-uninstall-deployment-charts`
+- `k8s-uninstall-helm-releases`
 
-  Uninstall helm charts for the given deployments.
+  Uninstall helm releases.
 
 - `k8s-wait-for-pods`
 
@@ -1263,6 +1335,10 @@ valet [options] [--] [commands...]
   Sends a notification to the team.
 
 - `self build`
+
+  Index all the commands and libraries present in the valet extensions directory and installation directory.
+
+- `self build2`
 
   Index all the commands and libraries present in the valet extensions directory and installation directory.
 
@@ -1336,4 +1412,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.43.381 (2026-07-27).
+> Documentation generated for the version 0.44.176 (2026-10-15).
