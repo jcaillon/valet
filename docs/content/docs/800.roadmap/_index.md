@@ -10,6 +10,7 @@ This page lists the features that I would like to implement in Valet. They come 
 
 Currently working on:
 
+- add option -vv for trace level log
 - Revamp self build:
   - <https://usage.jdx.dev/spec/reference/>
   - an error in the user extensions should not prevent from building valet core commands so we don't fail an install

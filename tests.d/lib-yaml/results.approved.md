@@ -1184,7 +1184,10 @@ REPLY_MAP2=(
 > cat `resources/ok/root-array.yaml`
 
 ```text
-- source:
+- description: |-
+    A Helm chart for argo-cd.
+    Very awesome indeed.
+  source:
     name: argo-cd
     repo: https://argoproj.github.io/argo-helm
     version: 9.5.15
@@ -1194,12 +1197,19 @@ REPLY_MAP2=(
     name: cert-manager
     repo: https://charts.jetstack.io
     version: v1.14.5
+  description: >
+    A
+    Helm
+    chart
+    for
+    cert-manager
   targets:
     - oci://srescloud.azurecr.io/helm
     - oci://secondtarget.azurecr.io/helm
     - oci://thirdtarget.azurecr.io/helm
 - source:
-    name: cilium
+    name: |-
+      cilium
     repo: https://helm.cilium.io/
     version: 1.19.4
   targets:
@@ -1214,10 +1224,14 @@ Returned variables:
 REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
+['[0].description']='A Helm chart for argo-cd.
+Very awesome indeed.'
 ['[0].source.name']='argo-cd'
 ['[0].source.repo']='https://argoproj.github.io/argo-helm'
 ['[0].source.version']='9.5.15'
 ['[0].targets[0]']='oci://srescloud.azurecr.io/helm'
+['[1].description']='A Helm chart for cert-manager
+'
 ['[1].source.name']='cert-manager'
 ['[1].source.repo']='https://charts.jetstack.io'
 ['[1].source.version']='v1.14.5'

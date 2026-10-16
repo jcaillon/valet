@@ -686,7 +686,7 @@ function yaml_handleLine() {
         keyName="${REPLY%"${REPLY##*[^[:space:]]}"}"
 
         # register keyname
-        if [[ (${firstChar} == [\'\"] && -z ${keyName}) || ${keyName} == *[\.\[]* ]]; then
+        if [[ (${firstChar} == [\'\"] && -z ${keyName}) || ${keyName} == *[\.\[\]]* ]]; then
           # key was quoted and need to be re-quoted
           keyName="\"${keyName}\""
         elif [[ -z ${keyName} ]]; then
@@ -937,6 +937,9 @@ function yaml_handleLine() {
       multilineTrimEnd=false
     else
       multilineTrimEnd=true
+    fi
+    if [[ ${isArrayItemStart} == true && ${keyName: -1} != \] ]]; then
+      arrayExtraIndentLevel=0
     fi
     value=""
 
