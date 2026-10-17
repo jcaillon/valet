@@ -10,6 +10,7 @@ This page lists the features that I would like to implement in Valet. They come 
 
 Currently working on:
 
+- test performance and replace all printf '%q' with ${var@Q}
 - add option -vv for trace level log
 - Revamp self build:
   - <https://usage.jdx.dev/spec/reference/>

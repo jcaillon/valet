@@ -912,7 +912,7 @@ function yaml_handleLine() {
       return 0
     fi
 
-  elif [[ ${value} == [\>\|]* ]]; then
+  elif [[ ${firstChar} != [\'\"] && ${value} == [\>\|]* ]]; then
     # new multiline value
     isMultilineValue=true
     multiLinesCumulatedLf=""
@@ -938,7 +938,7 @@ function yaml_handleLine() {
     else
       multilineTrimEnd=true
     fi
-    if [[ ${isArrayItemStart} == true && ${keyName: -1} != \] ]]; then
+    if [[ ${isArrayItemStart} == true && ${keyName: -1} != ']' ]]; then
       arrayExtraIndentLevel=0
     fi
     value=""

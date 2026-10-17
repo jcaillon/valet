@@ -6,6 +6,8 @@
 num[0].key: 1
 
 arr:
+- "|"
+- "-"
 - thing
 - stuff:with:colons
 

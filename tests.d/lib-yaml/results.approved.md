@@ -587,6 +587,8 @@ spaces']='!!null'
 ```text
 # Scalars
 strings:
+  string_with_pipe: "|"
+  string_with_dash: "-"
   plain: hello world
   single_quoted: 'hello ''world'''
   with_single_quote: "C'est \"quoi"
@@ -763,6 +765,8 @@ line two
 '
 ['strings.plain']='hello world'
 ['strings.single_quoted']='hello '"'"'world'"'"''
+['strings.string_with_dash']='-'
+['strings.string_with_pipe']='|'
 ['strings.with_single_quote']='C'"'"'est "quoi'
 )
 REPLY_MAP2=(
@@ -1263,6 +1267,8 @@ REPLY_MAP2=(
 num[0].key: 1
 
 arr:
+- "|"
+- "-"
 - thing
 - stuff:with:colons
 
@@ -1352,8 +1358,10 @@ REPLY_CODE='0'
 REPLY=''
 REPLY_MAP=(
 ['"num[0].key"']='1'
-['arr[0]']='thing'
-['arr[1]']='stuff:with:colons'
+['arr[0]']='|'
+['arr[1]']='-'
+['arr[2]']='thing'
+['arr[3]']='stuff:with:colons'
 ['endingMultiline']='
 
 first line
@@ -1418,7 +1426,7 @@ line two
 REPLY_MAP2=(
 ['"num[0].key"']='!!int'
 ['@.length']='1'
-['arr.length']='2'
+['arr.length']='4'
 ['nested.arr.length']='4'
 ['nested.arr[0].array.length']='2'
 ['nested.arr[0].array[1].arr.length']='2'

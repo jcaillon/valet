@@ -1,5 +1,7 @@
 # Scalars
 strings:
+  string_with_pipe: "|"
+  string_with_dash: "-"
   plain: hello world
   single_quoted: 'hello ''world'''
   with_single_quote: "C'est \"quoi"
