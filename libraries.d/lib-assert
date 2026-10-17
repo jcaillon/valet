@@ -77,6 +77,23 @@ function assert::isLink() {
   fi
 }
 
+# ## assert::isFileEmpty
+#
+# Assert that the given file exists, is a regular file, and is empty.
+#
+# - $1: **file path** _as string_:
+#       The path of the file to check.
+#
+# ```bash
+# assert::isFileEmpty "/path/to/file"
+# ```
+function assert::isFileEmpty() {
+  local filePath="${1}"
+  if [[ -s "${filePath}" ]]; then
+    test::fail "Expected file ⌜${filePath}⌝ is not empty."
+  fi
+}
+
 # ## assert::equals
 #
 # Assert that the two given values are equal.

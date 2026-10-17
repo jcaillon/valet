@@ -54,7 +54,14 @@ function test_exe::invoke() {
   test::cat "${GLOBAL_TEST_TEMP_FILE}"
 
   test::markdown "Append output:"
+  echo "test" >"${GLOBAL_TEMPORARY_STDERR_FILE}"
+  echo "test" >"${GLOBAL_TEST_TEMP_FILE}"
   test::func exe::invoke fake --- appendRedirect=true stdoutPath="${GLOBAL_TEST_TEMP_FILE}"
+
+  test::markdown "Append output:"
+  echo "test" >"${GLOBAL_TEMPORARY_STDOUT_FILE}"
+  echo "test" >"${GLOBAL_TEST_TEMP_FILE}"
+  test::func exe::invoke fake --- appendRedirect=true stderrPath="${GLOBAL_TEST_TEMP_FILE}"
 
   test::markdown "Group redirects:"
   test::func exe::invoke fake --- groupRedirect=true stdoutPath="${GLOBAL_TEST_TEMP_FILE}"

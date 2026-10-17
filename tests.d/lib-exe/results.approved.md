@@ -245,10 +245,24 @@ Returned variables:
 
 ```text
 REPLY_CODE='0'
-REPLY='🙈 mocking fake 
+REPLY='test
 🙈 mocking fake 
 '
 REPLY2='INFO: log line from fake mock to stderr
+'
+```
+
+Append output:
+
+❯ `exe::invoke fake --- appendRedirect=true stderrPath=/tmp/valet-temp`
+
+Returned variables:
+
+```text
+REPLY_CODE='0'
+REPLY='🙈 mocking fake 
+'
+REPLY2='test
 INFO: log line from fake mock to stderr
 '
 ```
