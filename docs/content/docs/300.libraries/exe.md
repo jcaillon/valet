@@ -92,13 +92,14 @@ Inputs:
 
   (optional) If true will append the output to the stdout/stderr files instead of overwriting them (>> redirect).
   This is useful when you want to run the same command multiple times and keep the previous output.
-  The stderr and stdout REPLY variables will both have the same content.
+  You must specify stdoutPath, stderrPath or both to enable this feature (temporary work files are always reset).
 
   (defaults to false)
 
 - `${groupRedirect}` _as bool_:
 
   (optional) If true will output stdout/stderr to the same file (&> redirect).
+  The stderr and stdout REPLY variables will both have the same content.
 
   (defaults to false)
 
@@ -150,4 +151,4 @@ exe::invoke cat --- stdin="Hello World"
 > - On linux, you can use a tmpfs directory for massive gains over subshells.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.44.176 (2026-10-15).
+> Documentation generated for the version 0.45.65 (2026-10-26).

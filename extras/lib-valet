@@ -2,7 +2,7 @@
 # This script contains the documentation of all the valet library functions.
 # It can be used in your editor to provide auto-completion and documentation.
 #
-# Documentation generated for the version 0.44.176 (2026-10-15).
+# Documentation generated for the version 0.45.65 (2026-10-26).
 
 # ## array::appendIfNotPresent
 # 
@@ -234,6 +234,19 @@ function assert::isDirectory() { :; }
 # ```
 # 
 function assert::isFile() { :; }
+
+# ## assert::isFileEmpty
+# 
+# Assert that the given file exists, is a regular file, and is empty.
+# 
+# - $1: **file path** _as string_:
+#       The path of the file to check.
+# 
+# ```bash
+# assert::isFileEmpty "/path/to/file"
+# ```
+# 
+function assert::isFileEmpty() { :; }
 
 # ## assert::isLink
 # 
@@ -1331,10 +1344,11 @@ function esc-codes::*() { :; }
 # - ${appendRedirect} _as bool_:
 #       (optional) If true will append the output to the stdout/stderr files instead of overwriting them (>> redirect).
 #       This is useful when you want to run the same command multiple times and keep the previous output.
-#       The stderr and stdout REPLY variables will both have the same content.
+#       You must specify stdoutPath, stderrPath or both to enable this feature (temporary work files are always reset).
 #       (defaults to false)
 # - ${groupRedirect} _as bool_:
 #       (optional) If true will output stdout/stderr to the same file (&> redirect).
+#       The stderr and stdout REPLY variables will both have the same content.
 #       (defaults to false)
 # - ${noRedirection} _as bool_:
 #       (optional) If set to true, the function will not redirect the stdout and stderr to temporary files.

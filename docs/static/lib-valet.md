@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.44.176 (2026-10-15).
+> Documentation generated for the version 0.45.65 (2026-10-26).
 
 ## array::appendIfNotPresent
 
@@ -276,6 +276,22 @@ Example usage:
 
 ```bash
 assert::isFile "/path/to/file"
+```
+
+## assert::isFileEmpty
+
+Assert that the given file exists, is a regular file, and is empty.
+
+Inputs:
+
+- `$1`: **file path** _as string_:
+
+  The path of the file to check.
+
+Example usage:
+
+```bash
+assert::isFileEmpty "/path/to/file"
 ```
 
 ## assert::isLink
@@ -1595,13 +1611,14 @@ Inputs:
 
   (optional) If true will append the output to the stdout/stderr files instead of overwriting them (>> redirect).
   This is useful when you want to run the same command multiple times and keep the previous output.
-  The stderr and stdout REPLY variables will both have the same content.
+  You must specify stdoutPath, stderrPath or both to enable this feature (temporary work files are always reset).
 
   (defaults to false)
 
 - `${groupRedirect}` _as bool_:
 
   (optional) If true will output stdout/stderr to the same file (&> redirect).
+  The stderr and stdout REPLY variables will both have the same content.
 
   (defaults to false)
 
@@ -6095,4 +6112,4 @@ Parses a YAML.
 
 
 
-> Documentation generated for the version 0.44.176 (2026-10-15).
+> Documentation generated for the version 0.45.65 (2026-10-26).

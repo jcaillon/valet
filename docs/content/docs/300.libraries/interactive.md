@@ -172,4 +172,4 @@ interactive::displayPrompt "Do you want to continue?"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.44.176 (2026-10-15).
+> Documentation generated for the version 0.45.65 (2026-10-26).

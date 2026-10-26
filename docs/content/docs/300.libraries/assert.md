@@ -57,6 +57,22 @@ Example usage:
 assert::isFile "/path/to/file"
 ```
 
+## assert::isFileEmpty
+
+Assert that the given file exists, is a regular file, and is empty.
+
+Inputs:
+
+- `$1`: **file path** _as string_:
+
+  The path of the file to check.
+
+Example usage:
+
+```bash
+assert::isFileEmpty "/path/to/file"
+```
+
 ## assert::isLink
 
 Assert that the given path exists and is a symbolic link.
@@ -90,4 +106,4 @@ assert::isPath "/path/to/file"
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.44.176 (2026-10-15).
+> Documentation generated for the version 0.45.65 (2026-10-26).
