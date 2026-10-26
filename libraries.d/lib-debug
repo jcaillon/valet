@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# author: github.com/jcaillon
+
+# ## debug::printVars (private)
+#
+# This function can be called to pretty print a list of variables,
+# their attributes and their values.
+#
+# - $@: **variables** _as string_:
+#       The variables to print.
+#
+# ```bash
+# debug::printVars myVar myVar2
+# ```
+function debug::printVars() {
+  # TODO:
+  # display a value using: value="${value@Q}"; value="${value//'\n'/$'\n'}"
+
+  local IFS=$'\n'
+  local chunk varName
+  bash::getBuiltinOutput declare -p "${@}"
+  if ((REPLY_CODE != 0)); then
+    local varName
+    for varName in "${@}"; do
+      bash::getBuiltinOutput declare -p "${varName}"
+      if ((REPLY_CODE != 0)); then
+        IFS=' '
+        test::fail "Variable ⌜${varName}⌝ does not exist, could not execute ⌜test::printVars $*⌝."
+      fi
+    done
+  fi
+  local output=""
+
+  output=""
+  while [[ -n ${REPLY} ]]; do
+    chunk="${REPLY%%$'\n'*}"
+    REPLY="${REPLY:${#chunk}+1}"
+
+    if [[ ${chunk} =~ "declare -"([aA])[ilnrtux]*" "([^=]+)"=" ]]; then
+      # we print an array
+      varName="${BASH_REMATCH[2]}"
+      local -n array_nameRef="${varName}"
+      output+="${varName}=("$'\n'
+      if [[ ${BASH_REMATCH[1]} == "A" ]]; then
+        local -a keys=("${!array_nameRef[@]}")
+        include array
+        array::sort keys
+        for key in "${keys[@]}"; do
+          output+="['${key}']='${array_nameRef[${key}]//\'/\'\"\'\"\'}'"$'\n'
+        done
+      else
+        for key in "${!array_nameRef[@]}"; do
+          output+="[${key}]='${array_nameRef[${key}]//\'/\'\"\'\"\'}'"$'\n'
+        done
+      fi
+      output+=")"$'\n'
+    elif [[ ${chunk} =~ "declare -"[^[:space:]]+" "([^=]+)"=" ]]; then
+      # we print a simple variable
+      varName="${BASH_REMATCH[1]}"
+      output+="${varName}='${!varName//\'/\'\"\'\"\'}'"$'\n'
+    elif [[ ${chunk} == "declare -"* ]]; then
+      test::fail "Could not parse variable declaration: ⌜${chunk}⌝."
+    fi
+  done
+
+  # shellcheck disable=SC2016
+  printf '```text\n%s\n```\n\n' "${output%$'\n'}"
+}
