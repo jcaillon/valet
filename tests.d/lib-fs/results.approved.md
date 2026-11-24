@@ -161,14 +161,15 @@ REPLY='$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir'
 
 This next command will fail because the directory already exists (it is a file).
 
-❯ `fs::createDirectoryIfNeeded resources/dir/subdir/file1`
+❯ `fs::createDirectoryIfNeeded resources/dir/subdir/file1
+`
 
 Exited with code: `1`
 
 **Error output**:
 
 ```text
-mkdir: cannot create directory '$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1': File exists
+mkdir: error
 FAIL     Failed to create the directory ⌜$GLOBAL_INSTALLATION_DIRECTORY/tests.d/lib-fs/resources/dir/subdir/file1⌝.
 ```
 

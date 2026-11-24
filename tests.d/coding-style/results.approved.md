@@ -11,7 +11,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line 46: 1: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line xx: 1: unbound variable
 ERROR    Exiting subshell depth 3 with code 1, stack:
 ╭ local arg1="${1}" arg2="${2}" myOption="1" myOption2="2" IFS=' '
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -84,7 +84,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line 46: 1: unbound variable
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line xx: 1: unbound variable
 ERROR    Exiting subshell depth 3 with code 1, stack:
 ╭ local arg1="${1}" arg2="${2}" myOption="1" myOption2="2" IFS=' '
 ├─ in myCmd::subFunction() at /path/to/subFunction.sh:200
@@ -165,7 +165,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line 52: local: `1invalid': not a valid identifier
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line xx: local: `1invalid': not a valid identifier
 CMDERR   Bad options passed to function ⌜functionWithFiniteArgs⌝ .
 
 All options must be passed with the syntax ⌜option=value⌝, i.e.:
@@ -185,7 +185,7 @@ Exited with code: `1`
 **Error output**:
 
 ```text
-$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line 66: local: `1invalid': not a valid identifier
+$GLOBAL_INSTALLATION_DIRECTORY/tests.d/coding-style/00.coding-style.sh: line xx: local: `1invalid': not a valid identifier
 CMDERR   Bad options passed to function ⌜functionWithInfiniteArgs⌝ .
 
 All options must be passed with the syntax ⌜option=value⌝ after a ⌜---⌝ separator, i.e.:

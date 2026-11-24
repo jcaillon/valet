@@ -175,7 +175,15 @@ function test_fs::createDirectoryIfNeeded() {
 
   test::func fs::createDirectoryIfNeeded resources/dir/subdir
 
-  test::addOutputScrubber scrubQuotes
+  function scrubMkdirError() {
+    local line IFS=$'\n' output=""
+    for line in ${GLOBAL_TEST_OUTPUT_CONTENT}; do
+      output+="${line//'mkdir:'*/'mkdir: error'}"$'\n'
+    done
+    GLOBAL_TEST_OUTPUT_CONTENT="${output}"
+  }
+
+  test::addOutputScrubber scrubMkdirError
   test::markdown "This next command will fail because the directory already exists (it is a file)."
   test::exit fs::createDirectoryIfNeeded resources/dir/subdir/file1
   test::clearOutputScrubbers

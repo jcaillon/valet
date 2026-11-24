@@ -34,7 +34,16 @@ function scrubProfilerOutput() {
   set -o noglob
   local line text=""
   local IFS=$'\n'
+  local afterEval=false
   for line in ${GLOBAL_TEST_OUTPUT_CONTENT}; do
+    # profiler output differs in bash 5.3.9; multi line is output as $'xxx\nxxx' instead of separate lines
+    if [[ ${afterEval} == true && ${line} != *"→"* ]]; then
+      continue
+    elif [[ ${line} == *"→ eval"* ]]; then
+      line="${line//" eval "*/" eval 'redacted'"}"
+      afterEval=true
+    fi
+    # redact the timing information for self-mock.sh
     text+="${line/*self-mock.sh:/00 00 00 0.0XXX 0.0XXX                    self-mock.sh:}"$'\n'
   done
   GLOBAL_TEST_OUTPUT_CONTENT="${text%$'\n'}"

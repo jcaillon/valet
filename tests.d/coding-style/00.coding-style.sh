@@ -70,5 +70,10 @@ function functionWithInfiniteArgs() {
   echo "remaining arguments: '${*}'"
 }
 
+function scrubLineNumbers() {
+  GLOBAL_TEST_OUTPUT_CONTENT="${GLOBAL_TEST_OUTPUT_CONTENT//"line "??/"line xx"}"
+}
 
+test::addOutputScrubber scrubLineNumbers
 main
+test::clearOutputScrubbers

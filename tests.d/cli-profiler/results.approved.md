@@ -43,17 +43,7 @@ INFO     Disabling profiler.
 D  I  S  timer  delta                          source:line function                                 → command
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:166  selfMock2()                              → local -a more
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:167  selfMock2()                              → command::parseArguments arg1 arg2
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:168  selfMock2()                              → eval 'local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
-                                                                                                       local -a more
-                                                                                                       option1=""
-                                                                                                       thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"
-                                                                                                       flag3="${VALET_FLAG3:-""}"
-                                                                                                       withDefault="${VALET_WITH_DEFAULT:-"cool"}"
-                                                                                                       help=""
-                                                                                                       firstArg=arg1
-                                                                                                       more=(
-                                                                                                       arg2
-                                                                                                       )'
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:168  selfMock2()                              → eval 'redacted'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:168  selfMock2()                              → local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:169  selfMock2()                              → local -a more
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  selfMock2()                              → option1=
@@ -105,17 +95,7 @@ INFO     Disabling profiler.
 D  I  S  timer  delta                          source:line function                                 → command
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:166  selfMock2()                              → local -a more
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:167  selfMock2()                              → command::parseArguments arg1 arg2
-00 00 00 0.0XXX 0.0XXX                    self-mock.sh:168  selfMock2()                              → eval 'local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
-                                                                                                           local -a more								
-                                                                                                           option1=""								
-                                                                                                           thisIsOption2="${VALET_THIS_IS_OPTION2:-""}"								
-                                                                                                           flag3="${VALET_FLAG3:-""}"								
-                                                                                                           withDefault="${VALET_WITH_DEFAULT:-"cool"}"								
-                                                                                                           help=""								
-                                                                                                           firstArg=arg1								
-                                                                                                           more=(								
-                                                                                                           arg2								
-                                                                                                           )'								
+00 00 00 0.0XXX 0.0XXX                    self-mock.sh:168  selfMock2()                              → eval 'redacted'
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:168  selfMock2()                              → local commandArgumentsErrors option1 thisIsOption2 flag3 withDefault help firstArg
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:169  selfMock2()                              → local -a more
 00 00 00 0.0XXX 0.0XXX                    self-mock.sh:170  selfMock2()                              → option1=

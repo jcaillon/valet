@@ -1361,10 +1361,13 @@ function command_writeAsTable() {
 
   output=""
   for index in "${!names[@]}"; do
-    string::wrapWords "names[${index}]" width="${width}" newLinePadString="  " firstLineWidth="$((width - 2))"
+    local \
+      name="${names[${index}]}" \
+      description="${descriptions[${index}]}"
+    string::wrapWords name width="${width}" newLinePadString="  " firstLineWidth="$((width - 2))"
     output+="  ${color}${REPLY}${STYLE_RESET:-}"$'\n'
 
-    string::wrapWords "descriptions[${index}]" width="${width}" newLinePadString="      " firstLineWidth="$((width - 6))"
+    string::wrapWords description width="${width}" newLinePadString="      " firstLineWidth="$((width - 6))"
     output+="      ${REPLY}"$'\n'
   done
 
