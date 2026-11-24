@@ -1,6 +1,6 @@
 # Valet functions documentation
 
-> Documentation generated for the version 0.45.65 (2026-10-26).
+> Documentation generated for the version 0.46.95 (2026-11-24).
 
 ## array::appendIfNotPresent
 
@@ -946,8 +946,8 @@ Inputs:
 
   The variable name to use for the coproc.
   It will be used to store the coproc file descriptors and PID.
-  <coproc_variable_name>[0] will be the input pipe file descriptor,
-  <coproc_variable_name>[1] will be the output pipe file descriptor,
+  <coproc_variable_name>[0] will be the output pipe file descriptor,
+  <coproc_variable_name>[1] will be the input pipe file descriptor,
   <coproc_variable_name>_PID will be the PID of the coproc.
 
 - `${mainCommand}` _as string_:
@@ -2798,7 +2798,8 @@ Inputs:
 Example usage:
 
 ```bash
-log::printRaw "my line"
+myVar="hi"
+log::printRaw myVar
 ```
 
 ## log::printString
@@ -6112,4 +6113,4 @@ Parses a YAML.
 
 
 
-> Documentation generated for the version 0.45.65 (2026-10-26).
+> Documentation generated for the version 0.46.95 (2026-11-24).

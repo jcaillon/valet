@@ -103,4 +103,4 @@ echo "The curl command ended with exit code ⌜${REPLY_CODE}⌝, the http return
 ```
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.45.65 (2026-10-26).
+> Documentation generated for the version 0.46.95 (2026-11-24).

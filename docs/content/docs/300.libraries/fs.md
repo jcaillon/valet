@@ -621,4 +621,4 @@ fs::tail myFile 10
 > #TODO: use mapfile quantum to not have to read the whole file in a single go.
 
 > [!IMPORTANT]
-> Documentation generated for the version 0.45.65 (2026-10-26).
+> Documentation generated for the version 0.46.95 (2026-11-24).

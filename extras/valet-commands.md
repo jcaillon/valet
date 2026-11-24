@@ -1,6 +1,6 @@
 # Valet commands documentation
 
-> Documentation generated for the version 0.45.65 (2026-10-26).
+> Documentation generated for the version 0.46.95 (2026-11-24).
 
 ## valet bash bootstrap
 
@@ -573,70 +573,6 @@ valet self build [options]
 
   Build the valet user commands from the directory **~/my-valet-directory** and with minimal log output.
 
-## valet self build2
-
-### Synopsis
-
-Index all the commands and libraries present in the valet extensions directory and installation directory.
-
-This command can be used to re-build the menu / help / options / arguments in case you have modified, added or removed a Valet command definition.
-
-Please check https://jcaillon.github.io/valet/docs/new-commands/ or check the examples in **showcase.d** directory to learn how to create and modified your commands.
-
-This command:
-
-- Makes a list of all the eligible files in which we could find command definitions.
-- For each file in this list, extract the command definitions.
-- Build your commands file (in your valet extensions directory) from these definitions.
-- Makes a list of all `libraries.d` directories found in the user directory.
-
-### Usage
-
-```bash
-valet self build2 [options]
-```
-
-### Options
-
-- `-d, --extensions-directory <path>`
-
-  Specify your valet extensions directory, in which to look for your extension commands.
-  Defaults to the valet extensions directory.
-  #default: '${| core::getExtensionsDirectory; }'
-  This option can be set by exporting the variable VALET_EXTENSIONS_DIRECTORY='<path>'.
-
-- `--extra-extension-directories <path>`
-
-  Comma separated list of additional valet extension directories, in which to look for commands and libraries.
-  This option can be set by exporting the variable VALET_EXTRA_EXTENSION_DIRECTORIES='<path>'.
-
-- `-o, --output <path>`
-
-  Specify the directory path in which to write the command definition variable files.
-  
-  This defaults to your user data folder `~/.local/share/valet`.
-  #default: '${| core::getUserDataDirectory; }'
-  This option can be set by exporting the variable VALET_OUTPUT='<path>'.
-
-- `-s, --silent`
-
-  Build silently without any info logs.
-  This option can be set by exporting the variable VALET_SILENT='true'.
-
-- `-h, --help`
-
-  Display the help for this command.
-
-### Examples
-
-- `valet self build`
-
-  Build the valet user commands.
-
-- `valet self build -d ~/my-valet-directory --silent`
-
-  Build the valet user commands from the directory **~/my-valet-directory** and with minimal log output.
-
 ## valet self config
 
 ### Synopsis
@@ -1182,6 +1118,10 @@ valet [options] [--] [commands...]
 
   Find secrets from AWS Secrets Manager.
 
+- `aws-get-tf-outputs`
+
+  Get the terraform outputs for a given deployment.
+
 - `aws-login`
 
   Log in to AWS and EKS for the specified profile.
@@ -1266,6 +1206,10 @@ valet [options] [--] [commands...]
 
   Generate the k8s manifests as seen by ArgoCD for a GitOps repository.
 
+- `gitops-inflate`
+
+  Inflate a gitops repository starting from a given root directory.
+
 - `gitops-tenants-promote`
 
   Promote a release for the gitops-tenants repository.
@@ -1335,10 +1279,6 @@ valet [options] [--] [commands...]
   Sends a notification to the team.
 
 - `self build`
-
-  Index all the commands and libraries present in the valet extensions directory and installation directory.
-
-- `self build2`
 
   Index all the commands and libraries present in the valet extensions directory and installation directory.
 
@@ -1412,4 +1352,4 @@ valet [options] [--] [commands...]
 
   Active **verbose** mode and run the command **a-command** with the sub command **and-sub-command**.
 
-> Documentation generated for the version 0.45.65 (2026-10-26).
+> Documentation generated for the version 0.46.95 (2026-11-24).
