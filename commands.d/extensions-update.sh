@@ -181,6 +181,13 @@ function extensionsUpdate() {
     output+="${line}"
   done
 
+  if ((updatedCount > 0)); then
+    # rebuild the command cache
+    log::info "Rebuilding the command cache."
+    command::deleteCommandsIndex
+    command::reloadCommandsIndex
+  fi
+
   log::success "Updated ${updatedCount} extensions:"
   log::printString $'\n'"${output}"
 }

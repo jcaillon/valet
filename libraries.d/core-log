@@ -685,12 +685,12 @@ function log::saveFileString() {
 #       The variable name containing the content to print (can contain new lines).
 #
 # ```bash
-# log::printRaw "my line"
+# myVar="hi"
+# log::printRaw myVar
 # ```
 # shellcheck disable=SC2317
 function log::printRaw() {
   local -n rawStringToPrintInLog="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
-  # shellcheck disable=SC2034
 
   # evaluated the print statement built in log::init; it uses the local var rawStringToPrintInLog defined above
   eval "${GLOBAL_LOG_PRINT_STATEMENT_STANDARD}"

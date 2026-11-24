@@ -63,6 +63,9 @@ Update extension: extension-1 using git.
 [9G│[0m Yes. [16G├──░[0m
 [9G╰──────╯[0m
 SUCCESS  The extension extension-1 has been updated 07cda5f..46dcbbf.
+INFO     Rebuilding the command cache.
+INFO     The commands index does not exist ⌜/home/me/.local/share/valet/commands⌝.
+Now silently building it using ⌜valet self build⌝ command.
 SUCCESS  Updated 1 extensions:
 
 Extension name[0m │ Previous version[0m │ New version[0m │ Setup status[0m
