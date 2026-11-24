@@ -196,7 +196,15 @@ function bash::injectCodeInFunction() {
 function bash::sleep() {
   local timeout="${1?"The function ⌜${FUNCNAME:-?}⌝ requires more than $# arguments."}"
   if [[ ! -v GLOBAL_FD_BASH_SLEEP ]]; then
-    exec {GLOBAL_FD_BASH_SLEEP}<>/dev/udp/127.0.0.1/0
+    { exec {GLOBAL_FD_BASH_SLEEP}<>/dev/udp/127.0.0.1/65535; } &>/dev/null ||
+      unset -v GLOBAL_FD_BASH_SLEEP
+    if [[ ! -v GLOBAL_FD_BASH_SLEEP ]]; then
+      # fallback to opening a fifo using coproc
+      # shellcheck source=lib-coproc
+      source coproc
+      coproc::run _BASH_SLEEP_BG_PROCESS mainCommand="read"
+      GLOBAL_FD_BASH_SLEEP="${_BASH_SLEEP_BG_PROCESS[0]}"
+    fi
   fi
   if [[ ${timeout} == "0" ]]; then
     # wait indefinitely

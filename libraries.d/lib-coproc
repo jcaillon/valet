@@ -222,8 +222,8 @@ function coproc::runInParallel() {
 # - $1: **coproc variable name** _as string_:
 #       The variable name to use for the coproc.
 #       It will be used to store the coproc file descriptors and PID.
-#       <coproc_variable_name>[0] will be the input pipe file descriptor,
-#       <coproc_variable_name>[1] will be the output pipe file descriptor,
+#       <coproc_variable_name>[0] will be the output pipe file descriptor,
+#       <coproc_variable_name>[1] will be the input pipe file descriptor,
 #       <coproc_variable_name>_PID will be the PID of the coproc.
 # - ${mainCommand} _as string_:
 #       (optional) The main command (will be evaluated) to run in the coproc.

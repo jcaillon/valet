@@ -114,6 +114,9 @@ SUCCESS  The extension extension-to-update-wo-setup has been updated old1234..ne
 9│ No. 15├──░
 9╰─────╯
 INFO     The extension ⌜extension-to-update-wo-setup-skipped⌝ will not be updated.
+INFO     Rebuilding the command cache.
+INFO     The commands index does not exist ⌜/tmp/valet.valet.d/commands⌝.
+Now silently building it using ⌜valet self build⌝ command.
 SUCCESS  Updated 4 extensions:
 
 Extension name                                      │ Previous version │ New version │ Setup status                
@@ -138,6 +141,9 @@ extension-to-update-wo-setup-skipped                │ old1234          │ old
 ```text
 SUCCESS  The extension extension-to-update-with-ok-setup has been updated old1234..new1234.
 INFO     Skipping the execution of the ⌜extension.setup.sh⌝ script.
+INFO     Rebuilding the command cache.
+INFO     The commands index does not exist ⌜/tmp/valet.valet.d/commands⌝.
+Now silently building it using ⌜valet self build⌝ command.
 SUCCESS  Updated 1 extensions:
 
 Extension name                    │ Previous version │ New version │ Setup status     
